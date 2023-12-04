@@ -1,6 +1,5 @@
 import type { PyodideInterface } from "pyodide";
 import { loadPyodide } from "pyodide";
-import { mathDsl } from "./code";
 
 const indexURL = "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/";
 
@@ -17,8 +16,6 @@ async function setupPyodide(): Promise<PyodideInterface> {
   const micropip = pyodide.pyimport("micropip");
   await micropip.install("sympy-latex-parser");
   await pyodide.loadPackage("numpy");
-  await pyodide.loadPackagesFromImports(mathDsl);
-  pyodide.FS.writeFile("mathdsl.py", mathDsl);
   return pyodide;
 }
 
