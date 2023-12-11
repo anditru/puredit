@@ -1,4 +1,4 @@
-import type Parser from "web-tree-sitter";
+import type { TreeSitterParser } from "./treeSitterParser";
 import type { TreeCursor } from "web-tree-sitter";
 import type { TemplateBlock } from ".";
 import {
@@ -28,7 +28,7 @@ export function createPatternMap(patterns: PatternNode[]): PatternMap {
 
 export function parsePattern(
   code: string,
-  parser: Parser,
+  parser: TreeSitterParser,
   args: TemplateArg[] = [],
   blocks: TemplateBlock[] = [],
   contextVariables: TemplateContextVariable[] = [],

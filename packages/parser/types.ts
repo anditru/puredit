@@ -1,5 +1,5 @@
 import type { SyntaxNode } from "web-tree-sitter";
-import type { Target } from "./parser";
+import type { Target } from "./treeSitterParser";
 
 export type { SyntaxNode };
 
