@@ -1,0 +1,1 @@
+K, L = sheet.take("K4:L35", "isinstance(L, int)")
