@@ -47,6 +47,12 @@ export default class Parser {
     );
   }
 
+  /**
+   * Builds a Statement Pattern
+   * @param template String pices of the template
+   * @param params Active nodes in the pattern
+   * @returns Tuple of a PatternNode and PatternDraft
+   */
   statementPattern(
     template: TemplateStringsArray,
     ...params: (string | TemplateParam)[]
@@ -54,6 +60,12 @@ export default class Parser {
     return pattern(template, params, this.tsParser, this.target, false);
   }
 
+  /**
+   * Builds an Expression Pattern
+   * @param template String pices of the template
+   * @param params Active nodes in the pattern
+   * @returns Tuple of a PatternNode and PatternDraft
+   */
   expressionPattern(
     template: TemplateStringsArray,
     ...params: (string | TemplateParam)[]
