@@ -5,10 +5,10 @@ import { tsParser } from "./parser";
 import ReplaceProjection from "./ReplaceProjection.svelte";
 
 const table = contextVariable("table");
-const columnTarget = arg("columnTarget", "string");
-const columnSource = arg("columnSource", "string");
-const target = arg("target", "string");
-const replacement = arg("replacement", "string");
+const columnTarget = arg("columnTarget", ["string"]);
+const columnSource = arg("columnSource", ["string"]);
+const target = arg("target", ["string"]);
+const replacement = arg("replacement", ["string"]);
 
 export const [pattern, draft] = tsParser.statementPattern`
 ${table}[${columnTarget}] = ${table}[${columnSource}].replace(${target}, ${replacement});

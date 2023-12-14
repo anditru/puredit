@@ -5,9 +5,9 @@ import { pythonParser } from "./parser";
 import ReplaceProjection from "./ReplaceProjection.svelte";
 
 const table = contextVariable("table");
-const column = arg("column", "string");
-const target = arg("target", "string");
-const replacement = arg("replacement", "string");
+const column = arg("column", ["string"]);
+const target = arg("target", ["string"]);
+const replacement = arg("replacement", ["string"]);
 
 export const [pattern, draft] = pythonParser.statementPattern`
 ${table}.column(${column}).replace(${target}, ${replacement})

@@ -5,8 +5,8 @@ import { pythonParser } from "./parser";
 import TrimProjection from "./TrimProjection.svelte";
 
 const table = contextVariable("table");
-const column = arg("column", "string");
-const direction = arg("direction", "string");
+const column = arg("column", ["string"]);
+const direction = arg("direction", ["string"]);
 
 export const [pattern, draft] = pythonParser.statementPattern`
 ${table}.column(${column}).trim(${direction})

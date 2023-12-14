@@ -12,17 +12,17 @@
 
   const patternMap = createPatternMap([
     parser.statementPattern`
-      db.change(${arg("table", "string")}, (table) => ${block()});
+      db.change(${arg("table", ["string"])}, (table) => ${block()});
     `[0],
     parser.statementPattern`
-      table.column(${arg("column", "string")}).replace(
-        ${arg("target", "string")},
-        ${arg("replacement", "string")}
+      table.column(${arg("column", ["string"])}).replace(
+        ${arg("target", ["string"])},
+        ${arg("replacement", ["string"])}
       );
     `[0],
     parser.statementPattern`
-      table.column(${arg("column", "string")}).trim(
-        ${arg("direction", "string")},
+      table.column(${arg("column", ["string"])}).trim(
+        ${arg("direction", ["string"])},
       );
     `[0],
   ]);

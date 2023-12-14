@@ -31,7 +31,7 @@ export function serializePattern(
     ) {
       result += "${block()}";
     } else {
-      result += '${arg("' + name + '", "' + patternCursor.nodeType + '")}';
+      result += '${arg("' + name + '", ["' + patternCursor.nodeType + '"])}';
     }
     from = sampleCursor.endIndex;
   }

@@ -3,7 +3,7 @@ import type { Projection } from "@puredit/projections/types";
 import { simpleProjection } from "@puredit/simple-projection";
 import { tsParser } from "./parser";
 
-const message = arg("message", "string");
+const message = arg("message", ["string"]);
 
 export const [pattern, draft] = tsParser.statementPattern`
 console.log(${message});
