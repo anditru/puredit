@@ -51,7 +51,7 @@ function matchPattern(
   }
   if (pattern.arg) {
     args[pattern.arg.name] = cursor.currentNode();
-    return pattern.arg.type === nodeType(cursor);
+    return pattern.arg.types.includes(nodeType(cursor));
   }
   if (pattern.block) {
     let from = cursor.startIndex;

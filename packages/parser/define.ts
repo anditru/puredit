@@ -22,11 +22,11 @@ import { Target, TreeSitterParser } from "./treeSitterParser";
  * @param type Type of the Argument
  * @returns Object representing the Argument
  */
-export function arg(name: string, type: string): TemplateArg {
+export function arg(name: string, types: string[]): TemplateArg {
   return {
     kind: "arg",
     name,
-    type,
+    types,
   };
 }
 
@@ -103,7 +103,7 @@ export function pattern(
           return param;
         }
         if (param.kind === "arg") {
-          switch (param.type) {
+          switch (param.types[0]) {
             case "string":
               return '""';
             case "number":
@@ -111,7 +111,7 @@ export function pattern(
             case "list":
               return "[]";
             default:
-              return `__empty_${param.type}`;
+              return `__empty_${param.types[0]}`;
           }
         }
         if (param.kind === "block") {

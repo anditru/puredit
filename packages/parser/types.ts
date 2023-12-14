@@ -20,7 +20,7 @@ export type ArgMap = Record<string, SyntaxNode>;
 export interface TemplateArg {
   kind: "arg";
   name: string;
-  type: string;
+  types: string[];
 }
 
 export interface TemplateBlock {

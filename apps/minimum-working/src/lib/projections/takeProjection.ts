@@ -5,10 +5,10 @@ import { pythonParser } from "./parser";
 import TakeProjection from "./TakeProjection.svelte";
 
 export const [pattern, draft] = pythonParser.statementPattern`
-${arg("var0", "pattern_list")} = ${arg("var1", "identifier")}.take(${arg(
+${arg("var0", ["pattern_list"])} = ${arg("var1", ["identifier"])}.take(${arg(
   "var2",
-  "string"
-)}, ${arg("var3", "string")})
+  ["string"]
+)}, ${arg("var3", ["string"])})
 `;
 
 export const widget = svelteProjection(TakeProjection);
