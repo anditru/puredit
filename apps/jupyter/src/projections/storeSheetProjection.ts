@@ -5,9 +5,9 @@ import { pythonParser } from "./parser";
 import StoreSheetProjection from "./StoreSheetProjection.svelte";
 
 const dsl = contextVariable("dsl");
-const fileName = arg("fileName", "string");
-const sheetName = arg("sheetName", "string");
-const columns = arg("columns", "list");
+const fileName = arg("fileName", ["string"]);
+const sheetName = arg("sheetName", ["string"]);
+const columns = arg("columns", ["list"]);
 
 export const [pattern, draft] = pythonParser.statementPattern`
 ${dsl}.store_sheet(${fileName}, ${sheetName}, ${columns})

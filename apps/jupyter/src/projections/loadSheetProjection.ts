@@ -5,8 +5,8 @@ import LoadSheetProjection from "./LoadSheetProjection.svelte";
 import { pythonParser } from "./parser";
 
 const dsl = contextVariable("dsl");
-const fileName = arg("fileName", "string");
-const sheetName = arg("sheetName", "string");
+const fileName = arg("fileName", ["string"]);
+const sheetName = arg("sheetName", ["string"]);
 
 export const [pattern, draft] = pythonParser.statementPattern`
 with ${dsl}.load_sheet(${fileName}, ${sheetName}) as sheet:

@@ -5,9 +5,9 @@ import { pythonParser } from "./parser";
 import TakeProjection from "./TakeProjection.svelte";
 
 const sheet = contextVariable("sheet");
-const sheetRange = arg("sheetRange", "string");
-const columns = arg("columns", "pattern_list");
-const expression = arg("expression", "string");
+const sheetRange = arg("sheetRange", ["string"]);
+const columns = arg("columns", ["pattern_list"]);
+const expression = arg("expression", ["string"]);
 
 export const [pattern, draft] = pythonParser.statementPattern`
 ${columns} = ${sheet}.take(${sheetRange}, ${expression})

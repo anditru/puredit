@@ -5,7 +5,7 @@ import MathProjection from "./MathProjection.svelte";
 import { pythonParser } from "./parser";
 
 const dsl = contextVariable("mathdsl");
-const latex = arg("latex", "string");
+const latex = arg("latex", ["string"]);
 
 export const [pattern, draft] = pythonParser.expressionPattern`
 ${dsl}.evaluate(${latex}, locals())

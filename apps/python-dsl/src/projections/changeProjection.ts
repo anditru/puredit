@@ -9,7 +9,7 @@ import type { ContextColumns, ContextTables } from "./context";
 import { pythonParser } from "./parser";
 
 const db = contextVariable("db");
-const table = arg("table", "string");
+const table = arg("table", ["string"]);
 
 export const [pattern, draft] = pythonParser.statementPattern`
 with ${db}.change(${table}) as table:

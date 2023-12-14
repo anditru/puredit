@@ -4,6 +4,11 @@ import type { Completion, CompletionResult } from "@codemirror/autocomplete";
 import type { Context } from "@puredit/parser";
 import { projectionState } from "./state";
 
+/**
+ * Transforms the registered projections into suggestions for the code completion
+ * @param completionContext
+ * @returns
+ */
 export function completions(
   completionContext: CompletionContext
 ): CompletionResult | null {

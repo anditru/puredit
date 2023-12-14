@@ -5,9 +5,9 @@ import { tsParser } from "./parser";
 import TrimProjection from "./TrimProjection.svelte";
 
 const table = contextVariable("table");
-const columnTarget = arg("columnTarget", "string");
-const columnSource = arg("columnSource", "string");
-const direction = arg("direction", "string");
+const columnTarget = arg("columnTarget", ["string"]);
+const columnSource = arg("columnSource", ["string"]);
+const direction = arg("direction", ["string"]);
 
 export const [pattern, draft] = tsParser.statementPattern`
 ${table}[${columnTarget}] = ${table}[${columnSource}].trim(${direction});

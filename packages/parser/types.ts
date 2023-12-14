@@ -1,5 +1,5 @@
 import type { SyntaxNode } from "web-tree-sitter";
-import type { Target } from "./parser";
+import type { Target } from "./treeSitterParser";
 
 export type { SyntaxNode };
 
@@ -20,7 +20,7 @@ export type ArgMap = Record<string, SyntaxNode>;
 export interface TemplateArg {
   kind: "arg";
   name: string;
-  type: string;
+  types: string[];
 }
 
 export interface TemplateBlock {
