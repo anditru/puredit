@@ -8,7 +8,7 @@ export const [pattern, draft] = pythonParser.statementPattern`
 ${arg("var0", ["pattern_list"])} = ${arg("var1", ["identifier"])}.take(${arg(
   "var2",
   ["string"]
-)}, ${arg("var3", ["string"])})
+)}, ${arg("var3", ["string", "integer"])})
 `;
 
 export const widget = svelteProjection(TakeProjection);
