@@ -5,9 +5,7 @@
   "private": true,
   "workspaces": [
     "apps/*",
-    "packages/*",
-    "vscode-extension/*",
-    "vscode-extension/editors/*"
+    "packages/*"
   ],
   "scripts": {
     "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js",
