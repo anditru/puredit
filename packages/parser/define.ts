@@ -7,7 +7,6 @@ import { isString } from "@puredit/utils";
 import { parsePattern } from "./pattern";
 import type {
   Context,
-  PatternDraft,
   PatternNode,
   TemplateArg,
   TemplateBlock,
@@ -56,13 +55,13 @@ export function contextVariable(name: string): TemplateContextVariable {
 }
 
 /**
- * Builds a pattern. A pattern is defined as a tuple of a PatternNode and a PatternDraft
+ * Builds a pattern.
  * @param template String pices of the template
  * @param params Active nodes in the pattern
  * @param parser TreeSitter Parser for the target language
  * @param target Target language
  * @param isExpression Is an expression pattern
- * @returns Tuple of a PatternNode and PatternDraft
+ * @returns PatternNode
  */
 export function pattern(
   template: TemplateStringsArray,
@@ -70,7 +69,7 @@ export function pattern(
   parser: TreeSitterParser,
   target: Target,
   isExpression: boolean
-): [PatternNode, PatternDraft] {
+): PatternNode {
   const args: TemplateArg[] = [];
   const blocks: TemplateBlock[] = [];
   const contextVariables: TemplateContextVariable[] = [];
@@ -129,8 +128,8 @@ export function pattern(
         }
       })
     ).trim();
-  return [
-    parsePattern(raw, parser, args, blocks, contextVariables, isExpression),
+  return {
+    ...parsePattern(raw, parser, args, blocks, contextVariables, isExpression),
     draft,
-  ];
+  };
 }

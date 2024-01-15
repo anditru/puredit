@@ -16,7 +16,7 @@ import type { Projection } from "@puredit/projections/types";
 import { ${options.parserName} } from "${options.parserModule}";
 import ${componentName} from "./${componentName}.svelte";
 
-export const [pattern, draft] = ${options.parserName}.statementPattern\`
+export const pattern = ${options.parserName}.statementPattern\`
 ${options.codeTemplate}
 \`;
 

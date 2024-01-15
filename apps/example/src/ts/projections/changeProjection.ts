@@ -15,7 +15,7 @@ import { tsParser } from "./parser";
 const db = contextVariable("db");
 const table = arg("table", ["string"]);
 
-export const [pattern, draft] = tsParser.statementPattern`
+export const pattern = tsParser.statementPattern`
 ((table) => ${block({ table: "table" })})(${db}[${table}]);
 `;
 
@@ -35,7 +35,6 @@ export const changeProjection: Projection = {
   name: "change table",
   description: "Applies changes to the specified table of the database",
   pattern,
-  draft,
   requiredContextVariables: ["db"],
   widgets: [widget, end],
   contextProvider(

@@ -12,7 +12,6 @@ export interface Projection {
   name: string;
   description: string;
   pattern: PatternNode;
-  draft(context: Context): string;
   requiredContextVariables: string[];
   widgets: Array<ProjectionWidgetClass>;
   contextProvider?(match: Match, text: Text, context: object): object;

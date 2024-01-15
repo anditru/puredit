@@ -9,7 +9,7 @@ const fileName = arg("fileName", ["string"]);
 const sheetName = arg("sheetName", ["string"]);
 const columns = arg("columns", ["list"]);
 
-export const [pattern, draft] = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern`
 ${dsl}.store_sheet(${fileName}, ${sheetName}, ${columns})
 `;
 
@@ -19,7 +19,6 @@ export const storeSheetProjection: Projection = {
   name: "store sheet",
   description: "Stores the given columns as an Excel file",
   pattern,
-  draft,
   requiredContextVariables: ["dsl"],
   widgets: [widget],
 };

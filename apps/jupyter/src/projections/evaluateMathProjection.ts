@@ -7,7 +7,7 @@ import { pythonParser } from "./parser";
 const dsl = contextVariable("mathdsl");
 const latex = arg("latex", ["string"]);
 
-export const [pattern, draft] = pythonParser.expressionPattern`
+export const pattern = pythonParser.expressionPattern`
 ${dsl}.evaluate(${latex}, locals())
 `;
 
@@ -18,7 +18,6 @@ export const evaluateMathProjection: Projection = {
   description:
     "Evaluates an expression in mathematical notation using the variables from the current local scope.",
   pattern,
-  draft,
   requiredContextVariables: [],
   widgets: [widget],
 };

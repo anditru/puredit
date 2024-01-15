@@ -7,7 +7,7 @@ import { pythonParser } from "./parser";
 const dsl = contextVariable("mathdsl");
 const latex = arg("latex", ["string"]);
 
-export const [pattern, draft] = pythonParser.expressionPattern`
+export const pattern = pythonParser.expressionPattern`
 ${dsl}.compile(${latex})
 `;
 
@@ -18,7 +18,6 @@ export const compileMathProjection: Projection = {
   description:
     "Transforms an expression in mathematical notation into a reusable functions, using free symbols as named parameters.",
   pattern,
-  draft,
   requiredContextVariables: [],
   widgets: [widget],
 };

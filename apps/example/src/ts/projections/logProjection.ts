@@ -5,7 +5,7 @@ import { tsParser } from "./parser";
 
 const message = arg("message", ["string"]);
 
-export const [pattern, draft] = tsParser.statementPattern`
+export const pattern = tsParser.statementPattern`
 console.log(${message});
 `;
 
@@ -15,7 +15,6 @@ export const logProjection: Projection = {
   name: "log message",
   description: "Log a message to the console",
   pattern,
-  draft,
   requiredContextVariables: [],
   widgets: [widget],
 };

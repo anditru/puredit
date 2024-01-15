@@ -9,7 +9,7 @@ const sheetRange = arg("sheetRange", ["string"]);
 const columns = arg("columns", ["pattern_list"]);
 const expression = arg("expression", ["string"]);
 
-export const [pattern, draft] = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern`
 ${columns} = ${sheet}.take(${sheetRange}, ${expression})
 `;
 
@@ -20,7 +20,6 @@ export const takeProjection: Projection = {
   description:
     "Extracts all columns from a sheet range that match the criteria",
   pattern,
-  draft,
   requiredContextVariables: ["sheet"],
   widgets: [widget],
 };

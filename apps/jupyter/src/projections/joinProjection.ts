@@ -12,7 +12,7 @@ const targetColumn = arg("targetColumn", ["identifier"]);
 const expression = arg("expression", ["string"]);
 const aggregationMethod = arg("aggregationMethod", ["string"]);
 
-export const [pattern, draft] = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern`
 ${columns} = ${sheet}.join(${sheetRange}, ${targetColumn}, ${expression}, ${dsl}.AggregationMethod[${aggregationMethod}])
 `;
 
@@ -22,7 +22,6 @@ export const joinProjection: Projection = {
   name: "join columns from sheet range",
   description: "Join all columns from a sheet range on another column",
   pattern,
-  draft,
   requiredContextVariables: ["dsl", "sheet"],
   widgets: [widget],
 };

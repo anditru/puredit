@@ -9,7 +9,7 @@ const columnTarget = arg("columnTarget", ["string"]);
 const columnSource = arg("columnSource", ["string"]);
 const direction = arg("direction", ["string"]);
 
-export const [pattern, draft] = tsParser.statementPattern`
+export const pattern = tsParser.statementPattern`
 ${table}[${columnTarget}] = ${table}[${columnSource}].trim(${direction});
 `;
 
@@ -19,7 +19,6 @@ export const trimProjection: Projection = {
   name: "trim column",
   description: "Remove whitespace on the given sides of a column",
   pattern,
-  draft,
   requiredContextVariables: ["table"],
   widgets: [widget],
 };

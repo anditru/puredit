@@ -48,7 +48,7 @@ export function completions(
             changes: {
               from,
               to,
-              insert: projection
+              insert: projection.pattern
                 .draft(context)
                 .split("\n")
                 .join("\n" + indentString(view.state, indentation)),

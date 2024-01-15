@@ -11,7 +11,7 @@ import { pythonParser } from "./parser";
 const db = contextVariable("db");
 const table = arg("table", ["string"]);
 
-export const [pattern, draft] = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern`
 with ${db}.change(${table}) as table:
     ${block({ table: "table" })}
 `;
@@ -30,7 +30,6 @@ export const changeProjection: Projection = {
   name: "change table",
   description: "Applies changes to the specified table of the database",
   pattern,
-  draft,
   requiredContextVariables: ["db"],
   widgets: [widget],
   contextProvider(

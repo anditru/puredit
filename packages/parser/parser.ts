@@ -3,7 +3,6 @@ import { createTreeSitterParser, Target } from "./treeSitterParser";
 import { pattern } from "./define";
 import { parsePattern } from "./pattern";
 import type {
-  PatternDraft,
   PatternNode,
   TemplateArg,
   TemplateBlock,
@@ -51,12 +50,12 @@ export default class Parser {
    * Builds a Statement Pattern
    * @param template String pices of the template
    * @param params Active nodes in the pattern
-   * @returns Tuple of a PatternNode and PatternDraft
+   * @returns PatternNode
    */
   statementPattern(
     template: TemplateStringsArray,
     ...params: (string | TemplateParam)[]
-  ): [PatternNode, PatternDraft] {
+  ): PatternNode {
     return pattern(template, params, this.tsParser, this.target, false);
   }
 
@@ -64,12 +63,12 @@ export default class Parser {
    * Builds an Expression Pattern
    * @param template String pices of the template
    * @param params Active nodes in the pattern
-   * @returns Tuple of a PatternNode and PatternDraft
+   * @returns PatternNode
    */
   expressionPattern(
     template: TemplateStringsArray,
     ...params: (string | TemplateParam)[]
-  ): [PatternNode, PatternDraft] {
+  ): PatternNode {
     return pattern(template, params, this.tsParser, this.target, true);
   }
 }

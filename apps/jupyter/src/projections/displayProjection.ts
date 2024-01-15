@@ -7,7 +7,7 @@ import DisplayProjection from "./DisplayProjection.svelte";
 const dsl = contextVariable("dsl");
 const columns = arg("columns", ["list"]);
 
-export const [pattern, draft] = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern`
 ${dsl}.display(${columns})
 `;
 
@@ -17,7 +17,6 @@ export const displayProjection: Projection = {
   name: "display columns",
   description: "Displays the given columns in Jupyter",
   pattern,
-  draft,
   requiredContextVariables: ["dsl"],
   widgets: [widget],
 };

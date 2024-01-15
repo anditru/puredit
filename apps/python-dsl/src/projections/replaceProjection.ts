@@ -9,7 +9,7 @@ const column = arg("column", ["string"]);
 const target = arg("target", ["string"]);
 const replacement = arg("replacement", ["string"]);
 
-export const [pattern, draft] = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern`
 ${table}.column(${column}).replace(${target}, ${replacement})
 `;
 
@@ -19,7 +19,6 @@ export const replaceProjection: Projection = {
   name: "replace text in column",
   description: "Replaces all occurences of a text in a column",
   pattern,
-  draft,
   requiredContextVariables: ["table"],
   widgets: [widget],
 };

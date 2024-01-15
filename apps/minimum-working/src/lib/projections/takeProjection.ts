@@ -4,7 +4,7 @@ import type { Projection } from "@puredit/projections/types";
 import { pythonParser } from "./parser";
 import TakeProjection from "./TakeProjection.svelte";
 
-export const [pattern, draft] = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern`
 ${arg("var0", ["pattern_list"])} = ${arg("var1", ["identifier"])}.take(${arg(
   "var2",
   ["string"]
@@ -17,7 +17,6 @@ export const takeProjection: Projection = {
   name: "take",
   description: "take",
   pattern,
-  draft,
   requiredContextVariables: [],
   widgets: [widget],
 };

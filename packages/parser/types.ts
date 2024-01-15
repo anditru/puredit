@@ -11,7 +11,10 @@ export interface PatternNode {
   arg?: TemplateArg;
   block?: TemplateBlock;
   contextVariable?: TemplateContextVariable;
+  draft: PatternDraft;
 }
+
+type PatternDraft = (context: Context) => string;
 
 export type PatternMap = Record<string, PatternNode[]>;
 
@@ -53,8 +56,6 @@ export interface ContextRange {
   to: number;
   context: Context;
 }
-
-export type PatternDraft = (context: Context) => string;
 
 export interface CodeBlock {
   node: SyntaxNode;
