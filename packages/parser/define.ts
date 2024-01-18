@@ -9,6 +9,8 @@ import type {
   Context,
   PatternNode,
   TemplateArg,
+  TemplateAgg,
+  AggregationCardinality,
   TemplateBlock,
   TemplateContextVariable,
   TemplateParam,
@@ -26,6 +28,26 @@ export function arg(name: string, types: string[]): TemplateArg {
     kind: "arg",
     name,
     types,
+  };
+}
+
+/**
+ * Defines a Aggregation active node
+ * @param allowedPatterns Allowed patterns in the aggregation
+ * @param cardinality Cardinality of the aggregation
+ * @param context Context Variables required in the Block
+ * @returns Object representing the Block
+ */
+export function agg(
+  allowedPatterns: PatternNode[],
+  cardinality: AggregationCardinality,
+  context: Context = {}
+): TemplateAgg {
+  return {
+    kind: "agg",
+    allowedPatterns,
+    cardinality,
+    context,
   };
 }
 

@@ -1,3 +1,9 @@
+/**
+ * @module match
+ * Implements the pattern matching algorithm and exposes it
+ * via the function findPatterns
+ */
+
 import type { TreeCursor } from "web-tree-sitter";
 import { isErrorToken, skipKeywords } from "./shared";
 import type { Keyword } from "./shared";
@@ -12,14 +18,67 @@ import type {
 } from "./types";
 import type { Context } from ".";
 
-function nodeType(cursor: TreeCursor) {
-  if (
-    cursor.nodeType === "identifier" &&
-    cursor.nodeText.startsWith("__empty_")
-  ) {
-    return cursor.nodeText.slice("__empty_".length);
-  }
-  return cursor.nodeType;
+export function findPatterns(
+  patternMap: PatternMap,
+  cursor: TreeCursor,
+  context: Context = {},
+  to = Infinity
+): FindPatternsResult {
+  let matches: Match[] = [];
+  let contextRanges: ContextRange[] = [];
+  do {
+    if (patternMap[cursor.nodeType]) {
+      const patterns = patternMap[cursor.nodeType];
+      let foundPattern = false;
+      for (const pattern of patterns) {
+        const args: ArgMap = {};
+        const blocks: CodeBlock[] = [];
+        if (
+          matchPattern(
+            pattern,
+            cursor.currentNode().walk(),
+            context,
+            args,
+            blocks
+          )
+        ) {
+          matches.push({
+            pattern,
+            node: cursor.currentNode(),
+            args,
+            blocks,
+          });
+          for (const block of blocks) {
+            contextRanges.push({
+              from: block.node.startIndex,
+              to: block.node.endIndex,
+              context: block.context,
+            });
+            const result = findPatterns(
+              patternMap,
+              block.node.walk(),
+              Object.assign({}, context, block.context),
+              to
+            );
+            matches = matches.concat(result.matches);
+            contextRanges = contextRanges.concat(result.contextRanges);
+          }
+          foundPattern = true;
+          break;
+        }
+      }
+      if (foundPattern) {
+        continue;
+      }
+    }
+    if (cursor.gotoFirstChild()) {
+      const result = findPatterns(patternMap, cursor, context, to);
+      matches = matches.concat(result.matches);
+      contextRanges = contextRanges.concat(result.contextRanges);
+      cursor.gotoParent();
+    }
+  } while (cursor.gotoNextSibling() && cursor.startIndex < to);
+  return { matches, contextRanges };
 }
 
 function matchPattern(
@@ -124,65 +183,12 @@ function matchPattern(
   return true;
 }
 
-export function findPatterns(
-  patternMap: PatternMap,
-  cursor: TreeCursor,
-  context: Context = {},
-  to = Infinity
-): FindPatternsResult {
-  let matches: Match[] = [];
-  let contextRanges: ContextRange[] = [];
-  do {
-    if (patternMap[cursor.nodeType]) {
-      const patterns = patternMap[cursor.nodeType];
-      let foundPattern = false;
-      for (const pattern of patterns) {
-        const args: ArgMap = {};
-        const blocks: CodeBlock[] = [];
-        if (
-          matchPattern(
-            pattern,
-            cursor.currentNode().walk(),
-            context,
-            args,
-            blocks
-          )
-        ) {
-          matches.push({
-            pattern,
-            node: cursor.currentNode(),
-            args,
-            blocks,
-          });
-          for (const block of blocks) {
-            contextRanges.push({
-              from: block.node.startIndex,
-              to: block.node.endIndex,
-              context: block.context,
-            });
-            const result = findPatterns(
-              patternMap,
-              block.node.walk(),
-              Object.assign({}, context, block.context),
-              to
-            );
-            matches = matches.concat(result.matches);
-            contextRanges = contextRanges.concat(result.contextRanges);
-          }
-          foundPattern = true;
-          break;
-        }
-      }
-      if (foundPattern) {
-        continue;
-      }
-    }
-    if (cursor.gotoFirstChild()) {
-      const result = findPatterns(patternMap, cursor, context, to);
-      matches = matches.concat(result.matches);
-      contextRanges = contextRanges.concat(result.contextRanges);
-      cursor.gotoParent();
-    }
-  } while (cursor.gotoNextSibling() && cursor.startIndex < to);
-  return { matches, contextRanges };
+function nodeType(cursor: TreeCursor) {
+  if (
+    cursor.nodeType === "identifier" &&
+    cursor.nodeText.startsWith("__empty_")
+  ) {
+    return cursor.nodeText.slice("__empty_".length);
+  }
+  return cursor.nodeType;
 }

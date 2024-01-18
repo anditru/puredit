@@ -1,3 +1,9 @@
+/**
+ * @module inspect
+ * Implements a set of functions to convert patterns, ast-nodes and matches to their
+ * string representation
+ */
+
 import type { SyntaxNode } from "web-tree-sitter";
 import { visitNode } from "./pattern";
 import type { ArgMap, Match, PatternNode } from "./types";

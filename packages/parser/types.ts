@@ -26,6 +26,19 @@ export interface TemplateArg {
   types: string[];
 }
 
+export interface TemplateAgg {
+  kind: "agg";
+  allowedPatterns: PatternNode[];
+  cardinality: AggregationCardinality;
+  context: Context;
+}
+
+export enum AggregationCardinality {
+  One = "1",
+  ZeroToMany = "0..n",
+  OneToMany = "1..n",
+}
+
 export interface TemplateBlock {
   kind: "block";
   context: Context;
