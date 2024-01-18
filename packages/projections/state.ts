@@ -2,7 +2,7 @@ import { EditorState, StateField } from "@codemirror/state";
 import { Decoration, EditorView } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { zip } from "@puredit/utils";
-import { createPatternMap, PatternSearch } from "@puredit/parser";
+import { createPatternMap, PatternMatching } from "@puredit/parser";
 import type { PatternNode, Match } from "@puredit/parser";
 import { pickedCompletion } from "@codemirror/autocomplete";
 import type {
@@ -25,12 +25,12 @@ export function createProjectionState(
 ): ProjectionState {
   const patternMap = createPatternMap(config.projections.map((p) => p.pattern));
   const cursor = config.parser.parse(state.sliceDoc(0)).walk();
-  const patternSearch = new PatternSearch(
+  const patternMatching = new PatternMatching(
     patternMap,
     cursor,
     config.globalContextVariables
   );
-  const { matches, contextRanges } = patternSearch.start();
+  const { matches, contextRanges } = patternMatching.execute();
   const decorations = updateProjections(
     config,
     Decoration.none,
@@ -51,12 +51,12 @@ export const projectionState = StateField.define<ProjectionState>({
     const state = transaction.state;
     // TODO: reuse previous tree for incremental parsing
     const cursor = config.parser.parse(state.sliceDoc(0)).walk();
-    const patternSearch = new PatternSearch(
+    const patternMatching = new PatternMatching(
       patternMap,
       cursor,
       config.globalContextVariables
     );
-    const { matches, contextRanges } = patternSearch.start();
+    const { matches, contextRanges } = patternMatching.execute();
     decorations = updateProjections(
       config,
       decorations,

@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { arg, block, createPatternMap, PatternSearch } from "@puredit/parser";
+  import {
+    arg,
+    block,
+    createPatternMap,
+    PatternMatching,
+  } from "@puredit/parser";
   import { matchToString, syntaxNodeToString } from "@puredit/parser/inspect";
   import { parser } from "./parser";
 
@@ -28,8 +33,8 @@
   ]);
 
   console.time("findPatterns");
-  const patternSearch = new PatternSearch(patternMap, snippetNode.walk());
-  const { matches } = patternSearch.start();
+  const patternMatching = new PatternMatching(patternMap, snippetNode.walk());
+  const { matches } = patternMatching.execute();
   console.timeEnd("findPatterns");
   const matchStrings = matches
     .map((match) => matchToString(match, snippet))

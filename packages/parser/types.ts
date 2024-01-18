@@ -78,7 +78,7 @@ export interface CodeBlock {
   blockType: Target;
 }
 
-export interface FindPatternsResult {
+export interface PatternMatchingResult {
   matches: Match[];
   contextRanges: ContextRange[];
 }

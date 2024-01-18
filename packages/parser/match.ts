@@ -1,7 +1,7 @@
 /**
  * @module match
  * Implements the pattern matching algorithm and exposes it
- * via the function findPatterns
+ * via the class PatternMatching
  */
 
 import type { TreeCursor } from "web-tree-sitter";
@@ -11,113 +11,122 @@ import type {
   ArgMap,
   CodeBlock,
   ContextRange,
-  FindPatternsResult,
+  PatternMatchingResult,
   Match,
   PatternMap,
   PatternNode,
 } from "./types";
 import type { Context } from ".";
 
-export class PatternSearch {
+export class PatternMatching {
+  private matches: Match[] = [];
+  private contextRanges: ContextRange[] = [];
+
   constructor(
-    public patternMap: PatternMap,
-    public cursor: TreeCursor,
-    public context: Context = {}
+    private patternMap: PatternMap,
+    private cursor: TreeCursor,
+    private context: Context = {},
+    private to = Infinity
   ) {}
 
-  start(to = Infinity): FindPatternsResult {
-    let matches: Match[] = [];
-    let contextRanges: ContextRange[] = [];
+  execute(): PatternMatchingResult {
     do {
-      if (this.candidatePatternsExist()) {
-        const candidatePatterns = this.getCandidatePatterns();
-        let foundPattern = false;
-
-        for (const candidatePattern of candidatePatterns) {
-          const args: ArgMap = {};
-          const blocks: CodeBlock[] = [];
-
-          const candidateMatch = new CandidateMatch(
-            candidatePattern,
-            this.cursor.currentNode().walk(),
-            this.context,
-            args,
-            blocks
-          );
-
-          if (candidateMatch.matches()) {
-            matches.push({
-              pattern: candidatePattern,
-              node: this.cursor.currentNode(),
-              args,
-              blocks,
-            });
-
-            for (const block of blocks) {
-              contextRanges.push({
-                from: block.node.startIndex,
-                to: block.node.endIndex,
-                context: block.context,
-              });
-
-              const blockPatternSearch = new PatternSearch(
-                this.patternMap,
-                block.node.walk(),
-                Object.assign({}, this.context, block.context)
-              );
-              const result = blockPatternSearch.start(to);
-
-              matches = matches.concat(result.matches);
-              contextRanges = contextRanges.concat(result.contextRanges);
-            }
-
-            foundPattern = true;
-            break;
-          }
-        }
-
-        if (foundPattern) {
+      if (this.candidatePatternsExistForCurrentNode()) {
+        const firstMatch = this.findFirstMatchingCandidateForCurrentNode();
+        if (firstMatch) {
+          this.findMatchesInBlocksOf(firstMatch);
           continue;
         }
       }
+      this.findMatchesInFirstChild();
+    } while (this.cursor.gotoNextSibling() && this.cursor.startIndex < this.to);
 
-      if (this.cursor.gotoFirstChild()) {
-        const childPatternSearch = new PatternSearch(
-          this.patternMap,
-          this.cursor,
-          this.context
-        );
-        const result = childPatternSearch.start(to);
-        matches = matches.concat(result.matches);
-        contextRanges = contextRanges.concat(result.contextRanges);
-
-        this.cursor.gotoParent();
-      }
-    } while (this.cursor.gotoNextSibling() && this.cursor.startIndex < to);
-    return { matches, contextRanges };
+    return { matches: this.matches, contextRanges: this.contextRanges };
   }
 
-  candidatePatternsExist(): boolean {
+  candidatePatternsExistForCurrentNode(): boolean {
     return !!this.patternMap[this.cursor.nodeType];
   }
 
-  getCandidatePatterns(): PatternNode[] {
+  findFirstMatchingCandidateForCurrentNode(): CandidateMatch | undefined {
+    const candidatePatterns = this.getCandidatePatternsForCurrentNode();
+
+    for (const candidatePattern of candidatePatterns) {
+      const candidateMatch = new CandidateMatch(
+        candidatePattern,
+        this.cursor.currentNode().walk(),
+        this.context
+      );
+      candidateMatch.verifyMatch();
+
+      if (candidateMatch.matched) {
+        this.matches.push({
+          pattern: candidatePattern,
+          node: this.cursor.currentNode(),
+          args: candidateMatch.args,
+          blocks: candidateMatch.blocks,
+        });
+        return candidateMatch;
+      }
+    }
+  }
+
+  getCandidatePatternsForCurrentNode(): PatternNode[] {
     return this.patternMap[this.cursor.nodeType];
+  }
+
+  findMatchesInBlocksOf(candidateMatch: CandidateMatch) {
+    for (const block of candidateMatch.blocks) {
+      this.contextRanges.push({
+        from: block.node.startIndex,
+        to: block.node.endIndex,
+        context: block.context,
+      });
+
+      const blockPatternMatching = new PatternMatching(
+        this.patternMap,
+        block.node.walk(),
+        Object.assign({}, this.context, block.context)
+      );
+      const result = blockPatternMatching.execute();
+
+      this.matches = this.matches.concat(result.matches);
+      this.contextRanges = this.contextRanges.concat(result.contextRanges);
+    }
+  }
+
+  findMatchesInFirstChild() {
+    if (this.cursor.gotoFirstChild()) {
+      const childPatternMatching = new PatternMatching(
+        this.patternMap,
+        this.cursor,
+        this.context,
+        this.to
+      );
+      const result = childPatternMatching.execute();
+      this.matches = this.matches.concat(result.matches);
+      this.contextRanges = this.contextRanges.concat(result.contextRanges);
+
+      this.cursor.gotoParent();
+    }
   }
 }
 
 class CandidateMatch {
+  private _matched: boolean | null = null;
+  private _args: ArgMap = {};
+  private _blocks: CodeBlock[] = [];
+
   constructor(
-    public pattern: PatternNode,
-    public cursor: TreeCursor,
-    public context: Context,
-    public args: ArgMap,
-    public blocks: CodeBlock[]
+    private pattern: PatternNode,
+    private cursor: TreeCursor,
+    private context: Context
   ) {}
 
-  public matches(lastSiblingKeyword?: Keyword): boolean {
+  public verifyMatch(lastSiblingKeyword?: Keyword): void {
     if (isErrorToken(this.cursor.nodeType)) {
-      return false;
+      this._matched = false;
+      return;
     }
     while (
       this.pattern.fieldName === "body" &&
@@ -136,11 +145,13 @@ class CandidateMatch {
     }
     const fieldName = this.cursor.currentFieldName() || undefined;
     if (fieldName !== this.pattern.fieldName) {
-      return false;
+      this._matched = false;
+      return;
     }
     if (this.pattern.arg) {
-      this.args[this.pattern.arg.name] = this.cursor.currentNode();
-      return this.pattern.arg.types.includes(nodeType(this.cursor));
+      this._args[this.pattern.arg.name] = this.cursor.currentNode();
+      this._matched = this.pattern.arg.types.includes(nodeType(this.cursor));
+      return;
     }
     if (this.pattern.block) {
       let from = this.cursor.startIndex;
@@ -152,7 +163,7 @@ class CandidateMatch {
       }
       const rangeModifierStart = 1;
       const rangeModifierEnd = this.pattern.block.blockType === "ts" ? 1 : 0;
-      this.blocks.push({
+      this._blocks.push({
         node: this.cursor.currentNode(),
         context: this.pattern.block.context,
         from: from + rangeModifierStart,
@@ -161,9 +172,11 @@ class CandidateMatch {
       });
       switch (this.pattern.block.blockType) {
         case "ts":
-          return nodeType(this.cursor) === "statement_block";
+          this._matched = nodeType(this.cursor) === "statement_block";
+          return;
         case "py":
-          return nodeType(this.cursor) === "block";
+          this._matched = nodeType(this.cursor) === "block";
+          return;
       }
     }
     if (
@@ -173,48 +186,80 @@ class CandidateMatch {
         this.pattern.contextVariable.name
       )
     ) {
-      return (
+      this._matched =
         nodeType(this.cursor) === "identifier" &&
-        this.cursor.nodeText === this.context[this.pattern.contextVariable.name]
-      );
+        this.cursor.nodeText ===
+          this.context[this.pattern.contextVariable.name];
+      return;
     }
     if (nodeType(this.cursor) !== this.pattern.type) {
-      return false;
+      this._matched = false;
+      return;
     }
     if (this.pattern.text) {
-      return this.pattern.text === this.cursor.nodeText;
+      this._matched = this.pattern.text === this.cursor.nodeText;
+      return;
     }
     // A node must either contain text or children
     if (!this.pattern.children || !this.cursor.gotoFirstChild()) {
-      return false;
+      this._matched = false;
+      return;
     }
     const length = this.pattern.children.length;
     let [hasSibling, lastKeyword] = skipKeywords(this.cursor);
     if (!hasSibling && length > 0) {
-      return false;
+      this._matched = false;
+      return;
     }
     for (let i = 0; i < length; ) {
       const candidateChildMatch = new CandidateMatch(
         this.pattern.children[i],
         this.cursor,
-        this.context,
-        this.args,
-        this.blocks
+        this.context
       );
-      if (!candidateChildMatch.matches(lastKeyword)) {
-        return false;
+      candidateChildMatch.verifyMatch(lastKeyword);
+
+      if (!candidateChildMatch.matched) {
+        this._matched = false;
+        return;
       }
+
+      this._blocks = this._blocks.concat(candidateChildMatch.blocks);
+      this._args = { ...this._args, ...candidateChildMatch.args };
+
       i += 1;
       hasSibling = this.cursor.gotoNextSibling();
       if (hasSibling) {
         [hasSibling, lastKeyword] = skipKeywords(this.cursor);
       }
       if ((i < length && !hasSibling) || (i >= length && hasSibling)) {
-        return false;
+        this._matched = false;
+        return;
       }
     }
     this.cursor.gotoParent();
-    return true;
+    this._matched = true;
+  }
+
+  private checkMatchingExecuted() {
+    if (this._matched === null) {
+      throw new Error("Matching has not been executed yet");
+    }
+  }
+
+  public get matched() {
+    this.checkMatchingExecuted();
+    return this._matched;
+  }
+
+  public get blocks() {
+    this.checkMatchingExecuted();
+    return this._blocks;
+  }
+
+  public get args() {
+    this.checkMatchingExecuted();
+    return this._args;
   }
 }
 
