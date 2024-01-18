@@ -11,7 +11,7 @@ export interface PatternNode {
   arg?: TemplateArg;
   block?: TemplateBlock;
   contextVariable?: TemplateContextVariable;
-  draft: PatternDraft;
+  draft?: PatternDraft;
 }
 
 type PatternDraft = (context: Context) => string;
