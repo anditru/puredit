@@ -14,6 +14,7 @@ export interface Projection {
   pattern: PatternNode;
   requiredContextVariables: string[];
   widgets: Array<ProjectionWidgetClass>;
+  partWidgetsMapping?: Record<string, any>;
   contextProvider?(match: Match, text: Text, context: object): object;
 }
 

@@ -12,9 +12,10 @@ export type {
   ArgMap,
   TemplateArg,
   TemplateAgg,
-  AggregationCardinality,
   TemplateBlock,
   TemplateParam,
   Match,
   Context,
 } from "./types";
+
+export { AggregationCardinality } from "./types";

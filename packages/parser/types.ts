@@ -3,12 +3,18 @@ import type { Target } from "./treeSitterParser";
 
 export type { SyntaxNode };
 
+export interface AggPart {
+  template: TemplateStringsArray;
+  params: (string | TemplateParam)[];
+}
+
 export interface PatternNode {
   type: string;
   fieldName?: string;
   children?: PatternNode[];
   text?: string;
   arg?: TemplateArg;
+  agg?: TemplateAgg;
   block?: TemplateBlock;
   contextVariable?: TemplateContextVariable;
   draft?: PatternDraft;
@@ -28,13 +34,15 @@ export interface TemplateArg {
 
 export interface TemplateAgg {
   kind: "agg";
-  allowedPatterns: PatternNode[];
+  name: string;
+  allowedPatterns: AggPart[];
   cardinality: AggregationCardinality;
+  separatorToken?: string;
   context: Context;
 }
 
 export enum AggregationCardinality {
-  One = "1",
+  ZeroToOne = "0..1",
   ZeroToMany = "0..n",
   OneToMany = "1..n",
 }
@@ -52,6 +60,7 @@ export interface TemplateContextVariable {
 
 export type TemplateParam =
   | TemplateArg
+  | TemplateAgg
   | TemplateBlock
   | TemplateContextVariable;
 
