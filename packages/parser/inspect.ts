@@ -5,7 +5,7 @@
  */
 
 import type { SyntaxNode } from "web-tree-sitter";
-import { visitNode } from "./pattern";
+import { visitNode } from "./parse/patternNodeBuilder";
 import type { ArgMap, Match, PatternNode } from "./types";
 
 export function patternToString(node: PatternNode, indent = ""): string {
