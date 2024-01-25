@@ -26,6 +26,13 @@ export type PatternMap = Record<string, PatternNode[]>;
 
 export type ArgMap = Record<string, SyntaxNode>;
 
+export enum TemplatePrefixes {
+  Arg = "__template_arg_",
+  Block = "__template_block_",
+  ContextVariable = "__template_context_variable_",
+  Agg = "__template_agg_",
+}
+
 export interface TemplateArg {
   kind: "arg";
   name: string;

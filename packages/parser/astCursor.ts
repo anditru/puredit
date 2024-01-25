@@ -1,4 +1,5 @@
 import type { TreeCursor } from "web-tree-sitter";
+import { TemplatePrefixes } from "./types";
 
 export class AstCursor {
   constructor(private treeCursor: TreeCursor) {}
@@ -55,9 +56,39 @@ export class AstCursor {
     return !this.treeCursor.nodeIsNamed;
   }
 
+  isArgNode(): boolean {
+    return this.treeCursor.nodeText.startsWith(TemplatePrefixes.Arg);
+  }
+
+  isBlockNode(): boolean {
+    return this.treeCursor.nodeText.startsWith(TemplatePrefixes.Block);
+  }
+
+  isContextVariableNode(): boolean {
+    return this.treeCursor.nodeText.startsWith(
+      TemplatePrefixes.ContextVariable
+    );
+  }
+
+  isAggNode(): boolean {
+    return this.treeCursor.nodeText.startsWith(TemplatePrefixes.Agg);
+  }
+
+  hasChildren(): boolean {
+    if (this.goToFirstChild()) {
+      this.goToParent();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * String literals may have children, in particular escape sequences.
+   * To keep it simple, we treat string literals as atomic nodes.
+   * @returns boolean
+   */
   shouldTreatAsAtomicNode(): boolean {
-    // String literals may have children, in particular escape sequences.
-    // To keep it simple, we treat string literals as atomic nodes.
     return this.treeCursor.nodeType === "string";
   }
 

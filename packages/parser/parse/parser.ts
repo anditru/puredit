@@ -1,7 +1,7 @@
 import type { TreeSitterParser } from "../treeSitterParser";
 import { createTreeSitterParser, Target } from "../treeSitterParser";
 import type { AggPart, PatternNode, TemplateParam } from "../types";
-import { PatternNodeBuilder } from "./patternNodeBuilder";
+import { PatternTreeBuilder } from "./patternTreeBuilder";
 
 export default class Parser {
   static async load(target: Target): Promise<Parser> {
@@ -9,13 +9,13 @@ export default class Parser {
     return new Parser(treeSitterParser, target);
   }
 
-  patternNodeBuilder: PatternNodeBuilder;
+  patternNodeBuilder: PatternTreeBuilder;
 
   private constructor(
     private treeSitterParser: TreeSitterParser,
     public target: Target
   ) {
-    this.patternNodeBuilder = new PatternNodeBuilder(treeSitterParser, target);
+    this.patternNodeBuilder = new PatternTreeBuilder(treeSitterParser, target);
   }
 
   parse(

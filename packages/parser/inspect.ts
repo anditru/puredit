@@ -5,7 +5,7 @@
  */
 
 import type { SyntaxNode } from "web-tree-sitter";
-import { visitNode } from "./parse/patternNodeBuilder";
+import { NodeTransformVisitor } from "./parse/nodeTransformVisitor";
 import type { ArgMap, Match, PatternNode } from "./types";
 import { AstCursor } from "./astCursor";
 
@@ -30,8 +30,9 @@ export function syntaxNodeToString(
   text: string,
   indent = ""
 ): string {
+  const nodeTransformVisitor = new NodeTransformVisitor([], [], []);
   return patternToString(
-    visitNode(new AstCursor(node.walk()), text, [], [], [])[0],
+    nodeTransformVisitor.visit(new AstCursor(node.walk()), text)[0],
     indent
   );
 }
