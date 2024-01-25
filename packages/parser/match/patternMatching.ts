@@ -8,17 +8,25 @@ import type {
 } from "../types";
 import type { Context } from "..";
 import { CandidateMatch } from "./candidateMatch";
+import { AstCursor } from "../astCursor";
 
 export class PatternMatching {
   private matches: Match[] = [];
   private contextRanges: ContextRange[] = [];
+  private cursor: AstCursor;
 
   constructor(
     private patternMap: PatternMap,
-    private cursor: TreeCursor,
+    cursor: AstCursor | TreeCursor,
     private context: Context = {},
     private to = Infinity
-  ) {}
+  ) {
+    if (!(cursor instanceof AstCursor)) {
+      this.cursor = new AstCursor(cursor);
+    } else {
+      this.cursor = cursor;
+    }
+  }
 
   execute(): PatternMatchingResult {
     do {
@@ -30,7 +38,7 @@ export class PatternMatching {
         }
       }
       this.findMatchesInFirstChild();
-    } while (this.cursor.gotoNextSibling() && this.cursor.startIndex < this.to);
+    } while (this.cursor.goToNextSibling() && this.cursor.startIndex < this.to);
 
     return { matches: this.matches, contextRanges: this.contextRanges };
   }
@@ -47,7 +55,7 @@ export class PatternMatching {
     for (const candidatePattern of candidatePatterns) {
       const candidateMatch = new CandidateMatch(
         candidatePattern,
-        this.cursor.currentNode().walk(),
+        new AstCursor(this.cursor.currentNode.walk()),
         this.context
       );
       candidateMatch.verify();
@@ -55,7 +63,7 @@ export class PatternMatching {
       if (candidateMatch.matched) {
         this.matches.push({
           pattern: candidatePattern,
-          node: this.cursor.currentNode(),
+          node: this.cursor.currentNode,
           args: candidateMatch.args,
           blocks: candidateMatch.blocks,
         });
@@ -89,7 +97,7 @@ export class PatternMatching {
   }
 
   private findMatchesInFirstChild(): void {
-    if (this.cursor.gotoFirstChild()) {
+    if (this.cursor.goToFirstChild()) {
       const childPatternMatching = new PatternMatching(
         this.patternMap,
         this.cursor,
@@ -100,7 +108,7 @@ export class PatternMatching {
       this.matches = this.matches.concat(result.matches);
       this.contextRanges = this.contextRanges.concat(result.contextRanges);
 
-      this.cursor.gotoParent();
+      this.cursor.goToParent();
     }
   }
 }

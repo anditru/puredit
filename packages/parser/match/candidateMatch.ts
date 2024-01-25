@@ -1,6 +1,5 @@
-import type { TreeCursor } from "web-tree-sitter";
-import { isErrorToken, skipKeywords } from "../shared";
-import type { Keyword } from "../shared";
+import type { AstCursor, Keyword } from "../astCursor";
+import { isErrorToken } from "../common";
 import type { ArgMap, CodeBlock, PatternNode } from "../types";
 import type { Context } from "..";
 
@@ -11,7 +10,7 @@ export class CandidateMatch {
 
   constructor(
     private pattern: PatternNode,
-    private cursor: TreeCursor,
+    private cursor: AstCursor,
     private context: Context,
     private lastSiblingKeyword?: Keyword
   ) {}
@@ -53,7 +52,7 @@ export class CandidateMatch {
       return;
     }
 
-    if (nodeType(this.cursor) !== this.pattern.type) {
+    if (this.cursor.cleanNodeType !== this.pattern.type) {
       this._matched = false;
       return;
     }
@@ -64,7 +63,7 @@ export class CandidateMatch {
     }
 
     // A node must either contain text or children
-    if (!this.pattern.children || !this.cursor.gotoFirstChild()) {
+    if (!this.pattern.children || !this.cursor.goToFirstChild()) {
       this._matched = false;
       return;
     }
@@ -74,27 +73,27 @@ export class CandidateMatch {
       return;
     }
 
-    this.cursor.gotoParent();
+    this.cursor.goToParent();
     this._matched = true;
   }
 
   private skipLeadingCommentsInBodies(): void {
     while (
       this.pattern.fieldName === "body" &&
-      nodeType(this.cursor) === "comment"
+      this.cursor.cleanNodeType === "comment"
     ) {
-      this.cursor.gotoNextSibling();
+      this.cursor.goToNextSibling();
     }
   }
 
   private fieldNamesMatch(): boolean {
-    const fieldName = this.cursor.currentFieldName() || undefined;
+    const fieldName = this.cursor.currentFieldName || undefined;
     return fieldName === this.pattern.fieldName;
   }
 
   private verifyArgumentNodeMatches(): void {
-    this._args[this.pattern.arg!.name] = this.cursor.currentNode();
-    this._matched = this.pattern.arg!.types.includes(nodeType(this.cursor));
+    this._args[this.pattern.arg!.name] = this.cursor.currentNode;
+    this._matched = this.pattern.arg!.types.includes(this.cursor.cleanNodeType);
   }
 
   private verifyBlockNodeMatches(): void {
@@ -108,7 +107,7 @@ export class CandidateMatch {
     const rangeModifierStart = 1;
     const rangeModifierEnd = this.pattern.block!.blockType === "ts" ? 1 : 0;
     this._blocks.push({
-      node: this.cursor.currentNode(),
+      node: this.cursor.currentNode,
       context: this.pattern.block!.context,
       from: from + rangeModifierStart,
       to: this.cursor.endIndex - rangeModifierEnd,
@@ -116,10 +115,10 @@ export class CandidateMatch {
     });
     switch (this.pattern.block!.blockType) {
       case "ts":
-        this._matched = nodeType(this.cursor) === "statement_block";
+        this._matched = this.cursor.cleanNodeType === "statement_block";
         return;
       case "py":
-        this._matched = nodeType(this.cursor) === "block";
+        this._matched = this.cursor.cleanNodeType === "block";
         return;
     }
   }
@@ -133,13 +132,13 @@ export class CandidateMatch {
 
   private verifyContextVariableNodeMatches(): void {
     this._matched =
-      nodeType(this.cursor) === "identifier" &&
+      this.cursor.cleanNodeType === "identifier" &&
       this.cursor.nodeText === this.context[this.pattern.contextVariable!.name];
   }
 
   private childrenMatch(): boolean {
     const requiredNumberOfChildren = this.pattern.children!.length;
-    let [hasSibling, lastKeyword] = skipKeywords(this.cursor);
+    let [hasSibling, lastKeyword] = this.cursor.skipKeywords();
     if (!hasSibling && requiredNumberOfChildren > 0) {
       return false;
     }
@@ -161,9 +160,9 @@ export class CandidateMatch {
       this._args = { ...this._args, ...candidateChildMatch.args };
 
       i += 1;
-      hasSibling = this.cursor.gotoNextSibling();
+      hasSibling = this.cursor.goToNextSibling();
       if (hasSibling) {
-        [hasSibling, lastKeyword] = skipKeywords(this.cursor);
+        [hasSibling, lastKeyword] = this.cursor.skipKeywords();
       }
       if (
         (i < requiredNumberOfChildren && !hasSibling) ||
@@ -195,14 +194,4 @@ export class CandidateMatch {
       throw new Error("Matching has not been executed yet");
     }
   }
-}
-
-function nodeType(cursor: TreeCursor) {
-  if (
-    cursor.nodeType === "identifier" &&
-    cursor.nodeText.startsWith("__empty_")
-  ) {
-    return cursor.nodeText.slice("__empty_".length);
-  }
-  return cursor.nodeType;
 }

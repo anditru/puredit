@@ -7,6 +7,7 @@
 import type { SyntaxNode } from "web-tree-sitter";
 import { visitNode } from "./parse/patternNodeBuilder";
 import type { ArgMap, Match, PatternNode } from "./types";
+import { AstCursor } from "./astCursor";
 
 export function patternToString(node: PatternNode, indent = ""): string {
   let out = indent + (node.fieldName ? node.fieldName + ": " : "") + node.type;
@@ -29,7 +30,10 @@ export function syntaxNodeToString(
   text: string,
   indent = ""
 ): string {
-  return patternToString(visitNode(node.walk(), text, [], [], [])[0], indent);
+  return patternToString(
+    visitNode(new AstCursor(node.walk()), text, [], [], [])[0],
+    indent
+  );
 }
 
 export function argMapToString(

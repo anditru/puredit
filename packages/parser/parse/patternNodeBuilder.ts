@@ -1,12 +1,6 @@
 import type { Target, TreeSitterParser } from "../treeSitterParser";
-import type { TreeCursor } from "web-tree-sitter";
 import type { TemplateBlock } from "..";
-import {
-  isErrorToken,
-  isKeyword,
-  isTopNode,
-  shouldTreatAsAtomicNode,
-} from "../shared";
+import { isErrorToken, isTopNode } from "../common";
 import type {
   Context,
   PatternMap,
@@ -16,6 +10,7 @@ import type {
   TemplateParam,
 } from "../types";
 import { isString } from "@puredit/utils";
+import { AstCursor } from "../astCursor";
 
 export class PatternNodeBuilder {
   private template: TemplateStringsArray | undefined;
@@ -131,9 +126,9 @@ export class PatternNodeBuilder {
     contextVariables: TemplateContextVariable[] = [],
     isExpression = false
   ): PatternNode {
-    const cursor = parser.parse(code).walk();
+    const cursor = new AstCursor(parser.parse(code).walk());
     if (isExpression) {
-      goToExpression(cursor);
+      cursor.goToExpression();
     }
     const root = visitNode(cursor, code, args, blocks, contextVariables)[0];
     if (isTopNode(root) && root.children) {
@@ -143,25 +138,8 @@ export class PatternNodeBuilder {
   }
 }
 
-function goToExpression(cursor: TreeCursor) {
-  do {
-    if (cursor.nodeType === "expression_statement") {
-      cursor.gotoFirstChild();
-      return;
-    }
-  } while (goToNextNode(cursor));
-}
-
-function goToNextNode(cursor: TreeCursor): boolean {
-  return (
-    cursor.gotoFirstChild() ||
-    cursor.gotoNextSibling() ||
-    (cursor.gotoParent() && cursor.gotoNextSibling())
-  );
-}
-
 export function visitNode(
-  cursor: TreeCursor,
+  cursor: AstCursor,
   code: string,
   args: TemplateArg[],
   blocks: TemplateBlock[],
@@ -175,14 +153,14 @@ export function visitNode(
       );
     }
     // Skip keywords
-    if (isKeyword(cursor)) {
+    if (cursor.isKeyword()) {
       continue;
     }
     let node: PatternNode = {
       type: cursor.nodeType,
-      fieldName: cursor.currentFieldName() || undefined,
+      fieldName: cursor.currentFieldName || undefined,
     };
-    if (!shouldTreatAsAtomicNode(cursor) && cursor.gotoFirstChild()) {
+    if (!cursor.shouldTreatAsAtomicNode() && cursor.goToFirstChild()) {
       node.children = visitNode(cursor, code, args, blocks, contextVariables);
       if (
         (node.type === "block" || node.type === "expression_statement") &&
@@ -192,7 +170,7 @@ export function visitNode(
         node = node.children[0];
         node.fieldName = fieldName;
       }
-      cursor.gotoParent();
+      cursor.goToParent();
     } else {
       node.text = cursor.nodeText;
       if (node.text.startsWith("__template_arg_")) {
@@ -212,23 +190,6 @@ export function visitNode(
       }
     }
     nodes.push(node);
-  } while (cursor.gotoNextSibling());
+  } while (cursor.goToNextSibling());
   return nodes;
-}
-
-/**
- * Converts an array fo PatterNodes to map that groups the patterns by their type.
- * @param patterns The array of patterns to group
- * @returns Pattern map (NodeType -> Array of PatternNodes of the respective type)
- */
-export function createPatternMap(patterns: PatternNode[]): PatternMap {
-  const patternMap: PatternMap = {};
-  for (const pattern of patterns) {
-    if (patternMap[pattern.type]) {
-      patternMap[pattern.type].push(pattern);
-    } else {
-      patternMap[pattern.type] = [pattern];
-    }
-  }
-  return patternMap;
 }
