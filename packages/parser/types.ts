@@ -5,7 +5,7 @@ export type { SyntaxNode };
 
 export interface AggPart {
   template: TemplateStringsArray;
-  params: (string | TemplateParam)[];
+  params: (string | TemplateArg)[];
 }
 
 export interface PatternNode {
@@ -26,7 +26,7 @@ export type PatternMap = Record<string, PatternNode[]>;
 
 export type ArgMap = Record<string, SyntaxNode>;
 
-export enum TemplateNodeKind {
+export enum TemplateParamKind {
   Arg,
   Block,
   ContextVariable,
@@ -41,13 +41,13 @@ export enum TemplatePrefix {
 }
 
 export interface TemplateArg {
-  kind: TemplateNodeKind.Arg;
+  kind: TemplateParamKind.Arg;
   name: string;
   types: string[];
 }
 
 export interface TemplateAgg {
-  kind: TemplateNodeKind.Agg;
+  kind: TemplateParamKind.Agg;
   name: string;
   allowedPatterns: AggPart[];
   cardinality: AggregationCardinality;
@@ -62,13 +62,13 @@ export enum AggregationCardinality {
 }
 
 export interface TemplateBlock {
-  kind: TemplateNodeKind.Block;
+  kind: TemplateParamKind.Block;
   context: Context;
   blockType: Target;
 }
 
 export interface TemplateContextVariable {
-  kind: TemplateNodeKind.ContextVariable;
+  kind: TemplateParamKind.ContextVariable;
   name: string;
 }
 

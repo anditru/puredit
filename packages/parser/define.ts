@@ -11,7 +11,7 @@ import {
   type TemplateBlock,
   type TemplateContextVariable,
   type AggPart,
-  TemplateNodeKind,
+  TemplateParamKind,
 } from "./types";
 import { Target } from "./treeSitterParser";
 
@@ -23,7 +23,7 @@ import { Target } from "./treeSitterParser";
  */
 export function arg(name: string, types: string[]): TemplateArg {
   return {
-    kind: TemplateNodeKind.Arg,
+    kind: TemplateParamKind.Arg,
     name,
     types,
   };
@@ -44,7 +44,7 @@ export function agg(
   context: Context = {}
 ): TemplateAgg {
   return {
-    kind: TemplateNodeKind.Agg,
+    kind: TemplateParamKind.Agg,
     name,
     allowedPatterns,
     cardinality,
@@ -60,7 +60,7 @@ export function agg(
  */
 export function block(context: Context = {}): TemplateBlock {
   return {
-    kind: TemplateNodeKind.Block,
+    kind: TemplateParamKind.Block,
     context,
     blockType: Target.TypeScript,
   };
@@ -73,7 +73,7 @@ export function block(context: Context = {}): TemplateBlock {
  */
 export function contextVariable(name: string): TemplateContextVariable {
   return {
-    kind: TemplateNodeKind.ContextVariable,
+    kind: TemplateParamKind.ContextVariable,
     name,
   };
 }

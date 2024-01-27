@@ -1,12 +1,12 @@
 import type { Target, TreeSitterParser } from "../treeSitterParser";
-import type { TemplateBlock } from "..";
 import { isTopNode } from "../common";
 import {
-  TemplateNodeKind,
+  TemplateParamKind,
   TemplatePrefix,
   type Context,
   type PatternNode,
   type TemplateArg,
+  type TemplateBlock,
   type TemplateContextVariable,
   type TemplateParam,
 } from "../types";
@@ -74,13 +74,13 @@ export class PatternTreeBuilder {
       if (isString(param)) {
         return;
       }
-      if (param.kind === TemplateNodeKind.Arg) {
+      if (param.kind === TemplateParamKind.Arg) {
         this.args.push(param);
       }
-      if (param.kind === TemplateNodeKind.Block) {
+      if (param.kind === TemplateParamKind.Block) {
         this.blocks.push(param);
       }
-      if (param.kind === TemplateNodeKind.ContextVariable) {
+      if (param.kind === TemplateParamKind.ContextVariable) {
         this.contextVariables.push(param);
       }
     });
@@ -91,14 +91,14 @@ export class PatternTreeBuilder {
       if (isString(param)) {
         return param;
       }
-      if (param.kind === TemplateNodeKind.Arg) {
+      if (param.kind === TemplateParamKind.Arg) {
         return TemplatePrefix.Arg + this.args.indexOf(param).toString();
       }
-      if (param.kind === TemplateNodeKind.Block) {
+      if (param.kind === TemplateParamKind.Block) {
         param.blockType = this.target!;
         return TemplatePrefix.Block + this.blocks.indexOf(param).toString();
       }
-      if (param.kind === TemplateNodeKind.ContextVariable) {
+      if (param.kind === TemplateParamKind.ContextVariable) {
         return (
           TemplatePrefix.ContextVariable +
           this.contextVariables.indexOf(param).toString()
@@ -117,7 +117,7 @@ export class PatternTreeBuilder {
           if (isString(param)) {
             return param;
           }
-          if (param.kind === TemplateNodeKind.Arg) {
+          if (param.kind === TemplateParamKind.Arg) {
             switch (param.types[0]) {
               case "string":
                 return '""';
@@ -129,7 +129,7 @@ export class PatternTreeBuilder {
                 return `__empty_${param.types[0]}`;
             }
           }
-          if (param.kind === TemplateNodeKind.Block) {
+          if (param.kind === TemplateParamKind.Block) {
             switch (param.blockType) {
               case "ts":
                 return "{\n  // instructions go here\n}";
@@ -137,7 +137,7 @@ export class PatternTreeBuilder {
                 return "pass # instructions go here";
             }
           }
-          if (param.kind === TemplateNodeKind.ContextVariable) {
+          if (param.kind === TemplateParamKind.ContextVariable) {
             return Object.prototype.hasOwnProperty.call(context, param.name)
               ? context[param.name]
               : param.name;
