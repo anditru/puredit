@@ -2,7 +2,8 @@ import type { Target, TreeSitterParser } from "../treeSitterParser";
 import type { TemplateBlock } from "..";
 import { isTopNode } from "../common";
 import {
-  TemplatePrefixes,
+  TemplateNodeKind,
+  TemplatePrefix,
   type Context,
   type PatternNode,
   type TemplateArg,
@@ -74,18 +75,18 @@ export class PatternTreeBuilder {
         if (isString(param)) {
           return param;
         }
-        if (param.kind === "arg") {
-          return TemplatePrefixes.Arg + (this.args.push(param) - 1).toString();
+        if (param.kind === TemplateNodeKind.Arg) {
+          return TemplatePrefix.Arg + (this.args.push(param) - 1).toString();
         }
-        if (param.kind === "block") {
+        if (param.kind === TemplateNodeKind.Block) {
           param.blockType = this.target!;
           return (
-            TemplatePrefixes.Block + (this.blocks.push(param) - 1).toString()
+            TemplatePrefix.Block + (this.blocks.push(param) - 1).toString()
           );
         }
-        if (param.kind === "contextVariable") {
+        if (param.kind === TemplateNodeKind.ContextVariable) {
           return (
-            TemplatePrefixes.ContextVariable +
+            TemplatePrefix.ContextVariable +
             (this.contextVariables.push(param) - 1).toString()
           );
         }
@@ -101,7 +102,7 @@ export class PatternTreeBuilder {
           if (isString(param)) {
             return param;
           }
-          if (param.kind === "arg") {
+          if (param.kind === TemplateNodeKind.Arg) {
             switch (param.types[0]) {
               case "string":
                 return '""';
@@ -113,7 +114,7 @@ export class PatternTreeBuilder {
                 return `__empty_${param.types[0]}`;
             }
           }
-          if (param.kind === "block") {
+          if (param.kind === TemplateNodeKind.Block) {
             switch (param.blockType) {
               case "ts":
                 return "{\n  // instructions go here\n}";
@@ -121,7 +122,7 @@ export class PatternTreeBuilder {
                 return "pass # instructions go here";
             }
           }
-          if (param.kind === "contextVariable") {
+          if (param.kind === TemplateNodeKind.ContextVariable) {
             return Object.prototype.hasOwnProperty.call(context, param.name)
               ? context[param.name]
               : param.name;

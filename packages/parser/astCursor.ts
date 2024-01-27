@@ -1,5 +1,5 @@
 import type { TreeCursor } from "web-tree-sitter";
-import { TemplatePrefixes } from "./types";
+import { TemplatePrefix } from "./types";
 
 export class AstCursor {
   constructor(private treeCursor: TreeCursor) {}
@@ -57,21 +57,19 @@ export class AstCursor {
   }
 
   isArgNode(): boolean {
-    return this.treeCursor.nodeText.startsWith(TemplatePrefixes.Arg);
+    return this.treeCursor.nodeText.startsWith(TemplatePrefix.Arg);
   }
 
   isBlockNode(): boolean {
-    return this.treeCursor.nodeText.startsWith(TemplatePrefixes.Block);
+    return this.treeCursor.nodeText.startsWith(TemplatePrefix.Block);
   }
 
   isContextVariableNode(): boolean {
-    return this.treeCursor.nodeText.startsWith(
-      TemplatePrefixes.ContextVariable
-    );
+    return this.treeCursor.nodeText.startsWith(TemplatePrefix.ContextVariable);
   }
 
   isAggNode(): boolean {
-    return this.treeCursor.nodeText.startsWith(TemplatePrefixes.Agg);
+    return this.treeCursor.nodeText.startsWith(TemplatePrefix.Agg);
   }
 
   hasChildren(): boolean {

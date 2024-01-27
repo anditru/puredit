@@ -26,7 +26,14 @@ export type PatternMap = Record<string, PatternNode[]>;
 
 export type ArgMap = Record<string, SyntaxNode>;
 
-export enum TemplatePrefixes {
+export enum TemplateNodeKind {
+  Arg,
+  Block,
+  ContextVariable,
+  Agg,
+}
+
+export enum TemplatePrefix {
   Arg = "__template_arg_",
   Block = "__template_block_",
   ContextVariable = "__template_context_variable_",
@@ -34,13 +41,13 @@ export enum TemplatePrefixes {
 }
 
 export interface TemplateArg {
-  kind: "arg";
+  kind: TemplateNodeKind.Arg;
   name: string;
   types: string[];
 }
 
 export interface TemplateAgg {
-  kind: "agg";
+  kind: TemplateNodeKind.Agg;
   name: string;
   allowedPatterns: AggPart[];
   cardinality: AggregationCardinality;
@@ -55,13 +62,13 @@ export enum AggregationCardinality {
 }
 
 export interface TemplateBlock {
-  kind: "block";
+  kind: TemplateNodeKind.Block;
   context: Context;
   blockType: Target;
 }
 
 export interface TemplateContextVariable {
-  kind: "contextVariable";
+  kind: TemplateNodeKind.ContextVariable;
   name: string;
 }
 

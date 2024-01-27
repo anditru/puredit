@@ -1,6 +1,6 @@
 import { isErrorToken } from "../common";
 import {
-  TemplatePrefixes,
+  TemplatePrefix,
   type PatternNode,
   type TemplateArg,
   type TemplateBlock,
@@ -81,7 +81,7 @@ export class NodeTransformVisitor {
     const patternNode = this.getInitialPatternNode(cursor);
 
     patternNode.text = cursor.nodeText;
-    const index = parseInt(patternNode.text.slice(TemplatePrefixes.Arg.length));
+    const index = parseInt(patternNode.text.slice(TemplatePrefix.Arg.length));
     patternNode.arg = this.args[index];
     patternNode.type = "TemplateArg";
 
@@ -92,9 +92,7 @@ export class NodeTransformVisitor {
     const patternNode = this.getInitialPatternNode(cursor);
 
     patternNode.text = cursor.nodeText;
-    const index = parseInt(
-      patternNode.text.slice(TemplatePrefixes.Block.length)
-    );
+    const index = parseInt(patternNode.text.slice(TemplatePrefix.Block.length));
     patternNode.block = this.blocks[index];
     patternNode.type = "TemplateBlock";
 
@@ -106,7 +104,7 @@ export class NodeTransformVisitor {
 
     patternNode.text = cursor.nodeText;
     const index = parseInt(
-      patternNode.text.slice(TemplatePrefixes.ContextVariable.length)
+      patternNode.text.slice(TemplatePrefix.ContextVariable.length)
     );
     patternNode.contextVariable = this.contextVariables[index];
     patternNode.type = "TemplateContextVariable";

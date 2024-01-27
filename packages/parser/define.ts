@@ -3,14 +3,15 @@
  * Implements functions to define patterns with active nodes.
  */
 
-import type {
-  Context,
-  TemplateArg,
-  TemplateAgg,
-  AggregationCardinality,
-  TemplateBlock,
-  TemplateContextVariable,
-  AggPart,
+import {
+  type Context,
+  type TemplateArg,
+  type TemplateAgg,
+  type AggregationCardinality,
+  type TemplateBlock,
+  type TemplateContextVariable,
+  type AggPart,
+  TemplateNodeKind,
 } from "./types";
 import { Target } from "./treeSitterParser";
 
@@ -22,7 +23,7 @@ import { Target } from "./treeSitterParser";
  */
 export function arg(name: string, types: string[]): TemplateArg {
   return {
-    kind: "arg",
+    kind: TemplateNodeKind.Arg,
     name,
     types,
   };
@@ -43,7 +44,7 @@ export function agg(
   context: Context = {}
 ): TemplateAgg {
   return {
-    kind: "agg",
+    kind: TemplateNodeKind.Agg,
     name,
     allowedPatterns,
     cardinality,
@@ -59,7 +60,7 @@ export function agg(
  */
 export function block(context: Context = {}): TemplateBlock {
   return {
-    kind: "block",
+    kind: TemplateNodeKind.Block,
     context,
     blockType: Target.TypeScript,
   };
@@ -72,7 +73,7 @@ export function block(context: Context = {}): TemplateBlock {
  */
 export function contextVariable(name: string): TemplateContextVariable {
   return {
-    kind: "contextVariable",
+    kind: TemplateNodeKind.ContextVariable,
     name,
   };
 }
