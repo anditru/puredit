@@ -44,6 +44,7 @@ export class PatternTreeBuilder {
   }
 
   build(): PatternNode {
+    this.categorizeParams();
     const raw = this.buildRawString();
     const draft = this.getDraftFunction();
 
@@ -68,30 +69,44 @@ export class PatternTreeBuilder {
     };
   }
 
-  buildRawString(): string {
-    return String.raw(
-      this.template!,
-      ...this.params!.map((param) => {
-        if (isString(param)) {
-          return param;
-        }
-        if (param.kind === TemplateNodeKind.Arg) {
-          return TemplatePrefix.Arg + (this.args.push(param) - 1).toString();
-        }
-        if (param.kind === TemplateNodeKind.Block) {
-          param.blockType = this.target!;
-          return (
-            TemplatePrefix.Block + (this.blocks.push(param) - 1).toString()
-          );
-        }
-        if (param.kind === TemplateNodeKind.ContextVariable) {
-          return (
-            TemplatePrefix.ContextVariable +
-            (this.contextVariables.push(param) - 1).toString()
-          );
-        }
-      })
-    );
+  categorizeParams(): void {
+    this.params?.forEach((param) => {
+      if (isString(param)) {
+        return;
+      }
+      if (param.kind === TemplateNodeKind.Arg) {
+        this.args.push(param);
+      }
+      if (param.kind === TemplateNodeKind.Block) {
+        this.blocks.push(param);
+      }
+      if (param.kind === TemplateNodeKind.ContextVariable) {
+        this.contextVariables.push(param);
+      }
+    });
+  }
+
+  buildRawString() {
+    const substitutions = this.params!.map((param) => {
+      if (isString(param)) {
+        return param;
+      }
+      if (param.kind === TemplateNodeKind.Arg) {
+        return TemplatePrefix.Arg + this.args.indexOf(param).toString();
+      }
+      if (param.kind === TemplateNodeKind.Block) {
+        param.blockType = this.target!;
+        return TemplatePrefix.Block + this.blocks.indexOf(param).toString();
+      }
+      if (param.kind === TemplateNodeKind.ContextVariable) {
+        return (
+          TemplatePrefix.ContextVariable +
+          this.contextVariables.indexOf(param).toString()
+        );
+      }
+    });
+
+    return String.raw(this.template!, ...substitutions);
   }
 
   getDraftFunction() {
