@@ -1,5 +1,8 @@
 import type { TreeCursor } from "web-tree-sitter";
-import { TemplatePrefix } from "./types";
+import TemplateAggregation from "./define/templateAggregation";
+import TemplateBlock from "./define/templateBlock";
+import TemplateContextVariable from "./define/templateContextVariable";
+import TemplateArgument from "./define/templateArgument";
 
 export class AstCursor {
   constructor(private treeCursor: TreeCursor) {}
@@ -56,20 +59,28 @@ export class AstCursor {
     return !this.treeCursor.nodeIsNamed;
   }
 
-  isArgNode(): boolean {
-    return this.treeCursor.nodeText.startsWith(TemplatePrefix.Arg);
+  isTemplateParameterNode(): boolean {
+    const nodeText = this.treeCursor.nodeText;
+    const TemplateParameterTypes = [
+      TemplateArgument,
+      TemplateAggregation,
+      TemplateBlock,
+      TemplateContextVariable,
+    ];
+    for (const TemplateParameterType of TemplateParameterTypes) {
+      if (nodeText.startsWith(TemplateParameterType.CODE_STRING_PREFIX)) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  isBlockNode(): boolean {
-    return this.treeCursor.nodeText.startsWith(TemplatePrefix.Block);
-  }
-
-  isContextVariableNode(): boolean {
-    return this.treeCursor.nodeText.startsWith(TemplatePrefix.ContextVariable);
-  }
-
-  isAggNode(): boolean {
-    return this.treeCursor.nodeText.startsWith(TemplatePrefix.Agg);
+  getTemplateParameterId(): number {
+    if (!this.isTemplateParameterNode()) {
+      new Error("Current node is no TemplateParameterNode");
+    }
+    const nodeText = this.treeCursor.nodeText;
+    return parseInt(nodeText.split("_").pop()!);
   }
 
   hasChildren(): boolean {

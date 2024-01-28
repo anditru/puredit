@@ -1,7 +1,7 @@
 import Parser from "./parse/parser";
 
 export { Parser };
-export { arg, agg, block, contextVariable } from "./define";
+export { arg, agg, block, contextVariable } from "./define/definitionFunctions";
 export { PatternMatching } from "./match/patternMatching";
 export { Target } from "./treeSitterParser";
 export { createPatternMap } from "./common";
@@ -10,12 +10,7 @@ export type {
   PatternNode,
   PatternMap,
   ArgMap,
-  TemplateArg,
-  TemplateAgg,
-  TemplateBlock,
-  TemplateParam,
   Match,
   Context,
 } from "./types";
-
-export { AggregationCardinality } from "./types";
+export { AggregationCardinality } from "./define/templateAggregation";

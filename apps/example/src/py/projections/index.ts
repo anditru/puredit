@@ -2,7 +2,7 @@ import type { ProjectionPluginConfig } from "@puredit/projections";
 import { pythonParser } from "./parser";
 import { evaluateMathProjection } from "./evaluateMathProjection";
 import { compileMathProjection } from "./compileMathProjection";
-import { selectProjection } from "./selectProjection";
+//import { selectProjection } from "./selectProjection";
 import { globalContextValues, globalContextVariables } from "./context";
 
 export const projectionPluginConfig: ProjectionPluginConfig = {
@@ -10,7 +10,7 @@ export const projectionPluginConfig: ProjectionPluginConfig = {
   projections: [
     evaluateMathProjection,
     compileMathProjection,
-    selectProjection,
+    //selectProjection,
   ],
   globalContextVariables,
   globalContextValues,

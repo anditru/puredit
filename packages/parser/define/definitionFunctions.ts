@@ -1,19 +1,17 @@
 /**
  * @module define
- * Implements functions to define patterns with active nodes.
+ * Implements functions to define template parameters.
  */
 
-import {
-  type Context,
-  type TemplateArg,
-  type TemplateAgg,
-  type AggregationCardinality,
-  type TemplateBlock,
-  type TemplateContextVariable,
-  type AggPart,
-  TemplateParamKind,
-} from "./types";
-import { Target } from "./treeSitterParser";
+import TemplateAggregation, {
+  AggregationCardinality,
+  AggregationPart,
+} from "./templateAggregation";
+import TemplateArgument from "./templateArgument";
+import TemplateBlock from "./templateBlock";
+import TemplateContextVariable from "./templateContextVariable";
+import { Target } from "../treeSitterParser";
+import { Context } from "../types";
 
 /**
  * Defines an Argument active node
@@ -21,12 +19,8 @@ import { Target } from "./treeSitterParser";
  * @param type Type of the Argument
  * @returns Object representing the Argument
  */
-export function arg(name: string, types: string[]): TemplateArg {
-  return {
-    kind: TemplateParamKind.Arg,
-    name,
-    types,
-  };
+export function arg(name: string, types: string[]): TemplateArgument {
+  return new TemplateArgument(name, types);
 }
 
 /**
@@ -38,19 +32,18 @@ export function arg(name: string, types: string[]): TemplateArg {
  */
 export function agg(
   name: string,
-  allowedPatterns: AggPart[],
+  allowedPatterns: AggregationPart[],
   cardinality: AggregationCardinality,
   separatorToken?: string,
   context: Context = {}
-): TemplateAgg {
-  return {
-    kind: TemplateParamKind.Agg,
+): TemplateAggregation {
+  return new TemplateAggregation(
     name,
     allowedPatterns,
     cardinality,
-    separatorToken,
     context,
-  };
+    separatorToken
+  );
 }
 
 /**
@@ -59,11 +52,7 @@ export function agg(
  * @returns Object representing the Block
  */
 export function block(context: Context = {}): TemplateBlock {
-  return {
-    kind: TemplateParamKind.Block,
-    context,
-    blockType: Target.TypeScript,
-  };
+  return new TemplateBlock(context, Target.TypeScript);
 }
 
 /**
@@ -72,8 +61,5 @@ export function block(context: Context = {}): TemplateBlock {
  * @returns Object representing the Context Variable
  */
 export function contextVariable(name: string): TemplateContextVariable {
-  return {
-    kind: TemplateParamKind.ContextVariable,
-    name,
-  };
+  return new TemplateContextVariable(name);
 }

@@ -1,19 +1,11 @@
 import { isErrorToken } from "../common";
-import {
-  TemplatePrefix,
-  type PatternNode,
-  type TemplateArg,
-  type TemplateBlock,
-  type TemplateContextVariable,
-} from "../types";
+import type { PatternNode } from "../types";
 import { AstCursor } from "../astCursor";
+import TemplateParameter from "../define/templateParameter";
+import { isString } from "@puredit/utils";
 
 export class NodeTransformVisitor {
-  constructor(
-    private readonly args: TemplateArg[],
-    private readonly blocks: TemplateBlock[],
-    private readonly contextVariables: TemplateContextVariable[]
-  ) {}
+  constructor(private readonly params: (string | TemplateParameter)[]) {}
 
   visit(cursor: AstCursor, code: string): PatternNode[] {
     const nodes = [];
@@ -66,50 +58,25 @@ export class NodeTransformVisitor {
   }
 
   private transformAtomicNode(cursor: AstCursor): PatternNode {
-    if (cursor.isArgNode()) {
-      return this.transformArgNode(cursor);
-    } else if (cursor.isBlockNode()) {
-      return this.transformBlockNode(cursor);
-    } else if (cursor.isContextVariableNode()) {
-      return this.transformContextVariableNode(cursor);
+    if (cursor.isTemplateParameterNode()) {
+      const parameterId = cursor.getTemplateParameterId();
+      const correspondingParameter = this.findTemplateParameterBy(parameterId);
+      return correspondingParameter.toPatternNode(cursor);
     } else {
       return this.transformRegularNode(cursor);
     }
   }
 
-  private transformArgNode(cursor: AstCursor) {
-    const patternNode = this.getInitialPatternNode(cursor);
-
-    patternNode.text = cursor.nodeText;
-    const index = parseInt(patternNode.text.slice(TemplatePrefix.Arg.length));
-    patternNode.arg = this.args[index];
-    patternNode.type = "TemplateArg";
-
-    return patternNode;
-  }
-
-  private transformBlockNode(cursor: AstCursor) {
-    const patternNode = this.getInitialPatternNode(cursor);
-
-    patternNode.text = cursor.nodeText;
-    const index = parseInt(patternNode.text.slice(TemplatePrefix.Block.length));
-    patternNode.block = this.blocks[index];
-    patternNode.type = "TemplateBlock";
-
-    return patternNode;
-  }
-
-  private transformContextVariableNode(cursor: AstCursor) {
-    const patternNode = this.getInitialPatternNode(cursor);
-
-    patternNode.text = cursor.nodeText;
-    const index = parseInt(
-      patternNode.text.slice(TemplatePrefix.ContextVariable.length)
-    );
-    patternNode.contextVariable = this.contextVariables[index];
-    patternNode.type = "TemplateContextVariable";
-
-    return patternNode;
+  private findTemplateParameterBy(id: number) {
+    for (const param of this.params) {
+      if (isString(param)) {
+        continue;
+      }
+      if (param.id === id) {
+        return param;
+      }
+    }
+    throw new Error(`No parameter with ID ${id} found`);
   }
 
   private transformRegularNode(cursor: AstCursor) {

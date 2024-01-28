@@ -1,20 +1,19 @@
 import type { SyntaxNode } from "web-tree-sitter";
 import type { Target } from "./treeSitterParser";
+import TemplateArgument from "./define/templateArgument";
+import TemplateAggregation from "./define/templateAggregation";
+import TemplateBlock from "./define/templateBlock";
+import TemplateContextVariable from "./define/templateContextVariable";
 
 export type { SyntaxNode };
-
-export interface AggPart {
-  template: TemplateStringsArray;
-  params: (string | TemplateArg)[];
-}
 
 export interface PatternNode {
   type: string;
   fieldName?: string;
   children?: PatternNode[];
   text?: string;
-  arg?: TemplateArg;
-  agg?: TemplateAgg;
+  arg?: TemplateArgument;
+  agg?: TemplateAggregation;
   block?: TemplateBlock;
   contextVariable?: TemplateContextVariable;
   draft?: PatternDraft;
@@ -25,58 +24,6 @@ type PatternDraft = (context: Context) => string;
 export type PatternMap = Record<string, PatternNode[]>;
 
 export type ArgMap = Record<string, SyntaxNode>;
-
-export enum TemplateParamKind {
-  Arg,
-  Block,
-  ContextVariable,
-  Agg,
-}
-
-export enum TemplatePrefix {
-  Arg = "__template_arg_",
-  Block = "__template_block_",
-  ContextVariable = "__template_context_variable_",
-  Agg = "__template_agg_",
-}
-
-export interface TemplateArg {
-  kind: TemplateParamKind.Arg;
-  name: string;
-  types: string[];
-}
-
-export interface TemplateAgg {
-  kind: TemplateParamKind.Agg;
-  name: string;
-  allowedPatterns: AggPart[];
-  cardinality: AggregationCardinality;
-  separatorToken?: string;
-  context: Context;
-}
-
-export enum AggregationCardinality {
-  ZeroToOne = "0..1",
-  ZeroToMany = "0..n",
-  OneToMany = "1..n",
-}
-
-export interface TemplateBlock {
-  kind: TemplateParamKind.Block;
-  context: Context;
-  blockType: Target;
-}
-
-export interface TemplateContextVariable {
-  kind: TemplateParamKind.ContextVariable;
-  name: string;
-}
-
-export type TemplateParam =
-  | TemplateArg
-  | TemplateAgg
-  | TemplateBlock
-  | TemplateContextVariable;
 
 export interface Match {
   pattern: PatternNode;
