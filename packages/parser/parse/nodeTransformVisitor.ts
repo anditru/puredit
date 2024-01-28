@@ -1,6 +1,6 @@
 import { isErrorToken } from "../common";
 import type { PatternNode } from "../types";
-import { AstCursor } from "../astCursor";
+import AstCursor from "../ast/cursor";
 import TemplateParameter from "../define/templateParameter";
 import { isString } from "@puredit/utils";
 
@@ -10,17 +10,20 @@ export class NodeTransformVisitor {
   visit(cursor: AstCursor, code: string): PatternNode[] {
     const nodes = [];
     do {
-      if (isErrorToken(cursor.nodeType)) {
+      if (isErrorToken(cursor.currentNode.type)) {
         throw new Error(
-          `error in pattern ast at position ${cursor.startIndex}: ${cursor.nodeText}`
+          `error in pattern ast at position ${cursor.startIndex}: ${cursor.currentNode.text}`
         );
       }
       // Skip keywords
-      if (cursor.isKeyword()) {
+      if (cursor.currentNode.isKeyword()) {
         continue;
       }
 
-      if (!cursor.shouldTreatAsAtomicNode() && cursor.hasChildren()) {
+      if (
+        !cursor.currentNode.shouldTreatAsAtomicNode() &&
+        cursor.currentNode.hasChildren()
+      ) {
         const node = this.transformNonAtomicNode(cursor, code);
         cursor.goToParent();
         nodes.push(node);
@@ -52,14 +55,14 @@ export class NodeTransformVisitor {
 
   private getInitialPatternNode(cursor: AstCursor): PatternNode {
     return {
-      type: cursor.nodeType,
+      type: cursor.currentNode.type,
       fieldName: cursor.currentFieldName || undefined,
     };
   }
 
   private transformAtomicNode(cursor: AstCursor): PatternNode {
-    if (cursor.isTemplateParameterNode()) {
-      const parameterId = cursor.getTemplateParameterId();
+    if (cursor.currentNode.isTemplateParameterNode()) {
+      const parameterId = cursor.currentNode.getTemplateParameterId();
       const correspondingParameter = this.findTemplateParameterBy(parameterId);
       return correspondingParameter.toPatternNode(cursor);
     } else {
@@ -81,7 +84,7 @@ export class NodeTransformVisitor {
 
   private transformRegularNode(cursor: AstCursor) {
     const patternNode = this.getInitialPatternNode(cursor);
-    patternNode.text = cursor.nodeText;
+    patternNode.text = cursor.currentNode.text;
     return patternNode;
   }
 }

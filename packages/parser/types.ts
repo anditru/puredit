@@ -1,11 +1,9 @@
-import type { SyntaxNode } from "web-tree-sitter";
 import type { Target } from "./treeSitterParser";
 import TemplateArgument from "./define/templateArgument";
 import TemplateAggregation from "./define/templateAggregation";
 import TemplateBlock from "./define/templateBlock";
 import TemplateContextVariable from "./define/templateContextVariable";
-
-export type { SyntaxNode };
+import AstNode from "./ast/node";
 
 export interface PatternNode {
   type: string;
@@ -23,11 +21,11 @@ type PatternDraft = (context: Context) => string;
 
 export type PatternMap = Record<string, PatternNode[]>;
 
-export type ArgMap = Record<string, SyntaxNode>;
+export type ArgMap = Record<string, AstNode>;
 
 export interface Match {
   pattern: PatternNode;
-  node: SyntaxNode;
+  node: AstNode;
   args: ArgMap;
   blocks: CodeBlock[];
 }
@@ -41,7 +39,7 @@ export interface ContextRange {
 }
 
 export interface CodeBlock {
-  node: SyntaxNode;
+  node: AstNode;
   context: Context;
   from: number;
   to: number;

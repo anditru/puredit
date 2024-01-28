@@ -7,6 +7,7 @@
   } from "@puredit/parser";
   import { matchToString, syntaxNodeToString } from "@puredit/parser/inspect";
   import { parser } from "./parser";
+  import AstNode from "@puredit/parser/ast/node";
 
   let snippet = `
   db.change("students", (table) => {
@@ -41,7 +42,7 @@
     .join("\n");
 </script>
 
-<pre>{syntaxNodeToString(snippetNode, snippet)}</pre>
+<pre>{syntaxNodeToString(new AstNode(snippetNode), snippet)}</pre>
 <pre>{matchStrings}</pre>
 
 <style>

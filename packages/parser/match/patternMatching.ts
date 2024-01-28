@@ -8,7 +8,7 @@ import type {
 } from "../types";
 import type { Context } from "..";
 import { CandidateMatch } from "./candidateMatch";
-import { AstCursor } from "../astCursor";
+import AstCursor from "../ast/cursor";
 
 export class PatternMatching {
   private matches: Match[] = [];
@@ -44,7 +44,7 @@ export class PatternMatching {
   }
 
   private candidatePatternsExistForCurrentNode(): boolean {
-    return !!this.patternMap[this.cursor.nodeType];
+    return !!this.patternMap[this.cursor.currentNode.type];
   }
 
   private findFirstMatchingCandidateForCurrentNode():
@@ -55,7 +55,7 @@ export class PatternMatching {
     for (const candidatePattern of candidatePatterns) {
       const candidateMatch = new CandidateMatch(
         candidatePattern,
-        new AstCursor(this.cursor.currentNode.walk()),
+        this.cursor.currentNode.walk(),
         this.context
       );
       candidateMatch.verify();
@@ -73,7 +73,7 @@ export class PatternMatching {
   }
 
   private getCandidatePatternsForCurrentNode(): PatternNode[] {
-    return this.patternMap[this.cursor.nodeType];
+    return this.patternMap[this.cursor.currentNode.type];
   }
 
   private findMatchesInBlocksOf(candidateMatch: CandidateMatch): void {

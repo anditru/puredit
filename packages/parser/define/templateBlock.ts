@@ -1,4 +1,4 @@
-import { AstCursor } from "../astCursor";
+import AstCursor from "../ast/cursor";
 import { Target } from "../treeSitterParser";
 import { Context, PatternNode } from "../types";
 import TemplateParameter from "./templateParameter";
@@ -22,7 +22,7 @@ export default class TemplateBlock extends TemplateParameter {
 
   toPatternNode(cursor: AstCursor): PatternNode {
     const patternNode = this.getInitialPatternNode(cursor);
-    patternNode.text = cursor.nodeText;
+    patternNode.text = cursor.currentNode.text;
     patternNode.block = this;
     patternNode.type = "TemplateBlock";
     return patternNode;

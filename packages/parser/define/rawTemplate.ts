@@ -1,6 +1,6 @@
 import { isString } from "@puredit/utils";
-import TemplateParameter from "./define/templateParameter";
-import TemplateAggregation from "./define/templateAggregation";
+import TemplateParameter from "./templateParameter";
+import TemplateAggregation from "./templateAggregation";
 
 export default class RawTemplate {
   constructor(

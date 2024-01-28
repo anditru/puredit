@@ -1,4 +1,4 @@
-import { AstCursor } from "../astCursor";
+import AstCursor from "../ast/cursor";
 import { PatternNode } from "../types";
 
 export default abstract class TemplateParameter {
@@ -15,7 +15,7 @@ export default abstract class TemplateParameter {
 
   protected getInitialPatternNode(cursor: AstCursor): PatternNode {
     return {
-      type: cursor.nodeType,
+      type: cursor.currentNode.type,
       fieldName: cursor.currentFieldName || undefined,
     };
   }

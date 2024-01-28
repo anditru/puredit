@@ -11,7 +11,7 @@ import TemplateBlock from "./templateBlock";
 import TemplateContextVariable from "./templateContextVariable";
 import { Target } from "../treeSitterParser";
 import { Context } from "../types";
-import RawTemplate from "../rawTemplate";
+import RawTemplate from "./rawTemplate";
 
 /**
  * Defines an Argument active node

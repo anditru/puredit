@@ -1,6 +1,6 @@
 import TemplateArgument from "../define/templateArgument";
 import TemplateParameter from "../define/templateParameter";
-import RawTemplate from "../rawTemplate";
+import RawTemplate from "../define/rawTemplate";
 import type { TreeSitterParser } from "../treeSitterParser";
 import { createTreeSitterParser, Target } from "../treeSitterParser";
 import type { PatternNode } from "../types";

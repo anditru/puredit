@@ -1,8 +1,16 @@
-import type { AstCursor, Keyword } from "../astCursor";
+import AstCursor, { Keyword } from "../ast/cursor";
 import { isErrorToken } from "../common";
 import type { ArgMap, CodeBlock, PatternNode } from "../types";
 import type { Context } from "..";
 
+/**
+ * @class CandidateMatch
+ * A CandidateMatch represents the combination of a pattern and a certain
+ * prosition in the AST in which the pattern matches the AST. The position
+ * in the AST is here represented by an AstCursor that points to the node
+ * of the AST that serves as starting point from which the nodes of the
+ * pattern are matched against those of the AST.
+ */
 export class CandidateMatch {
   private _matched: boolean | null = null;
   private _args: ArgMap = {};
@@ -15,21 +23,17 @@ export class CandidateMatch {
     private lastSiblingKeyword?: Keyword
   ) {}
 
+  /**
+   * Checks if the pattern of this CandidateMatch actually matches the
+   * AST at the position of the cursor by recursively creating new
+   * CandateMatches for the child nodes in a depth-first manner.
+   */
   public verify(): void {
-    if (isErrorToken(this.cursor.nodeType)) {
+    if (isErrorToken(this.cursor.currentNode.type)) {
       this._matched = false;
       return;
     }
 
-    // The Python tree-sitter parser wrongly puts leading comments between
-    // a with-clause and its body.
-    // To still be able to match patterns that expect a body right after
-    // the with-clause, we simply skip the comments.
-    // The same applies to function definitions, where a comment on the
-    // first line of the function body is put between the parameters
-    // and the body.
-    // This fix applies to both cases.
-    // Also see https://github.com/tree-sitter/tree-sitter-python/issues/112.
     this.skipLeadingCommentsInBodies();
 
     if (!this.fieldNamesMatch()) {
@@ -52,13 +56,13 @@ export class CandidateMatch {
       return;
     }
 
-    if (this.cursor.cleanNodeType !== this.pattern.type) {
+    if (this.cursor.currentNode.cleanNodeType !== this.pattern.type) {
       this._matched = false;
       return;
     }
 
     if (this.pattern.text) {
-      this._matched = this.pattern.text === this.cursor.nodeText;
+      this._matched = this.pattern.text === this.cursor.currentNode.text;
       return;
     }
 
@@ -77,10 +81,21 @@ export class CandidateMatch {
     this._matched = true;
   }
 
+  /**
+   * The Python tree-sitter parser wrongly puts leading comments between
+   * a with-clause and its body.
+   * To still be able to match patterns that expect a body right after
+   * the with-clause, we simply skip the comments.
+   * The same applies to function definitions, where a comment on the
+   * first line of the function body is put between the parameters
+   * and the body.
+   * This fix applies to both cases.
+   * Also see https://github.com/tree-sitter/tree-sitter-python/issues/112.
+   */
   private skipLeadingCommentsInBodies(): void {
     while (
       this.pattern.fieldName === "body" &&
-      this.cursor.cleanNodeType === "comment"
+      this.cursor.currentNode.cleanNodeType === "comment"
     ) {
       this.cursor.goToNextSibling();
     }
@@ -93,7 +108,9 @@ export class CandidateMatch {
 
   private verifyArgumentNodeMatches(): void {
     this._args[this.pattern.arg!.name] = this.cursor.currentNode;
-    this._matched = this.pattern.arg!.types.includes(this.cursor.cleanNodeType);
+    this._matched = this.pattern.arg!.types.includes(
+      this.cursor.currentNode.cleanNodeType
+    );
   }
 
   private verifyBlockNodeMatches(): void {
@@ -115,10 +132,11 @@ export class CandidateMatch {
     });
     switch (this.pattern.block!.blockType) {
       case "ts":
-        this._matched = this.cursor.cleanNodeType === "statement_block";
+        this._matched =
+          this.cursor.currentNode.cleanNodeType === "statement_block";
         return;
       case "py":
-        this._matched = this.cursor.cleanNodeType === "block";
+        this._matched = this.cursor.currentNode.cleanNodeType === "block";
         return;
     }
   }
@@ -132,8 +150,9 @@ export class CandidateMatch {
 
   private verifyContextVariableNodeMatches(): void {
     this._matched =
-      this.cursor.cleanNodeType === "identifier" &&
-      this.cursor.nodeText === this.context[this.pattern.contextVariable!.name];
+      this.cursor.currentNode.cleanNodeType === "identifier" &&
+      this.cursor.currentNode.text ===
+        this.context[this.pattern.contextVariable!.name];
   }
 
   private childrenMatch(): boolean {

@@ -4,10 +4,9 @@
  * string representation
  */
 
-import type { SyntaxNode } from "web-tree-sitter";
 import { NodeTransformVisitor } from "./parse/nodeTransformVisitor";
 import type { ArgMap, Match, PatternNode } from "./types";
-import { AstCursor } from "./astCursor";
+import AstNode from "./ast/node";
 
 export function patternToString(node: PatternNode, indent = ""): string {
   let out = indent + (node.fieldName ? node.fieldName + ": " : "") + node.type;
@@ -26,13 +25,13 @@ export function patternToString(node: PatternNode, indent = ""): string {
 }
 
 export function syntaxNodeToString(
-  node: SyntaxNode,
+  node: AstNode,
   text: string,
   indent = ""
 ): string {
-  const nodeTransformVisitor = new NodeTransformVisitor([], [], []);
+  const nodeTransformVisitor = new NodeTransformVisitor([]);
   return patternToString(
-    nodeTransformVisitor.visit(new AstCursor(node.walk()), text)[0],
+    nodeTransformVisitor.visit(node.walk(), text)[0],
     indent
   );
 }

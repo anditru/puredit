@@ -1,5 +1,5 @@
-import { AstCursor } from "../astCursor";
-import RawTemplate from "../rawTemplate";
+import AstCursor from "../ast/cursor";
+import RawTemplate from "./rawTemplate";
 import { Context, PatternNode } from "../types";
 import TemplateParameter from "./templateParameter";
 
@@ -23,7 +23,7 @@ export default class TemplateAggregation extends TemplateParameter {
     return TemplateAggregation.CODE_STRING_PREFIX + this._id.toString();
   }
 
-  toCodeStringsExpandingParts(): string[] {
+  getCodeStringsForParts(): string[] {
     return this.allowedPatterns.map((pattern: RawTemplate) =>
       pattern.toCodeString()
     );

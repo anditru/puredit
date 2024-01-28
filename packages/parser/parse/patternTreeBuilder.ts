@@ -1,9 +1,9 @@
 import type { TreeSitterParser } from "../treeSitterParser";
 import { isTopNode } from "../common";
 import { type Context, type PatternNode } from "../types";
-import { AstCursor } from "../astCursor";
+import AstCursor from "../ast/cursor";
 import { NodeTransformVisitor } from "./nodeTransformVisitor";
-import RawTemplate from "../rawTemplate";
+import RawTemplate from "../define/rawTemplate";
 
 export class PatternTreeBuilder {
   private rawTemplate: RawTemplate | undefined;
