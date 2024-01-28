@@ -1,6 +1,6 @@
-import { AggregationPart } from "../define/templateAggregation";
 import TemplateArgument from "../define/templateArgument";
 import TemplateParameter from "../define/templateParameter";
+import RawTemplate from "../rawTemplate";
 import type { TreeSitterParser } from "../treeSitterParser";
 import { createTreeSitterParser, Target } from "../treeSitterParser";
 import type { PatternNode } from "../types";
@@ -32,11 +32,8 @@ export default class Parser {
   aggPartPattern(
     template: TemplateStringsArray,
     ...params: (string | TemplateArgument)[]
-  ): AggregationPart {
-    return {
-      template,
-      params,
-    };
+  ): RawTemplate {
+    return new RawTemplate(template, params);
   }
 
   /**
@@ -49,9 +46,9 @@ export default class Parser {
     template: TemplateStringsArray,
     ...params: (string | TemplateParameter)[]
   ): PatternNode {
+    const rawTemplate = new RawTemplate(template, params);
     return this.patternNodeBuilder
-      .setTemplate(template)
-      .setParams(params)
+      .setRawTemplate(rawTemplate)
       .setIsExpression(false)
       .build();
   }
@@ -66,9 +63,9 @@ export default class Parser {
     template: TemplateStringsArray,
     ...params: (string | TemplateParameter)[]
   ): PatternNode {
+    const rawTemplate = new RawTemplate(template, params);
     return this.patternNodeBuilder
-      .setTemplate(template)
-      .setParams(params)
+      .setRawTemplate(rawTemplate)
       .setIsExpression(true)
       .build();
   }

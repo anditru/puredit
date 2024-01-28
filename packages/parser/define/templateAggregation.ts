@@ -1,17 +1,17 @@
 import { AstCursor } from "../astCursor";
+import RawTemplate from "../rawTemplate";
 import { Context, PatternNode } from "../types";
-import TemplateArgument from "./templateArgument";
 import TemplateParameter from "./templateParameter";
 
 export default class TemplateAggregation extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_agg_";
 
   constructor(
-    private readonly name: string,
-    private readonly allowedPatterns: AggregationPart[],
-    private readonly cardinality: AggregationCardinality,
-    private readonly context?: Context,
-    private readonly separatorToken?: string
+    public readonly name: string,
+    public readonly allowedPatterns: RawTemplate[],
+    public readonly cardinality: AggregationCardinality,
+    public readonly context?: Context,
+    public readonly separatorToken?: string
   ) {
     super();
   }
@@ -23,14 +23,15 @@ export default class TemplateAggregation extends TemplateParameter {
     return TemplateAggregation.CODE_STRING_PREFIX + this._id.toString();
   }
 
+  toCodeStringsExpandingParts(): string[] {
+    return this.allowedPatterns.map((pattern: RawTemplate) =>
+      pattern.toCodeString()
+    );
+  }
+
   toPatternNode(cursor: AstCursor): PatternNode {
     throw new Error("Method not implemented.");
   }
-}
-
-export interface AggregationPart {
-  template: TemplateStringsArray;
-  params: (string | TemplateArgument)[];
 }
 
 export enum AggregationCardinality {

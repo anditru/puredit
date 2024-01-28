@@ -20,6 +20,6 @@ export default abstract class TemplateParameter {
     };
   }
 
-  abstract toCodeString(id: number): string;
+  abstract toCodeString(): string;
   abstract toPatternNode(cursor: AstCursor): PatternNode;
 }

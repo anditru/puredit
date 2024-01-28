@@ -1,25 +1,19 @@
 import type { TreeSitterParser } from "../treeSitterParser";
 import { isTopNode } from "../common";
 import { type Context, type PatternNode } from "../types";
-import { isString } from "@puredit/utils";
 import { AstCursor } from "../astCursor";
 import { NodeTransformVisitor } from "./nodeTransformVisitor";
-import TemplateParameter from "../define/templateParameter";
+import RawTemplate from "../rawTemplate";
 
 export class PatternTreeBuilder {
-  private template: TemplateStringsArray | undefined;
-  private params: (string | TemplateParameter)[] | undefined;
+  private rawTemplate: RawTemplate | undefined;
   private isExpression: boolean | undefined;
+  private nodeTransformVisitor: NodeTransformVisitor | undefined;
 
   constructor(private readonly parser: TreeSitterParser | undefined) {}
 
-  setTemplate(template: TemplateStringsArray): PatternTreeBuilder {
-    this.template = template;
-    return this;
-  }
-
-  setParams(params: (string | TemplateParameter)[]): PatternTreeBuilder {
-    this.params = params;
+  setRawTemplate(rawTemplate: RawTemplate): PatternTreeBuilder {
+    this.rawTemplate = rawTemplate;
     return this;
   }
 
@@ -29,36 +23,40 @@ export class PatternTreeBuilder {
   }
 
   build(): PatternNode {
-    const codeString = this.buildCodeString();
+    this.nodeTransformVisitor = new NodeTransformVisitor(
+      this.rawTemplate!.params
+    );
+
+    let patternTree;
+    if (!this.rawTemplate!.hasAggregations()) {
+      const codeString = this.rawTemplate!.toCodeString();
+      patternTree = this.transformToPatternTree(codeString);
+    } else {
+      throw new Error("Not implemented");
+    }
+
     const draft = this.getDraftFunction();
 
+    return {
+      ...patternTree,
+      draft,
+    };
+  }
+
+  private transformToPatternTree(codeString: string): PatternNode {
     const cursor = new AstCursor(this.parser!.parse(codeString).walk());
     if (this.isExpression) {
       cursor.goToExpression();
     }
 
-    const nodeTransformVisitor = new NodeTransformVisitor(this.params!);
-    let rootPatternNode = nodeTransformVisitor.visit(cursor, codeString)[0];
-
+    const rootPatternNode = this.nodeTransformVisitor!.visit(
+      cursor,
+      codeString
+    )[0];
     if (isTopNode(rootPatternNode) && rootPatternNode.children) {
-      rootPatternNode = rootPatternNode.children[0];
+      return rootPatternNode.children[0];
     }
-    return {
-      ...rootPatternNode,
-      draft,
-    };
-  }
-
-  buildCodeString() {
-    const substitutions = this.params!.map((param, index) => {
-      if (isString(param)) {
-        return param;
-      } else {
-        return param.toCodeString(index);
-      }
-    });
-
-    return String.raw(this.template!, ...substitutions);
+    return rootPatternNode;
   }
 
   getDraftFunction() {

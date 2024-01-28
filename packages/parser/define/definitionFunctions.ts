@@ -5,13 +5,13 @@
 
 import TemplateAggregation, {
   AggregationCardinality,
-  AggregationPart,
 } from "./templateAggregation";
 import TemplateArgument from "./templateArgument";
 import TemplateBlock from "./templateBlock";
 import TemplateContextVariable from "./templateContextVariable";
 import { Target } from "../treeSitterParser";
 import { Context } from "../types";
+import RawTemplate from "../rawTemplate";
 
 /**
  * Defines an Argument active node
@@ -32,7 +32,7 @@ export function arg(name: string, types: string[]): TemplateArgument {
  */
 export function agg(
   name: string,
-  allowedPatterns: AggregationPart[],
+  allowedPatterns: RawTemplate[],
   cardinality: AggregationCardinality,
   separatorToken?: string,
   context: Context = {}
