@@ -1,4 +1,3 @@
-import { isErrorToken } from "../common";
 import AstCursor from "../ast/cursor";
 import TemplateParameter from "../define/templateParameter";
 import { isString } from "@puredit/utils";
@@ -11,7 +10,7 @@ export class NodeTransformVisitor {
   visit(cursor: AstCursor, code: string): PatternNode[] {
     const nodes = [];
     do {
-      if (isErrorToken(cursor.currentNode.type)) {
+      if (cursor.currentNode.isErrorToken()) {
         throw new Error(
           `error in pattern ast at position ${cursor.startIndex}: ${cursor.currentNode.text}`
         );

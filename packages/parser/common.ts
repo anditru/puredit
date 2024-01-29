@@ -1,5 +1,4 @@
 import Pattern from "./pattern/pattern";
-import PatternNode from "./pattern/patternNode";
 import type { PatternMap } from "./types";
 
 /**
@@ -17,12 +16,4 @@ export function createPatternMap(patterns: Pattern[]): PatternMap {
     }
   }
   return patternMap;
-}
-
-export function isErrorToken(name: string): boolean {
-  return name === "ERROR";
-}
-
-export function isTopNode(node: PatternNode): boolean {
-  return node.type === "program" || node.type === "module";
 }

@@ -16,5 +16,9 @@ export default abstract class PatternNode {
     }
   }
 
+  isTopNode(): boolean {
+    return this.type === "program" || this.type === "module";
+  }
+
   abstract matches(astNode: AstNode): boolean;
 }

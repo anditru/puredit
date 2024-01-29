@@ -12,6 +12,10 @@ export default class AstNode {
     return !this.syntaxNode.isNamed();
   }
 
+  isErrorToken(): boolean {
+    return this.syntaxNode.type === "ERROR";
+  }
+
   isTemplateParameterNode(): boolean {
     const nodeText = this.syntaxNode.text;
     const TemplateParameterTypes = [

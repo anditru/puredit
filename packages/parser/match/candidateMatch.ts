@@ -1,5 +1,4 @@
 import AstCursor, { Keyword } from "../ast/cursor";
-import { isErrorToken } from "../common";
 import type { ArgMap, CodeBlock } from "../types";
 import type { Context } from "..";
 import PatternNode from "../pattern/patternNode";
@@ -33,7 +32,7 @@ export class CandidateMatch {
    * CandateMatches for the child nodes in a depth-first manner.
    */
   public verify(): void {
-    if (isErrorToken(this.cursor.currentNode.type)) {
+    if (this.cursor.currentNode.isErrorToken()) {
       this._matched = false;
       return;
     }

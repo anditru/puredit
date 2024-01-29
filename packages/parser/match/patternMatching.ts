@@ -13,20 +13,13 @@ import Pattern from "../pattern/pattern";
 export class PatternMatching {
   private matches: Match[] = [];
   private contextRanges: ContextRange[] = [];
-  private cursor: AstCursor;
 
   constructor(
     private patternMap: PatternMap,
-    cursor: AstCursor | TreeCursor,
+    private cursor: AstCursor,
     private context: Context = {},
     private to = Infinity
-  ) {
-    if (!(cursor instanceof AstCursor)) {
-      this.cursor = new AstCursor(cursor);
-    } else {
-      this.cursor = cursor;
-    }
-  }
+  ) {}
 
   execute(): PatternMatchingResult {
     do {

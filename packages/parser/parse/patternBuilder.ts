@@ -1,5 +1,4 @@
 import type { TreeSitterParser } from "../treeSitterParser";
-import { isTopNode } from "../common";
 import AstCursor from "../ast/cursor";
 import { NodeTransformVisitor } from "./nodeTransformVisitor";
 import RawTemplate from "../define/rawTemplate";
@@ -44,7 +43,7 @@ export class PatternBuilder {
       cursor,
       codeString
     )[0];
-    if (isTopNode(rootPatternNode) && rootPatternNode.children) {
+    if (rootPatternNode.isTopNode() && rootPatternNode.children) {
       return rootPatternNode.children[0];
     }
     return rootPatternNode;
