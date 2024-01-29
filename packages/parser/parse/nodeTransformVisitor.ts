@@ -1,8 +1,9 @@
 import { isErrorToken } from "../common";
-import type { PatternNode } from "../types";
 import AstCursor from "../ast/cursor";
 import TemplateParameter from "../define/templateParameter";
 import { isString } from "@puredit/utils";
+import PatternNode from "../pattern/patternNode";
+import RegularNode, { RegularNodeBuilder } from "../pattern/regularNode";
 
 export class NodeTransformVisitor {
   constructor(private readonly params: (string | TemplateParameter)[]) {}
@@ -15,7 +16,7 @@ export class NodeTransformVisitor {
           `error in pattern ast at position ${cursor.startIndex}: ${cursor.currentNode.text}`
         );
       }
-      // Skip keywords
+
       if (cursor.currentNode.isKeyword()) {
         continue;
       }
@@ -36,28 +37,25 @@ export class NodeTransformVisitor {
   }
 
   private transformNonAtomicNode(cursor: AstCursor, code: string): PatternNode {
-    let patternNode = this.getInitialPatternNode(cursor);
+    const patternNodeBuilder = new RegularNodeBuilder();
+    patternNodeBuilder
+      .setType(cursor.currentNode.type)
+      .setFieldName(cursor.currentFieldName);
+
     cursor.goToFirstChild();
-    patternNode.children = this.visit(cursor, code);
+    patternNodeBuilder.setChildren(this.visit(cursor, code));
 
     if (
-      (patternNode.type === "block" ||
-        patternNode.type === "expression_statement") &&
-      patternNode.children[0].type === "TemplateBlock"
+      ["block", "expression_statement"].includes(patternNodeBuilder.type!) &&
+      patternNodeBuilder.children[0].type === "TemplateBlock"
     ) {
-      const fieldName = patternNode.fieldName;
-      patternNode = patternNode.children[0];
-      patternNode.fieldName = fieldName;
+      const firstChild = patternNodeBuilder.children[0];
+      patternNodeBuilder
+        .setType(firstChild.type)
+        .setChildren(firstChild.children);
     }
 
-    return patternNode;
-  }
-
-  private getInitialPatternNode(cursor: AstCursor): PatternNode {
-    return {
-      type: cursor.currentNode.type,
-      fieldName: cursor.currentFieldName || undefined,
-    };
+    return patternNodeBuilder.build();
   }
 
   private transformAtomicNode(cursor: AstCursor): PatternNode {
@@ -83,8 +81,10 @@ export class NodeTransformVisitor {
   }
 
   private transformRegularNode(cursor: AstCursor) {
-    const patternNode = this.getInitialPatternNode(cursor);
-    patternNode.text = cursor.currentNode.text;
-    return patternNode;
+    return new RegularNode(
+      cursor.currentNode.type,
+      cursor.currentNode.text,
+      cursor.currentFieldName
+    );
   }
 }

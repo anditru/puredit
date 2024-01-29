@@ -3,8 +3,8 @@ import TemplateParameter from "../define/templateParameter";
 import RawTemplate from "../define/rawTemplate";
 import type { TreeSitterParser } from "../treeSitterParser";
 import { createTreeSitterParser, Target } from "../treeSitterParser";
-import type { PatternNode } from "../types";
-import { PatternTreeBuilder } from "./patternTreeBuilder";
+import { PatternBuilder } from "./patternBuilder";
+import Pattern from "../pattern/pattern";
 
 export default class Parser {
   static async load(target: Target): Promise<Parser> {
@@ -12,13 +12,13 @@ export default class Parser {
     return new Parser(treeSitterParser, target);
   }
 
-  patternNodeBuilder: PatternTreeBuilder;
+  patternNodeBuilder: PatternBuilder;
 
   private constructor(
     private treeSitterParser: TreeSitterParser,
     public target: Target
   ) {
-    this.patternNodeBuilder = new PatternTreeBuilder(treeSitterParser);
+    this.patternNodeBuilder = new PatternBuilder(treeSitterParser);
   }
 
   parse(
@@ -45,7 +45,7 @@ export default class Parser {
   statementPattern(
     template: TemplateStringsArray,
     ...params: (string | TemplateParameter)[]
-  ): PatternNode {
+  ): Pattern {
     const rawTemplate = new RawTemplate(template, params);
     return this.patternNodeBuilder
       .setRawTemplate(rawTemplate)
@@ -62,7 +62,7 @@ export default class Parser {
   expressionPattern(
     template: TemplateStringsArray,
     ...params: (string | TemplateParameter)[]
-  ): PatternNode {
+  ): Pattern {
     const rawTemplate = new RawTemplate(template, params);
     return this.patternNodeBuilder
       .setRawTemplate(rawTemplate)

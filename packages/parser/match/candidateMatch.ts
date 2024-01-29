@@ -1,7 +1,11 @@
 import AstCursor, { Keyword } from "../ast/cursor";
 import { isErrorToken } from "../common";
-import type { ArgMap, CodeBlock, PatternNode } from "../types";
+import type { ArgMap, CodeBlock } from "../types";
 import type { Context } from "..";
+import PatternNode from "../pattern/patternNode";
+import ArgumentNode from "../pattern/argumentNode";
+import BlockNode from "../pattern/blockNode";
+import ContextVariableNode from "../pattern/contextVariableNode";
 
 /**
  * @class CandidateMatch
@@ -17,7 +21,7 @@ export class CandidateMatch {
   private _blocks: CodeBlock[] = [];
 
   constructor(
-    private pattern: PatternNode,
+    private patternNode: PatternNode,
     private cursor: AstCursor,
     private context: Context,
     private lastSiblingKeyword?: Keyword
@@ -41,33 +45,42 @@ export class CandidateMatch {
       return;
     }
 
-    if (this.pattern.arg) {
-      this.verifyArgumentNodeMatches();
+    if (this.patternNode instanceof ArgumentNode) {
+      this._args[this.patternNode.templateArgument.name] =
+        this.cursor.currentNode;
+      this._matched = this.patternNode.matches(this.cursor.currentNode);
       return;
     }
 
-    if (this.pattern.block) {
-      this.verifyBlockNodeMatches();
+    if (this.patternNode instanceof BlockNode) {
+      this._blocks.push(this.extractCodeBlockFor(this.patternNode));
+      this._matched = this.patternNode.matches(this.cursor.currentNode);
       return;
     }
 
-    if (this.pattern.contextVariable && this.requiredContextExists()) {
-      this.verifyContextVariableNodeMatches();
+    if (
+      this.patternNode instanceof ContextVariableNode &&
+      this.requiredContextExists(this.patternNode)
+    ) {
+      this._matched =
+        this.patternNode.matches(this.cursor.currentNode) &&
+        this.cursor.currentNode.text ===
+          this.context[this.patternNode.templateContextVariable.name];
       return;
     }
 
-    if (this.cursor.currentNode.cleanNodeType !== this.pattern.type) {
+    if (this.cursor.currentNode.cleanNodeType !== this.patternNode.type) {
       this._matched = false;
       return;
     }
 
-    if (this.pattern.text) {
-      this._matched = this.pattern.text === this.cursor.currentNode.text;
+    if (this.patternNode.text) {
+      this._matched = this.patternNode.text === this.cursor.currentNode.text;
       return;
     }
 
     // A node must either contain text or children
-    if (!this.pattern.children || !this.cursor.goToFirstChild()) {
+    if (!this.patternNode.children || !this.cursor.goToFirstChild()) {
       this._matched = false;
       return;
     }
@@ -94,7 +107,7 @@ export class CandidateMatch {
    */
   private skipLeadingCommentsInBodies(): void {
     while (
-      this.pattern.fieldName === "body" &&
+      this.patternNode.fieldName === "body" &&
       this.cursor.currentNode.cleanNodeType === "comment"
     ) {
       this.cursor.goToNextSibling();
@@ -103,60 +116,39 @@ export class CandidateMatch {
 
   private fieldNamesMatch(): boolean {
     const fieldName = this.cursor.currentFieldName || undefined;
-    return fieldName === this.pattern.fieldName;
+    return fieldName === this.patternNode.fieldName;
   }
 
-  private verifyArgumentNodeMatches(): void {
-    this._args[this.pattern.arg!.name] = this.cursor.currentNode;
-    this._matched = this.pattern.arg!.types.includes(
-      this.cursor.currentNode.cleanNodeType
-    );
-  }
-
-  private verifyBlockNodeMatches(): void {
+  private extractCodeBlockFor(blockNode: BlockNode): CodeBlock {
     let from = this.cursor.startIndex;
     if (
-      this.pattern.block!.blockType === "py" &&
+      blockNode.templateBlock.blockType === "py" &&
       this.lastSiblingKeyword?.type === ":"
     ) {
       from = this.lastSiblingKeyword.pos;
     }
     const rangeModifierStart = 1;
-    const rangeModifierEnd = this.pattern.block!.blockType === "ts" ? 1 : 0;
-    this._blocks.push({
+    const rangeModifierEnd = blockNode.templateBlock.blockType === "ts" ? 1 : 0;
+    return {
       node: this.cursor.currentNode,
-      context: this.pattern.block!.context,
+      context: blockNode.templateBlock.context,
       from: from + rangeModifierStart,
       to: this.cursor.endIndex - rangeModifierEnd,
-      blockType: this.pattern.block!.blockType,
-    });
-    switch (this.pattern.block!.blockType) {
-      case "ts":
-        this._matched =
-          this.cursor.currentNode.cleanNodeType === "statement_block";
-        return;
-      case "py":
-        this._matched = this.cursor.currentNode.cleanNodeType === "block";
-        return;
-    }
+      blockType: blockNode.templateBlock.blockType,
+    };
   }
 
-  private requiredContextExists(): boolean {
+  private requiredContextExists(
+    contextVariableNode: ContextVariableNode
+  ): boolean {
     return Object.prototype.hasOwnProperty.call(
       this.context,
-      this.pattern.contextVariable!.name
+      contextVariableNode.templateContextVariable.name
     );
   }
 
-  private verifyContextVariableNodeMatches(): void {
-    this._matched =
-      this.cursor.currentNode.cleanNodeType === "identifier" &&
-      this.cursor.currentNode.text ===
-        this.context[this.pattern.contextVariable!.name];
-  }
-
   private childrenMatch(): boolean {
-    const requiredNumberOfChildren = this.pattern.children!.length;
+    const requiredNumberOfChildren = this.patternNode.children!.length;
     let [hasSibling, lastKeyword] = this.cursor.skipKeywords();
     if (!hasSibling && requiredNumberOfChildren > 0) {
       return false;
@@ -164,7 +156,7 @@ export class CandidateMatch {
 
     for (let i = 0; i < requiredNumberOfChildren; ) {
       const candidateChildMatch = new CandidateMatch(
-        this.pattern.children![i],
+        this.patternNode.children![i],
         this.cursor,
         this.context,
         lastKeyword

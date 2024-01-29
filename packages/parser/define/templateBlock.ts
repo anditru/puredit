@@ -1,7 +1,9 @@
 import AstCursor from "../ast/cursor";
 import { Target } from "../treeSitterParser";
-import { Context, PatternNode } from "../types";
+import { Context } from "../types";
 import TemplateParameter from "./templateParameter";
+import PatternNode from "../pattern/patternNode";
+import BlockNode from "../pattern/blockNode";
 
 export default class TemplateBlock extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_block_";
@@ -21,10 +23,10 @@ export default class TemplateBlock extends TemplateParameter {
   }
 
   toPatternNode(cursor: AstCursor): PatternNode {
-    const patternNode = this.getInitialPatternNode(cursor);
-    patternNode.text = cursor.currentNode.text;
-    patternNode.block = this;
-    patternNode.type = "TemplateBlock";
-    return patternNode;
+    return new BlockNode(
+      cursor.currentNode.text,
+      cursor.currentFieldName,
+      this
+    );
   }
 }

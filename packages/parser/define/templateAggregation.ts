@@ -1,7 +1,8 @@
 import AstCursor from "../ast/cursor";
 import RawTemplate from "./rawTemplate";
-import { Context, PatternNode } from "../types";
+import { Context } from "../types";
 import TemplateParameter from "./templateParameter";
+import PatternNode from "../pattern/patternNode";
 
 export default class TemplateAggregation extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_agg_";

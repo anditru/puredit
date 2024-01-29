@@ -1,30 +1,13 @@
 import type { Target } from "./treeSitterParser";
-import TemplateArgument from "./define/templateArgument";
-import TemplateAggregation from "./define/templateAggregation";
-import TemplateBlock from "./define/templateBlock";
-import TemplateContextVariable from "./define/templateContextVariable";
 import AstNode from "./ast/node";
+import Pattern from "./pattern/pattern";
 
-export interface PatternNode {
-  type: string;
-  fieldName?: string;
-  children?: PatternNode[];
-  text?: string;
-  arg?: TemplateArgument;
-  agg?: TemplateAggregation;
-  block?: TemplateBlock;
-  contextVariable?: TemplateContextVariable;
-  draft?: PatternDraft;
-}
-
-type PatternDraft = (context: Context) => string;
-
-export type PatternMap = Record<string, PatternNode[]>;
+export type PatternMap = Record<string, Pattern[]>;
 
 export type ArgMap = Record<string, AstNode>;
 
 export interface Match {
-  pattern: PatternNode;
+  pattern: Pattern;
   node: AstNode;
   args: ArgMap;
   blocks: CodeBlock[];

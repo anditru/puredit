@@ -49,7 +49,7 @@ export function completions(
               from,
               to,
               insert: projection.pattern
-                .draft(context)
+                .getDraft()
                 .split("\n")
                 .join("\n" + indentString(view.state, indentation)),
             },

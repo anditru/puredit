@@ -1,5 +1,5 @@
 import AstCursor from "../ast/cursor";
-import { PatternNode } from "../types";
+import PatternNode from "../pattern/patternNode";
 
 export default abstract class TemplateParameter {
   private static highestId = -1;
@@ -11,13 +11,6 @@ export default abstract class TemplateParameter {
   protected _id: number | undefined;
   get id() {
     return this._id;
-  }
-
-  protected getInitialPatternNode(cursor: AstCursor): PatternNode {
-    return {
-      type: cursor.currentNode.type,
-      fieldName: cursor.currentFieldName || undefined,
-    };
   }
 
   abstract toCodeString(): string;

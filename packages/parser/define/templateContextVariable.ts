@@ -1,5 +1,6 @@
 import AstCursor from "../ast/cursor";
-import { PatternNode } from "../types";
+import ContextVariableNode from "../pattern/contextVariableNode";
+import PatternNode from "../pattern/patternNode";
 import TemplateParameter from "./templateParameter";
 
 export default class TemplateContextVariable extends TemplateParameter {
@@ -17,10 +18,10 @@ export default class TemplateContextVariable extends TemplateParameter {
   }
 
   toPatternNode(cursor: AstCursor): PatternNode {
-    const patternNode = this.getInitialPatternNode(cursor);
-    patternNode.text = cursor.currentNode.text;
-    patternNode.contextVariable = this;
-    patternNode.type = "TemplateContextVariable";
-    return patternNode;
+    return new ContextVariableNode(
+      cursor.currentNode.text,
+      cursor.currentFieldName,
+      this
+    );
   }
 }

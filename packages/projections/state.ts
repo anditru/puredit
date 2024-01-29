@@ -3,7 +3,7 @@ import { Decoration, EditorView } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { zip } from "@puredit/utils";
 import { createPatternMap, PatternMatching } from "@puredit/parser";
-import type { PatternNode, Match } from "@puredit/parser";
+import type { Match, Pattern } from "@puredit/parser";
 import { pickedCompletion } from "@codemirror/autocomplete";
 import type {
   CodeBlock,
@@ -89,7 +89,7 @@ function updateProjections(
   state: EditorState,
   matches: Match[]
 ): DecorationSet {
-  const projectionMap = new Map<PatternNode, Projection>(
+  const projectionMap = new Map<Pattern, Projection>(
     config.projections.map((p) => [p.pattern, p])
   );
   let newDecorations = Decoration.none;

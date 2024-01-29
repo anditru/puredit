@@ -1,46 +1,37 @@
 import type { TreeSitterParser } from "../treeSitterParser";
 import { isTopNode } from "../common";
-import { type Context, type PatternNode } from "../types";
 import AstCursor from "../ast/cursor";
 import { NodeTransformVisitor } from "./nodeTransformVisitor";
 import RawTemplate from "../define/rawTemplate";
+import PatternNode from "../pattern/patternNode";
+import Pattern from "../pattern/pattern";
 
-export class PatternTreeBuilder {
+export class PatternBuilder {
   private rawTemplate: RawTemplate | undefined;
   private isExpression: boolean | undefined;
   private nodeTransformVisitor: NodeTransformVisitor | undefined;
 
   constructor(private readonly parser: TreeSitterParser | undefined) {}
 
-  setRawTemplate(rawTemplate: RawTemplate): PatternTreeBuilder {
+  setRawTemplate(rawTemplate: RawTemplate): PatternBuilder {
     this.rawTemplate = rawTemplate;
     return this;
   }
 
-  setIsExpression(isExpression: boolean): PatternTreeBuilder {
+  setIsExpression(isExpression: boolean): PatternBuilder {
     this.isExpression = isExpression;
     return this;
   }
 
-  build(): PatternNode {
+  build(): Pattern {
     this.nodeTransformVisitor = new NodeTransformVisitor(
       this.rawTemplate!.params
     );
 
-    let patternTree;
-    if (!this.rawTemplate!.hasAggregations()) {
-      const codeString = this.rawTemplate!.toCodeString();
-      patternTree = this.transformToPatternTree(codeString);
-    } else {
-      throw new Error("Not implemented");
-    }
+    const codeString = this.rawTemplate!.toCodeString();
+    const rootNode = this.transformToPatternTree(codeString);
 
-    const draft = this.getDraftFunction();
-
-    return {
-      ...patternTree,
-      draft,
-    };
+    return new Pattern(rootNode);
   }
 
   private transformToPatternTree(codeString: string): PatternNode {
@@ -57,10 +48,5 @@ export class PatternTreeBuilder {
       return rootPatternNode.children[0];
     }
     return rootPatternNode;
-  }
-
-  getDraftFunction() {
-    // TODO: Implement draft generation considering Aggregation variants
-    return (context: Context) => "Not implemented";
   }
 }

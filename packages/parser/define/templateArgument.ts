@@ -1,4 +1,5 @@
 import AstCursor from "../ast/cursor";
+import ArgumentNode from "../pattern/argumentNode";
 import TemplateParameter from "./templateParameter";
 
 export default class TemplateArgument extends TemplateParameter {
@@ -16,10 +17,10 @@ export default class TemplateArgument extends TemplateParameter {
   }
 
   toPatternNode(cursor: AstCursor) {
-    const patternNode = this.getInitialPatternNode(cursor);
-    patternNode.text = cursor.currentNode.text;
-    patternNode.arg = this;
-    patternNode.type = "TemplateArg";
-    return patternNode;
+    return new ArgumentNode(
+      cursor.currentNode.text,
+      cursor.currentFieldName,
+      this
+    );
   }
 }

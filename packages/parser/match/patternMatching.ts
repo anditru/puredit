@@ -4,11 +4,11 @@ import type {
   PatternMatchingResult,
   Match,
   PatternMap,
-  PatternNode,
 } from "../types";
 import type { Context } from "..";
 import { CandidateMatch } from "./candidateMatch";
 import AstCursor from "../ast/cursor";
+import Pattern from "../pattern/pattern";
 
 export class PatternMatching {
   private matches: Match[] = [];
@@ -54,7 +54,7 @@ export class PatternMatching {
 
     for (const candidatePattern of candidatePatterns) {
       const candidateMatch = new CandidateMatch(
-        candidatePattern,
+        candidatePattern.rootNode,
         this.cursor.currentNode.walk(),
         this.context
       );
@@ -72,7 +72,7 @@ export class PatternMatching {
     }
   }
 
-  private getCandidatePatternsForCurrentNode(): PatternNode[] {
+  private getCandidatePatternsForCurrentNode(): Pattern[] {
     return this.patternMap[this.cursor.currentNode.type];
   }
 
