@@ -1,10 +1,17 @@
-import type { Target } from "./treeSitterParser";
-import AstNode from "./ast/node";
-import Pattern from "./pattern/pattern";
+import type { Target } from "../treeSitterParser";
+import AstNode from "../ast/node";
+import Pattern from "../pattern/pattern";
+import AstCursor from "../ast/cursor";
 
 export type PatternMap = Record<string, Pattern[]>;
 
 export type ArgMap = Record<string, AstNode>;
+
+export interface CandidateMatch {
+  pattern: Pattern;
+  cursor: AstCursor;
+  context: Context;
+}
 
 export interface Match {
   pattern: Pattern;

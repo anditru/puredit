@@ -10,7 +10,7 @@ import TemplateArgument from "./templateArgument";
 import TemplateBlock from "./templateBlock";
 import TemplateContextVariable from "./templateContextVariable";
 import { Target } from "../treeSitterParser";
-import { Context } from "../types";
+import { Context } from "../match/types";
 import RawTemplate from "./rawTemplate";
 
 /**

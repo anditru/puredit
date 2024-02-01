@@ -5,8 +5,9 @@
  */
 
 import { NodeTransformVisitor } from "./parse/nodeTransformVisitor";
-import type { ArgMap, Match, PatternNode } from "./types";
+import type { ArgMap, Match } from "./match/types";
 import AstNode from "./ast/node";
+import PatternNode from "./pattern/patternNode";
 
 export function patternToString(node: PatternNode, indent = ""): string {
   let out = indent + (node.fieldName ? node.fieldName + ": " : "") + node.type;

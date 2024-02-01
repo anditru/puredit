@@ -1,6 +1,6 @@
 import AstCursor from "../ast/cursor";
 import RawTemplate from "./rawTemplate";
-import { Context } from "../types";
+import { Context } from "../match/types";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../pattern/patternNode";
 

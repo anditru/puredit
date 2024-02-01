@@ -9,6 +9,6 @@ export default class Pattern {
 
   getDraft(): string {
     // TODO: Implement draft generation considering Aggregation variants
-    return "__pattern_node";
+    return "__pattern";
   }
 }

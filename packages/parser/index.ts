@@ -9,5 +9,5 @@ export { AggregationCardinality } from "./define/templateAggregation";
 export { PatternMatching } from "./match/patternMatching";
 export { Target } from "./treeSitterParser";
 export { createPatternMap } from "./common";
-export type { PatternMap, ArgMap, Match, Context } from "./types";
+export type { PatternMap, ArgMap, Match, Context } from "./match/types";
 export type { Pattern, PatternNode };

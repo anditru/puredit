@@ -43,12 +43,14 @@ export class RegularNodeBuilder {
   }
 
   build() {
-    return new RegularNode(
+    const regularNode = new RegularNode(
       this._type!,
       this._text!,
       this._fieldName!,
       this._children
     );
+    this._children.forEach((child) => (child.parent = regularNode));
+    return regularNode;
   }
 
   get fieldName() {

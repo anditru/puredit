@@ -16,4 +16,8 @@ export default class ArgumentNode extends PatternNode {
   matches(astNode: AstNode): boolean {
     return this.templateArgument.types.includes(astNode.cleanNodeType);
   }
+
+  get name() {
+    return this.templateArgument.name;
+  }
 }

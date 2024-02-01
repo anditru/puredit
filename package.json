@@ -62,5 +62,9 @@
     "*.{json,html,css,md}": [
       "prettier --write --plugin-search-dir=."
     ]
+  },
+  "dependencies": {
+    "typescript-logging": "^2.1.0",
+    "typescript-logging-log4ts-style": "^2.1.0"
   }
 }

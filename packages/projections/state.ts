@@ -9,7 +9,7 @@ import type {
   CodeBlock,
   ContextRange,
   PatternMap,
-} from "@puredit/parser/types";
+} from "@puredit/parser/match/types";
 import type { Projection, ProjectionPluginConfig } from "./types";
 
 export interface ProjectionState {

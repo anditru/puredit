@@ -1,5 +1,5 @@
 import Pattern from "./pattern/pattern";
-import type { PatternMap } from "./types";
+import type { PatternMap } from "./match/types";
 
 /**
  * Converts an array fo PatterNodes to map that groups the patterns by their type.
