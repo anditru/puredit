@@ -1,11 +1,10 @@
-import {
-  createSystem,
-  createVirtualTypeScriptEnvironment,
-} from "@typescript/vfs";
+import { createSystem, createVirtualTypeScriptEnvironment } from "@typescript/vfs";
 import type { VirtualTypeScriptEnvironment } from "@typescript/vfs";
 import typescript from "typescript";
-import { log } from "./log";
 import { TSFS } from "./tsfs";
+
+import { logProvider } from "../../logconfig";
+const logger = logProvider.getLogger("codemirror-typescript.TypescriptProject");
 
 const TS_PROJECT_ENTRYPOINT = "index.ts";
 export type FileMap = Record<string, string>;
@@ -53,7 +52,7 @@ export class TypescriptProject {
       }
     );
 
-    log("Initialized");
+    logger.info("Initialized");
     this.state = "ready";
   }
 
@@ -63,7 +62,7 @@ export class TypescriptProject {
       if (!content.trim()) {
         continue;
       }
-      log(`Injecting types for ${name} to tsserver`);
+      logger.info(`Injecting types for ${name} to tsserver`);
       // if tsserver has initialized, we must add files to it, modifying the FS will do nothing
       ts.createFile(name, content);
     }
@@ -87,18 +86,16 @@ export class TypescriptProject {
     return this.tsserver!;
   }
 
-  public async lang(): Promise<
-    VirtualTypeScriptEnvironment["languageService"]
-  > {
+  public async lang(): Promise<VirtualTypeScriptEnvironment["languageService"]> {
     const env = await this.env();
     return env.languageService;
   }
 
   public destroy() {
-    log("Destroying language service");
+    logger.info("Destroying language service");
     this.tsserver?.languageService.dispose();
 
-    log("Destroying tsserver");
+    logger.info("Destroying tsserver");
     this.state = "procrastinating";
     this.initPromise = undefined;
     this.tsserver = undefined;

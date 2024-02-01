@@ -30,7 +30,9 @@
     "mathlive": "^0.95.5",
     "normalize.css": "^8.0.1",
     "pyodide": "^0.23.4",
-    "svelte-dark-mode": "^2.1.0"
+    "svelte-dark-mode": "^2.1.0",
+    "typescript-logging": "^2.1.0",
+    "typescript-logging-log4ts-style": "^2.1.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.1.0",

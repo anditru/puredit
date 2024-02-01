@@ -6,9 +6,9 @@ import ArgumentNode from "../pattern/argumentNode";
 import BlockNode from "../pattern/blockNode";
 import ContextVariableNode from "../pattern/contextVariableNode";
 import PatternCursor from "../pattern/cursor";
-import { logProvider } from "../../../logconfig";
 import RegularNode from "../pattern/regularNode";
 
+import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.CandidateMatchVerification");
 
 /**

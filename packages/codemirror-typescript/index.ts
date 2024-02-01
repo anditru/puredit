@@ -1,30 +1,21 @@
 import { autocompletion, completeFromList } from "@codemirror/autocomplete";
-import type {
-  CompletionContext,
-  CompletionResult,
-} from "@codemirror/autocomplete";
+import type { CompletionContext, CompletionResult } from "@codemirror/autocomplete";
 import { javascript } from "@codemirror/lang-javascript";
 import { linter, setDiagnostics as cmSetDiagnostics } from "@codemirror/lint";
 import type { Diagnostic } from "@codemirror/lint";
 import { StateEffect, StateField } from "@codemirror/state";
-import type {
-  EditorState,
-  Extension,
-  TransactionSpec,
-} from "@codemirror/state";
+import type { EditorState, Extension, TransactionSpec } from "@codemirror/state";
 import { EditorView, ViewUpdate, hoverTooltip } from "@codemirror/view";
 import type { Tooltip } from "@codemirror/view";
-import {
-  DiagnosticCategory,
-  displayPartsToString,
-  flattenDiagnosticMessageText,
-} from "typescript";
-import { log } from "./log";
+import { DiagnosticCategory, displayPartsToString, flattenDiagnosticMessageText } from "typescript";
 import { TypescriptProject } from "./project";
 import type { FileMap } from "./project";
 
 export { TypescriptProject };
 export type { FileMap };
+
+import { logProvider } from "../../logconfig";
+const logger = logProvider.getLogger("codemirror-typescript.index");
 
 /**
  * This file exports an extension that makes Typescript language services work. This includes:
@@ -76,13 +67,9 @@ export const completionSource = async (
   const ts = state.field(tsStateField);
 
   try {
-    const completions = (await ts.lang()).getCompletionsAtPosition(
-      ts.entrypoint,
-      pos,
-      {}
-    );
+    const completions = (await ts.lang()).getCompletionsAtPosition(ts.entrypoint, pos, {});
     if (!completions) {
-      log("Unable to get completions", { pos });
+      logger.warn("Unable to get completions", { pos });
       return null;
     }
 
@@ -94,7 +81,7 @@ export const completionSource = async (
       }))
     )(ctx);
   } catch (e) {
-    log("Unable to get completions", { pos, error: e });
+    logger.error("Unable to get completions", { pos, error: e });
     return null;
   }
 };
@@ -128,16 +115,10 @@ const lintDiagnostics = async (state: EditorState): Promise<Diagnostic[]> => {
 /**
  * A HoverTooltipSource that returns a Tooltip to show at a given cursor position (via tsserver)
  */
-const hoverTooltipSource = async (
-  state: EditorState,
-  pos: number
-): Promise<Tooltip | null> => {
+const hoverTooltipSource = async (state: EditorState, pos: number): Promise<Tooltip | null> => {
   const ts = state.field(tsStateField);
 
-  const quickInfo = (await ts.lang()).getQuickInfoAtPosition(
-    ts.entrypoint,
-    pos
-  );
+  const quickInfo = (await ts.lang()).getQuickInfoAtPosition(ts.entrypoint, pos);
   if (!quickInfo) {
     return null;
   }
@@ -174,9 +155,7 @@ export function injectTypes(types: FileMap): TransactionSpec {
 /**
  * A TransactionSpec that can be dispatched to force re-calculation of lint diagnostics
  */
-export async function setDiagnostics(
-  state: EditorState
-): Promise<TransactionSpec> {
+export async function setDiagnostics(state: EditorState): Promise<TransactionSpec> {
   const diagnostics = await lintDiagnostics(state);
   return cmSetDiagnostics(state, diagnostics);
 }

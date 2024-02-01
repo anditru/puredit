@@ -1,5 +1,6 @@
 import localforage from "localforage";
-import { log } from "./log";
+import { logProvider } from "../../logconfig";
+const logger = logProvider.getLogger("codemirror-typescript.index");
 
 type LibName = "typescript" | "@types/node";
 type FileName = string;
@@ -20,10 +21,7 @@ export class TSFS {
    * Given a lib name, runs a callback function for every file in that library.
    * It might fetch files in the library from a cache or from the network
    */
-  private forFileInLib = async (
-    libName: LibName,
-    cb: (name: string, content: string) => void
-  ) => {
+  private forFileInLib = async (libName: LibName, cb: (name: string, content: string) => void) => {
     // First, we fetch metadata about the library
 
     // Rollup needs us to use static strings for dynamic imports
@@ -40,18 +38,14 @@ export class TSFS {
     // 3. We iterate over the files we just fetched and cache them (compressed)
     // 4. We iterate over the files we just fetched and call the callback for every (fileName, fileContent) pair
 
-    const isCached =
-      (await localforage.getItem(`ts-lib/${libName}/_version`)) ===
-      meta.version;
+    const isCached = (await localforage.getItem(`ts-lib/${libName}/_version`)) === meta.version;
 
     // TODO:: Integrity checks?
     if (isCached) {
-      log(`Injecting ${libName} ${meta.version} from cache`);
+      logger.info(`Injecting ${libName} ${meta.version} from cache`);
       const fileNames = meta.files;
       const fileContents = (await Promise.all(
-        fileNames.map((f) =>
-          localforage.getItem<string>(`ts-lib/${libName}/${meta.version}/${f}`)
-        )
+        fileNames.map((f) => localforage.getItem<string>(`ts-lib/${libName}/${meta.version}/${f}`))
       )) as string[]; // type-cast is olay because we know this file should exist
 
       fileNames.forEach((name, i) => cb(name, fileContents[i]));
@@ -59,7 +53,7 @@ export class TSFS {
       // Remove everything, we'll download types and cache them
       await localforage.clear();
 
-      log(`Downloading & Injecting ${libName} ${meta.version}`);
+      logger.info(`Downloading & Injecting ${libName} ${meta.version}`);
 
       // Rollup needs us to use static strings for dynamic imports
       const data = await import("./types/typescript/data.js");
@@ -74,10 +68,7 @@ export class TSFS {
       await Promise.all([
         localforage.setItem(`ts-lib/${libName}/_version`, meta.version),
         ...files.map(([name, content]) =>
-          localforage.setItem(
-            `ts-lib/${libName}/${data.version}/${name}`,
-            content
-          )
+          localforage.setItem(`ts-lib/${libName}/${data.version}/${name}`, content)
         ),
       ]);
     }
