@@ -12,6 +12,16 @@ export default class AstCursor {
     return this.treeCursor.gotoFirstChild();
   }
 
+  goToFirstNonKeywordChildAndGetLastKeyword(): boolean | Keyword | undefined {
+    this.goToFirstChild();
+    const [hasSibling, lastKeyword] = this.skipKeywordsAndGetLast();
+    if (!hasSibling) {
+      return false;
+    } else {
+      return lastKeyword;
+    }
+  }
+
   goToFirstChildForIndex(index: number): boolean {
     return this.treeCursor.gotoFirstChildForIndex(index);
   }
@@ -38,7 +48,7 @@ export default class AstCursor {
     );
   }
 
-  skipKeywords(): [boolean, Keyword | undefined] {
+  skipKeywordsAndGetLast(): [boolean, Keyword | undefined] {
     let lastKeyword: Keyword | undefined;
     while (!this.treeCursor.currentNode().isNamed()) {
       lastKeyword = {

@@ -1,5 +1,6 @@
 import AstNode from "../ast/node";
 import TemplateContextVariable from "../define/templateContextVariable";
+import { Context } from "../match/types";
 import PatternNode from "./patternNode";
 
 export default class ContextVariableNode extends PatternNode {
@@ -13,7 +14,10 @@ export default class ContextVariableNode extends PatternNode {
     super(ContextVariableNode.TYPE, text, fieldName);
   }
 
-  matches(astNode: AstNode): boolean {
-    return astNode.cleanNodeType === "identifier";
+  matches(astNode: AstNode, context: Context): boolean {
+    return (
+      astNode.cleanNodeType === "identifier" &&
+      astNode.text === context[this.templateContextVariable.name]
+    );
   }
 }

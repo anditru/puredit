@@ -7,6 +7,7 @@ import BlockNode from "../pattern/blockNode";
 import ContextVariableNode from "../pattern/contextVariableNode";
 import PatternCursor from "../pattern/cursor";
 import { logProvider } from "../../../logconfig";
+import RegularNode from "../pattern/regularNode";
 
 const logger = logProvider.getLogger("parser.match.CandidateMatchVerification");
 
@@ -52,116 +53,93 @@ export default class CandidateMatchVerification {
 
   private recurse(lastSiblingKeyword?: Keyword) {
     logger.debug(
-      `Pattern node type: ${this.patternCursor.currentNode.type}, AST node type: ${this.astCursor.currentNode.cleanNodeType}`
+      `Pattern node type: ${this.patternCursor.currentNode.type}, ` +
+        `AST node type: ${this.astCursor.currentNode.cleanNodeType}`
     );
-    if (this.astCursor.currentNode.isErrorToken()) {
-      logger.debug("Error token encountered");
-      throw new DoesNotMatch();
-    }
 
+    this.checkNoErrorToken();
     this.skipLeadingCommentsInBodies();
-
-    if (!this.fieldNamesMatch()) {
-      logger.debug(
-        `FieldNames do not match. Pattern: ${this.patternCursor.currentNode.fieldName}, AST: ${this.astCursor.currentFieldName}`
-      );
-      throw new DoesNotMatch();
-    }
+    this.checkFieldNamesMatch();
 
     if (this.patternCursor.currentNode instanceof ArgumentNode) {
-      this._args[this.patternCursor.currentNode.templateArgument.name] =
-        this.astCursor.currentNode;
-      if (!this.patternCursor.currentNode.matches(this.astCursor.currentNode)) {
-        logger.debug("AST does not match ArgumentNode");
-        throw new DoesNotMatch();
-      }
-      return;
-    }
-
-    if (this.patternCursor.currentNode instanceof BlockNode) {
-      this._blocks.push(
-        this.extractCodeBlockFor(
-          this.patternCursor.currentNode,
-          lastSiblingKeyword
-        )
-      );
-      if (!this.patternCursor.currentNode.matches(this.astCursor.currentNode)) {
-        logger.debug("AST does not match BlockNode");
-        throw new DoesNotMatch();
-      }
-      return;
-    }
-
-    if (
+      this.visitArgumentNode();
+    } else if (this.patternCursor.currentNode instanceof BlockNode) {
+      this.visitBlockNode(lastSiblingKeyword);
+    } else if (
       this.patternCursor.currentNode instanceof ContextVariableNode &&
       this.requiredContextExists(this.patternCursor.currentNode)
     ) {
-      if (
-        !this.patternCursor.currentNode.matches(this.astCursor.currentNode) ||
-        this.astCursor.currentNode.text !==
-          this.context[
-            this.patternCursor.currentNode.templateContextVariable.name
-          ]
-      ) {
-        logger.debug("AST does not match ContextVariable");
-        throw new DoesNotMatch();
-      }
-      return;
+      this.visitContextVariableNode();
+    } else {
+      this.visitRegularNode();
     }
+  }
 
-    const astNodeType = this.astCursor.currentNode.cleanNodeType;
-    const patternNodeType = this.patternCursor.currentNode.type;
-    if (astNodeType !== patternNodeType) {
-      logger.debug(
-        `Node types do not match. Pattern: ${patternNodeType}, "AST: ${astNodeType}`
-      );
+  private visitArgumentNode() {
+    const argumentNode = this.patternCursor.currentNode as ArgumentNode;
+    this._args[argumentNode.templateArgument.name] = this.astCursor.currentNode;
+    if (!this.patternCursor.currentNode.matches(this.astCursor.currentNode)) {
+      logger.debug("AST does not match ArgumentNode");
       throw new DoesNotMatch();
     }
+  }
 
-    const astNodeText = this.patternCursor.currentNode.text;
-    const patternNodeText = this.patternCursor.currentNode.text;
-    if (astNodeText) {
-      if (patternNodeText !== astNodeText) {
-        logger.debug(
-          `Node textes do not match. Pattern: ${patternNodeText}, "AST: ${astNodeText}`
-        );
-        throw new DoesNotMatch();
-      }
+  private visitBlockNode(lastSiblingKeyword?: Keyword) {
+    const blockNode = this.patternCursor.currentNode as BlockNode;
+    const codeBlocks = this.extractCodeBlockFor(blockNode, lastSiblingKeyword);
+    this._blocks.push(codeBlocks);
+    if (!this.patternCursor.currentNode.matches(this.astCursor.currentNode)) {
+      logger.debug("AST does not match BlockNode");
+      throw new DoesNotMatch();
+    }
+  }
+
+  private visitContextVariableNode() {
+    const contextVariableNode = this.patternCursor.currentNode as ContextVariableNode;
+    if (!contextVariableNode.matches(this.astCursor.currentNode, this.context)) {
+      logger.debug("AST does not match ContextVariable");
+      throw new DoesNotMatch();
+    }
+  }
+
+  private visitRegularNode() {
+    const regularNode = this.patternCursor.currentNode as RegularNode;
+    this.checkNodeTypesMatch();
+
+    if (regularNode.hasText()) {
+      this.checkNodeTextsMatch();
       return;
     }
 
-    // A node must either contain text or children
-    if (
-      !this.patternCursor.currentNode.hasChildren() ||
-      !this.astCursor.currentNode.hasChildren()
-    ) {
+    if (!this.patternAndAstNodeHaveChildren()) {
       logger.debug("AST node or pattern node has neither text nor children");
       throw new DoesNotMatch();
     }
 
+    this.patternCursor.goToFirstChild();
     this.astCursor.goToFirstChild();
-    const requiredNumberOfChildren =
-      this.patternCursor.currentNode.children!.length;
-    let [hasSibling, lastKeyword] = this.astCursor.skipKeywords();
-    if (!hasSibling && requiredNumberOfChildren > 0) {
+    let [nextSiblingExists, lastKeyword] = this.astCursor.skipKeywordsAndGetLast();
+    if (!nextSiblingExists) {
       logger.debug("Pattern node has children but AST node does not");
       throw new DoesNotMatch();
     }
 
-    this.patternCursor.goToFirstChild();
-
+    const requiredNumberOfChildren = regularNode.children!.length;
     for (let i = 0; i < requiredNumberOfChildren; ) {
       this.recurse(lastKeyword);
 
       i += 1;
       this.patternCursor.goToNextSibling();
-      hasSibling = this.astCursor.goToNextSibling();
-      if (hasSibling) {
-        [hasSibling, lastKeyword] = this.astCursor.skipKeywords();
+      nextSiblingExists = this.astCursor.goToNextSibling();
+
+      if (nextSiblingExists) {
+        [nextSiblingExists, lastKeyword] = this.astCursor.skipKeywordsAndGetLast();
       }
+
+      // Check AST node does not have too few or too many children
       if (
-        (i < requiredNumberOfChildren && !hasSibling) ||
-        (i >= requiredNumberOfChildren && hasSibling)
+        (i < requiredNumberOfChildren && !nextSiblingExists) ||
+        (i >= requiredNumberOfChildren && nextSiblingExists)
       ) {
         logger.debug("AST node does not have sufficient amount of children");
         throw new DoesNotMatch();
@@ -170,6 +148,50 @@ export default class CandidateMatchVerification {
 
     this.astCursor.goToParent();
     this.patternCursor.goToParent();
+  }
+
+  private patternAndAstNodeHaveChildren() {
+    return this.patternCursor.currentNode.hasChildren() && this.astCursor.currentNode.hasChildren();
+  }
+
+  private checkNodeTypesMatch() {
+    const astNodeType = this.astCursor.currentNode.cleanNodeType;
+    const patternNodeType = this.patternCursor.currentNode.type;
+    if (astNodeType !== patternNodeType) {
+      logger.debug(`Node types do not match. Pattern: ${patternNodeType}, "AST: ${astNodeType}`);
+      throw new DoesNotMatch();
+    }
+  }
+
+  private checkNodeTextsMatch() {
+    const astNodeText = this.patternCursor.currentNode.text;
+    const patternNodeText = this.patternCursor.currentNode.text;
+    if (patternNodeText !== astNodeText) {
+      logger.debug(`Node textes do not match. Pattern: ${patternNodeText}, "AST: ${astNodeText}`);
+      throw new DoesNotMatch();
+    }
+  }
+
+  private checkNoErrorToken() {
+    if (this.astCursor.currentNode.isErrorToken()) {
+      logger.debug("Error token encountered");
+      throw new DoesNotMatch();
+    }
+  }
+
+  private checkFieldNamesMatch() {
+    if (!this.fieldNamesMatch()) {
+      logger.debug(
+        `FieldNames do not match. Pattern: ${this.patternCursor.currentNode.fieldName}, ` +
+          `AST: ${this.astCursor.currentFieldName}`
+      );
+      throw new DoesNotMatch();
+    }
+  }
+
+  private fieldNamesMatch(): boolean {
+    const fieldName = this.astCursor.currentFieldName || undefined;
+    return fieldName === this.patternCursor.currentNode.fieldName;
   }
 
   /**
@@ -192,20 +214,9 @@ export default class CandidateMatchVerification {
     }
   }
 
-  private fieldNamesMatch(): boolean {
-    const fieldName = this.astCursor.currentFieldName || undefined;
-    return fieldName === this.patternCursor.currentNode.fieldName;
-  }
-
-  private extractCodeBlockFor(
-    blockNode: BlockNode,
-    lastSiblingKeyword?: Keyword
-  ): CodeBlock {
+  private extractCodeBlockFor(blockNode: BlockNode, lastSiblingKeyword?: Keyword): CodeBlock {
     let from = this.astCursor.startIndex;
-    if (
-      blockNode.templateBlock.blockType === "py" &&
-      lastSiblingKeyword?.type === ":"
-    ) {
+    if (blockNode.templateBlock.blockType === "py" && lastSiblingKeyword?.type === ":") {
       from = lastSiblingKeyword.pos;
     }
     const rangeModifierStart = 1;
@@ -219,9 +230,7 @@ export default class CandidateMatchVerification {
     };
   }
 
-  private requiredContextExists(
-    contextVariableNode: ContextVariableNode
-  ): boolean {
+  private requiredContextExists(contextVariableNode: ContextVariableNode): boolean {
     return Object.prototype.hasOwnProperty.call(
       this.context,
       contextVariableNode.templateContextVariable.name

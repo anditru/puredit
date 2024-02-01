@@ -1,4 +1,5 @@
 import AstNode from "../ast/node";
+import { Context } from "../match/types";
 
 export default abstract class PatternNode {
   public readonly fieldName: string | undefined;
@@ -25,6 +26,10 @@ export default abstract class PatternNode {
     return this.children.length > 0;
   }
 
+  hasText(): boolean {
+    return !!this.text;
+  }
+
   hasNextSibling(): boolean {
     if (!this._parent) {
       return false;
@@ -46,5 +51,5 @@ export default abstract class PatternNode {
     this._parent = parent;
   }
 
-  abstract matches(astNode: AstNode): boolean;
+  abstract matches(astNode: AstNode, context?: Context): boolean;
 }
