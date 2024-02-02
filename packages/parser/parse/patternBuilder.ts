@@ -23,9 +23,7 @@ export class PatternBuilder {
   }
 
   build(): Pattern {
-    this.nodeTransformVisitor = new NodeTransformVisitor(
-      this.rawTemplate!.params
-    );
+    this.nodeTransformVisitor = new NodeTransformVisitor(this.rawTemplate!.params);
 
     const codeString = this.rawTemplate!.toCodeString();
     const rootNode = this.transformToPatternTree(codeString);
@@ -39,10 +37,7 @@ export class PatternBuilder {
       cursor.goToExpression();
     }
 
-    const rootPatternNode = this.nodeTransformVisitor!.visit(
-      cursor,
-      codeString
-    )[0];
+    const rootPatternNode = this.nodeTransformVisitor!.visit(cursor)[0];
     if (rootPatternNode.isTopNode() && rootPatternNode.children) {
       return rootPatternNode.children[0];
     }

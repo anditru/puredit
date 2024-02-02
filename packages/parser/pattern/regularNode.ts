@@ -42,13 +42,8 @@ export class RegularNodeBuilder {
     return this;
   }
 
-  build() {
-    const regularNode = new RegularNode(
-      this._type!,
-      this._text!,
-      this._fieldName!,
-      this._children
-    );
+  buildAndSetParentOnChildren() {
+    const regularNode = new RegularNode(this._type!, this._text!, this._fieldName!, this._children);
     this._children.forEach((child) => (child.parent = regularNode));
     return regularNode;
   }
