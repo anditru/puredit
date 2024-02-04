@@ -1,7 +1,7 @@
 import BasePattern from "./basePattern";
 import PatternNode from "./nodes/patternNode";
 import Pattern from "./pattern";
-import PatternDecorator from "./patternDecorator";
+import PatternDecorator from "./decorators/patternDecorator";
 import PatternPath from "./patternPath";
 
 export default class PatternCursor {

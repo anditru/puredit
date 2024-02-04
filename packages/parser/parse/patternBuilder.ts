@@ -5,7 +5,7 @@ import RawTemplate from "../define/rawTemplate";
 import PatternNode from "../pattern/nodes/patternNode";
 import BasePattern from "../pattern/basePattern";
 import Pattern from "../pattern/pattern";
-import AggregationDecorator from "../pattern/aggregationDecorator";
+import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
 import PatternCursor from "../pattern/cursor";
 import { SubPatternMap } from "../pattern/types";
 

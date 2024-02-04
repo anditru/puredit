@@ -1,6 +1,6 @@
-import PatternNode from "./nodes/patternNode";
-import Pattern from "./pattern";
-import PatternPath from "./patternPath";
+import PatternNode from "../nodes/patternNode";
+import Pattern from "../pattern";
+import PatternPath from "../patternPath";
 
 export default abstract class PatternDecorator implements Pattern {
   constructor(private pattern: Pattern) {}
