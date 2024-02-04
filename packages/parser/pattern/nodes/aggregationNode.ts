@@ -29,7 +29,7 @@ export default class AggregationNode extends PatternNode {
     );
     if (!nodeTypeConfig) {
       throw new Error(
-        `AST node type ${astNodeType} of language ${language} ` + `is not supported for aggregation`
+        `AST node type ${astNodeType} of language ${language} is not supported for aggregation`
       );
     }
 
