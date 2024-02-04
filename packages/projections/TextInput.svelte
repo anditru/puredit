@@ -1,18 +1,18 @@
 <script lang="ts">
   import type { EditorState } from "@codemirror/state";
   import type { EditorView } from "@codemirror/view";
-  import type { SyntaxNode } from "@puredit/parser";
   import { onDestroy } from "svelte";
   import { compareTwoStrings } from "string-similarity";
   import type { FocusGroup } from "./focus";
   import { stringLiteralValue, stringLiteralValueChange } from "./shared";
+  import AstNode from "@puredit/parser/ast/node";
 
   export let view: EditorView | null;
-  export let node: SyntaxNode;
+  export let node: AstNode;
   export let state: EditorState;
   let nodeType = node.type;
 
-  export let targetNodes: SyntaxNode[] | null = null;
+  export let targetNodes: AstNode[] | null = null;
 
   export let className: string | null = null;
   export let placeholder = "text";
@@ -52,9 +52,7 @@
   export let validate: ValidationFunction | null = null;
   let error: string | undefined;
   let value = "";
-  $: value = codeToValue(
-    handleEmptyCodeToValue(stringLiteralValue(node, state.doc))
-  );
+  $: value = codeToValue(handleEmptyCodeToValue(stringLiteralValue(node, state.doc)));
   $: if (validate) {
     error = validate(value);
   }
@@ -64,9 +62,8 @@
     view?.dispatch({
       filter: false,
       changes:
-        targetNodes?.map((targetNode) =>
-          stringLiteralValueChange(targetNode, code)
-        ) ?? stringLiteralValueChange(node, code),
+        targetNodes?.map((targetNode) => stringLiteralValueChange(targetNode, code)) ??
+        stringLiteralValueChange(node, code),
     });
   }
 
@@ -171,9 +168,7 @@
     on:keydown={onKeydown}
   />
   {#if error || sortedCompletions.length}
-    <div
-      class="tooltip {showTooltipError && error ? 'show-tooltip-error' : ''}"
-    >
+    <div class="tooltip {showTooltipError && error ? 'show-tooltip-error' : ''}">
       {#if sortedCompletions.length}
         <ul class="tooltip-completion {error ? 'with-border' : ''}">
           {#each sortedCompletions as completion, i}

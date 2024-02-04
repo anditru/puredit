@@ -5,11 +5,7 @@ import { zip } from "@puredit/utils";
 import { createPatternMap, PatternMatching } from "@puredit/parser";
 import type { Match, Pattern } from "@puredit/parser";
 import { pickedCompletion } from "@codemirror/autocomplete";
-import type {
-  CodeBlock,
-  ContextRange,
-  PatternMap,
-} from "@puredit/parser/match/types";
+import type { CodeRange, ContextRange, PatternMap } from "@puredit/parser/match/types";
 import type { Projection, ProjectionPluginConfig } from "./types";
 
 export interface ProjectionState {
@@ -25,19 +21,9 @@ export function createProjectionState(
 ): ProjectionState {
   const patternMap = createPatternMap(config.projections.map((p) => p.pattern));
   const cursor = config.parser.parse(state.sliceDoc(0)).walk();
-  const patternMatching = new PatternMatching(
-    patternMap,
-    cursor,
-    config.globalContextVariables
-  );
+  const patternMatching = new PatternMatching(patternMap, cursor, config.globalContextVariables);
   const { matches, contextRanges } = patternMatching.execute();
-  const decorations = updateProjections(
-    config,
-    Decoration.none,
-    false,
-    state,
-    matches
-  );
+  const decorations = updateProjections(config, Decoration.none, false, state, matches);
   return { config, patternMap, decorations, contextRanges };
 }
 
@@ -51,19 +37,9 @@ export const projectionState = StateField.define<ProjectionState>({
     const state = transaction.state;
     // TODO: reuse previous tree for incremental parsing
     const cursor = config.parser.parse(state.sliceDoc(0)).walk();
-    const patternMatching = new PatternMatching(
-      patternMap,
-      cursor,
-      config.globalContextVariables
-    );
+    const patternMatching = new PatternMatching(patternMap, cursor, config.globalContextVariables);
     const { matches, contextRanges } = patternMatching.execute();
-    decorations = updateProjections(
-      config,
-      decorations,
-      isCompletion,
-      state,
-      matches
-    );
+    decorations = updateProjections(config, decorations, isCompletion, state, matches);
 
     // TODO: figure out a way to incrementally match changes, to avoid
     // rematching the whole tree.
@@ -89,17 +65,12 @@ function updateProjections(
   state: EditorState,
   matches: Match[]
 ): DecorationSet {
-  const projectionMap = new Map<Pattern, Projection>(
-    config.projections.map((p) => [p.pattern, p])
-  );
+  const projectionMap = new Map<Pattern, Projection>(config.projections.map((p) => [p.pattern, p]));
   let newDecorations = Decoration.none;
   const contexts: object[] = [config.globalContextValues];
   const contextBounds: number[] = [];
   for (const match of matches) {
-    if (
-      contextBounds.length &&
-      match.node.startIndex >= contextBounds[contextBounds.length - 1]
-    ) {
+    if (contextBounds.length && match.node.startIndex >= contextBounds[contextBounds.length - 1]) {
       contexts.pop();
       contextBounds.pop();
     }
@@ -110,15 +81,13 @@ function updateProjections(
     const { widgets, contextProvider } = projection;
     const context = Object.assign({}, ...contexts);
     if (contextProvider) {
-      contexts.push(
-        contextProvider(match, state.doc, Object.assign({}, context))
-      );
+      contexts.push(contextProvider(match, state.doc, Object.assign({}, context)));
       contextBounds.push(match.node.endIndex);
     }
     const ranges = removeBlocksFromRange(
       match.node.startIndex,
       match.node.endIndex,
-      match.blocks
+      match.blockRanges
     );
     for (const [{ from, to }, Widget] of zip(ranges, widgets)) {
       let found = false;
@@ -156,19 +125,15 @@ interface Range {
  * Splits a range into subranges that do not cover a given list of blocks.
  * @param from Start of the original range.
  * @param to End of the original range.
- * @param blocks A sorted list of blocks to exclude from the range.
+ * @param blockRanges A sorted list of blockRanges to exclude from the range.
  */
-function removeBlocksFromRange(
-  from: number,
-  to: number,
-  blocks: CodeBlock[]
-): Range[] {
+function removeBlocksFromRange(from: number, to: number, blockRanges: CodeRange[]): Range[] {
   const ranges: Range[] = [];
-  for (const block of blocks) {
-    if (block.from !== from) {
-      ranges.push({ from, to: block.from });
+  for (const blockRange of blockRanges) {
+    if (blockRange.from !== from) {
+      ranges.push({ from, to: blockRange.from });
     }
-    from = block.to;
+    from = blockRange.to;
   }
   if (from < to) {
     ranges.push({ from, to });

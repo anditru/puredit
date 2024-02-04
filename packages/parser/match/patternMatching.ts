@@ -1,13 +1,6 @@
-import type {
-  ContextRange,
-  PatternMatchingResult,
-  Match,
-  PatternMap,
-} from "./types";
+import type { ContextRange, PatternMatchingResult, Match, PatternMap } from "./types";
 import type { Context } from "..";
-import CandidateMatchVerification, {
-  DoesNotMatch,
-} from "./candidateMatchVerification";
+import CandidateMatchVerification, { DoesNotMatch } from "./candidateMatchVerification";
 import AstCursor from "../ast/cursor";
 import Pattern from "../pattern/pattern";
 import { TreeCursor } from "web-tree-sitter";
@@ -58,9 +51,7 @@ export class PatternMatching {
         cursor: this.cursor.currentNode.walk(),
         context: this.context,
       };
-      const candidateMatchVerification = new CandidateMatchVerification(
-        candidateMatch
-      );
+      const candidateMatchVerification = new CandidateMatchVerification(candidateMatch);
 
       let match;
       try {
@@ -82,7 +73,7 @@ export class PatternMatching {
   }
 
   private findMatchesInBlocksOf(match: Match): void {
-    for (const block of match.blocks) {
+    for (const block of match.blockRanges) {
       this.contextRanges.push({
         from: block.node.startIndex,
         to: block.node.endIndex,

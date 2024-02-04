@@ -2,26 +2,21 @@ import { tags } from "@lezer/highlight";
 import { EditorSelection, EditorState } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import { highlightingFor } from "@codemirror/language";
-import type { Match, TemplateArg } from "@puredit/parser";
+import type { Match } from "@puredit/parser";
 import { FocusGroup } from "@puredit/projections/focus";
 import type { FocusGroupHandler } from "@puredit/projections/focus";
 import { ProjectionWidget } from "@puredit/projections/projection";
 import TextInput from "@puredit/projections/TextInput.svelte";
 import { isString } from "@puredit/utils";
 import type { SvelteComponent } from "@puredit/projections/svelte";
+import TemplateArgument from "@puredit/parser/define/templateArgument";
 
-export const simpleProjection = (
-  template: Array<string | TemplateArg | TemplateArg[]>
-) =>
+export const simpleProjection = (template: Array<string | TemplateArgument | TemplateArgument[]>) =>
   class extends ProjectionWidget implements FocusGroupHandler {
     focusGroup!: FocusGroup;
-    inputs: Array<[TemplateArg[], SvelteComponent<any>]>;
+    inputs: Array<[TemplateArgument[], SvelteComponent<any>]>;
 
-    protected initialize(
-      match: Match,
-      _context: object,
-      state: EditorState
-    ): HTMLElement {
+    protected initialize(match: Match, _context: object, state: EditorState): HTMLElement {
       this.focusGroup = new FocusGroup(this);
       this.inputs = [];
       const target = document.createElement("span");
@@ -38,10 +33,7 @@ export const simpleProjection = (
             props: {
               className: highlightingFor(state, [tags.string]),
               node: match.args[args[0].name],
-              targetNodes:
-                args.length > 1
-                  ? args.map((arg) => match.args[arg.name])
-                  : undefined,
+              targetNodes: args.length > 1 ? args.map((arg) => match.args[arg.name]) : undefined,
               placeholder: args[0].name,
               state,
               view: null,
@@ -58,10 +50,7 @@ export const simpleProjection = (
       for (const [args, component] of this.inputs) {
         component.$set({
           node: match.args[args[0].name],
-          targetNodes:
-            args.length > 1
-              ? args.map((arg) => match.args[arg.name])
-              : undefined,
+          targetNodes: args.length > 1 ? args.map((arg) => match.args[arg.name]) : undefined,
           context,
           state,
         });
@@ -128,8 +117,8 @@ export const simpleProjection = (
 
     onLeaveEnd(): void {
       let end = this.match.node.endIndex;
-      if (this.match.blocks.length) {
-        end = this.match.blocks[0].from;
+      if (this.match.blockRanges.length) {
+        end = this.match.blockRanges[0].from;
       }
       this.view?.focus();
       this.view?.dispatch({

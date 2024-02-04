@@ -3,27 +3,21 @@ import type { EditorView } from "@codemirror/view";
 import { highlightingFor } from "@codemirror/language";
 import type { EditorState, ChangeSpec } from "@codemirror/state";
 import type { Text } from "@codemirror/state";
-import type { Match, SyntaxNode } from "@puredit/parser";
+import type { Match } from "@puredit/parser";
 import { ProjectionWidget } from "./projection";
+import AstNode from "@puredit/parser/ast/node";
 
 const stringTypes = ["string", "template_string"];
 
-export function isStringNode(node: SyntaxNode): boolean {
+export function isStringNode(node: AstNode): boolean {
   return stringTypes.includes(node.type);
 }
 
-export function nodeValue(
-  node: SyntaxNode,
-  text: Text,
-  offsetLeftRight = 0
-): string {
-  return text.sliceString(
-    node.startIndex + offsetLeftRight,
-    node.endIndex - offsetLeftRight
-  );
+export function nodeValue(node: AstNode, text: Text, offsetLeftRight = 0): string {
+  return text.sliceString(node.startIndex + offsetLeftRight, node.endIndex - offsetLeftRight);
 }
 
-export function stringLiteralValue(node: SyntaxNode, text: Text) {
+export function stringLiteralValue(node: AstNode, text: Text) {
   if (!isStringNode(node)) {
     return nodeValue(node, text);
   }
@@ -37,11 +31,7 @@ export function stringLiteralValue(node: SyntaxNode, text: Text) {
   );
 }
 
-export function nodeValueChange(
-  node: SyntaxNode,
-  newValue: string,
-  offsetLeftRight = 0
-): ChangeSpec {
+export function nodeValueChange(node: AstNode, newValue: string, offsetLeftRight = 0): ChangeSpec {
   return {
     from: node.startIndex + offsetLeftRight,
     to: node.endIndex - offsetLeftRight,
@@ -49,10 +39,7 @@ export function nodeValueChange(
   };
 }
 
-export function stringLiteralValueChange(
-  node: SyntaxNode,
-  newValue: string
-): ChangeSpec {
+export function stringLiteralValueChange(node: AstNode, newValue: string): ChangeSpec {
   if (!isStringNode(node)) {
     return nodeValueChange(node, newValue);
   }
@@ -89,11 +76,7 @@ export function span(text: string): HTMLElement {
 
 export const staticWidget = (initialize: (state: EditorState) => HTMLElement) =>
   class extends ProjectionWidget {
-    protected initialize(
-      _match: Match,
-      _context: object,
-      state: EditorState
-    ): HTMLElement {
+    protected initialize(_match: Match, _context: object, state: EditorState): HTMLElement {
       return initialize(state);
     }
 
@@ -115,9 +98,8 @@ export const staticWidget = (initialize: (state: EditorState) => HTMLElement) =>
     }
   };
 
-export const validateFromList =
-  (allowedValues: string[]) => (value: string) => {
-    if (!allowedValues.includes(value)) {
-      return `invalid value ${value}`;
-    }
-  };
+export const validateFromList = (allowedValues: string[]) => (value: string) => {
+  if (!allowedValues.includes(value)) {
+    return `invalid value ${value}`;
+  }
+};

@@ -1,5 +1,5 @@
 import AstCursor, { Keyword } from "../ast/cursor";
-import type { ArgMap, CandidateMatch, CodeBlock, Match } from "./types";
+import type { ArgMap, CandidateMatch, CodeRange, Match } from "./types";
 import { Target, type Context } from "..";
 import Pattern from "../pattern/pattern";
 import ArgumentNode from "../pattern/nodes/argumentNode";
@@ -26,7 +26,7 @@ export default class CandidateMatchVerification {
   private context: Context;
 
   private _args: ArgMap = {};
-  private _blocks: CodeBlock[] = [];
+  private _blockRanges: CodeRange[] = [];
 
   constructor(private candidateMatch: CandidateMatch) {
     this.pattern = this.candidateMatch.pattern;
@@ -47,7 +47,7 @@ export default class CandidateMatchVerification {
       pattern: this.pattern,
       node: this.astCursor.currentNode,
       args: this._args,
-      blocks: this._blocks,
+      blockRanges: this._blockRanges,
     };
   }
 
@@ -86,8 +86,8 @@ export default class CandidateMatchVerification {
 
   private visitBlockNode(lastSiblingKeyword?: Keyword) {
     const blockNode = this.patternCursor.currentNode as BlockNode;
-    const codeBlocks = this.extractCodeBlockFor(blockNode, lastSiblingKeyword);
-    this._blocks.push(codeBlocks);
+    const blockRanges = this.extractBlockRangeFor(blockNode, lastSiblingKeyword);
+    this._blockRanges.push(blockRanges);
     if (!this.patternCursor.currentNode.matches(this.astCursor.currentNode)) {
       logger.debug("AST does not match BlockNode");
       throw new DoesNotMatch();
@@ -194,7 +194,7 @@ export default class CandidateMatchVerification {
     }
   }
 
-  private extractCodeBlockFor(blockNode: BlockNode, lastSiblingKeyword?: Keyword): CodeBlock {
+  private extractBlockRangeFor(blockNode: BlockNode, lastSiblingKeyword?: Keyword): CodeRange {
     let from = this.astCursor.startIndex;
     if (blockNode.language === Target.Python && lastSiblingKeyword?.type === ":") {
       from = lastSiblingKeyword.pos;
@@ -206,7 +206,7 @@ export default class CandidateMatchVerification {
       context: blockNode.templateBlock.context,
       from: from + rangeModifierStart,
       to: this.astCursor.endIndex - rangeModifierEnd,
-      blockType: blockNode.language,
+      language: blockNode.language,
     };
   }
 

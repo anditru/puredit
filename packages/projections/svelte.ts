@@ -19,11 +19,7 @@ export const svelteProjection = (Component: ComponentClass<Props>) =>
     component!: SvelteComponent<Props>;
     focusGroup!: FocusGroup;
 
-    protected initialize(
-      match: Match,
-      context: object,
-      state: EditorState
-    ): HTMLElement {
+    protected initialize(match: Match, context: object, state: EditorState): HTMLElement {
       const target = document.createElement("span");
       this.focusGroup = new FocusGroup(this);
       this.component = new Component({
@@ -95,8 +91,8 @@ export const svelteProjection = (Component: ComponentClass<Props>) =>
 
     onLeaveEnd(): void {
       let end = this.match.node.endIndex;
-      if (this.match.blocks.length) {
-        end = this.match.blocks[0].from;
+      if (this.match.blockRanges.length) {
+        end = this.match.blockRanges[0].from;
       }
       this.view?.focus();
       this.view?.dispatch({

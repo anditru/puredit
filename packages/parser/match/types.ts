@@ -17,7 +17,7 @@ export interface Match {
   pattern: Pattern;
   node: AstNode;
   args: ArgMap;
-  blocks: CodeBlock[];
+  blockRanges: CodeRange[];
 }
 
 export type Context = Record<string, string>;
@@ -28,12 +28,12 @@ export interface ContextRange {
   context: Context;
 }
 
-export interface CodeBlock {
+export interface CodeRange {
   node: AstNode;
   context: Context;
   from: number;
   to: number;
-  blockType: Target;
+  language: Target;
 }
 
 export interface PatternMatchingResult {
