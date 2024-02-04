@@ -1,14 +1,16 @@
-import AstNode from "../ast/node";
+import AstNode from "../../ast/node";
+import { Target } from "../../treeSitterParser";
 import PatternNode from "./patternNode";
 
 export default class RegularNode extends PatternNode {
   constructor(
-    public readonly type: string,
-    public readonly text: string,
+    language: Target,
+    type: string,
+    text: string,
     fieldName: string | null,
     children: PatternNode[] = []
   ) {
-    super(type, text, fieldName, children);
+    super(language, type, text, fieldName, children);
   }
 
   matches(astNode: AstNode): boolean {
@@ -17,10 +19,16 @@ export default class RegularNode extends PatternNode {
 }
 
 export class RegularNodeBuilder {
+  private _language: Target | undefined;
   private _type: string | undefined;
   private _text: string | undefined;
   private _fieldName: string | null | undefined;
   private _children: PatternNode[] = [];
+
+  setLanguage(language: Target): RegularNodeBuilder {
+    this._language = language;
+    return this;
+  }
 
   setType(type: string): RegularNodeBuilder {
     this._type = type;
@@ -43,9 +51,22 @@ export class RegularNodeBuilder {
   }
 
   buildAndSetParentOnChildren() {
-    const regularNode = new RegularNode(this._type!, this._text!, this._fieldName!, this._children);
+    const regularNode = new RegularNode(
+      this._language!,
+      this._type!,
+      this._text!,
+      this._fieldName!,
+      this._children
+    );
     this._children.forEach((child) => (child.parent = regularNode));
     return regularNode;
+  }
+
+  buildsParentOfBlockNode() {
+    return (
+      ["block", "expression_statement"].includes(this._type!) &&
+      this._children[0].type === "TemplateBlock"
+    );
   }
 
   get fieldName() {

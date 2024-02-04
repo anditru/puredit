@@ -3,9 +3,7 @@
  * Implements functions to define template parameters.
  */
 
-import TemplateAggregation, {
-  AggregationCardinality,
-} from "./templateAggregation";
+import TemplateAggregation, { AggregationCardinality } from "./templateAggregation";
 import TemplateArgument from "./templateArgument";
 import TemplateBlock from "./templateBlock";
 import TemplateContextVariable from "./templateContextVariable";
@@ -37,13 +35,7 @@ export function agg(
   separatorToken?: string,
   context: Context = {}
 ): TemplateAggregation {
-  return new TemplateAggregation(
-    name,
-    allowedPatterns,
-    cardinality,
-    context,
-    separatorToken
-  );
+  return new TemplateAggregation(name, allowedPatterns, cardinality, context, separatorToken);
 }
 
 /**
@@ -52,7 +44,7 @@ export function agg(
  * @returns Object representing the Block
  */
 export function block(context: Context = {}): TemplateBlock {
-  return new TemplateBlock(context, Target.TypeScript);
+  return new TemplateBlock(context);
 }
 
 /**

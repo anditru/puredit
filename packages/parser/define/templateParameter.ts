@@ -1,5 +1,6 @@
 import AstCursor from "../ast/cursor";
-import PatternNode from "../pattern/patternNode";
+import PatternNode from "../pattern/nodes/patternNode";
+import { Target } from "../treeSitterParser";
 
 export default abstract class TemplateParameter {
   private static highestId = -1;
@@ -14,5 +15,5 @@ export default abstract class TemplateParameter {
   }
 
   abstract toCodeString(): string;
-  abstract toPatternNode(cursor: AstCursor): PatternNode;
+  abstract toPatternNode(cursor: AstCursor, language: Target): PatternNode;
 }

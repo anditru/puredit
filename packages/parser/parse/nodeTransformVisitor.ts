@@ -1,13 +1,18 @@
 import AstCursor from "../ast/cursor";
 import TemplateParameter from "../define/templateParameter";
 import { isString } from "@puredit/utils";
-import PatternNode from "../pattern/patternNode";
-import RegularNode, { RegularNodeBuilder } from "../pattern/regularNode";
+import PatternNode from "../pattern/nodes/patternNode";
+import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
+import { Target } from "../treeSitterParser";
+import TemplateAggregation from "../define/templateAggregation";
 
 export class NodeTransformVisitor {
   cursor: AstCursor | undefined;
 
-  constructor(private readonly params: (string | TemplateParameter)[]) {}
+  constructor(
+    public readonly targetLanguage: Target,
+    private params: (string | TemplateParameter)[]
+  ) {}
 
   visit(cursor: AstCursor): PatternNode[] {
     this.cursor = cursor;
@@ -52,18 +57,18 @@ export class NodeTransformVisitor {
   private transformNonAtomicNode(): PatternNode {
     const patternNodeBuilder = new RegularNodeBuilder();
     patternNodeBuilder
+      .setLanguage(this.targetLanguage)
       .setType(this.cursor!.currentNode.type)
+      .setText(this.cursor!.currentNode.text)
       .setFieldName(this.cursor!.currentFieldName);
 
     this.cursor!.goToFirstChild();
     patternNodeBuilder.setChildren(this.recurse());
 
-    if (
-      ["block", "expression_statement"].includes(patternNodeBuilder.type!) &&
-      patternNodeBuilder.children[0].type === "TemplateBlock"
-    ) {
-      const firstChild = patternNodeBuilder.children[0];
-      patternNodeBuilder.setType(firstChild.type).setChildren(firstChild.children);
+    /* To make the BlockNode actually replace the AST node representing the code block
+     * we need to shift it up. */
+    if (patternNodeBuilder.buildsParentOfBlockNode()) {
+      return patternNodeBuilder.children[0];
     }
 
     return patternNodeBuilder.buildAndSetParentOnChildren();
@@ -73,26 +78,48 @@ export class NodeTransformVisitor {
     if (this.cursor!.currentNode.isTemplateParameterNode()) {
       const parameterId = this.cursor!.currentNode.getTemplateParameterId();
       const correspondingParameter = this.findTemplateParameterBy(parameterId);
-      return correspondingParameter.toPatternNode(this.cursor!);
+      return correspondingParameter.toPatternNode(this.cursor!, this.targetLanguage);
     } else {
       return this.transformRegularNode();
     }
   }
 
   private findTemplateParameterBy(id: number) {
-    for (const param of this.params) {
+    const result = this.recursefindTemplateParameterBy(id, this.params!);
+    if (result !== null) {
+      return result;
+    } else {
+      throw new Error(`No parameter with ID ${id} found`);
+    }
+  }
+
+  private recursefindTemplateParameterBy(
+    id: number,
+    params: (string | TemplateParameter)[]
+  ): TemplateParameter | null {
+    for (const param of params) {
       if (isString(param)) {
         continue;
       }
       if (param.id === id) {
         return param;
       }
+      if (param instanceof TemplateAggregation) {
+        for (const allowedPattern of param.allowedPatterns) {
+          const result = this.recursefindTemplateParameterBy(id, allowedPattern.params);
+          if (result !== null) {
+            return result;
+          }
+        }
+        return null;
+      }
     }
-    throw new Error(`No parameter with ID ${id} found`);
+    return null;
   }
 
   private transformRegularNode() {
     return new RegularNode(
+      this.targetLanguage,
       this.cursor!.currentNode.type,
       this.cursor!.currentNode.text,
       this.cursor!.currentFieldName

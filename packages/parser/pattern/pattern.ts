@@ -1,14 +1,9 @@
-import PatternNode from "./patternNode";
+import PatternNode from "./nodes/patternNode";
+import PatternPath from "./patternPath";
 
-export default class Pattern {
-  constructor(public readonly rootNode: PatternNode) {}
-
-  get rootNodeType() {
-    return this.rootNode.type;
-  }
-
-  getDraft(): string {
-    // TODO: Implement draft generation considering Aggregation variants
-    return "__pattern";
-  }
+export default interface Pattern {
+  get rootNode(): PatternNode;
+  get rootNodeType(): string;
+  getDraft(): string;
+  getPathToNodeWithText(text: string): PatternPath;
 }

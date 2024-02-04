@@ -1,11 +1,13 @@
-import AstNode from "../ast/node";
-import { Context } from "../match/types";
+import AstNode from "../../ast/node";
+import { Context } from "../../match/types";
+import { Target } from "../../treeSitterParser";
 
 export default abstract class PatternNode {
   public readonly fieldName: string | undefined;
   private _parent: PatternNode | null | undefined;
 
   constructor(
+    public readonly language: Target,
     public readonly type: string,
     public readonly text: string,
     fieldName: string | null,
@@ -22,6 +24,10 @@ export default abstract class PatternNode {
     return this.type === "program" || this.type === "module";
   }
 
+  hasParent(): boolean {
+    return !!this.parent;
+  }
+
   hasChildren(): boolean {
     return this.children.length > 0;
   }
@@ -31,13 +37,25 @@ export default abstract class PatternNode {
   }
 
   hasNextSibling(): boolean {
+    const childIndex = this.getChildIndex();
+    return !!this._parent!.children[childIndex + 1];
+  }
+
+  hasPreviousSibling(): boolean {
+    const childIndex = this.getChildIndex();
+    return !!this._parent!.children[childIndex - 1];
+  }
+
+  getChildIndex(): number {
     if (!this._parent) {
-      return false;
+      throw new Error("Node does not have a parent");
     }
-    const childIndex = this._parent.children.findIndex(
-      (childNode) => childNode === this
-    );
-    return !!this._parent.children[childIndex + 1];
+    return this._parent.children.findIndex((childNode) => childNode === this);
+  }
+
+  cutOff(): PatternNode {
+    this._parent = null;
+    return this;
   }
 
   get parent(): PatternNode | null | undefined {

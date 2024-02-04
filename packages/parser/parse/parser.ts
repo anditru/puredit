@@ -14,10 +14,7 @@ export default class Parser {
 
   patternNodeBuilder: PatternBuilder;
 
-  private constructor(
-    private treeSitterParser: TreeSitterParser,
-    public target: Target
-  ) {
+  private constructor(private treeSitterParser: TreeSitterParser, public readonly target: Target) {
     this.patternNodeBuilder = new PatternBuilder(treeSitterParser);
   }
 
@@ -49,6 +46,7 @@ export default class Parser {
     const rawTemplate = new RawTemplate(template, params);
     return this.patternNodeBuilder
       .setRawTemplate(rawTemplate)
+      .setTargetLanguage(this.target)
       .setIsExpression(false)
       .build();
   }
@@ -66,6 +64,7 @@ export default class Parser {
     const rawTemplate = new RawTemplate(template, params);
     return this.patternNodeBuilder
       .setRawTemplate(rawTemplate)
+      .setTargetLanguage(this.target)
       .setIsExpression(true)
       .build();
   }

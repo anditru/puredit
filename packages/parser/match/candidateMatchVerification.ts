@@ -1,12 +1,12 @@
 import AstCursor, { Keyword } from "../ast/cursor";
 import type { ArgMap, CandidateMatch, CodeBlock, Match } from "./types";
-import type { Context } from "..";
+import { Target, type Context } from "..";
 import Pattern from "../pattern/pattern";
-import ArgumentNode from "../pattern/argumentNode";
-import BlockNode from "../pattern/blockNode";
-import ContextVariableNode from "../pattern/contextVariableNode";
+import ArgumentNode from "../pattern/nodes/argumentNode";
+import BlockNode from "../pattern/nodes/blockNode";
+import ContextVariableNode from "../pattern/nodes/contextVariableNode";
 import PatternCursor from "../pattern/cursor";
-import RegularNode from "../pattern/regularNode";
+import RegularNode from "../pattern/nodes/regularNode";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.CandidateMatchVerification");
@@ -106,7 +106,7 @@ export default class CandidateMatchVerification {
     const regularNode = this.patternCursor.currentNode as RegularNode;
     this.checkNodeTypesMatch();
 
-    if (regularNode.hasText()) {
+    if (regularNode.hasText() && !regularNode.hasChildren()) {
       this.checkNodeTextsMatch();
       return;
     }
@@ -216,17 +216,17 @@ export default class CandidateMatchVerification {
 
   private extractCodeBlockFor(blockNode: BlockNode, lastSiblingKeyword?: Keyword): CodeBlock {
     let from = this.astCursor.startIndex;
-    if (blockNode.templateBlock.blockType === "py" && lastSiblingKeyword?.type === ":") {
+    if (blockNode.language === Target.Python && lastSiblingKeyword?.type === ":") {
       from = lastSiblingKeyword.pos;
     }
     const rangeModifierStart = 1;
-    const rangeModifierEnd = blockNode.templateBlock.blockType === "ts" ? 1 : 0;
+    const rangeModifierEnd = blockNode.language === Target.TypeScript ? 1 : 0;
     return {
       node: this.astCursor.currentNode,
       context: blockNode.templateBlock.context,
       from: from + rangeModifierStart,
       to: this.astCursor.endIndex - rangeModifierEnd,
-      blockType: blockNode.templateBlock.blockType,
+      blockType: blockNode.language,
     };
   }
 

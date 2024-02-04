@@ -1,6 +1,6 @@
 import Parser from "./parse/parser";
 import Pattern from "./pattern/pattern";
-import PatternNode from "./pattern/patternNode";
+import PatternNode from "./pattern/nodes/patternNode";
 
 export type { SyntaxNode } from "web-tree-sitter";
 export { Parser };

@@ -2,7 +2,7 @@
   import TypescriptEditor from "./ts/Editor.svelte";
   import PythonEditor from "./py/Editor.svelte";
 
-  let activeTab: "ts" | "py" = "ts";
+  let activeTab: "ts" | "py" = "py";
 
   function selectTypescript() {
     activeTab = "ts";
@@ -16,13 +16,9 @@
 <main>
   <ul class="tab-list">
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <li class={activeTab === "ts" ? "active" : ""} on:click={selectTypescript}>
-      TypeScript
-    </li>
+    <li class={activeTab === "ts" ? "active" : ""} on:click={selectTypescript}>TypeScript</li>
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <li class={activeTab === "py" ? "active" : ""} on:click={selectPython}>
-      Python
-    </li>
+    <li class={activeTab === "py" ? "active" : ""} on:click={selectPython}>Python</li>
   </ul>
   {#if activeTab === "ts"}
     <TypescriptEditor />
@@ -44,11 +40,10 @@
     width: 100vw;
     height: 100vh;
     overflow: auto;
-    --system-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-      Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
-      sans-serif;
-    --mono-font: "JetBrains Mono", "SF Mono", "Menlo", "Consolas", "Monaco",
-      "Courier New", monospace;
+    --system-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+      Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    --mono-font: "JetBrains Mono", "SF Mono", "Menlo", "Consolas", "Monaco", "Courier New",
+      monospace;
   }
 
   .tab-list {

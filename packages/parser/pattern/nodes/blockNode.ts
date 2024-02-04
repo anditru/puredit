@@ -1,23 +1,25 @@
 import PatternNode from "./patternNode";
-import AstNode from "../ast/node";
-import TemplateBlock from "../define/templateBlock";
+import AstNode from "../../ast/node";
+import TemplateBlock from "../../define/templateBlock";
+import { Target } from "../../treeSitterParser";
 
 export default class BlockNode extends PatternNode {
   static readonly TYPE = "BlockNode";
 
   constructor(
-    public readonly text: string,
+    language: Target,
+    text: string,
     fieldName: string | null,
     public readonly templateBlock: TemplateBlock
   ) {
-    super(BlockNode.TYPE, text, fieldName);
+    super(language, BlockNode.TYPE, text, fieldName);
   }
 
   matches(astNode: AstNode): boolean {
-    switch (this.templateBlock.blockType) {
-      case "ts":
+    switch (this.language) {
+      case Target.TypeScript:
         return astNode.cleanNodeType === "statement_block";
-      case "py":
+      case Target.Python:
         return astNode.cleanNodeType === "block";
       default:
         throw new Error("Unsupported language");
