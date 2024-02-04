@@ -13,8 +13,7 @@ export default class TemplateAggregation extends TemplateParameter {
     public readonly name: string,
     public readonly allowedPatterns: RawTemplate[],
     public readonly cardinality: AggregationCardinality,
-    public readonly context?: Context,
-    public readonly separatorToken?: string
+    public readonly context: Context = {}
   ) {
     super();
   }
@@ -31,7 +30,13 @@ export default class TemplateAggregation extends TemplateParameter {
   }
 
   toPatternNode(cursor: AstCursor, language: Target): PatternNode {
-    return new AggregationNode(language, cursor.currentNode.text, cursor.currentFieldName, this);
+    return new AggregationNode(
+      language,
+      cursor.currentNode.text,
+      cursor.currentFieldName,
+      cursor.currentNode.type,
+      this
+    );
   }
 }
 

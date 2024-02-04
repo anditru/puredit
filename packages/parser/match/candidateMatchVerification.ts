@@ -1,6 +1,6 @@
 import AstCursor, { Keyword } from "../ast/cursor";
-import type { ArgMap, CandidateMatch, CodeRange, Match } from "./types";
-import { Target, type Context } from "..";
+import type { AggregationRangeMap, ArgMap, CandidateMatch, CodeRange, Match } from "./types";
+import { Target, block, type Context } from "..";
 import Pattern from "../pattern/pattern";
 import ArgumentNode from "../pattern/nodes/argumentNode";
 import BlockNode from "../pattern/nodes/blockNode";
@@ -9,6 +9,7 @@ import PatternCursor from "../pattern/cursor";
 import RegularNode from "../pattern/nodes/regularNode";
 
 import { logProvider } from "../../../logconfig";
+import AggregationNode from "../pattern/nodes/aggregationNode";
 const logger = logProvider.getLogger("parser.match.CandidateMatchVerification");
 
 /**
@@ -27,6 +28,7 @@ export default class CandidateMatchVerification {
 
   private _args: ArgMap = {};
   private _blockRanges: CodeRange[] = [];
+  private _aggregationRangeMap: AggregationRangeMap = {};
 
   constructor(private candidateMatch: CandidateMatch) {
     this.pattern = this.candidateMatch.pattern;
@@ -48,6 +50,7 @@ export default class CandidateMatchVerification {
       node: this.astCursor.currentNode,
       args: this._args,
       blockRanges: this._blockRanges,
+      aggregationRangeMap: this._aggregationRangeMap,
     };
   }
 
@@ -63,6 +66,8 @@ export default class CandidateMatchVerification {
 
     if (this.patternCursor.currentNode instanceof ArgumentNode) {
       this.visitArgumentNode();
+    } else if (this.patternCursor.currentNode instanceof AggregationNode) {
+      this.visitAggregationNode();
     } else if (this.patternCursor.currentNode instanceof BlockNode) {
       this.visitBlockNode(lastSiblingKeyword);
     } else if (
@@ -77,21 +82,31 @@ export default class CandidateMatchVerification {
 
   private visitArgumentNode() {
     const argumentNode = this.patternCursor.currentNode as ArgumentNode;
-    this._args[argumentNode.templateArgument.name] = this.astCursor.currentNode;
     if (!this.patternCursor.currentNode.matches(this.astCursor.currentNode)) {
       logger.debug("AST does not match ArgumentNode");
       throw new DoesNotMatch();
     }
+    this._args[argumentNode.templateArgument.name] = this.astCursor.currentNode;
+  }
+
+  private visitAggregationNode() {
+    const aggregationNode = this.patternCursor.currentNode as AggregationNode;
+    if (!this.patternCursor.currentNode.matches(this.astCursor.currentNode)) {
+      logger.debug("AST node does not match AggregationNode");
+      throw new DoesNotMatch();
+    }
+    const aggregationRanges = this.extractAggregationRangesFor(aggregationNode);
+    this._aggregationRangeMap[aggregationNode.templateAggregation.name] = aggregationRanges;
   }
 
   private visitBlockNode(lastSiblingKeyword?: Keyword) {
     const blockNode = this.patternCursor.currentNode as BlockNode;
-    const blockRanges = this.extractBlockRangeFor(blockNode, lastSiblingKeyword);
-    this._blockRanges.push(blockRanges);
     if (!this.patternCursor.currentNode.matches(this.astCursor.currentNode)) {
       logger.debug("AST does not match BlockNode");
       throw new DoesNotMatch();
     }
+    const blockRange = this.extractBlockRangeFor(blockNode, lastSiblingKeyword);
+    this._blockRanges.push(blockRange);
   }
 
   private visitContextVariableNode() {
@@ -192,6 +207,26 @@ export default class CandidateMatchVerification {
     ) {
       this.astCursor.goToNextSibling();
     }
+  }
+
+  private extractAggregationRangesFor(aggregationNode: AggregationNode): CodeRange[] {
+    const currentAstNode = this.astCursor.currentNode;
+
+    const aggregationPartRoots = currentAstNode.children.filter((astNode) => {
+      return !(
+        astNode.text === aggregationNode.startToken ||
+        astNode.text === aggregationNode.delimiterToken ||
+        astNode.text === aggregationNode.endToken
+      );
+    });
+
+    return aggregationPartRoots.map((aggregationPartRoot) => ({
+      node: currentAstNode,
+      context: aggregationNode.templateAggregation.context,
+      from: aggregationPartRoot.startIndex,
+      to: aggregationPartRoot.endIndex,
+      language: aggregationNode.language,
+    }));
   }
 
   private extractBlockRangeFor(blockNode: BlockNode, lastSiblingKeyword?: Keyword): CodeRange {

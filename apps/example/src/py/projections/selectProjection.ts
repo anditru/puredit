@@ -12,12 +12,7 @@ export const columnWithAlias = pythonParser.aggPartPattern`${columnAlias}=${colu
 
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
 const sourceDataFrame = arg("sourceDataFrame", ["identifier"]);
-const columns = agg(
-  "columns",
-  [column, columnWithAlias],
-  AggregationCardinality.OneToMany,
-  ","
-);
+const columns = agg("columns", [column, columnWithAlias], AggregationCardinality.OneToMany);
 
 export const pattern = pythonParser.statementPattern`
 ${targetDataFrame}=${sourceDataFrame}.select(${columns})

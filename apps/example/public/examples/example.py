@@ -45,4 +45,4 @@ r = 5
 x = mathdsl.evaluate("r^r", locals())
 print("x:", x)
 
-df.select(foo="bar", "boo", moo="zoo") 
+df2 = df.select(foo="bar", "boo", moo="zoo") 

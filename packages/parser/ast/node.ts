@@ -57,15 +57,24 @@ export default class AstNode {
     return new AstCursor(this.syntaxNode.walk());
   }
 
+  get parent(): AstNode | null {
+    if (this.syntaxNode.parent) {
+      return new AstNode(this.syntaxNode.parent);
+    } else {
+      return null;
+    }
+  }
+
+  get children() {
+    return this.syntaxNode.children.map((child) => new AstNode(child));
+  }
+
   get type() {
     return this.syntaxNode.type;
   }
 
   get cleanNodeType() {
-    if (
-      this.syntaxNode.type === "identifier" &&
-      this.syntaxNode.text.startsWith("__empty_")
-    ) {
+    if (this.syntaxNode.type === "identifier" && this.syntaxNode.text.startsWith("__empty_")) {
       return this.syntaxNode.text.slice("__empty_".length);
     }
     return this.syntaxNode.type;

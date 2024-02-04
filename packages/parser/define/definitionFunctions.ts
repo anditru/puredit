@@ -4,11 +4,10 @@
  */
 
 import TemplateAggregation, { AggregationCardinality } from "./templateAggregation";
+import { Context } from "../match/types";
 import TemplateArgument from "./templateArgument";
 import TemplateBlock from "./templateBlock";
 import TemplateContextVariable from "./templateContextVariable";
-import { Target } from "../treeSitterParser";
-import { Context } from "../match/types";
 import RawTemplate from "./rawTemplate";
 
 /**
@@ -32,10 +31,9 @@ export function agg(
   name: string,
   allowedPatterns: RawTemplate[],
   cardinality: AggregationCardinality,
-  separatorToken?: string,
   context: Context = {}
 ): TemplateAggregation {
-  return new TemplateAggregation(name, allowedPatterns, cardinality, context, separatorToken);
+  return new TemplateAggregation(name, allowedPatterns, cardinality, context);
 }
 
 /**

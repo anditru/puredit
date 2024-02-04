@@ -18,9 +18,12 @@ export interface Match {
   node: AstNode;
   args: ArgMap;
   blockRanges: CodeRange[];
+  aggregationRangeMap: AggregationRangeMap;
 }
 
 export type Context = Record<string, string>;
+
+export type AggregationRangeMap = Record<string, CodeRange[]>;
 
 export interface ContextRange {
   from: number;

@@ -26,19 +26,11 @@
 
 <span class="inline-flex">
   <span>Read column(s)</span>
-  <TextInput
-    className={highlightingFor(state, [tags.string])}
-    node={match.args.var2}
-    placeholder="var2"
-    {state}
-    {view}
-    {focusGroup}
-  />
   <span>from</span>
   <TextInput
     className={highlightingFor(state, [tags.string])}
-    node={match.args.var1}
-    placeholder="var1"
+    node={match.args.sourceDataFrame}
+    placeholder="sourceDataFrame"
     {state}
     {view}
     {focusGroup}
@@ -46,8 +38,8 @@
   <span>into</span>
   <TextInput
     className={highlightingFor(state, [tags.string])}
-    node={match.args.var0}
-    placeholder="var0"
+    node={match.args.targetDataFrame}
+    placeholder="targetDataFrame"
     {state}
     {view}
     {focusGroup}

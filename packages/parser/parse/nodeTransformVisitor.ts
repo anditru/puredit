@@ -5,6 +5,7 @@ import PatternNode from "../pattern/nodes/patternNode";
 import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
 import { Target } from "../treeSitterParser";
 import TemplateAggregation from "../define/templateAggregation";
+import AggregationNode from "../pattern/nodes/aggregationNode";
 
 export class NodeTransformVisitor {
   cursor: AstCursor | undefined;
@@ -69,6 +70,12 @@ export class NodeTransformVisitor {
      * we need to shift it up. */
     if (patternNodeBuilder.buildsParentOfBlockNode()) {
       return patternNodeBuilder.children[0];
+    }
+    if (patternNodeBuilder.buildsParentOfAggregationNode()) {
+      const firstChild = patternNodeBuilder.children[0] as AggregationNode;
+      firstChild.astNodeType = patternNodeBuilder.type!;
+      firstChild.fieldName = patternNodeBuilder.fieldName!;
+      return firstChild;
     }
 
     return patternNodeBuilder.buildAndSetParentOnChildren();

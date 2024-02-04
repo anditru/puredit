@@ -3,12 +3,12 @@ import { Context } from "../../match/types";
 import { Target } from "../../treeSitterParser";
 
 export default abstract class PatternNode {
-  public readonly fieldName: string | undefined;
+  public fieldName: string | undefined;
   private _parent: PatternNode | null | undefined;
 
   constructor(
     public readonly language: Target,
-    public readonly type: string,
+    public type: string,
     public readonly text: string,
     fieldName: string | null,
     public readonly children: PatternNode[] = []

@@ -76,6 +76,10 @@ export class RegularNodeBuilder {
     );
   }
 
+  buildsParentOfAggregationNode() {
+    return ["argument_list"].includes(this._type!) && this._children[0]?.type === "AggregationNode";
+  }
+
   get fieldName() {
     return this._fieldName;
   }
