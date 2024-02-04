@@ -104,15 +104,17 @@ export default class CandidateMatchVerification {
 
   private visitRegularNode() {
     const regularNode = this.patternCursor.currentNode as RegularNode;
-    this.checkNodeTypesMatch();
+    if (!regularNode.matches(this.astCursor.currentNode)) {
+      logger.debug("AST does not match RegularNode.");
+      throw new DoesNotMatch();
+    }
 
-    if (regularNode.hasText() && !regularNode.hasChildren()) {
-      this.checkNodeTextsMatch();
+    if (!regularNode.hasChildren()) {
       return;
     }
 
-    if (!this.patternAndAstNodeHaveChildren()) {
-      logger.debug("AST node or pattern node has neither text nor children");
+    if (!this.astCursor.currentNode.hasChildren()) {
+      logger.debug("Pattern node has children but AST node does not");
       throw new DoesNotMatch();
     }
 
@@ -120,7 +122,7 @@ export default class CandidateMatchVerification {
     this.astCursor.goToFirstChild();
     let [nextSiblingExists, lastKeyword] = this.astCursor.skipKeywordsAndGetLast();
     if (!nextSiblingExists) {
-      logger.debug("Pattern node has children but AST node does not");
+      logger.debug("Patter node has children but AST node only has keywords as children");
       throw new DoesNotMatch();
     }
 
@@ -148,28 +150,6 @@ export default class CandidateMatchVerification {
 
     this.astCursor.goToParent();
     this.patternCursor.goToParent();
-  }
-
-  private patternAndAstNodeHaveChildren() {
-    return this.patternCursor.currentNode.hasChildren() && this.astCursor.currentNode.hasChildren();
-  }
-
-  private checkNodeTypesMatch() {
-    const astNodeType = this.astCursor.currentNode.cleanNodeType;
-    const patternNodeType = this.patternCursor.currentNode.type;
-    if (astNodeType !== patternNodeType) {
-      logger.debug(`Node types do not match. Pattern: ${patternNodeType}, "AST: ${astNodeType}`);
-      throw new DoesNotMatch();
-    }
-  }
-
-  private checkNodeTextsMatch() {
-    const astNodeText = this.patternCursor.currentNode.text;
-    const patternNodeText = this.patternCursor.currentNode.text;
-    if (patternNodeText !== astNodeText) {
-      logger.debug(`Node textes do not match. Pattern: ${patternNodeText}, "AST: ${astNodeText}`);
-      throw new DoesNotMatch();
-    }
   }
 
   private checkNoErrorToken() {

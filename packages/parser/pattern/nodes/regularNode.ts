@@ -14,7 +14,14 @@ export default class RegularNode extends PatternNode {
   }
 
   matches(astNode: AstNode): boolean {
-    return false;
+    if (astNode.cleanNodeType !== this.type) {
+      return false;
+    }
+    if (this.hasChildren()) {
+      return true;
+    } else {
+      return astNode.text === this.text;
+    }
   }
 }
 
