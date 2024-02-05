@@ -10,7 +10,7 @@ const columnSource = arg("columnSource", ["string"]);
 const target = arg("target", ["string"]);
 const replacement = arg("replacement", ["string"]);
 
-export const pattern = tsParser.statementPattern`
+export const pattern = tsParser.statementPattern("replateData")`
 ${table}[${columnTarget}] = ${table}[${columnSource}].replace(${target}, ${replacement});
 `;
 

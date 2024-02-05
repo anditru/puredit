@@ -9,7 +9,7 @@ const fileName = arg("fileName", ["string"]);
 const sheetName = arg("sheetName", ["string"]);
 const columns = arg("columns", ["list"]);
 
-export const pattern = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern("storeSheet")`
 ${dsl}.store_sheet(${fileName}, ${sheetName}, ${columns})
 `;
 

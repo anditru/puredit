@@ -4,8 +4,10 @@ import PatternPath from "./patternPath";
 
 export default class BasePattern implements Pattern {
   private numberOfLeafNodes: number;
+  private _name: string;
 
-  constructor(public readonly rootNode: PatternNode) {
+  constructor(public readonly rootNode: PatternNode, name: string) {
+    this._name = name;
     this.numberOfLeafNodes = this.countLeafNodes();
   }
 
@@ -65,6 +67,10 @@ export default class BasePattern implements Pattern {
   getDraft(): string {
     // TODO: Implement draft generation considering Aggregation variants
     return "__pattern";
+  }
+
+  get name(): string {
+    return this._name;
   }
 
   get priority(): number {

@@ -11,7 +11,7 @@ import { pythonParser } from "./parser";
 const db = contextVariable("db");
 const table = arg("table", ["string"]);
 
-export const pattern = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern("changeTableWithBlock")`
 with ${db}.change(${table}) as table:
     ${block({ table: "table" })}
 `;
@@ -32,11 +32,7 @@ export const changeProjection: Projection = {
   pattern,
   requiredContextVariables: ["db"],
   widgets: [widget],
-  contextProvider(
-    match: Match,
-    text: Text,
-    context: OuterContext
-  ): InnerContext {
+  contextProvider(match: Match, text: Text, context: OuterContext): InnerContext {
     const tableName = stringLiteralValue(match.args.table, text);
     return {
       columns: context.tables[tableName]?.columns || {},

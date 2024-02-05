@@ -10,12 +10,18 @@ import PatternCursor from "../pattern/cursor";
 import { SubPatternMap } from "../pattern/types";
 
 export class PatternBuilder {
+  private name: string | undefined;
   private rawTemplate: RawTemplate | undefined;
   private isExpression: boolean | undefined;
   private targetLanguage: Target | undefined;
   private nodeTransformVisitor: NodeTransformVisitor | undefined;
 
   constructor(private readonly parser: TreeSitterParser | undefined) {}
+
+  setName(name: string): PatternBuilder {
+    this.name = name;
+    return this;
+  }
 
   setRawTemplate(rawTemplate: RawTemplate): PatternBuilder {
     this.rawTemplate = rawTemplate;
@@ -39,7 +45,7 @@ export class PatternBuilder {
     );
 
     const rootNode = this.buildPatternTree();
-    let pattern = new BasePattern(rootNode) as Pattern;
+    let pattern = new BasePattern(rootNode, this.name!) as Pattern;
 
     if (this.rawTemplate!.hasAggregations()) {
       pattern = this.buildPatternWithAggregations(pattern);
@@ -78,13 +84,13 @@ export class PatternBuilder {
       const aggregationSubPatterns = partCodeStrings
         .map((partCodeString) => baseCodeString.replace(aggregationCodeString, partCodeString))
         .map((codeStringVariant) => this.transformToPatternTree(codeStringVariant))
-        .map((patternTreeVariant) => {
+        .map((patternTreeVariant, index: number) => {
           const patternTreeVariantCursor = new PatternCursor(patternTreeVariant);
           patternTreeVariantCursor.follow(aggregationRootPath);
           patternTreeVariantCursor.goToFirstChild();
           const subPatternRoot = patternTreeVariantCursor.currentNode;
           subPatternRoot.cutOff();
-          return new BasePattern(subPatternRoot);
+          return new BasePattern(subPatternRoot, aggregation.subPatterns[index].name);
         });
 
       aggregationPatternMap[aggregation.name] = aggregationSubPatterns;

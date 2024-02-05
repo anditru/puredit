@@ -9,7 +9,7 @@ const sheetRange = arg("sheetRange", ["string"]);
 const columns = arg("columns", ["pattern_list"]);
 const expression = arg("expression", ["string"]);
 
-export const pattern = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern("takeColumnsFromSheet")`
 ${columns} = ${sheet}.take(${sheetRange}, ${expression})
 `;
 
@@ -17,8 +17,7 @@ export const widget = svelteProjection(TakeProjection);
 
 export const takeProjection: Projection = {
   name: "take columns from sheet range",
-  description:
-    "Extracts all columns from a sheet range that match the criteria",
+  description: "Extracts all columns from a sheet range that match the criteria",
   pattern,
   requiredContextVariables: ["sheet"],
   widgets: [widget],

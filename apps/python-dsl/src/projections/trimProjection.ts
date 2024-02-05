@@ -8,7 +8,7 @@ const table = contextVariable("table");
 const column = arg("column", ["string"]);
 const direction = arg("direction", ["string"]);
 
-export const pattern = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern("trimData")`
 ${table}.column(${column}).trim(${direction})
 `;
 

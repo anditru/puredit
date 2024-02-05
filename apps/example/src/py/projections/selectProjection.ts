@@ -7,14 +7,16 @@ import SelectProjection from "./SelectProjection.svelte";
 
 const columnName = arg("columnName", ["string"]);
 const columnAlias = arg("columnAlias", ["identifier"]);
-export const column = pythonParser.aggPartPattern`${columnName}`;
-export const columnWithAlias = pythonParser.aggPartPattern`${columnAlias}=${columnName}`;
+export const column = pythonParser.aggSubPattern("column")`${columnName}`;
+export const columnWithAlias = pythonParser.aggSubPattern(
+  "columnWithAlias"
+)`${columnAlias}=${columnName}`;
 
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
 const sourceDataFrame = arg("sourceDataFrame", ["identifier"]);
 const columns = agg("columns", [column, columnWithAlias], AggregationCardinality.OneToMany);
 
-export const pattern = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern("select")`
 ${targetDataFrame}=${sourceDataFrame}.select(${columns})
 `;
 

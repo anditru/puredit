@@ -1,31 +1,21 @@
 <script type="ts">
   import type { EditorState } from "@codemirror/state";
   import type { EditorView } from "@codemirror/view";
-  import type { SyntaxNode } from "@puredit/parser";
-  import type {
-    CursorPositionHandler,
-    FocusGroup,
-  } from "@puredit/projections/focus";
-  import {
-    stringLiteralValue,
-    stringLiteralValueChange,
-  } from "@puredit/projections/shared";
+  import type AstNode from "@puredit/parser/ast/node";
+  import type { CursorPositionHandler, FocusGroup } from "@puredit/projections/focus";
+  import { stringLiteralValue, stringLiteralValueChange } from "@puredit/projections/shared";
   import { MathfieldElement } from "mathlive";
   import { onDestroy, onMount } from "svelte";
   export let view: EditorView | null;
-  export let node: SyntaxNode;
+  export let node: AstNode;
   export let state: EditorState;
   export let focusGroup: FocusGroup | null = null;
   let target: HTMLElement;
   let activeFocusGroup: FocusGroup | null = null;
-  MathfieldElement.fontsDirectory =
-    "https://unpkg.com/mathlive@0.95.5/dist/fonts";
-  MathfieldElement.soundsDirectory =
-    "https://unpkg.com/mathlive@0.95.5/dist/sounds";
+  MathfieldElement.fontsDirectory = "https://unpkg.com/mathlive@0.95.5/dist/fonts";
+  MathfieldElement.soundsDirectory = "https://unpkg.com/mathlive@0.95.5/dist/sounds";
   const mfe = new MathfieldElement();
-  (mfe as Partial<CursorPositionHandler>).focusGroupSetCursorPosition = (
-    cursorPosition
-  ) => {
+  (mfe as Partial<CursorPositionHandler>).focusGroupSetCursorPosition = (cursorPosition) => {
     switch (cursorPosition) {
       case "start":
         mfe.executeCommand("moveToMathfieldStart");

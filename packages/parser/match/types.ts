@@ -13,16 +13,24 @@ export interface CandidateMatch {
   context: Context;
 }
 
+export type Context = Record<string, string>;
+
 export interface Match {
   pattern: Pattern;
   node: AstNode;
   args: ArgMap;
   blockRanges: CodeRange[];
   aggregationRangeMap: AggregationRangeMap;
+  aggregationMatchMap: AggregationMatchMap;
 }
 
-export type Context = Record<string, string>;
+export type AggregationMatchMap = Record<string, AggregationMatch[]>;
 
+export interface AggregationMatch {
+  pattern: Pattern;
+  node: AstNode;
+  args: ArgMap;
+}
 export type AggregationRangeMap = Record<string, CodeRange[]>;
 
 export interface ContextRange {

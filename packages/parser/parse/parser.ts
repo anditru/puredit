@@ -4,7 +4,6 @@ import RawTemplate from "../define/rawTemplate";
 import type { TreeSitterParser } from "../treeSitterParser";
 import { createTreeSitterParser, Target } from "../treeSitterParser";
 import { PatternBuilder } from "./patternBuilder";
-import Pattern from "../pattern/pattern";
 
 export default class Parser {
   static async load(target: Target): Promise<Parser> {
@@ -12,10 +11,10 @@ export default class Parser {
     return new Parser(treeSitterParser, target);
   }
 
-  patternNodeBuilder: PatternBuilder;
+  patternBuilder: PatternBuilder;
 
   private constructor(private treeSitterParser: TreeSitterParser, public readonly target: Target) {
-    this.patternNodeBuilder = new PatternBuilder(treeSitterParser);
+    this.patternBuilder = new PatternBuilder(treeSitterParser);
   }
 
   parse(
@@ -26,46 +25,48 @@ export default class Parser {
     return this.treeSitterParser.parse(input, previousTree, options);
   }
 
-  aggPartPattern(
-    template: TemplateStringsArray,
-    ...params: (string | TemplateArgument)[]
-  ): RawTemplate {
-    return new RawTemplate(template, params);
+  /**
+   * Parses an aggregation subpattern
+   * @param name Name of the aggregation subpattern
+   * @returns RawTemplate
+   */
+  aggSubPattern(name: string) {
+    return (template: TemplateStringsArray, ...params: (string | TemplateArgument)[]) => {
+      return new RawTemplate(template, params, name);
+    };
   }
 
   /**
-   * Builds a Statement Pattern
-   * @param template String pices of the template
-   * @param params Active nodes in the pattern
-   * @returns PatternNode
+   * Parses a statement pattern
+   * @param name Name of the statement pattern
+   * @returns Pattern
    */
-  statementPattern(
-    template: TemplateStringsArray,
-    ...params: (string | TemplateParameter)[]
-  ): Pattern {
-    const rawTemplate = new RawTemplate(template, params);
-    return this.patternNodeBuilder
-      .setRawTemplate(rawTemplate)
-      .setTargetLanguage(this.target)
-      .setIsExpression(false)
-      .build();
+  statementPattern(name: string) {
+    return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
+      const rawTemplate = new RawTemplate(template, params, name);
+      return this.patternBuilder
+        .setName(name)
+        .setRawTemplate(rawTemplate)
+        .setTargetLanguage(this.target)
+        .setIsExpression(false)
+        .build();
+    };
   }
 
   /**
-   * Builds an Expression Pattern
-   * @param template String pices of the template
-   * @param params Active nodes in the pattern
-   * @returns PatternNode
+   * Parses an expression pattern
+   * @param name Name of the expression pattern
+   * @returns Pattern
    */
-  expressionPattern(
-    template: TemplateStringsArray,
-    ...params: (string | TemplateParameter)[]
-  ): Pattern {
-    const rawTemplate = new RawTemplate(template, params);
-    return this.patternNodeBuilder
-      .setRawTemplate(rawTemplate)
-      .setTargetLanguage(this.target)
-      .setIsExpression(true)
-      .build();
+  expressionPattern(name: string) {
+    return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
+      const rawTemplate = new RawTemplate(template, params, name);
+      return this.patternBuilder
+        .setName(name)
+        .setRawTemplate(rawTemplate)
+        .setTargetLanguage(this.target)
+        .setIsExpression(true)
+        .build();
+    };
   }
 }

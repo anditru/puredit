@@ -1,10 +1,5 @@
 <script lang="ts">
-  import {
-    arg,
-    block,
-    createPatternMap,
-    PatternMatching,
-  } from "@puredit/parser";
+  import { arg, block, createPatternMap, PatternMatching } from "@puredit/parser";
   import { matchToString, syntaxNodeToString } from "@puredit/parser/inspect";
   import { parser } from "./parser";
   import AstNode from "@puredit/parser/ast/node";
@@ -17,16 +12,16 @@
   const snippetNode = parser.parse(snippet).rootNode;
 
   const patternMap = createPatternMap([
-    parser.statementPattern`
+    parser.statementPattern("changeTable")`
       db.change(${arg("table", ["string"])}, (table) => ${block()});
     `,
-    parser.statementPattern`
+    parser.statementPattern("replaceData")`
       table.column(${arg("column", ["string"])}).replace(
         ${arg("target", ["string"])},
         ${arg("replacement", ["string"])}
       );
     `,
-    parser.statementPattern`
+    parser.statementPattern("trimData")`
       table.column(${arg("column", ["string"])}).trim(
         ${arg("direction", ["string"])},
       );
@@ -37,9 +32,7 @@
   const patternMatching = new PatternMatching(patternMap, snippetNode.walk());
   const { matches } = patternMatching.execute();
   console.timeEnd("findPatterns");
-  const matchStrings = matches
-    .map((match) => matchToString(match, snippet))
-    .join("\n");
+  const matchStrings = matches.map((match) => matchToString(match, snippet)).join("\n");
 </script>
 
 <pre>{syntaxNodeToString(new AstNode(snippetNode), snippet)}</pre>

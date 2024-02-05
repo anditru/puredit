@@ -43,6 +43,7 @@ export default class MatchVerification {
       args: this._args,
       blockRanges: this._blockRanges,
       aggregationRangeMap: this._aggregationRangeMap,
+      aggregationMatchMap: {},
     };
   }
 

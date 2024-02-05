@@ -12,7 +12,7 @@ const targetColumn = arg("targetColumn", ["identifier"]);
 const expression = arg("expression", ["string"]);
 const aggregationMethod = arg("aggregationMethod", ["string"]);
 
-export const pattern = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern("joinAllColumnsFromSheet")`
 ${columns} = ${sheet}.join(${sheetRange}, ${targetColumn}, ${expression}, ${dsl}.AggregationMethod[${aggregationMethod}])
 `;
 

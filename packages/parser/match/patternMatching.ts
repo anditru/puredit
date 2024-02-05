@@ -29,8 +29,9 @@ export class PatternMatching {
       if (this.candidatePatternsExistForCurrentNode()) {
         const firstMatch = this.findFirstMatchForCurrentNode();
         if (firstMatch) {
-          this.findMatchesInBlockRangesOf(firstMatch);
-          this.findMatchesInAggregationRangesOf(firstMatch);
+          const firstMatchWithAggregationMatches =
+            this.findMatchesInAggregationRangesOf(firstMatch);
+          this.findMatchesInBlockRangesOf(firstMatchWithAggregationMatches);
           continue;
         }
       }
@@ -108,15 +109,16 @@ export class PatternMatching {
     }
   }
 
-  private findMatchesInAggregationRangesOf(match: Match): void {
+  private findMatchesInAggregationRangesOf(match: Match): Match {
     if (!(match.pattern instanceof AggregationDecorator)) {
-      return;
+      match;
     }
 
     const pattern = match.pattern as AggregationDecorator;
     for (const aggregationName in match.aggregationRangeMap) {
       const subPatternMap = pattern.getSubPatternMapFor(aggregationName);
       const aggregationRanges = match.aggregationRangeMap[aggregationName];
+      match.aggregationMatchMap[aggregationName] = [];
 
       for (const aggregationRange of aggregationRanges) {
         const aggregationPatternMatching = new PatternMatching(
@@ -125,10 +127,12 @@ export class PatternMatching {
           Object.assign({}, this.context, aggregationRange.context)
         );
         const result = aggregationPatternMatching.execute();
-        this.matches = this.matches.concat(result.matches);
-        this.contextRanges = this.contextRanges.concat(result.contextRanges);
+        match.aggregationMatchMap[aggregationName] = match.aggregationMatchMap[
+          aggregationName
+        ].concat(result.matches);
       }
     }
+    return match;
   }
 
   private findMatchesInFirstChild(): void {

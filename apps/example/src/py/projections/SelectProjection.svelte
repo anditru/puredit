@@ -24,24 +24,64 @@
   });
 </script>
 
-<span class="inline-flex">
+<div style="display: flex; flex-direction: column">
   <span>Read column(s)</span>
-  <span>from</span>
-  <TextInput
-    className={highlightingFor(state, [tags.string])}
-    node={match.args.sourceDataFrame}
-    placeholder="sourceDataFrame"
-    {state}
-    {view}
-    {focusGroup}
-  />
-  <span>into</span>
-  <TextInput
-    className={highlightingFor(state, [tags.string])}
-    node={match.args.targetDataFrame}
-    placeholder="targetDataFrame"
-    {state}
-    {view}
-    {focusGroup}
-  />
-</span>
+  {#each match.aggregationMatchMap["columns"] as columnMatch}
+    {#if columnMatch.pattern.name === "column"}
+      <span id="column" class="inline-flex">
+        <TextInput
+          className={highlightingFor(state, [tags.string])}
+          node={columnMatch.args.columnName}
+          placeholder="columnName"
+          {state}
+          {view}
+          {focusGroup}
+        />
+      </span>
+    {:else if columnMatch.pattern.name === "columnWithAlias"}
+      <span id="columnWithAlias" class="inline-flex">
+        <TextInput
+          className={highlightingFor(state, [tags.string])}
+          node={columnMatch.args.columnName}
+          placeholder="columnName"
+          {state}
+          {view}
+          {focusGroup}
+        />
+        <span>as</span>
+        <TextInput
+          className={highlightingFor(state, [tags.string])}
+          node={columnMatch.args.columnAlias}
+          placeholder="columnAlias"
+          {state}
+          {view}
+          {focusGroup}
+        />
+      </span>
+    {/if}
+  {/each}
+
+  <span id="fromClause" class="inline-flex">
+    <span>from</span>
+    <TextInput
+      className={highlightingFor(state, [tags.string])}
+      node={match.args.sourceDataFrame}
+      placeholder="sourceDataFrame"
+      {state}
+      {view}
+      {focusGroup}
+    />
+  </span>
+
+  <span id="intoClause" class="inline-flex">
+    <span>into</span>
+    <TextInput
+      className={highlightingFor(state, [tags.string])}
+      node={match.args.targetDataFrame}
+      placeholder="targetDataFrame"
+      {state}
+      {view}
+      {focusGroup}
+    />
+  </span>
+</div>

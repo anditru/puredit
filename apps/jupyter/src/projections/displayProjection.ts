@@ -7,7 +7,7 @@ import DisplayProjection from "./DisplayProjection.svelte";
 const dsl = contextVariable("dsl");
 const columns = arg("columns", ["list"]);
 
-export const pattern = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern("displayColumns")`
 ${dsl}.display(${columns})
 `;
 

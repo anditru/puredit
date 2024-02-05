@@ -5,7 +5,8 @@ import TemplateAggregation from "./templateAggregation";
 export default class RawTemplate {
   constructor(
     public readonly template: TemplateStringsArray,
-    public readonly params: (string | TemplateParameter)[]
+    public readonly params: (string | TemplateParameter)[],
+    public readonly name: string
   ) {}
 
   hasAggregations(): boolean {

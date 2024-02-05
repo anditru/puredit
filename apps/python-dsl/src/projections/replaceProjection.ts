@@ -9,7 +9,7 @@ const column = arg("column", ["string"]);
 const target = arg("target", ["string"]);
 const replacement = arg("replacement", ["string"]);
 
-export const pattern = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern("replaceData")`
 ${table}.column(${column}).replace(${target}, ${replacement})
 `;
 

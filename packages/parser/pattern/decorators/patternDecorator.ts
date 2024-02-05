@@ -21,6 +21,10 @@ export default abstract class PatternDecorator implements Pattern {
     return this.pattern.getDraft();
   }
 
+  get name(): string {
+    return this.pattern.name;
+  }
+
   get priority(): number {
     return this.pattern.priority;
   }

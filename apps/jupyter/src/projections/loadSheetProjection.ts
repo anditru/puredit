@@ -8,7 +8,7 @@ const dsl = contextVariable("dsl");
 const fileName = arg("fileName", ["string"]);
 const sheetName = arg("sheetName", ["string"]);
 
-export const pattern = pythonParser.statementPattern`
+export const pattern = pythonParser.statementPattern("loadSheet")`
 with ${dsl}.load_sheet(${fileName}, ${sheetName}) as sheet:
     ${block({ sheet: "sheet" })}
 `;

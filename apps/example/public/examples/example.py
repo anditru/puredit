@@ -45,4 +45,5 @@ r = 5
 x = mathdsl.evaluate("r^r", locals())
 print("x:", x)
 
+# 4. Example: Projection with aggregation
 df2 = df.select(foo="bar", "boo", moo="zoo") 

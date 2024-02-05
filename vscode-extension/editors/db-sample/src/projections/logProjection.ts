@@ -5,7 +5,7 @@ import { tsParser } from "./parser";
 
 const message = arg("message", ["string"]);
 
-export const pattern = tsParser.statementPattern`
+export const pattern = tsParser.statementPattern("logMessage")`
 console.log(${message});
 `;
 
