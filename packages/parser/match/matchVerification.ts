@@ -7,20 +7,12 @@ import BlockNode from "../pattern/nodes/blockNode";
 import ContextVariableNode from "../pattern/nodes/contextVariableNode";
 import PatternCursor from "../pattern/cursor";
 import RegularNode from "../pattern/nodes/regularNode";
+import AggregationNode from "../pattern/nodes/aggregationNode";
 
 import { logProvider } from "../../../logconfig";
-import AggregationNode from "../pattern/nodes/aggregationNode";
-const logger = logProvider.getLogger("parser.match.CandidateMatchVerification");
+const logger = logProvider.getLogger("parser.match.MatchVerification");
 
-/**
- * @class CandidateMatch
- * A CandidateMatch represents the combination of a pattern and a certain
- * prosition in the AST in which the pattern matches the AST. The position
- * in the AST is here represented by an AstCursor that points to the node
- * of the AST that serves as starting point from which the nodes of the
- * pattern are matched against those of the AST.
- */
-export default class CandidateMatchVerification {
+export default class MatchVerification {
   private pattern: Pattern;
   private patternCursor: PatternCursor;
   private astCursor: AstCursor;

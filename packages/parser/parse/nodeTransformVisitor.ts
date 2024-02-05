@@ -112,7 +112,7 @@ export class NodeTransformVisitor {
         return param;
       }
       if (param instanceof TemplateAggregation) {
-        for (const allowedPattern of param.allowedPatterns) {
+        for (const allowedPattern of param.subPatterns) {
           const result = this.recursefindTemplateParameterBy(id, allowedPattern.params);
           if (result !== null) {
             return result;

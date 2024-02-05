@@ -1,6 +1,6 @@
 import type { ContextRange, PatternMatchingResult, Match, PatternMap } from "./types";
-import { createPatternMap, type Context } from "..";
-import CandidateMatchVerification, { DoesNotMatch } from "./candidateMatchVerification";
+import type { Context } from "..";
+import MatchVerification, { DoesNotMatch } from "./matchVerification";
 import AstCursor from "../ast/cursor";
 import Pattern from "../pattern/pattern";
 import { TreeCursor } from "web-tree-sitter";
@@ -53,7 +53,7 @@ export class PatternMatching {
         cursor: this.cursor.currentNode.walk(),
         context: this.context,
       };
-      const candidateMatchVerification = new CandidateMatchVerification(candidateMatch);
+      const candidateMatchVerification = new MatchVerification(candidateMatch);
 
       let match;
       try {

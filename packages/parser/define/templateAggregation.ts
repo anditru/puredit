@@ -11,7 +11,7 @@ export default class TemplateAggregation extends TemplateParameter {
 
   constructor(
     public readonly name: string,
-    public readonly allowedPatterns: RawTemplate[],
+    public readonly subPatterns: RawTemplate[],
     public readonly cardinality: AggregationCardinality,
     public readonly context: Context = {}
   ) {
@@ -26,7 +26,7 @@ export default class TemplateAggregation extends TemplateParameter {
   }
 
   getCodeStringsForParts(): string[] {
-    return this.allowedPatterns.map((pattern: RawTemplate) => pattern.toCodeString());
+    return this.subPatterns.map((pattern: RawTemplate) => pattern.toCodeString());
   }
 
   toPatternNode(cursor: AstCursor, language: Target): PatternNode {

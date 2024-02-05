@@ -76,7 +76,7 @@ export class RegularNodeBuilder {
   buildsParentOfBlockNode() {
     return (
       ["block", "expression_statement"].includes(this._type!) &&
-      this._children[0].type === "TemplateBlock"
+      this._children[0].type === "BlockNode"
     );
   }
 
