@@ -24,6 +24,10 @@ export default abstract class PatternNode {
     return this.type === "program" || this.type === "module";
   }
 
+  isLeafNode(): boolean {
+    return this.children.length === 0;
+  }
+
   hasParent(): boolean {
     return !!this.parent;
   }
@@ -70,4 +74,5 @@ export default abstract class PatternNode {
   }
 
   abstract matches(astNode: AstNode, context?: Context): boolean;
+  abstract getMatchedTypes(): string[];
 }

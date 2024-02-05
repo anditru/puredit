@@ -16,6 +16,10 @@ export default class ContextVariableNode extends PatternNode {
     super(language, ContextVariableNode.TYPE, text, fieldName);
   }
 
+  getMatchedTypes(): string[] {
+    return ["*"];
+  }
+
   matches(astNode: AstNode, context: Context): boolean {
     return (
       astNode.cleanNodeType === "identifier" &&

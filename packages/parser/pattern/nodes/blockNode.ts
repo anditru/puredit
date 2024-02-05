@@ -15,6 +15,15 @@ export default class BlockNode extends PatternNode {
     super(language, BlockNode.TYPE, text, fieldName);
   }
 
+  getMatchedTypes(): string[] {
+    switch (this.language) {
+      case Target.TypeScript:
+        return ["statement_block"];
+      case Target.Python:
+        return ["block"];
+    }
+  }
+
   matches(astNode: AstNode): boolean {
     switch (this.language) {
       case Target.TypeScript:

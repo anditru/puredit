@@ -9,8 +9,8 @@ export default abstract class PatternDecorator implements Pattern {
     return this.pattern.rootNode;
   }
 
-  get rootNodeType(): string {
-    return this.pattern.rootNodeType;
+  getTypesMatchedByRootNode(): string[] {
+    return this.pattern.getTypesMatchedByRootNode();
   }
 
   getPathToNodeWithText(text: string): PatternPath {
@@ -19,5 +19,9 @@ export default abstract class PatternDecorator implements Pattern {
 
   getDraft(): string {
     return this.pattern.getDraft();
+  }
+
+  get priority(): number {
+    return this.pattern.priority;
   }
 }

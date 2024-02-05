@@ -15,6 +15,10 @@ export default class ArgumentNode extends PatternNode {
     super(language, ArgumentNode.TYPE, text, fieldName);
   }
 
+  getMatchedTypes(): string[] {
+    return this.templateArgument.types;
+  }
+
   matches(astNode: AstNode): boolean {
     return this.templateArgument.types.includes(astNode.cleanNodeType);
   }

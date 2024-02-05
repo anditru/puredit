@@ -81,6 +81,7 @@ export class PatternBuilder {
         .map((patternTreeVariant) => {
           const patternTreeVariantCursor = new PatternCursor(patternTreeVariant);
           patternTreeVariantCursor.follow(aggregationRootPath);
+          patternTreeVariantCursor.goToFirstChild();
           const subPatternRoot = patternTreeVariantCursor.currentNode;
           subPatternRoot.cutOff();
           return new BasePattern(subPatternRoot);

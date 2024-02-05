@@ -1,6 +1,6 @@
 import AstCursor, { Keyword } from "../ast/cursor";
 import type { AggregationRangeMap, ArgMap, CandidateMatch, CodeRange, Match } from "./types";
-import { Target, block, type Context } from "..";
+import { Target, type Context } from "..";
 import Pattern from "../pattern/pattern";
 import ArgumentNode from "../pattern/nodes/argumentNode";
 import BlockNode from "../pattern/nodes/blockNode";
@@ -221,7 +221,7 @@ export default class CandidateMatchVerification {
     });
 
     return aggregationPartRoots.map((aggregationPartRoot) => ({
-      node: currentAstNode,
+      node: aggregationPartRoot,
       context: aggregationNode.templateAggregation.context,
       from: aggregationPartRoot.startIndex,
       to: aggregationPartRoot.endIndex,

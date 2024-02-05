@@ -1,9 +1,10 @@
 import type { ContextRange, PatternMatchingResult, Match, PatternMap } from "./types";
-import type { Context } from "..";
+import { createPatternMap, type Context } from "..";
 import CandidateMatchVerification, { DoesNotMatch } from "./candidateMatchVerification";
 import AstCursor from "../ast/cursor";
 import Pattern from "../pattern/pattern";
 import { TreeCursor } from "web-tree-sitter";
+import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
 
 export class PatternMatching {
   private matches: Match[] = [];
@@ -28,7 +29,8 @@ export class PatternMatching {
       if (this.candidatePatternsExistForCurrentNode()) {
         const firstMatch = this.findFirstMatchForCurrentNode();
         if (firstMatch) {
-          this.findMatchesInBlocksOf(firstMatch);
+          this.findMatchesInBlockRangesOf(firstMatch);
+          this.findMatchesInAggregationRangesOf(firstMatch);
           continue;
         }
       }
@@ -39,7 +41,7 @@ export class PatternMatching {
   }
 
   private candidatePatternsExistForCurrentNode(): boolean {
-    return !!this.patternMap[this.cursor.currentNode.type];
+    return this.getCandidatePatternsForCurrentNode().length > 0;
   }
 
   private findFirstMatchForCurrentNode(): Match | undefined {
@@ -68,27 +70,64 @@ export class PatternMatching {
     }
   }
 
-  private getCandidatePatternsForCurrentNode(): Pattern[] {
-    return this.patternMap[this.cursor.currentNode.type];
+  private sortByPriority(patterns: Pattern[]): Pattern[] {
+    return [...patterns].sort((a: Pattern, b: Pattern) => {
+      if (a.priority < b.priority) {
+        return -1;
+      } else if (a.priority > b.priority) {
+        return 1;
+      }
+      return 0;
+    });
   }
 
-  private findMatchesInBlocksOf(match: Match): void {
-    for (const block of match.blockRanges) {
+  private getCandidatePatternsForCurrentNode(): Pattern[] {
+    const exactlyFittingPatterns = this.patternMap[this.cursor.currentNode.type] || [];
+    const wildCardRootNodePatterns = this.patternMap["*"] || [];
+    const candidatePatterns = exactlyFittingPatterns.concat(wildCardRootNodePatterns);
+    return this.sortByPriority(candidatePatterns);
+  }
+
+  private findMatchesInBlockRangesOf(match: Match): void {
+    for (const blockRange of match.blockRanges) {
       this.contextRanges.push({
-        from: block.node.startIndex,
-        to: block.node.endIndex,
-        context: block.context,
+        from: blockRange.node.startIndex,
+        to: blockRange.node.endIndex,
+        context: blockRange.context,
       });
 
       const blockPatternMatching = new PatternMatching(
         this.patternMap,
-        block.node.walk(),
-        Object.assign({}, this.context, block.context)
+        blockRange.node.walk(),
+        Object.assign({}, this.context, blockRange.context)
       );
       const result = blockPatternMatching.execute();
 
       this.matches = this.matches.concat(result.matches);
       this.contextRanges = this.contextRanges.concat(result.contextRanges);
+    }
+  }
+
+  private findMatchesInAggregationRangesOf(match: Match): void {
+    if (!(match.pattern instanceof AggregationDecorator)) {
+      return;
+    }
+
+    const pattern = match.pattern as AggregationDecorator;
+    for (const aggregationName in match.aggregationRangeMap) {
+      const subPatternMap = pattern.getSubPatternMapFor(aggregationName);
+      const aggregationRanges = match.aggregationRangeMap[aggregationName];
+
+      for (const aggregationRange of aggregationRanges) {
+        const aggregationPatternMatching = new PatternMatching(
+          subPatternMap,
+          aggregationRange.node.walk(),
+          Object.assign({}, this.context, aggregationRange.context)
+        );
+        const result = aggregationPatternMatching.execute();
+        this.matches = this.matches.concat(result.matches);
+        this.contextRanges = this.contextRanges.concat(result.contextRanges);
+      }
     }
   }
 

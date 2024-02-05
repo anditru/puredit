@@ -9,10 +9,13 @@ import type { PatternMap } from "./match/types";
 export function createPatternMap(patterns: Pattern[]): PatternMap {
   const patternMap: PatternMap = {};
   for (const pattern of patterns) {
-    if (patternMap[pattern.rootNodeType]) {
-      patternMap[pattern.rootNodeType].push(pattern);
-    } else {
-      patternMap[pattern.rootNodeType] = [pattern];
+    const typesMatchedByRootNode = pattern.getTypesMatchedByRootNode();
+    for (const typeMatchedByRootNode of typesMatchedByRootNode) {
+      if (patternMap[typeMatchedByRootNode]) {
+        patternMap[typeMatchedByRootNode].push(pattern);
+      } else {
+        patternMap[typeMatchedByRootNode] = [pattern];
+      }
     }
   }
   return patternMap;

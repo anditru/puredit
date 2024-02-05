@@ -13,6 +13,10 @@ export default class RegularNode extends PatternNode {
     super(language, type, text, fieldName, children);
   }
 
+  getMatchedTypes(): string[] {
+    return [this.type];
+  }
+
   matches(astNode: AstNode): boolean {
     if (astNode.cleanNodeType !== this.type) {
       return false;

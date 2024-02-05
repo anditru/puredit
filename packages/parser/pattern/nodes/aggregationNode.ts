@@ -38,6 +38,10 @@ export default class AggregationNode extends PatternNode {
     this.endToken = nodeTypeConfig.endToken;
   }
 
+  getMatchedTypes(): string[] {
+    return [this.astNodeType];
+  }
+
   matches(astNode: AstNode): boolean {
     return this.astNodeType === astNode.type;
   }
