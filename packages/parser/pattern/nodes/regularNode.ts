@@ -1,4 +1,5 @@
 import AstNode from "../../ast/node";
+import { Context } from "../../match/types";
 import { Target } from "../../treeSitterParser";
 import PatternNode from "./patternNode";
 
@@ -17,7 +18,7 @@ export default class RegularNode extends PatternNode {
     return [this.type];
   }
 
-  matches(astNode: AstNode): boolean {
+  matches(astNode: AstNode, context?: Context): boolean {
     if (astNode.cleanNodeType !== this.type) {
       return false;
     }

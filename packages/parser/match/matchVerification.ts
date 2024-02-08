@@ -4,7 +4,6 @@ import { Target, type Context } from "..";
 import Pattern from "../pattern/pattern";
 import ArgumentNode from "../pattern/nodes/argumentNode";
 import BlockNode from "../pattern/nodes/blockNode";
-import ContextVariableNode from "../pattern/nodes/contextVariableNode";
 import PatternCursor from "../pattern/cursor";
 import RegularNode from "../pattern/nodes/regularNode";
 import AggregationNode from "../pattern/nodes/aggregationNode";
@@ -63,13 +62,10 @@ export default class MatchVerification {
       this.visitAggregationNode();
     } else if (this.patternCursor.currentNode instanceof BlockNode) {
       this.visitBlockNode(lastSiblingKeyword);
-    } else if (
-      this.patternCursor.currentNode instanceof ContextVariableNode &&
-      this.requiredContextExists(this.patternCursor.currentNode)
-    ) {
-      this.visitContextVariableNode();
-    } else {
+    } else if (this.patternCursor.currentNode instanceof RegularNode) {
       this.visitRegularNode();
+    } else {
+      throw new Error("Invalid node type");
     }
   }
 
@@ -102,17 +98,9 @@ export default class MatchVerification {
     this._blockRanges.push(blockRange);
   }
 
-  private visitContextVariableNode() {
-    const contextVariableNode = this.patternCursor.currentNode as ContextVariableNode;
-    if (!contextVariableNode.matches(this.astCursor.currentNode, this.context)) {
-      logger.debug("AST does not match ContextVariable");
-      throw new DoesNotMatch();
-    }
-  }
-
   private visitRegularNode() {
     const regularNode = this.patternCursor.currentNode as RegularNode;
-    if (!regularNode.matches(this.astCursor.currentNode)) {
+    if (!regularNode.matches(this.astCursor.currentNode, this.context)) {
       logger.debug("AST does not match RegularNode.");
       throw new DoesNotMatch();
     }
@@ -236,13 +224,6 @@ export default class MatchVerification {
       to: this.astCursor.endIndex - rangeModifierEnd,
       language: blockNode.language,
     };
-  }
-
-  private requiredContextExists(contextVariableNode: ContextVariableNode): boolean {
-    return Object.prototype.hasOwnProperty.call(
-      this.context,
-      contextVariableNode.templateContextVariable.name
-    );
   }
 }
 
