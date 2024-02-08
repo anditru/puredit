@@ -58,6 +58,10 @@
           {focusGroup}
         />
       </span>
+    {:else if columnMatch.pattern.name === "default"}
+      <span id="column" class="inline-flex" style="margin: 0 10px">
+        {columnMatch.args.content.text}
+      </span>
     {/if}
   {/each}
 

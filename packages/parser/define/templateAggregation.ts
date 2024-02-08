@@ -12,7 +12,6 @@ export default class TemplateAggregation extends TemplateParameter {
   constructor(
     public readonly name: string,
     public readonly subPatterns: RawTemplate[],
-    public readonly cardinality: AggregationCardinality,
     public readonly context: Context = {}
   ) {
     super();
@@ -38,10 +37,4 @@ export default class TemplateAggregation extends TemplateParameter {
       this
     );
   }
-}
-
-export enum AggregationCardinality {
-  ZeroToOne = "0..1",
-  ZeroToMany = "0..n",
-  OneToMany = "1..n",
 }

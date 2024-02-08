@@ -1,4 +1,4 @@
-import { arg, agg, AggregationCardinality } from "@puredit/parser";
+import { arg, agg } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
 import type { Projection } from "@puredit/projections/types";
 import { pythonParser } from "./parser";
@@ -14,7 +14,7 @@ export const columnWithAlias = pythonParser.aggSubPattern(
 
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
 const sourceDataFrame = arg("sourceDataFrame", ["identifier"]);
-const columns = agg("columns", [column, columnWithAlias], AggregationCardinality.OneToMany);
+const columns = agg("columns", [column, columnWithAlias]);
 
 export const pattern = pythonParser.statementPattern("select")`
 ${targetDataFrame}=${sourceDataFrame}.select(${columns})

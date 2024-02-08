@@ -4,7 +4,7 @@
  */
 
 import { Context } from "../match/types";
-import TemplateAggregation, { AggregationCardinality } from "./templateAggregation";
+import TemplateAggregation from "./templateAggregation";
 import TemplateArgument from "./templateArgument";
 import TemplateBlock from "./templateBlock";
 import TemplateContextVariable from "./templateContextVariable";
@@ -22,18 +22,17 @@ export function arg(name: string, types: string[]): TemplateArgument {
 
 /**
  * Defines a TeamplateAggregation
+ * @param name Name of the Aggregation
  * @param subPatterns Allowed patterns in the aggregation
- * @param cardinality Cardinality of the aggregation
  * @param context Context Variables required in the Block
  * @returns TeamplateAggregation
  */
 export function agg(
   name: string,
   subPatterns: RawTemplate[],
-  cardinality: AggregationCardinality,
   context: Context = {}
 ): TemplateAggregation {
-  return new TemplateAggregation(name, subPatterns, cardinality, context);
+  return new TemplateAggregation(name, subPatterns, context);
 }
 
 /**

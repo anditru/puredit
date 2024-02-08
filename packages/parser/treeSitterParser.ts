@@ -3,6 +3,7 @@ import TreeSitterParser from "web-tree-sitter";
 export enum Target {
   TypeScript = "ts",
   Python = "py",
+  Any = "any",
 }
 
 const VSCODE_BASE_PATH = "https://file+.vscode-resource.vscode-cdn.net";
@@ -40,9 +41,7 @@ function runningInVsCode(): boolean {
   return import.meta.url.startsWith(VSCODE_BASE_PATH);
 }
 
-export async function createTreeSitterParser(
-  type: Target
-): Promise<TreeSitterParser> {
+export async function createTreeSitterParser(type: Target): Promise<TreeSitterParser> {
   await TreeSitterParser.init({
     locateFile(path: string, prefix: string) {
       if (path === "tree-sitter.wasm" && !runningInVsCode()) {
@@ -61,9 +60,7 @@ export async function createTreeSitterParser(
   } else {
     languagePath = parserUrl(type).href;
   }
-  const language = await TreeSitterParser.Language.load(
-    stripFileProtocol(languagePath)
-  );
+  const language = await TreeSitterParser.Language.load(stripFileProtocol(languagePath));
   parser.setLanguage(language);
   return parser;
 }
