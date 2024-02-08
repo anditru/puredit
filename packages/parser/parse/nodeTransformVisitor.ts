@@ -69,7 +69,9 @@ export class NodeTransformVisitor {
     /* To make the BlockNode actually replace the AST node representing the code block
      * we need to shift it up. */
     if (patternNodeBuilder.buildsParentOfBlockNode()) {
-      return patternNodeBuilder.children[0];
+      const firstChild = patternNodeBuilder.children[0];
+      firstChild.fieldName = patternNodeBuilder.fieldName!;
+      return firstChild;
     }
     if (patternNodeBuilder.buildsParentOfAggregationNode()) {
       const firstChild = patternNodeBuilder.children[0] as AggregationNode;

@@ -5,15 +5,14 @@ import { Target } from "../../treeSitterParser";
 import RegularNode from "./regularNode";
 
 export default class ContextVariableNode extends RegularNode {
-  static readonly TYPE = "ContextVariable";
-
   constructor(
     language: Target,
+    type: string,
     text: string,
     fieldName: string | null,
     public readonly templateContextVariable: TemplateContextVariable
   ) {
-    super(language, ContextVariableNode.TYPE, text, fieldName);
+    super(language, type, text, fieldName);
   }
 
   getMatchedTypes(): string[] {

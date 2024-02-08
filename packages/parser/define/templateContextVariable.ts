@@ -21,6 +21,7 @@ export default class TemplateContextVariable extends TemplateParameter {
   toPatternNode(cursor: AstCursor, language: Target): PatternNode {
     return new ContextVariableNode(
       language,
+      cursor.currentNode.type,
       cursor.currentNode.text,
       cursor.currentFieldName,
       this
