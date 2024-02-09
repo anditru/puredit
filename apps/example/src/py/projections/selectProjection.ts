@@ -2,15 +2,14 @@ import { arg, agg } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
 import type { Projection } from "@puredit/projections/types";
 import { pythonParser } from "./parser";
-import { simpleProjection } from "@puredit/simple-projection";
 import SelectProjection from "./SelectProjection.svelte";
 
 const columnName = arg("columnName", ["string"]);
 const columnAlias = arg("columnAlias", ["identifier"]);
-export const column = pythonParser.aggSubPattern("column")`${columnName}`;
-export const columnWithAlias = pythonParser.aggSubPattern(
-  "columnWithAlias"
-)`${columnAlias}=${columnName}`;
+export const column = pythonParser.subPattern("column")`${columnName}`;
+export const columnWithAlias = pythonParser.subPattern("columnWithAlias")`
+${columnAlias}=${columnName}
+`;
 
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
 const sourceDataFrame = arg("sourceDataFrame", ["identifier"]);
@@ -21,8 +20,6 @@ ${targetDataFrame}=${sourceDataFrame}.select(${columns})
 `;
 
 export const widget = svelteProjection(SelectProjection);
-const columnWidget = simpleProjection([columnName]);
-const columnWithAliasWidget = simpleProjection([columnName, "as", columnAlias]);
 
 export const selectProjection: Projection = {
   name: "select",
@@ -30,8 +27,4 @@ export const selectProjection: Projection = {
   pattern,
   requiredContextVariables: [],
   widgets: [widget],
-  partWidgetsMapping: {
-    column: columnWidget,
-    columnWithAlias: columnWithAliasWidget,
-  },
 };

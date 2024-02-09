@@ -9,6 +9,8 @@ import TemplateArgument from "./templateArgument";
 import TemplateBlock from "./templateBlock";
 import TemplateContextVariable from "./templateContextVariable";
 import RawTemplate from "./rawTemplate";
+import TemplateChain from "./templateChain";
+import Pattern from "../pattern/pattern";
 
 /**
  * Defines a TemplateArgument
@@ -23,8 +25,8 @@ export function arg(name: string, types: string[]): TemplateArgument {
 /**
  * Defines a TeamplateAggregation
  * @param name Name of the Aggregation
- * @param subPatterns Allowed patterns in the aggregation
- * @param context Context Variables required in the Block
+ * @param subPatterns Allowed patterns in the Aggregation
+ * @param context Context Variables required in the Aggregation
  * @returns TeamplateAggregation
  */
 export function agg(
@@ -33,6 +35,23 @@ export function agg(
   context: Context = {}
 ): TemplateAggregation {
   return new TemplateAggregation(name, subPatterns, context);
+}
+
+/**
+ * Defines a TeamplateChain
+ * @param name Name of the Chain
+ * @param basePattern Base of the Chain
+ * @param subPatterns Allowed function in the Chain
+ * @param context Context Variables required in the Chain
+ * @returns TeamplateChain
+ */
+export function chain(
+  name: string,
+  basePattern: Pattern,
+  subPatterns: RawTemplate[],
+  context: Context = {}
+): TemplateChain {
+  return new TemplateChain(name, basePattern, subPatterns, context);
 }
 
 /**

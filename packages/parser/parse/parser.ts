@@ -30,7 +30,7 @@ export default class Parser {
    * @param name Name of the aggregation subpattern
    * @returns RawTemplate
    */
-  aggSubPattern(name: string) {
+  subPattern(name: string) {
     return (template: TemplateStringsArray, ...params: (string | TemplateArgument)[]) => {
       return new RawTemplate(template, params, name);
     };

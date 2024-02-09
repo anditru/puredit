@@ -137,7 +137,7 @@ export class PatternMatching {
 
   private findAggregationMatchesOfPatternForAggregation(match: Match, aggregationName: string) {
     const pattern = match.pattern as AggregationDecorator;
-    const subPatternMap = pattern.getSubPatternMapFor(aggregationName);
+    const subPatternMap = pattern.getAggregationPatternMapFor(aggregationName);
     const aggregationRanges = match.aggregationRangeMap[aggregationName];
     let aggregationMatches: Match[] = [];
 

@@ -9,7 +9,7 @@ export default class AggregationDecorator extends PatternDecorator {
     super(pattern);
   }
 
-  getSubPatternMapFor(aggregationName: string): PatternMap {
+  getAggregationPatternMapFor(aggregationName: string): PatternMap {
     const subPatterns = this.aggregationPatternMap[aggregationName];
     if (!subPatterns) {
       throw new Error(`Aggregation with name ${aggregationName} not found`);
