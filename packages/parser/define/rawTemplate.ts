@@ -1,6 +1,7 @@
 import { isString } from "@puredit/utils";
 import TemplateParameter from "./templateParameter";
 import TemplateAggregation from "./templateAggregation";
+import TemplateChain from "./templateChain";
 
 export default class RawTemplate {
   constructor(
@@ -17,6 +18,14 @@ export default class RawTemplate {
     return this.params.filter(
       (param) => param instanceof TemplateAggregation
     ) as TemplateAggregation[];
+  }
+
+  hasChains(): boolean {
+    return !!this.params.find((param) => param instanceof TemplateChain);
+  }
+
+  getChains(): TemplateChain[] {
+    return this.params.filter((param) => param instanceof TemplateChain) as TemplateChain[];
   }
 
   toCodeString(): string {

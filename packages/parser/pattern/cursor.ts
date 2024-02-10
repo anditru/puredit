@@ -63,6 +63,20 @@ export default class PatternCursor {
     return true;
   }
 
+  reverseFollow(path: PatternPath): boolean {
+    this.beginTransaction();
+    for (const _ of path.steps) {
+      if (this.goToParent()) {
+        continue;
+      } else {
+        this.rollbackTransaction();
+        return false;
+      }
+    }
+    this.commitTransaction();
+    return true;
+  }
+
   private goToSiblingWithIndex(index: number): boolean {
     for (let i = 0; i < index; i++) {
       if (!this.goToNextSibling()) {

@@ -6,6 +6,7 @@ import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
 import { Target } from "../treeSitterParser";
 import TemplateAggregation from "../define/templateAggregation";
 import AggregationNode from "../pattern/nodes/aggregationNode";
+import TemplateChain from "../define/templateChain";
 
 export class NodeTransformVisitor {
   cursor: AstCursor | undefined;
@@ -116,6 +117,19 @@ export class NodeTransformVisitor {
       if (param instanceof TemplateAggregation) {
         for (const allowedPattern of param.subPatterns) {
           const result = this.recursefindTemplateParameterBy(id, allowedPattern.params);
+          if (result !== null) {
+            return result;
+          }
+        }
+        return null;
+      }
+      if (param instanceof TemplateChain) {
+        let result = this.recursefindTemplateParameterBy(id, param.startPattern.params);
+        if (result !== null) {
+          return result;
+        }
+        for (const linkPattern of param.linkPatterns) {
+          result = this.recursefindTemplateParameterBy(id, [...linkPattern.params]);
           if (result !== null) {
             return result;
           }

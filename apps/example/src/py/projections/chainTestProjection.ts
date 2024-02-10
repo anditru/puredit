@@ -16,16 +16,16 @@ filter(${filterCondition})
 
 const sourceDataFrame = arg("sourceDataFrame", ["identifier"]);
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
-const baseDataFrame = pythonParser.expressionPattern("baseDataFrame")`${sourceDataFrame}`;
+const baseDataFrame = pythonParser.subPattern("baseDataFrame")`${sourceDataFrame}`;
 const processingChain = chain("processingChain", baseDataFrame, [selectFunction, fitlerFunction]);
 
-export const pattern = pythonParser.statementPattern("select")`
+export const pattern = pythonParser.statementPattern("selectChain")`
 ${targetDataFrame} = ${processingChain}
 `;
 
 export const widget = svelteProjection(ChainTestProjection);
 
-export const selectProjection: Projection = {
+export const chainTestProjection: Projection = {
   name: "chainTest",
   description: "Test chaining",
   pattern,

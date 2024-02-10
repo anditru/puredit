@@ -65,7 +65,8 @@ export default class MatchVerification {
     } else if (this.patternCursor.currentNode instanceof RegularNode) {
       this.visitRegularNode();
     } else {
-      throw new Error("Invalid node type");
+      logger.debug(`Unimplemented node type ${this.patternCursor.currentNode.type} encountered`);
+      throw new DoesNotMatch();
     }
   }
 

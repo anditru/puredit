@@ -47,11 +47,11 @@ export function agg(
  */
 export function chain(
   name: string,
-  basePattern: Pattern,
-  subPatterns: RawTemplate[],
+  startPattern: RawTemplate,
+  linkPatterns: RawTemplate[],
   context: Context = {}
 ): TemplateChain {
-  return new TemplateChain(name, basePattern, subPatterns, context);
+  return new TemplateChain(name, startPattern, linkPatterns, context);
 }
 
 /**

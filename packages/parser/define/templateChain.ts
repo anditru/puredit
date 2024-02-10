@@ -12,8 +12,8 @@ export default class TemplateChain extends TemplateParameter {
 
   constructor(
     public readonly name: string,
-    public readonly basePattern: Pattern,
-    public readonly subPatterns: RawTemplate[],
+    public readonly startPattern: RawTemplate,
+    public readonly linkPatterns: RawTemplate[],
     public readonly context: Context = {}
   ) {
     super();
@@ -26,8 +26,12 @@ export default class TemplateChain extends TemplateParameter {
     return TemplateChain.CODE_STRING_PREFIX + this._id.toString();
   }
 
-  getCodeStringsForParts(): string[] {
-    return this.subPatterns.map((pattern) => pattern.toCodeString());
+  getCodeStringForChainStart(): string {
+    return this.startPattern.toCodeString();
+  }
+
+  getCodeStringsForChainLinks(): string[] {
+    return this.linkPatterns.map((pattern) => pattern.toCodeString());
   }
 
   toPatternNode(cursor: AstCursor, language: Target): PatternNode {
