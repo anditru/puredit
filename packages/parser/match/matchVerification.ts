@@ -47,32 +47,33 @@ export default class MatchVerification {
   }
 
   private recurse(lastSiblingKeyword?: Keyword) {
+    const currentPatternNode = this.patternCursor.currentNode;
+    const currentAstNode = this.astCursor.currentNode;
     logger.debug(
-      `Pattern node type: ${this.patternCursor.currentNode.type}, ` +
-        `AST node type: ${this.astCursor.currentNode.cleanNodeType}`
+      `Pattern node type: ${currentPatternNode.type}, ` +
+        `AST node type: ${currentAstNode.cleanNodeType}`
     );
 
     this.checkNoErrorToken();
     this.skipLeadingCommentsInBodies();
-    this.checkFieldNamesMatch();
 
-    if (this.patternCursor.currentNode instanceof ArgumentNode) {
+    if (currentPatternNode instanceof ArgumentNode) {
       this.visitArgumentNode();
-    } else if (this.patternCursor.currentNode instanceof AggregationNode) {
+    } else if (currentPatternNode instanceof AggregationNode) {
       this.visitAggregationNode();
-    } else if (this.patternCursor.currentNode instanceof BlockNode) {
+    } else if (currentPatternNode instanceof BlockNode) {
       this.visitBlockNode(lastSiblingKeyword);
-    } else if (this.patternCursor.currentNode instanceof RegularNode) {
+    } else if (currentPatternNode instanceof RegularNode) {
       this.visitRegularNode();
     } else {
-      logger.debug(`Unimplemented node type ${this.patternCursor.currentNode.type} encountered`);
+      logger.debug(`Unimplemented node type ${currentPatternNode.type} encountered`);
       throw new DoesNotMatch();
     }
   }
 
   private visitArgumentNode() {
     const argumentNode = this.patternCursor.currentNode as ArgumentNode;
-    if (!this.patternCursor.currentNode.matches(this.astCursor.currentNode)) {
+    if (!argumentNode.matches(this.astCursor)) {
       logger.debug("AST does not match ArgumentNode");
       throw new DoesNotMatch();
     }
@@ -81,7 +82,7 @@ export default class MatchVerification {
 
   private visitAggregationNode() {
     const aggregationNode = this.patternCursor.currentNode as AggregationNode;
-    if (!this.patternCursor.currentNode.matches(this.astCursor.currentNode)) {
+    if (!aggregationNode.matches(this.astCursor)) {
       logger.debug("AST node does not match AggregationNode");
       throw new DoesNotMatch();
     }
@@ -91,7 +92,7 @@ export default class MatchVerification {
 
   private visitBlockNode(lastSiblingKeyword?: Keyword) {
     const blockNode = this.patternCursor.currentNode as BlockNode;
-    if (!this.patternCursor.currentNode.matches(this.astCursor.currentNode)) {
+    if (!blockNode.matches(this.astCursor)) {
       logger.debug("AST does not match BlockNode");
       throw new DoesNotMatch();
     }
@@ -101,7 +102,7 @@ export default class MatchVerification {
 
   private visitRegularNode() {
     const regularNode = this.patternCursor.currentNode as RegularNode;
-    if (!regularNode.matches(this.astCursor.currentNode, this.context)) {
+    if (!regularNode.matches(this.astCursor, this.context)) {
       logger.debug("AST does not match RegularNode.");
       throw new DoesNotMatch();
     }
@@ -151,24 +152,9 @@ export default class MatchVerification {
 
   private checkNoErrorToken() {
     if (this.astCursor.currentNode.isErrorToken()) {
-      logger.debug("Error token encountered");
+      logger.debug("Error token in AST encountered");
       throw new DoesNotMatch();
     }
-  }
-
-  private checkFieldNamesMatch() {
-    if (!this.fieldNamesMatch()) {
-      logger.debug(
-        `FieldNames do not match. Pattern: ${this.patternCursor.currentNode.fieldName}, ` +
-          `AST: ${this.astCursor.currentFieldName}`
-      );
-      throw new DoesNotMatch();
-    }
-  }
-
-  private fieldNamesMatch(): boolean {
-    const fieldName = this.astCursor.currentFieldName || undefined;
-    return fieldName === this.patternCursor.currentNode.fieldName;
   }
 
   /**

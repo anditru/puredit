@@ -1,7 +1,7 @@
 import PatternNode from "./patternNode";
-import AstNode from "../../ast/node";
 import TemplateAggregation from "../../define/templateAggregation";
 import { Target } from "../../treeSitterParser";
+import AstCursor from "../../ast/cursor";
 
 export default class AggregationNode extends PatternNode {
   static readonly TYPE = "AggregationNode";
@@ -46,7 +46,8 @@ export default class AggregationNode extends PatternNode {
     return [this.astNodeType];
   }
 
-  matches(astNode: AstNode): boolean {
-    return this.astNodeType === astNode.type;
+  matches(astCursor: AstCursor): boolean {
+    const astNode = astCursor.currentNode;
+    return this.astNodeType === astNode.type && this.fieldName === astCursor.currentFieldName;
   }
 }

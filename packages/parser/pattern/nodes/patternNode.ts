@@ -1,4 +1,4 @@
-import AstNode from "../../ast/node";
+import AstCursor from "../../ast/cursor";
 import { Context } from "../../match/types";
 import { Target } from "../../treeSitterParser";
 
@@ -73,6 +73,6 @@ export default abstract class PatternNode {
     this._parent = parent;
   }
 
-  abstract matches(astNode: AstNode, context?: Context): boolean;
+  abstract matches(astCursor: AstCursor, context?: Context): boolean;
   abstract getMatchedTypes(): string[];
 }

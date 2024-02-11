@@ -1,7 +1,7 @@
 import TemplateArgument from "../../define/templateArgument";
 import PatternNode from "./patternNode";
-import AstNode from "../../ast/node";
 import { Target } from "../../treeSitterParser";
+import AstCursor from "../../ast/cursor";
 
 export default class ArgumentNode extends PatternNode {
   static readonly TYPE: string = "ArgumentNode";
@@ -19,8 +19,12 @@ export default class ArgumentNode extends PatternNode {
     return this.templateArgument.types;
   }
 
-  matches(astNode: AstNode): boolean {
-    return this.templateArgument.types.includes(astNode.cleanNodeType);
+  matches(astCursor: AstCursor): boolean {
+    const astNode = astCursor.currentNode;
+    return (
+      this.templateArgument.types.includes(astNode.cleanNodeType) &&
+      astCursor.currentFieldName === this.fieldName
+    );
   }
 
   get name() {

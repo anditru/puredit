@@ -1,4 +1,4 @@
-import AstNode from "../../ast/node";
+import AstCursor from "../../ast/cursor";
 import TemplateContextVariable from "../../define/templateContextVariable";
 import { Context } from "../../match/types";
 import { Target } from "../../treeSitterParser";
@@ -19,14 +19,18 @@ export default class ContextVariableNode extends RegularNode {
     return ["*"];
   }
 
-  matches(astNode: AstNode, context?: Context): boolean {
+  matches(astCursor: AstCursor, context?: Context): boolean {
+    if (astCursor.currentFieldName !== this.fieldName) {
+      return false;
+    }
+    const astNode = astCursor.currentNode;
     if (context && this.requiredContextExists(context)) {
       return (
         astNode.cleanNodeType === "identifier" &&
         astNode.text === context[this.templateContextVariable.name]
       );
     } else {
-      return super.matches(astNode);
+      return super.matches(astCursor);
     }
   }
 

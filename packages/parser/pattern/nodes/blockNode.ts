@@ -1,7 +1,7 @@
 import PatternNode from "./patternNode";
-import AstNode from "../../ast/node";
 import TemplateBlock from "../../define/templateBlock";
 import { Target } from "../../treeSitterParser";
+import AstCursor from "../../ast/cursor";
 
 export default class BlockNode extends PatternNode {
   static readonly TYPE = "BlockNode";
@@ -24,7 +24,11 @@ export default class BlockNode extends PatternNode {
     }
   }
 
-  matches(astNode: AstNode): boolean {
+  matches(astCursor: AstCursor): boolean {
+    if (astCursor.currentFieldName !== this.fieldName) {
+      return false;
+    }
+    const astNode = astCursor.currentNode;
     switch (this.language) {
       case Target.TypeScript:
         return astNode.cleanNodeType === "statement_block";

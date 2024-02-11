@@ -1,4 +1,4 @@
-import AstNode from "../../ast/node";
+import AstCursor from "../../ast/cursor";
 import { Context } from "../../match/types";
 import { Target } from "../../treeSitterParser";
 import PatternNode from "./patternNode";
@@ -18,7 +18,11 @@ export default class RegularNode extends PatternNode {
     return [this.type];
   }
 
-  matches(astNode: AstNode, context?: Context): boolean {
+  matches(astCursor: AstCursor, context?: Context): boolean {
+    if (astCursor.currentFieldName !== this.fieldName) {
+      return false;
+    }
+    const astNode = astCursor.currentNode;
     if (astNode.cleanNodeType !== this.type) {
       return false;
     }

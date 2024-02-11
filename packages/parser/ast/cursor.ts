@@ -67,7 +67,7 @@ export default class AstCursor {
   }
 
   get currentFieldName() {
-    return this.treeCursor.currentFieldName();
+    return this.treeCursor.currentFieldName() || undefined;
   }
 
   get startIndex() {

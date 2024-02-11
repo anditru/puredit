@@ -1,6 +1,6 @@
 import PatternNode from "./patternNode";
-import AstNode from "../../ast/node";
 import { Target } from "../../treeSitterParser";
+import AstCursor from "../../ast/cursor";
 
 export default class ChainContinuationNode extends PatternNode {
   static readonly TYPE = "ChainContinuationNode";
@@ -13,7 +13,7 @@ export default class ChainContinuationNode extends PatternNode {
     return ["*"];
   }
 
-  matches(astNode: AstNode): boolean {
+  matches(astCursor: AstCursor): boolean {
     // TODO
     return false;
   }
