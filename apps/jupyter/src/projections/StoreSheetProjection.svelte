@@ -31,7 +31,7 @@
   <span>store</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
-    node={match.args.columns}
+    node={match.argsToAstNodeMap.columns}
     {state}
     {view}
     {focusGroup}
@@ -42,7 +42,7 @@
   <span>in sheet</span>
   <TextInput
     className={highlightingFor(state, [tags.string])}
-    node={match.args.sheetName}
+    node={match.argsToAstNodeMap.sheetName}
     {state}
     {view}
     {focusGroup}
@@ -51,7 +51,7 @@
   <span>of</span>
   <TextInput
     className={highlightingFor(state, [tags.string])}
-    node={match.args.fileName}
+    node={match.argsToAstNodeMap.fileName}
     {state}
     {view}
     {focusGroup}

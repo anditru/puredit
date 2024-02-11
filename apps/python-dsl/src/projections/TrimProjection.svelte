@@ -6,10 +6,7 @@
   import { highlightingFor } from "@codemirror/language";
   import type { Match } from "@puredit/parser";
   import type { FocusGroup } from "@puredit/projections/focus";
-  import {
-    stringLiteralValue,
-    validateFromList,
-  } from "@puredit/projections/shared";
+  import { stringLiteralValue, validateFromList } from "@puredit/projections/shared";
   import TextInput from "@puredit/projections/TextInput.svelte";
   import type { ContextTable } from "./context";
 
@@ -21,9 +18,7 @@
   export let focusGroup: FocusGroup;
 
   let textColumns: string[];
-  $: textColumns = Object.keys(context.columns).filter(
-    (key) => context.columns[key] === "TEXT"
-  );
+  $: textColumns = Object.keys(context.columns).filter((key) => context.columns[key] === "TEXT");
 
   const trimDirections = ["both", "left", "right"];
 
@@ -40,7 +35,7 @@
   <span>trim column</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
-    node={match.args.column}
+    node={match.argsToAstNodeMap.column}
     {state}
     {view}
     {focusGroup}
@@ -51,7 +46,7 @@
   <span>on</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
-    node={match.args.direction}
+    node={match.argsToAstNodeMap.direction}
     {state}
     {focusGroup}
     placeholder="direction"
@@ -60,7 +55,7 @@
     {view}
   />
   <span
-    >{stringLiteralValue(match.args.direction, state.doc) === "both"
+    >{stringLiteralValue(match.argsToAstNodeMap.direction, state.doc) === "both"
       ? "sides"
       : "side"}</span
   >

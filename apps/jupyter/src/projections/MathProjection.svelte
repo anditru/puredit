@@ -24,4 +24,4 @@
   });
 </script>
 
-<EquationEditor node={match.args.latex} {state} {view} {focusGroup} />
+<EquationEditor node={match.argsToAstNodeMap.latex} {state} {view} {focusGroup} />

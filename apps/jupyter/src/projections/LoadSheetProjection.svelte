@@ -30,7 +30,7 @@
   <span>load sheet</span>
   <TextInput
     className={highlightingFor(state, [tags.string])}
-    node={match.args.sheetName}
+    node={match.argsToAstNodeMap.sheetName}
     {state}
     {view}
     {focusGroup}
@@ -39,7 +39,7 @@
   <span>from</span>
   <TextInput
     className={highlightingFor(state, [tags.string])}
-    node={match.args.fileName}
+    node={match.argsToAstNodeMap.fileName}
     {state}
     {view}
     {focusGroup}

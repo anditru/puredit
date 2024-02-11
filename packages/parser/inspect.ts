@@ -40,6 +40,6 @@ export function argMapToString(args: ArgMap, text: string, indent = ""): string 
 
 export function matchToString(match: Match, text: string): string {
   return `Match {
-  args = ${argMapToString(match.args, text, "  ")}
+  args = ${argMapToString(match.argsToAstNodeMap, text, "  ")}
 }`;
 }

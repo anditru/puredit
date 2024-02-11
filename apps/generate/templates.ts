@@ -33,9 +33,7 @@ export const ${projectionName}: Projection = {
 `;
 };
 
-export const componentTemplate = (
-  projectionSegments: ProjectionSegment[]
-) => `<script lang="ts">
+export const componentTemplate = (projectionSegments: ProjectionSegment[]) => `<script lang="ts">
   import { onMount } from "svelte";
   import { tags } from "@lezer/highlight";
   import type { EditorState } from "@codemirror/state";
@@ -62,10 +60,7 @@ export const componentTemplate = (
 </script>
 
 <span class="inline-flex">
-${projectionSegments
-  .reduce(reduceSegments, [])
-  .map(projectionSegmentTemplate)
-  .join("\n")}
+${projectionSegments.reduce(reduceSegments, []).map(projectionSegmentTemplate).join("\n")}
 </span>
 `;
 
@@ -86,7 +81,7 @@ const projectionSegmentTemplate = (segment: ProjectionSegment) => {
   if (isString(segment)) {
     return `  <span>${segment}</span>`;
   }
-  const targetNodes = segment.names.map((name) => `match.args.${name}`);
+  const targetNodes = segment.names.map((name) => `match.argsToAstNodeMap.${name}`);
   let targetNodesAttr = "";
   if (segment.names.length > 1) {
     targetNodesAttr = `\n    targetNodes={[${targetNodes.join(", ")}]}`;

@@ -33,7 +33,7 @@
   <span>change table</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
-    node={match.args.table}
+    node={match.argsToAstNodeMap.table}
     {state}
     {view}
     {focusGroup}

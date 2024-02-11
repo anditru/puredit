@@ -31,7 +31,7 @@
   <span>display</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
-    node={match.args.columns}
+    node={match.argsToAstNodeMap.columns}
     {state}
     {view}
     {focusGroup}

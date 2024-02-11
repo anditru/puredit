@@ -32,8 +32,9 @@ export const simpleProjection = (template: Array<string | TemplateArgument | Tem
             target: element,
             props: {
               className: highlightingFor(state, [tags.string]),
-              node: match.args[args[0].name],
-              targetNodes: args.length > 1 ? args.map((arg) => match.args[arg.name]) : undefined,
+              node: match.argsToAstNodeMap[args[0].name],
+              targetNodes:
+                args.length > 1 ? args.map((arg) => match.argsToAstNodeMap[arg.name]) : undefined,
               placeholder: args[0].name,
               state,
               view: null,
@@ -49,8 +50,9 @@ export const simpleProjection = (template: Array<string | TemplateArgument | Tem
     protected update(match: Match, context: object, state: EditorState): void {
       for (const [args, component] of this.inputs) {
         component.$set({
-          node: match.args[args[0].name],
-          targetNodes: args.length > 1 ? args.map((arg) => match.args[arg.name]) : undefined,
+          node: match.argsToAstNodeMap[args[0].name],
+          targetNodes:
+            args.length > 1 ? args.map((arg) => match.argsToAstNodeMap[arg.name]) : undefined,
           context,
           state,
         });

@@ -34,7 +34,7 @@ export const changeProjection: Projection = {
   requiredContextVariables: ["db"],
   widgets: [widget, end],
   contextProvider(match: Match, text: Text, context: OuterContext): InnerContext {
-    const tableName = stringLiteralValue(match.args.table, text);
+    const tableName = stringLiteralValue(match.argsToAstNodeMap.table, text);
     return {
       columns: context.tables[tableName]?.columns || {},
     };

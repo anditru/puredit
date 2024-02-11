@@ -1,16 +1,24 @@
 import AstCursor, { Keyword } from "../ast/cursor";
-import type { AggregationRangeMap, ArgMap, CandidateMatch, CodeRange, Match } from "./types";
-import { Language, type Context } from "..";
+import type {
+  CandidateMatch,
+  CodeRange,
+  CodeRangeMap,
+  CodeRangesMap,
+  VerificationResult,
+} from "./types";
+import { Language, PatternMatching, createPatternMap, type Context } from "..";
 import Pattern from "../pattern/pattern";
 import ArgumentNode from "../pattern/nodes/argumentNode";
 import BlockNode from "../pattern/nodes/blockNode";
 import PatternCursor from "../pattern/cursor";
 import RegularNode from "../pattern/nodes/regularNode";
 import AggregationNode from "../pattern/nodes/aggregationNode";
-
-import { logProvider } from "../../../logconfig";
 import ChainNode from "../pattern/nodes/chainNode";
 import { loadChainsConfigFor } from "../config/load";
+import ChainDecorator from "../pattern/decorators/chainDecorator";
+
+import { logProvider } from "../../../logconfig";
+import AstNode from "../ast/node";
 const logger = logProvider.getLogger("parser.match.MatchVerification");
 
 export default class MatchVerification {
@@ -19,9 +27,11 @@ export default class MatchVerification {
   private astCursor: AstCursor;
   private context: Context;
 
-  private _args: ArgMap = {};
-  private _blockRanges: CodeRange[] = [];
-  private _aggregationRangeMap: AggregationRangeMap = {};
+  private argsToAstNodeMap: Record<string, AstNode> = {};
+  private blockRanges: CodeRange[] = [];
+  private aggregationToRangesMap: CodeRangesMap = {};
+  private chainToStartRangeMap: CodeRangeMap = {};
+  private chainToLinkRangesMap: CodeRangesMap = {};
 
   constructor(private candidateMatch: CandidateMatch) {
     this.pattern = this.candidateMatch.pattern;
@@ -35,16 +45,17 @@ export default class MatchVerification {
    * AST at the position of the cursor by recursively creating new
    * CandateMatches for the child nodes in a depth-first manner.
    */
-  public execute(lastSiblingKeyword?: Keyword): Match {
+  public execute(lastSiblingKeyword?: Keyword): VerificationResult {
     logger.debug("Starting new verification of CandidateMatch");
     this.recurse(lastSiblingKeyword);
     return {
       pattern: this.pattern,
       node: this.astCursor.currentNode,
-      args: this._args,
-      blockRanges: this._blockRanges,
-      aggregationRangeMap: this._aggregationRangeMap,
-      aggregationMatchMap: {},
+      argsToAstNodeMap: this.argsToAstNodeMap,
+      blockRanges: this.blockRanges,
+      aggregationToRangesMap: this.aggregationToRangesMap,
+      chainToStartRangeMap: this.chainToStartRangeMap,
+      chainToLinkRangesMap: this.chainToLinkRangesMap,
     };
   }
 
@@ -81,7 +92,7 @@ export default class MatchVerification {
       logger.debug("AST does not match ArgumentNode");
       throw new DoesNotMatch();
     }
-    this._args[argumentNode.templateArgument.name] = this.astCursor.currentNode;
+    this.argsToAstNodeMap[argumentNode.templateArgument.name] = this.astCursor.currentNode;
   }
 
   private visitAggregationNode() {
@@ -91,7 +102,7 @@ export default class MatchVerification {
       throw new DoesNotMatch();
     }
     const aggregationRanges = this.extractAggregationRangesFor(aggregationNode);
-    this._aggregationRangeMap[aggregationNode.templateAggregation.name] = aggregationRanges;
+    this.aggregationToRangesMap[aggregationNode.templateAggregation.name] = aggregationRanges;
   }
 
   private visitChainNode() {
@@ -110,8 +121,24 @@ export default class MatchVerification {
 
   private visitChainNodeChildren() {
     const chainNode = this.patternCursor.currentNode as ChainNode;
+    const pattern = this.pattern as ChainDecorator;
     const chainsConfig = loadChainsConfigFor(chainNode.language);
     const pathToNextChainLink = chainsConfig.pathToNextChainLink;
+    const startPattern = pattern.getStartPatternFor(chainNode.templateChain.name);
+    while (this.astCursor.follow(pathToNextChainLink)) {
+      if (this.astCursor.currentNode.type === chainsConfig.chainNodeType) {
+        continue;
+      }
+      const startPatternMatching = new PatternMatching(
+        createPatternMap([startPattern]),
+        this.astCursor,
+        this.context
+      );
+      const startPatternMatchingResult = startPatternMatching.executeOnlySpanningEntireRange();
+      if (startPatternMatchingResult.matches.length === 0) {
+        throw new DoesNotMatch();
+      }
+    }
     throw new DoesNotMatch();
   }
 
@@ -122,7 +149,7 @@ export default class MatchVerification {
       throw new DoesNotMatch();
     }
     const blockRange = this.extractBlockRangeFor(blockNode, lastSiblingKeyword);
-    this._blockRanges.push(blockRange);
+    this.blockRanges.push(blockRange);
   }
 
   private visitRegularNode() {

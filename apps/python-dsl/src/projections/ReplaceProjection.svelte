@@ -18,9 +18,7 @@
   export let focusGroup: FocusGroup;
 
   let textColumns: string[];
-  $: textColumns = Object.keys(context.columns).filter(
-    (key) => context.columns[key] === "TEXT"
-  );
+  $: textColumns = Object.keys(context.columns).filter((key) => context.columns[key] === "TEXT");
 
   onMount(() => {
     if (isNew) {
@@ -35,7 +33,7 @@
   <span>replace</span>
   <TextInput
     className={highlightingFor(state, [tags.string])}
-    node={match.args.target}
+    node={match.argsToAstNodeMap.target}
     {state}
     {view}
     {focusGroup}
@@ -44,7 +42,7 @@
   <span>in column</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
-    node={match.args.column}
+    node={match.argsToAstNodeMap.column}
     {state}
     {view}
     {focusGroup}
@@ -55,7 +53,7 @@
   <span>with</span>
   <TextInput
     className={highlightingFor(state, [tags.string])}
-    node={match.args.replacement}
+    node={match.argsToAstNodeMap.replacement}
     {state}
     {view}
     {focusGroup}

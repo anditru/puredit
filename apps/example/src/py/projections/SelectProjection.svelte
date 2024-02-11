@@ -26,12 +26,12 @@
 
 <div style="display: flex; flex-direction: column">
   <span>Read column(s)</span>
-  {#each match.aggregationMatchMap["columns"] as columnMatch}
+  {#each match.aggregationToSubMatchesMap["columns"] as columnMatch}
     {#if columnMatch.pattern.name === "column"}
       <span id="column" class="inline-flex">
         <TextInput
           className={highlightingFor(state, [tags.string])}
-          node={columnMatch.args.columnName}
+          node={columnMatch.argsToAstNodeMap.columnName}
           placeholder="columnName"
           {state}
           {view}
@@ -42,7 +42,7 @@
       <span id="columnWithAlias" class="inline-flex">
         <TextInput
           className={highlightingFor(state, [tags.string])}
-          node={columnMatch.args.columnName}
+          node={columnMatch.argsToAstNodeMap.columnName}
           placeholder="columnName"
           {state}
           {view}
@@ -51,7 +51,7 @@
         <span>as</span>
         <TextInput
           className={highlightingFor(state, [tags.string])}
-          node={columnMatch.args.columnAlias}
+          node={columnMatch.argsToAstNodeMap.columnAlias}
           placeholder="columnAlias"
           {state}
           {view}
@@ -60,7 +60,7 @@
       </span>
     {:else if columnMatch.pattern.name === "default"}
       <span id="column" class="inline-flex" style="margin: 0 10px">
-        {columnMatch.args.content.text}
+        {columnMatch.argsToAstNodeMap.content.text}
       </span>
     {/if}
   {/each}
@@ -69,7 +69,7 @@
     <span>from</span>
     <TextInput
       className={highlightingFor(state, [tags.string])}
-      node={match.args.sourceDataFrame}
+      node={match.argsToAstNodeMap.sourceDataFrame}
       placeholder="sourceDataFrame"
       {state}
       {view}
@@ -81,7 +81,7 @@
     <span>into</span>
     <TextInput
       className={highlightingFor(state, [tags.string])}
-      node={match.args.targetDataFrame}
+      node={match.argsToAstNodeMap.targetDataFrame}
       placeholder="targetDataFrame"
       {state}
       {view}

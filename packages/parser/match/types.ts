@@ -5,39 +5,33 @@ import { Language } from "../config/types";
 
 export type PatternMap = Record<string, Pattern[]>;
 
-export type ArgMap = Record<string, AstNode>;
+export type Context = Record<string, string>;
+export interface ContextRange {
+  from: number;
+  to: number;
+  context: Context;
+}
 
+// Result of Phase 1 (Generation of candidate matches)
 export interface CandidateMatch {
   pattern: Pattern;
   cursor: AstCursor;
   context: Context;
 }
 
-export type Context = Record<string, string>;
-
-export interface Match {
+// Result of Phase 2 (Verification of candidate matches)
+export interface VerificationResult {
   pattern: Pattern;
   node: AstNode;
-  args: ArgMap;
+  argsToAstNodeMap: AstNodeMap;
   blockRanges: CodeRange[];
-  aggregationRangeMap: AggregationRangeMap;
-  aggregationMatchMap: AggregationMatchMap;
+  aggregationToRangesMap: CodeRangesMap;
+  chainToStartRangeMap: CodeRangeMap;
+  chainToLinkRangesMap: CodeRangesMap;
 }
-
-export type AggregationMatchMap = Record<string, AggregationMatch[]>;
-
-export interface AggregationMatch {
-  pattern: Pattern;
-  node: AstNode;
-  args: ArgMap;
-}
-export type AggregationRangeMap = Record<string, CodeRange[]>;
-
-export interface ContextRange {
-  from: number;
-  to: number;
-  context: Context;
-}
+export type AstNodeMap = Record<string, AstNode>;
+export type CodeRangesMap = Record<string, CodeRange[]>;
+export type CodeRangeMap = Record<string, CodeRange>;
 
 export interface CodeRange {
   node: AstNode;
@@ -47,6 +41,23 @@ export interface CodeRange {
   language: Language;
 }
 
+// Result of Phase 3 (Post-processing)
+export interface Match {
+  pattern: Pattern;
+  node: AstNode;
+  argsToAstNodeMap: AstNodeMap;
+  aggregationToSubMatchesMap: SubMatchesMap;
+  blockRanges: CodeRange[];
+}
+export type SubMatchesMap = Record<string, SubMatch[]>;
+
+export interface SubMatch {
+  pattern: Pattern;
+  node: AstNode;
+  argsToAstNodeMap: AstNodeMap;
+}
+
+// Result of Phase 4 (Consolidation)
 export interface PatternMatchingResult {
   matches: Match[];
   contextRanges: ContextRange[];
