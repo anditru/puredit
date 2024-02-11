@@ -1,6 +1,6 @@
 import PatternNode from "../nodes/patternNode";
 import Pattern from "../pattern";
-import PatternPath from "../patternPath";
+import TreePath from "../../cursor/treePath";
 
 export default abstract class PatternDecorator implements Pattern {
   constructor(private pattern: Pattern) {}
@@ -13,7 +13,7 @@ export default abstract class PatternDecorator implements Pattern {
     return this.pattern.getTypesMatchedByRootNode();
   }
 
-  getPathToNodeWithText(text: string): PatternPath {
+  getPathToNodeWithText(text: string): TreePath {
     return this.pattern.getPathToNodeWithText(text);
   }
 

@@ -1,4 +1,4 @@
-import PatternPath from "../pattern/patternPath";
+import TreePath from "../cursor/treePath";
 import { Language, LanguageConfig } from "./types";
 
 const languageConfigs: Record<Language, LanguageConfig> = {
@@ -10,9 +10,9 @@ const languageConfigs: Record<Language, LanguageConfig> = {
     },
     chains: {
       chainNodeType: "call",
-      pathToCallRoot: new PatternPath([0]),
-      pathToNextChainLink: new PatternPath([0, 0]),
-      pathToArguments: new PatternPath([1]),
+      pathToCallRoot: new TreePath([0]),
+      pathToNextChainLink: new TreePath([0, 0]),
+      pathToArguments: new TreePath([1]),
     },
     blocks: {
       blockNodeType: "block",
@@ -26,9 +26,9 @@ const languageConfigs: Record<Language, LanguageConfig> = {
     },
     chains: {
       chainNodeType: "call_expression",
-      pathToCallRoot: new PatternPath([0]),
-      pathToNextChainLink: new PatternPath([0, 0]),
-      pathToArguments: new PatternPath([1]),
+      pathToCallRoot: new TreePath([0]),
+      pathToNextChainLink: new TreePath([0, 0]),
+      pathToArguments: new TreePath([1]),
     },
     blocks: {
       blockNodeType: "statement_block",

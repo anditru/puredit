@@ -9,7 +9,7 @@ import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
 import PatternCursor from "../pattern/cursor";
 import { SubPatternMap } from "../pattern/types";
 import ChainDecorator from "../pattern/decorators/chainDecorator";
-import PatternPath from "../pattern/patternPath";
+import TreePath from "../cursor/treePath";
 import ChainContinuationNode from "../pattern/nodes/chainContinuationNode";
 import { Language } from "../config/types";
 import { loadChainsConfigFor } from "../config/load";
@@ -19,8 +19,8 @@ export class PatternBuilder {
   private rawTemplate: RawTemplate | undefined;
   private isExpression: boolean | undefined;
   private targetLanguage: Language | undefined;
-  private pathToChainContinuation: PatternPath | undefined;
-  private pathToCallRoot: PatternPath | undefined;
+  private pathToChainContinuation: TreePath | undefined;
+  private pathToCallRoot: TreePath | undefined;
   private nodeTransformVisitor: NodeTransformVisitor | undefined;
 
   constructor(private readonly parser: TreeSitterParser | undefined) {}

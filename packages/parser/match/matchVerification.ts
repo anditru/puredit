@@ -10,6 +10,7 @@ import AggregationNode from "../pattern/nodes/aggregationNode";
 
 import { logProvider } from "../../../logconfig";
 import ChainNode from "../pattern/nodes/chainNode";
+import { loadChainsConfigFor } from "../config/load";
 const logger = logProvider.getLogger("parser.match.MatchVerification");
 
 export default class MatchVerification {
@@ -102,15 +103,15 @@ export default class MatchVerification {
     if (chainNode.hasChildren()) {
       this.visitChainNodeChildren();
     } else {
-      logger.debug("Chain node does not have children");
+      logger.debug("ChainNode does not have children");
       throw new DoesNotMatch();
     }
   }
 
   private visitChainNodeChildren() {
     const chainNode = this.patternCursor.currentNode as ChainNode;
-    this.patternCursor.goToFirstChild();
-    this.astCursor.goToFirstChild();
+    const chainsConfig = loadChainsConfigFor(chainNode.language);
+    const pathToNextChainLink = chainsConfig.pathToNextChainLink;
     throw new DoesNotMatch();
   }
 

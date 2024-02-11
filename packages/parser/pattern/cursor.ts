@@ -2,15 +2,17 @@ import BasePattern from "./basePattern";
 import PatternNode from "./nodes/patternNode";
 import Pattern from "./pattern";
 import PatternDecorator from "./decorators/patternDecorator";
-import PatternPath from "./patternPath";
+import TreePath from "../cursor/treePath";
+import Cursor from "../cursor/cursor";
 
-export default class PatternCursor {
+export default class PatternCursor extends Cursor {
   private _currentNode: PatternNode;
 
   private runningTransaction = false;
-  private operationLog: CursorOperation[] = [];
+  private operationLog: TransactionOperation[] = [];
 
   constructor(source: Pattern | PatternNode | PatternDecorator) {
+    super();
     if (source instanceof BasePattern || source instanceof PatternDecorator) {
       this._currentNode = source.rootNode;
     } else if (source instanceof PatternNode) {
@@ -20,33 +22,33 @@ export default class PatternCursor {
     }
   }
 
-  private beginTransaction() {
+  protected beginTransaction() {
     this.runningTransaction = true;
     this.operationLog = [];
   }
 
-  private commitTransaction() {
+  protected commitTransaction() {
     this.operationLog = [];
     this.runningTransaction = false;
   }
 
-  private rollbackTransaction() {
+  protected rollbackTransaction() {
     while (this.operationLog.length > 0) {
       const operation = this.operationLog.pop();
-      if (operation === CursorOperation.GOTO_FIRST_CHILD) {
+      if (operation === TransactionOperation.GOTO_FIRST_CHILD) {
         this.goToParent();
-      } else if (operation === CursorOperation.GOTO_NEXT_SIBLING) {
+      } else if (operation === TransactionOperation.GOTO_NEXT_SIBLING) {
         this.goToPreviousSibling();
-      } else if (operation === CursorOperation.GOTO_PARENT) {
+      } else if (operation === TransactionOperation.GOTO_PARENT) {
         this.goToFirstChild();
-      } else if (operation === CursorOperation.GOTO_PREVIOUS_SIBLING) {
+      } else if (operation === TransactionOperation.GOTO_PREVIOUS_SIBLING) {
         this.goToNextSibling();
       }
     }
     this.runningTransaction = false;
   }
 
-  follow(path: PatternPath): boolean {
+  follow(path: TreePath): boolean {
     this.beginTransaction();
     for (const step of path.steps) {
       if (this.goToFirstChild()) {
@@ -63,7 +65,7 @@ export default class PatternCursor {
     return true;
   }
 
-  reverseFollow(path: PatternPath): boolean {
+  reverseFollow(path: TreePath): boolean {
     this.beginTransaction();
     for (const _ of path.steps) {
       if (this.goToParent()) {
@@ -77,7 +79,7 @@ export default class PatternCursor {
     return true;
   }
 
-  private goToSiblingWithIndex(index: number): boolean {
+  goToSiblingWithIndex(index: number): boolean {
     for (let i = 0; i < index; i++) {
       if (!this.goToNextSibling()) {
         return false;
@@ -92,7 +94,7 @@ export default class PatternCursor {
     }
     this._currentNode = this._currentNode.children[0];
     if (this.runningTransaction) {
-      this.operationLog.push(CursorOperation.GOTO_FIRST_CHILD);
+      this.operationLog.push(TransactionOperation.GOTO_FIRST_CHILD);
     }
     return true;
   }
@@ -103,7 +105,7 @@ export default class PatternCursor {
     }
     this._currentNode = this._currentNode.parent;
     if (this.runningTransaction) {
-      this.operationLog.push(CursorOperation.GOTO_PARENT);
+      this.operationLog.push(TransactionOperation.GOTO_PARENT);
     }
     return true;
   }
@@ -117,7 +119,7 @@ export default class PatternCursor {
     this._currentNode = this._currentNode.parent!.children[currentChildNodeIndex + 1];
 
     if (this.runningTransaction) {
-      this.operationLog.push(CursorOperation.GOTO_NEXT_SIBLING);
+      this.operationLog.push(TransactionOperation.GOTO_NEXT_SIBLING);
     }
     return true;
   }
@@ -137,7 +139,7 @@ export default class PatternCursor {
     this._currentNode = this._currentNode.parent!.children[currentChildNodeIndex - 1];
 
     if (this.runningTransaction) {
-      this.operationLog.push(CursorOperation.GOTO_PREVIOUS_SIBLING);
+      this.operationLog.push(TransactionOperation.GOTO_PREVIOUS_SIBLING);
     }
     return true;
   }
@@ -147,7 +149,7 @@ export default class PatternCursor {
   }
 }
 
-enum CursorOperation {
+enum TransactionOperation {
   GOTO_PARENT,
   GOTO_FIRST_CHILD,
   GOTO_NEXT_SIBLING,

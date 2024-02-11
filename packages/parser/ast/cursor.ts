@@ -1,8 +1,36 @@
 import type { TreeCursor } from "web-tree-sitter";
 import AstNode from "./node";
+import Cursor from "../cursor/cursor";
 
-export default class AstCursor {
-  constructor(private treeCursor: TreeCursor) {}
+export default class AstCursor extends Cursor {
+  private runningTransaction = false;
+  private operationLog: TransactionOperation[] = [];
+
+  constructor(private treeCursor: TreeCursor) {
+    super();
+  }
+
+  protected beginTransaction() {
+    this.runningTransaction = true;
+    this.operationLog = [];
+  }
+
+  protected commitTransaction() {
+    this.operationLog = [];
+    this.runningTransaction = false;
+  }
+
+  protected rollbackTransaction() {
+    while (this.operationLog.length > 0) {
+      const operation = this.operationLog.pop();
+      if (operation === TransactionOperation.GOTO_FIRST_CHILD) {
+        this.goToParent();
+      } else if (operation === TransactionOperation.GOTO_PARENT) {
+        this.goToFirstChild();
+      }
+    }
+    this.runningTransaction = false;
+  }
 
   goToParent(): boolean {
     return this.treeCursor.gotoParent();
@@ -27,7 +55,21 @@ export default class AstCursor {
   }
 
   goToNextSibling(): boolean {
+    /* The underlying cursor by web-tree-sitter does currently not support gotoPreviousSibling.
+     * Therefore transactions starting with gotoNextSibling cannot be rolled back correctly */
+    if (this.runningTransaction && this.operationLog.length === 0) {
+      throw new Error("Transaction on AST Cursor cannot start with goToNextSibling");
+    }
     return this.treeCursor.gotoNextSibling();
+  }
+
+  goToSiblingWithIndex(index: number): boolean {
+    for (let i = 0; i < index; i++) {
+      if (!this.goToNextSibling()) {
+        return false;
+      }
+    }
+    return true;
   }
 
   goToExpression(): boolean {
@@ -82,4 +124,9 @@ export default class AstCursor {
 export interface Keyword {
   type: string;
   pos: number;
+}
+
+enum TransactionOperation {
+  GOTO_PARENT,
+  GOTO_FIRST_CHILD,
 }

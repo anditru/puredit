@@ -1,4 +1,4 @@
-import PatternPath from "../pattern/patternPath";
+import TreePath from "../cursor/treePath";
 
 export enum Language {
   TypeScript = "ts",
@@ -24,9 +24,9 @@ export type AggregatableNodeTypeConfig = {
 
 export type ChainsConfig = {
   chainNodeType: string;
-  pathToCallRoot: PatternPath;
-  pathToNextChainLink: PatternPath;
-  pathToArguments: PatternPath;
+  pathToCallRoot: TreePath;
+  pathToNextChainLink: TreePath;
+  pathToArguments: TreePath;
 };
 
 export type BlocksConfig = {

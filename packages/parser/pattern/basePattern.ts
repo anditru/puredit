@@ -1,6 +1,6 @@
 import PatternNode from "./nodes/patternNode";
 import Pattern from "./pattern";
-import PatternPath from "./patternPath";
+import TreePath from "../cursor/treePath";
 
 export default class BasePattern implements Pattern {
   private numberOfLeafNodes: number;
@@ -29,12 +29,12 @@ export default class BasePattern implements Pattern {
     return this.rootNode.getMatchedTypes();
   }
 
-  getPathToNodeWithText(text: string): PatternPath {
+  getPathToNodeWithText(text: string): TreePath {
     const result = this.findPathByDfs(text, this.rootNode);
     if (!result) {
       throw new Error(`Node with text ${text} does not exist in this pattern`);
     }
-    return new PatternPath(result);
+    return new TreePath(result);
   }
 
   private findPathByDfs(
