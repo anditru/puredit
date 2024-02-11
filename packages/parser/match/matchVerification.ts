@@ -9,6 +9,7 @@ import RegularNode from "../pattern/nodes/regularNode";
 import AggregationNode from "../pattern/nodes/aggregationNode";
 
 import { logProvider } from "../../../logconfig";
+import ChainNode from "../pattern/nodes/chainNode";
 const logger = logProvider.getLogger("parser.match.MatchVerification");
 
 export default class MatchVerification {
@@ -61,12 +62,14 @@ export default class MatchVerification {
       this.visitArgumentNode();
     } else if (currentPatternNode instanceof AggregationNode) {
       this.visitAggregationNode();
+    } else if (currentPatternNode instanceof ChainNode) {
+      this.visitChainNode();
     } else if (currentPatternNode instanceof BlockNode) {
       this.visitBlockNode(lastSiblingKeyword);
     } else if (currentPatternNode instanceof RegularNode) {
       this.visitRegularNode();
     } else {
-      logger.debug(`Unimplemented node type ${currentPatternNode.type} encountered`);
+      logger.debug(`Unsupported node type ${currentPatternNode.type} encountered`);
       throw new DoesNotMatch();
     }
   }
@@ -90,6 +93,24 @@ export default class MatchVerification {
     this._aggregationRangeMap[aggregationNode.templateAggregation.name] = aggregationRanges;
   }
 
+  private visitChainNode() {
+    const chainNode = this.patternCursor.currentNode as ChainNode;
+    if (!chainNode.matches(this.astCursor)) {
+      logger.debug("AST node does not match ChainNode");
+      throw new DoesNotMatch();
+    }
+    if (chainNode.hasChildren()) {
+      this.visitChainNodeChildren();
+    } else {
+      logger.debug("Chain node does not have children");
+      throw new DoesNotMatch();
+    }
+  }
+
+  private visitChainNodeChildren() {
+    throw new DoesNotMatch();
+  }
+
   private visitBlockNode(lastSiblingKeyword?: Keyword) {
     const blockNode = this.patternCursor.currentNode as BlockNode;
     if (!blockNode.matches(this.astCursor)) {
@@ -106,18 +127,16 @@ export default class MatchVerification {
       logger.debug("AST does not match RegularNode.");
       throw new DoesNotMatch();
     }
-
-    if (!regularNode.hasChildren()) {
-      return;
+    if (regularNode.hasChildren()) {
+      this.visitRegularNodeChildren();
     }
+  }
 
-    if (!this.astCursor.currentNode.hasChildren()) {
-      logger.debug("Pattern node has children but AST node does not");
-      throw new DoesNotMatch();
-    }
-
+  private visitRegularNodeChildren() {
+    const regularNode = this.patternCursor.currentNode as RegularNode;
     this.patternCursor.goToFirstChild();
     this.astCursor.goToFirstChild();
+
     let [nextSiblingExists, lastKeyword] = this.astCursor.skipKeywordsAndGetLast();
     if (!nextSiblingExists) {
       logger.debug("Patter node has children but AST node only has keywords as children");

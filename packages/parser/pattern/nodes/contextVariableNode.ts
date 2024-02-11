@@ -9,7 +9,7 @@ export default class ContextVariableNode extends RegularNode {
     language: Target,
     type: string,
     text: string,
-    fieldName: string | null,
+    fieldName: string | undefined,
     public readonly templateContextVariable: TemplateContextVariable
   ) {
     super(language, type, text, fieldName);

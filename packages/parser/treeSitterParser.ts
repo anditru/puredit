@@ -3,7 +3,6 @@ import TreeSitterParser from "web-tree-sitter";
 export enum Target {
   TypeScript = "ts",
   Python = "py",
-  Any = "any",
 }
 
 const VSCODE_BASE_PATH = "https://file+.vscode-resource.vscode-cdn.net";

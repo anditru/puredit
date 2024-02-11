@@ -48,9 +48,6 @@ export class PatternBuilder {
   }
 
   setTargetLanguage(targetLanguage: Target) {
-    if (targetLanguage === Target.Any) {
-      throw new Error("Language Any not allowed for PatternBuilder");
-    }
     this.targetLanguage = targetLanguage;
     this.pathToChainContinuation = PatternBuilder.PATHS_TO_CHAIN_CONTINUATION[targetLanguage];
     this.pathToCallRoot = PatternBuilder.PATHS_TO_CALL_ROOT[targetLanguage];
@@ -128,12 +125,6 @@ export class PatternBuilder {
     const chains = this.rawTemplate!.getChains();
 
     for (const chain of chains) {
-      const chainCodeString = chain.toCodeString();
-      const chainRootPath = pattern.getPathToNodeWithText(chainCodeString);
-      const patternCursor = new PatternCursor(pattern);
-      patternCursor.follow(chainRootPath);
-      const chainFieldName = patternCursor.currentNode.fieldName;
-
       const startCodeString = chain.getCodeStringForChainStart();
       const startPatternRootNode = this.transformToPatternTree(startCodeString);
       startPatternMap[chain.name] = new BasePattern(startPatternRootNode, chain.startPattern.name);
@@ -152,7 +143,6 @@ export class PatternBuilder {
           linkPatternCursor.reverseFollow(this.pathToChainContinuation!.getSliceBeforeLastStep());
           linkPatternCursor.follow(this.pathToCallRoot!);
           linkRootNode = linkPatternCursor.currentNode.cutOff();
-          linkRootNode.fieldName = chainFieldName;
           return new BasePattern(linkRootNode, chain.linkPatterns[index].name);
         });
       linkPatternMap[chain.name] = linkPatterns;

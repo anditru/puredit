@@ -5,7 +5,6 @@ import TemplateParameter from "./templateParameter";
 import PatternNode from "../pattern/nodes/patternNode";
 import { Target } from "../treeSitterParser";
 import ChainNode from "../pattern/nodes/chainNode";
-import Pattern from "../pattern/pattern";
 
 export default class TemplateChain extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_chain_";
@@ -35,12 +34,6 @@ export default class TemplateChain extends TemplateParameter {
   }
 
   toPatternNode(cursor: AstCursor, language: Target): PatternNode {
-    return new ChainNode(
-      language,
-      cursor.currentNode.text,
-      cursor.currentFieldName,
-      cursor.currentNode.type,
-      this
-    );
+    return new ChainNode(language, cursor.currentNode.text, cursor.currentFieldName, this);
   }
 }

@@ -1,18 +1,10 @@
 import type { ContextRange, PatternMatchingResult, Match, PatternMap } from "./types";
-import { Target, type Context } from "..";
+import type { Context } from "..";
 import MatchVerification, { DoesNotMatch } from "./matchVerification";
 import AstCursor from "../ast/cursor";
 import Pattern from "../pattern/pattern";
 import { TreeCursor } from "web-tree-sitter";
 import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
-import BasePattern from "../pattern/basePattern";
-import ArgumentNode from "../pattern/nodes/argumentNode";
-import TemplateArgument from "../define/templateArgument";
-
-const aggregationDefaultPattern = new BasePattern(
-  new ArgumentNode(Target.Any, "", null, new TemplateArgument("content", [])),
-  "default"
-);
 
 export class PatternMatching {
   private matches: Match[] = [];
@@ -148,18 +140,7 @@ export class PatternMatching {
         Object.assign({}, this.context, aggregationRange.context)
       );
       const result = aggregationPatternMatching.executeOnlySpanningEntireRange();
-      if (result.matches.length > 0) {
-        aggregationMatches = aggregationMatches.concat(result.matches);
-      } else {
-        aggregationMatches.push({
-          pattern: aggregationDefaultPattern,
-          args: { content: aggregationRange.node },
-          node: aggregationRange.node,
-          aggregationMatchMap: {},
-          aggregationRangeMap: {},
-          blockRanges: [],
-        });
-      }
+      aggregationMatches = aggregationMatches.concat(result.matches);
     }
 
     return aggregationMatches;

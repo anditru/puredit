@@ -5,37 +5,29 @@ import AstCursor from "../../ast/cursor";
 
 export default class BlockNode extends PatternNode {
   static readonly TYPE = "BlockNode";
+  static readonly BLOCK_NODE_TYPES = {
+    py: "block",
+    ts: "statement_block",
+  };
 
   constructor(
     language: Target,
     text: string,
-    fieldName: string | null,
+    fieldName: string | undefined,
     public readonly templateBlock: TemplateBlock
   ) {
     super(language, BlockNode.TYPE, text, fieldName);
   }
 
   getMatchedTypes(): string[] {
-    switch (this.language) {
-      case Target.TypeScript:
-        return ["statement_block"];
-      case Target.Python:
-        return ["block"];
-    }
+    return [BlockNode.BLOCK_NODE_TYPES[this.language]];
   }
 
   matches(astCursor: AstCursor): boolean {
-    if (astCursor.currentFieldName !== this.fieldName) {
-      return false;
-    }
     const astNode = astCursor.currentNode;
-    switch (this.language) {
-      case Target.TypeScript:
-        return astNode.cleanNodeType === "statement_block";
-      case Target.Python:
-        return astNode.cleanNodeType === "block";
-      default:
-        throw new Error("Unsupported language");
-    }
+    return (
+      BlockNode.BLOCK_NODE_TYPES[this.language] === astNode.cleanNodeType &&
+      astCursor.currentFieldName === this.fieldName
+    );
   }
 }

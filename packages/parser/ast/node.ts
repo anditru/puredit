@@ -4,6 +4,7 @@ import TemplateAggregation from "../define/templateAggregation";
 import TemplateBlock from "../define/templateBlock";
 import TemplateContextVariable from "../define/templateContextVariable";
 import AstCursor from "./cursor";
+import TemplateChain from "../define/templateChain";
 
 export default class AstNode {
   constructor(private readonly syntaxNode: SyntaxNode) {}
@@ -23,6 +24,7 @@ export default class AstNode {
       TemplateAggregation,
       TemplateBlock,
       TemplateContextVariable,
+      TemplateChain,
     ];
     for (const TemplateParameterType of TemplateParameterTypes) {
       if (nodeText.startsWith(TemplateParameterType.CODE_STRING_PREFIX)) {

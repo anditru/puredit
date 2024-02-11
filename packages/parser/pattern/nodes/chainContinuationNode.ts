@@ -6,7 +6,7 @@ export default class ChainContinuationNode extends PatternNode {
   static readonly TYPE = "ChainContinuationNode";
 
   constructor(language: Target) {
-    super(language, ChainContinuationNode.TYPE, "chainContinuation", null);
+    super(language, ChainContinuationNode.TYPE, "chainContinuation", undefined);
   }
 
   getMatchedTypes(): string[] {

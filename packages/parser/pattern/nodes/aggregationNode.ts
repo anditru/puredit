@@ -17,15 +17,11 @@ export default class AggregationNode extends PatternNode {
   constructor(
     language: Target,
     text: string,
-    fieldName: string | null,
+    fieldName: string | undefined,
     public astNodeType: string,
     public readonly templateAggregation: TemplateAggregation
   ) {
     super(language, AggregationNode.TYPE, text, fieldName);
-
-    if (language === Target.Any) {
-      throw new Error("Language Any not allowed for AggregationNode");
-    }
 
     const aggregatableNodeTypes = AggregationNode.AGGREGATABLE_NODE_TYPES[language];
     const nodeTypeConfig = aggregatableNodeTypes.find(

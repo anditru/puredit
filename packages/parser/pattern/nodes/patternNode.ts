@@ -10,7 +10,7 @@ export default abstract class PatternNode {
     public readonly language: Target,
     public type: string,
     public readonly text: string,
-    fieldName: string | null,
+    fieldName: string | undefined,
     public readonly children: PatternNode[] = []
   ) {
     if (!fieldName) {

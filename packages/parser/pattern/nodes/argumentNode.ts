@@ -9,7 +9,7 @@ export default class ArgumentNode extends PatternNode {
   constructor(
     language: Target,
     text: string,
-    fieldName: string | null,
+    fieldName: string | undefined,
     public readonly templateArgument: TemplateArgument
   ) {
     super(language, ArgumentNode.TYPE, text, fieldName);

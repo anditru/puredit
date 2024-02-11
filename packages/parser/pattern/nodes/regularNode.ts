@@ -8,7 +8,7 @@ export default class RegularNode extends PatternNode {
     language: Target,
     type: string,
     text: string,
-    fieldName: string | null,
+    fieldName: string | undefined,
     children: PatternNode[] = []
   ) {
     super(language, type, text, fieldName, children);
@@ -26,11 +26,7 @@ export default class RegularNode extends PatternNode {
     if (astNode.cleanNodeType !== this.type) {
       return false;
     }
-    if (this.hasChildren()) {
-      return true;
-    } else {
-      return astNode.text === this.text;
-    }
+    return (this.hasChildren() && astNode.hasChildren()) || this.text === astNode.text;
   }
 }
 
