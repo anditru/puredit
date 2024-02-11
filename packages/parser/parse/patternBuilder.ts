@@ -1,4 +1,4 @@
-import { Target, TreeSitterParser } from "../treeSitterParser";
+import { TreeSitterParser } from "../treeSitterParser";
 import AstCursor from "../ast/cursor";
 import { NodeTransformVisitor } from "./nodeTransformVisitor";
 import RawTemplate from "../define/rawTemplate";
@@ -11,21 +11,14 @@ import { SubPatternMap } from "../pattern/types";
 import ChainDecorator from "../pattern/decorators/chainDecorator";
 import PatternPath from "../pattern/patternPath";
 import ChainContinuationNode from "../pattern/nodes/chainContinuationNode";
+import { Language } from "../config/types";
+import { loadChainsConfigFor } from "../config/load";
 
 export class PatternBuilder {
-  static readonly PATHS_TO_CHAIN_CONTINUATION = {
-    py: new PatternPath([0, 0]),
-    ts: new PatternPath([0, 0]),
-  };
-  static readonly PATHS_TO_CALL_ROOT = {
-    py: new PatternPath([0]),
-    ts: new PatternPath([0]),
-  };
-
   private name: string | undefined;
   private rawTemplate: RawTemplate | undefined;
   private isExpression: boolean | undefined;
-  private targetLanguage: Target | undefined;
+  private targetLanguage: Language | undefined;
   private pathToChainContinuation: PatternPath | undefined;
   private pathToCallRoot: PatternPath | undefined;
   private nodeTransformVisitor: NodeTransformVisitor | undefined;
@@ -47,10 +40,13 @@ export class PatternBuilder {
     return this;
   }
 
-  setTargetLanguage(targetLanguage: Target) {
+  setTargetLanguage(targetLanguage: Language) {
     this.targetLanguage = targetLanguage;
-    this.pathToChainContinuation = PatternBuilder.PATHS_TO_CHAIN_CONTINUATION[targetLanguage];
-    this.pathToCallRoot = PatternBuilder.PATHS_TO_CALL_ROOT[targetLanguage];
+
+    const chainsConfig = loadChainsConfigFor(targetLanguage);
+    this.pathToChainContinuation = chainsConfig.pathToNextChainLink;
+    this.pathToCallRoot = chainsConfig.pathToCallRoot;
+
     return this;
   }
 

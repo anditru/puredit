@@ -1,11 +1,11 @@
 import PatternNode from "./patternNode";
-import { Target } from "../../treeSitterParser";
 import AstCursor from "../../ast/cursor";
+import { Language } from "../../config/types";
 
 export default class ChainContinuationNode extends PatternNode {
   static readonly TYPE = "ChainContinuationNode";
 
-  constructor(language: Target) {
+  constructor(language: Language) {
     super(language, ChainContinuationNode.TYPE, "chainContinuation", undefined);
   }
 

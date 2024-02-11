@@ -1,6 +1,6 @@
 import AstCursor, { Keyword } from "../ast/cursor";
 import type { AggregationRangeMap, ArgMap, CandidateMatch, CodeRange, Match } from "./types";
-import { Target, type Context } from "..";
+import { Language, type Context } from "..";
 import Pattern from "../pattern/pattern";
 import ArgumentNode from "../pattern/nodes/argumentNode";
 import BlockNode from "../pattern/nodes/blockNode";
@@ -108,6 +108,9 @@ export default class MatchVerification {
   }
 
   private visitChainNodeChildren() {
+    const chainNode = this.patternCursor.currentNode as ChainNode;
+    this.patternCursor.goToFirstChild();
+    this.astCursor.goToFirstChild();
     throw new DoesNotMatch();
   }
 
@@ -218,11 +221,11 @@ export default class MatchVerification {
 
   private extractBlockRangeFor(blockNode: BlockNode, lastSiblingKeyword?: Keyword): CodeRange {
     let from = this.astCursor.startIndex;
-    if (blockNode.language === Target.Python && lastSiblingKeyword?.type === ":") {
+    if (blockNode.language === Language.Python && lastSiblingKeyword?.type === ":") {
       from = lastSiblingKeyword.pos;
     }
     const rangeModifierStart = 1;
-    const rangeModifierEnd = blockNode.language === Target.TypeScript ? 1 : 0;
+    const rangeModifierEnd = blockNode.language === Language.TypeScript ? 1 : 0;
     return {
       node: this.astCursor.currentNode,
       context: blockNode.templateBlock.context,

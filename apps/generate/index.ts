@@ -1,7 +1,7 @@
 import parseArgv from "yargs/yargs";
 import path from "path";
 import fs from "fs";
-import { Parser, Target } from "@puredit/parser";
+import { Language, Parser } from "@puredit/parser";
 import { scanCode } from "./code.js";
 import { scanProjections } from "./projections.js";
 import { serializePattern } from "./serialize.js";
@@ -20,16 +20,14 @@ const argNames = [
   "target-dir",
 ];
 
-const args = parseArgv(process.argv.slice(2))
-  .string(argNames)
-  .demandOption(argNames).argv;
+const args = parseArgv(process.argv.slice(2)).string(argNames).demandOption(argNames).argv;
 
-if (!Object.values(Target).includes(args.language as Target)) {
-  console.error("Parameter --language must be one of", Object.values(Target));
+if (!Object.values(Language).includes(args.language as Language)) {
+  console.error("Parameter --language must be one of", Object.values(Language));
   process.exit(1);
 }
 
-const parser = await Parser.load(args.language as Target);
+const parser = await Parser.load(args.language as Language);
 
 // Ensure we are running from the root directory of the monorepo
 process.chdir("../..");
@@ -40,14 +38,10 @@ if (process.platform === "win32") {
 }
 
 const samplesRaw = fs.readFileSync(args.samples, { encoding: "utf-8" });
-const [codeRaw, projectionsRaw] = samplesRaw.split(
-  `${doubleNewline}---${doubleNewline}`
-);
+const [codeRaw, projectionsRaw] = samplesRaw.split(`${doubleNewline}---${doubleNewline}`);
 
 const code = codeRaw.split(doubleNewline).map((sample) => parser.parse(sample));
-const projections = projectionsRaw
-  .split(doubleNewline)
-  .map((sample) => sample.trim().split(" "));
+const projections = projectionsRaw.split(doubleNewline).map((sample) => sample.trim().split(" "));
 
 const projection = scanProjections(projections);
 
@@ -56,10 +50,7 @@ const { pattern, variables } = scanCode(code);
 const connections = connectVariables(code, projections, variables, projection);
 setVariableNames(projection, connections);
 
-const definitionPath = path.join(
-  args.targetDir,
-  `${args.projectionName}Projection.ts`
-);
+const definitionPath = path.join(args.targetDir, `${args.projectionName}Projection.ts`);
 fs.writeFileSync(
   definitionPath,
   definitionTemplate({

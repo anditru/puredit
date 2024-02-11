@@ -1,3 +1,3 @@
-import { Parser, Target } from "@puredit/parser";
+import { Language, Parser } from "@puredit/parser";
 
-export const parser = await Parser.load(Target.TypeScript);
+export const parser = await Parser.load(Language.TypeScript);

@@ -1,11 +1,11 @@
 import AstCursor from "../../ast/cursor";
+import { Language } from "../../config/types";
 import { Context } from "../../match/types";
-import { Target } from "../../treeSitterParser";
 import PatternNode from "./patternNode";
 
 export default class RegularNode extends PatternNode {
   constructor(
-    language: Target,
+    language: Language,
     type: string,
     text: string,
     fieldName: string | undefined,
@@ -31,13 +31,13 @@ export default class RegularNode extends PatternNode {
 }
 
 export class RegularNodeBuilder {
-  private _language: Target | undefined;
+  private _language: Language | undefined;
   private _type: string | undefined;
   private _text: string | undefined;
   private _fieldName: string | null | undefined;
   private _children: PatternNode[] = [];
 
-  setLanguage(language: Target): RegularNodeBuilder {
+  setLanguage(language: Language): RegularNodeBuilder {
     this._language = language;
     return this;
   }
@@ -52,7 +52,7 @@ export class RegularNodeBuilder {
     return this;
   }
 
-  setFieldName(fieldName: string | null): RegularNodeBuilder {
+  setFieldName(fieldName: string | undefined): RegularNodeBuilder {
     this._fieldName = fieldName;
     return this;
   }

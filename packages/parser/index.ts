@@ -6,7 +6,7 @@ export type { SyntaxNode } from "web-tree-sitter";
 export { Parser };
 export { arg, agg, chain, block, contextVariable } from "./define/definitionFunctions";
 export { PatternMatching } from "./match/patternMatching";
-export { Target } from "./treeSitterParser";
+export { Language } from "./config/types";
 export { createPatternMap } from "./common";
 export type { PatternMap, ArgMap, Match, Context } from "./match/types";
 export type { Pattern, PatternNode };

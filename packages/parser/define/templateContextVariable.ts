@@ -1,7 +1,7 @@
 import AstCursor from "../ast/cursor";
+import { Language } from "../config/types";
 import ContextVariableNode from "../pattern/nodes/contextVariableNode";
 import PatternNode from "../pattern/nodes/patternNode";
-import { Target } from "../treeSitterParser";
 import TemplateParameter from "./templateParameter";
 
 export default class TemplateContextVariable extends TemplateParameter {
@@ -18,7 +18,7 @@ export default class TemplateContextVariable extends TemplateParameter {
     return TemplateContextVariable.CODE_STRING_PREFIX + this._id.toString();
   }
 
-  toPatternNode(cursor: AstCursor, language: Target): PatternNode {
+  toPatternNode(cursor: AstCursor, language: Language): PatternNode {
     return new ContextVariableNode(
       language,
       cursor.currentNode.type,

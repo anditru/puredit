@@ -2,18 +2,22 @@ import TemplateArgument from "../define/templateArgument";
 import TemplateParameter from "../define/templateParameter";
 import RawTemplate from "../define/rawTemplate";
 import type { TreeSitterParser } from "../treeSitterParser";
-import { createTreeSitterParser, Target } from "../treeSitterParser";
+import { createTreeSitterParser } from "../treeSitterParser";
 import { PatternBuilder } from "./patternBuilder";
+import { Language } from "../config/types";
 
 export default class Parser {
-  static async load(target: Target): Promise<Parser> {
+  static async load(target: Language): Promise<Parser> {
     const treeSitterParser = await createTreeSitterParser(target);
     return new Parser(treeSitterParser, target);
   }
 
   patternBuilder: PatternBuilder;
 
-  private constructor(private treeSitterParser: TreeSitterParser, public readonly target: Target) {
+  private constructor(
+    private treeSitterParser: TreeSitterParser,
+    public readonly target: Language
+  ) {
     this.patternBuilder = new PatternBuilder(treeSitterParser);
   }
 

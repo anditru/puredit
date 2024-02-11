@@ -3,8 +3,8 @@ import RawTemplate from "./rawTemplate";
 import { Context } from "../match/types";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../pattern/nodes/patternNode";
-import { Target } from "../treeSitterParser";
 import AggregationNode from "../pattern/nodes/aggregationNode";
+import { Language } from "../config/types";
 
 export default class TemplateAggregation extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_agg_";
@@ -28,7 +28,7 @@ export default class TemplateAggregation extends TemplateParameter {
     return this.subPatterns.map((pattern) => pattern.toCodeString());
   }
 
-  toPatternNode(cursor: AstCursor, language: Target): PatternNode {
+  toPatternNode(cursor: AstCursor, language: Language): PatternNode {
     return new AggregationNode(
       language,
       cursor.currentNode.text,

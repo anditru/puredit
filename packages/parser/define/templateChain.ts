@@ -3,8 +3,8 @@ import RawTemplate from "./rawTemplate";
 import { Context } from "../match/types";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../pattern/nodes/patternNode";
-import { Target } from "../treeSitterParser";
 import ChainNode from "../pattern/nodes/chainNode";
+import { Language } from "../config/types";
 
 export default class TemplateChain extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_chain_";
@@ -33,7 +33,7 @@ export default class TemplateChain extends TemplateParameter {
     return this.linkPatterns.map((pattern) => pattern.toCodeString());
   }
 
-  toPatternNode(cursor: AstCursor, language: Target): PatternNode {
+  toPatternNode(cursor: AstCursor, language: Language): PatternNode {
     return new ChainNode(language, cursor.currentNode.text, cursor.currentFieldName, this);
   }
 }

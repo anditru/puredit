@@ -1,21 +1,18 @@
 import PatternNode from "./patternNode";
 import TemplateAggregation from "../../define/templateAggregation";
-import { Target } from "../../treeSitterParser";
 import AstCursor from "../../ast/cursor";
+import { Language } from "../../config/types";
+import { loadAggregationsConfigFor } from "../../config/load";
 
 export default class AggregationNode extends PatternNode {
   static readonly TYPE = "AggregationNode";
-  static readonly AGGREGATABLE_NODE_TYPES = {
-    py: [{ name: "argument_list", startToken: "(", delimiterToken: ",", endToken: ")" }],
-    ts: [{ name: "arguments", startToken: "(", delimiterToken: ",", endToken: ")" }],
-  };
 
   public readonly startToken: string;
   public readonly delimiterToken: string;
   public readonly endToken: string;
 
   constructor(
-    language: Target,
+    language: Language,
     text: string,
     fieldName: string | undefined,
     public astNodeType: string,
@@ -23,8 +20,8 @@ export default class AggregationNode extends PatternNode {
   ) {
     super(language, AggregationNode.TYPE, text, fieldName);
 
-    const aggregatableNodeTypes = AggregationNode.AGGREGATABLE_NODE_TYPES[language];
-    const nodeTypeConfig = aggregatableNodeTypes.find(
+    const aggregationsConfig = loadAggregationsConfigFor(language);
+    const nodeTypeConfig = aggregationsConfig.aggregatableNodeTypes.find(
       (nodeTypeConfig) => (nodeTypeConfig.name = astNodeType)
     );
     if (!nodeTypeConfig) {

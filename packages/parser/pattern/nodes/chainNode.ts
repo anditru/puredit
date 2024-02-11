@@ -1,25 +1,23 @@
 import PatternNode from "./patternNode";
 import TemplateChain from "../../define/templateChain";
-import { Target } from "../../treeSitterParser";
 import AstCursor from "../../ast/cursor";
+import { Language } from "../../config/types";
+import { loadChainsConfigFor } from "../../config/load";
 
 export default class ChainNode extends PatternNode {
   static readonly TYPE = "ChainNode";
-  static readonly CHAIN_NODE_TYPES = {
-    py: "call",
-    ts: "call_expression",
-  };
 
   public astNodeType: string;
 
   constructor(
-    language: Target,
+    language: Language,
     text: string,
     fieldName: string | undefined,
     public readonly templateChain: TemplateChain
   ) {
     super(language, ChainNode.TYPE, text, fieldName);
-    this.astNodeType = ChainNode.CHAIN_NODE_TYPES[language];
+    const chainsConfig = loadChainsConfigFor(language);
+    this.astNodeType = chainsConfig.chainNodeType;
   }
 
   getMatchedTypes(): string[] {

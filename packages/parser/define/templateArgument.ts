@@ -1,6 +1,6 @@
 import AstCursor from "../ast/cursor";
+import { Language } from "../config/types";
 import ArgumentNode from "../pattern/nodes/argumentNode";
-import { Target } from "../treeSitterParser";
 import TemplateParameter from "./templateParameter";
 
 export default class TemplateArgument extends TemplateParameter {
@@ -17,7 +17,7 @@ export default class TemplateArgument extends TemplateParameter {
     return TemplateArgument.CODE_STRING_PREFIX + this._id.toString();
   }
 
-  toPatternNode(cursor: AstCursor, language: Target) {
+  toPatternNode(cursor: AstCursor, language: Language) {
     return new ArgumentNode(language, cursor.currentNode.text, cursor.currentFieldName, this);
   }
 }

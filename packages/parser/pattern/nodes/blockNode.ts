@@ -1,33 +1,33 @@
 import PatternNode from "./patternNode";
 import TemplateBlock from "../../define/templateBlock";
-import { Target } from "../../treeSitterParser";
 import AstCursor from "../../ast/cursor";
+import { Language } from "../../config/types";
+import { loadBlocksConfigFor } from "../../config/load";
 
 export default class BlockNode extends PatternNode {
   static readonly TYPE = "BlockNode";
-  static readonly BLOCK_NODE_TYPES = {
-    py: "block",
-    ts: "statement_block",
-  };
+
+  public readonly astNodeType: string;
 
   constructor(
-    language: Target,
+    language: Language,
     text: string,
     fieldName: string | undefined,
     public readonly templateBlock: TemplateBlock
   ) {
     super(language, BlockNode.TYPE, text, fieldName);
+    const blocksConfig = loadBlocksConfigFor(language);
+    this.astNodeType = blocksConfig.blockNodeType;
   }
 
   getMatchedTypes(): string[] {
-    return [BlockNode.BLOCK_NODE_TYPES[this.language]];
+    return [this.astNodeType];
   }
 
   matches(astCursor: AstCursor): boolean {
     const astNode = astCursor.currentNode;
     return (
-      BlockNode.BLOCK_NODE_TYPES[this.language] === astNode.cleanNodeType &&
-      astCursor.currentFieldName === this.fieldName
+      this.astNodeType === astNode.cleanNodeType && astCursor.currentFieldName === this.fieldName
     );
   }
 }

@@ -1,12 +1,12 @@
 import AstCursor from "../../ast/cursor";
+import { Language } from "../../config/types";
 import TemplateContextVariable from "../../define/templateContextVariable";
 import { Context } from "../../match/types";
-import { Target } from "../../treeSitterParser";
 import RegularNode from "./regularNode";
 
 export default class ContextVariableNode extends RegularNode {
   constructor(
-    language: Target,
+    language: Language,
     type: string,
     text: string,
     fieldName: string | undefined,

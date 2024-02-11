@@ -1,13 +1,13 @@
 import AstCursor from "../../ast/cursor";
+import { Language } from "../../config/types";
 import { Context } from "../../match/types";
-import { Target } from "../../treeSitterParser";
 
 export default abstract class PatternNode {
   public fieldName: string | undefined;
   private _parent: PatternNode | null | undefined;
 
   constructor(
-    public readonly language: Target,
+    public readonly language: Language,
     public type: string,
     public readonly text: string,
     fieldName: string | undefined,

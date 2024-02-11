@@ -3,16 +3,16 @@ import TemplateParameter from "../define/templateParameter";
 import { isString } from "@puredit/utils";
 import PatternNode from "../pattern/nodes/patternNode";
 import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
-import { Target } from "../treeSitterParser";
 import TemplateAggregation from "../define/templateAggregation";
 import AggregationNode from "../pattern/nodes/aggregationNode";
 import TemplateChain from "../define/templateChain";
+import { Language } from "../config/types";
 
 export class NodeTransformVisitor {
   cursor: AstCursor | undefined;
 
   constructor(
-    public readonly targetLanguage: Target,
+    public readonly targetLanguage: Language,
     private params: (string | TemplateParameter)[]
   ) {}
 

@@ -1,3 +1,3 @@
-import { Parser, Target } from "@puredit/parser";
+import { Language, Parser } from "@puredit/parser";
 
-export const pythonParser = await Parser.load(Target.Python);
+export const pythonParser = await Parser.load(Language.Python);

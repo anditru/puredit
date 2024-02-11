@@ -1,13 +1,13 @@
 import TemplateArgument from "../../define/templateArgument";
 import PatternNode from "./patternNode";
-import { Target } from "../../treeSitterParser";
 import AstCursor from "../../ast/cursor";
+import { Language } from "../../config/types";
 
 export default class ArgumentNode extends PatternNode {
   static readonly TYPE: string = "ArgumentNode";
 
   constructor(
-    language: Target,
+    language: Language,
     text: string,
     fieldName: string | undefined,
     public readonly templateArgument: TemplateArgument

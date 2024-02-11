@@ -1,7 +1,7 @@
-import type { Target } from "../treeSitterParser";
 import AstNode from "../ast/node";
 import Pattern from "../pattern/pattern";
 import AstCursor from "../ast/cursor";
+import { Language } from "../config/types";
 
 export type PatternMap = Record<string, Pattern[]>;
 
@@ -44,7 +44,7 @@ export interface CodeRange {
   context: Context;
   from: number;
   to: number;
-  language: Target;
+  language: Language;
 }
 
 export interface PatternMatchingResult {
