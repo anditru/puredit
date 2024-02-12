@@ -1,6 +1,7 @@
 import AstCursor from "../../ast/cursor";
 import { Language } from "../../config/types";
 import { Context } from "../../match/types";
+import Pattern from "../pattern";
 
 export default abstract class PatternNode {
   public fieldName: string | undefined;
@@ -62,14 +63,16 @@ export default abstract class PatternNode {
     return this;
   }
 
+  insertChild(node: PatternNode, index: number) {
+    node.parent = this;
+    this.children[index] = node;
+  }
+
   get parent(): PatternNode | null | undefined {
     return this._parent;
   }
 
   set parent(parent: PatternNode) {
-    if (this._parent) {
-      throw new Error("Parent is already set");
-    }
     this._parent = parent;
   }
 

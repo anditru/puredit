@@ -122,7 +122,7 @@ export class PatternBuilder {
 
     for (const chain of chains) {
       const startCodeString = chain.getCodeStringForChainStart();
-      const startPatternRootNode = this.transformToPatternTree(startCodeString);
+      const startPatternRootNode = this.transformToPatternTree(startCodeString).children[0];
       startPatternMap[chain.name] = new BasePattern(startPatternRootNode, chain.startPattern.name);
 
       const linkCodeStrings = chain.getCodeStringsForChainLinks();
@@ -133,9 +133,12 @@ export class PatternBuilder {
           const linkPatternCursor = new PatternCursor(linkRootNode);
           const lastStep = this.pathToChainContinuation!.getLastStep();
           linkPatternCursor.follow(this.pathToChainContinuation!.getSliceBeforeLastStep());
-          linkPatternCursor.currentNode.children[lastStep] = new ChainContinuationNode(
-            this.targetLanguage!
+          const chainContinuationNode = new ChainContinuationNode(
+            this.targetLanguage!,
+            startPatternRootNode,
+            chain
           );
+          linkPatternCursor.currentNode.insertChild(chainContinuationNode, lastStep);
           linkPatternCursor.reverseFollow(this.pathToChainContinuation!.getSliceBeforeLastStep());
           linkPatternCursor.follow(this.pathToCallRoot!);
           linkRootNode = linkPatternCursor.currentNode.cutOff();

@@ -14,6 +14,7 @@ import AstCursor from "../ast/cursor";
 import Pattern from "../pattern/pattern";
 import { TreeCursor } from "web-tree-sitter";
 import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
+import ChainDecorator from "../pattern/decorators/chainDecorator";
 
 export class PatternMatching {
   private matches: Match[] = [];
@@ -94,6 +95,8 @@ export class PatternMatching {
       blockRanges: verificationResult.blockRanges,
     });
     this.findMatchesInBlockRangesOf(verificationResult);
+    this.findMatchesInChainStartRangesOf(verificationResult);
+    this.findMatchesInChainLinkRangesOf(verificationResult);
   }
 
   private findMatchesInAggregationRangesOf(verificationResult: VerificationResult): SubMatchesMap {
@@ -102,18 +105,15 @@ export class PatternMatching {
     }
     const aggregationToSubMatchesMap: SubMatchesMap = {};
     for (const aggregationName in verificationResult.aggregationToRangesMap) {
-      const aggregationMatches = this.findSubMatchesForAggregation(
-        verificationResult,
-        aggregationName
-      );
+      const aggregationMatches = this.findSubMatchesFor(aggregationName, verificationResult);
       aggregationToSubMatchesMap[aggregationName] = aggregationMatches;
     }
     return aggregationToSubMatchesMap;
   }
 
-  private findSubMatchesForAggregation(
-    verificationResult: VerificationResult,
-    aggregationName: string
+  private findSubMatchesFor(
+    aggregationName: string,
+    verificationResult: VerificationResult
   ): SubMatch[] {
     const pattern = verificationResult.pattern as AggregationDecorator;
     const subPatternMap = pattern.getAggregationPatternMapFor(aggregationName);
@@ -152,6 +152,58 @@ export class PatternMatching {
         Object.assign({}, this.context, blockRange.context)
       );
       const result = blockPatternMatching.execute();
+
+      this.matches = this.matches.concat(result.matches);
+      this.contextRanges = this.contextRanges.concat(result.contextRanges);
+    }
+  }
+
+  private findMatchesInChainStartRangesOf(verificationResult: VerificationResult): void {
+    if (!(verificationResult.pattern instanceof ChainDecorator)) {
+      return;
+    }
+    for (const chainName in verificationResult.chainToStartRangeMap) {
+      this.findStartMatchForChain(chainName, verificationResult);
+    }
+  }
+
+  private findStartMatchForChain(chainName: string, verificationResult: VerificationResult): void {
+    const pattern = verificationResult.pattern as ChainDecorator;
+    const chainStartPatternMap = pattern.getStartPatternMapFor(chainName);
+    const chainStartRange = verificationResult.chainToStartRangeMap[chainName];
+
+    const chainStartPatternMatching = new PatternMatching(
+      chainStartPatternMap,
+      chainStartRange.node.walk(),
+      Object.assign({}, this.context, chainStartRange.context)
+    );
+    const result = chainStartPatternMatching.executeOnlySpanningEntireRange();
+
+    this.matches = this.matches.concat(result.matches);
+    this.contextRanges = this.contextRanges.concat(result.contextRanges);
+  }
+
+  private findMatchesInChainLinkRangesOf(verificationResult: VerificationResult): void {
+    if (!(verificationResult.pattern instanceof ChainDecorator)) {
+      return;
+    }
+    for (const chainName in verificationResult.chainToLinkRangesMap) {
+      this.findLinkMatchesForChain(chainName, verificationResult);
+    }
+  }
+
+  private findLinkMatchesForChain(chainName: string, verificationResult: VerificationResult) {
+    const pattern = verificationResult.pattern as ChainDecorator;
+    const chainLinkPatterns = pattern.getLinkPatternMapFor(chainName);
+    const chainLinkRanges = verificationResult.chainToLinkRangesMap[chainName];
+
+    for (const chainLinkRange of chainLinkRanges) {
+      const chainLinkPatternMatching = new PatternMatching(
+        chainLinkPatterns,
+        chainLinkRange.node.walk(),
+        Object.assign({}, this.context, chainLinkRange.context)
+      );
+      const result = chainLinkPatternMatching.executeOnlySpanningEntireRange();
 
       this.matches = this.matches.concat(result.matches);
       this.contextRanges = this.contextRanges.concat(result.contextRanges);

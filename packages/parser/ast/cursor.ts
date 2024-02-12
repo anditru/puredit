@@ -33,11 +33,25 @@ export default class AstCursor extends Cursor {
   }
 
   goToParent(): boolean {
-    return this.treeCursor.gotoParent();
+    if (this.treeCursor.gotoParent()) {
+      if (this.runningTransaction) {
+        this.operationLog.push(TransactionOperation.GOTO_PARENT);
+      }
+      return true;
+    } else {
+      return false;
+    }
   }
 
   goToFirstChild(): boolean {
-    return this.treeCursor.gotoFirstChild();
+    if (this.treeCursor.gotoFirstChild()) {
+      if (this.runningTransaction) {
+        this.operationLog.push(TransactionOperation.GOTO_FIRST_CHILD);
+      }
+      return true;
+    } else {
+      return false;
+    }
   }
 
   goToFirstNonKeywordChildAndGetLastKeyword(): boolean | Keyword | undefined {

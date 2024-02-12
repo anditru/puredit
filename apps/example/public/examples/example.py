@@ -46,4 +46,7 @@ x = mathdsl.evaluate("r^r", locals())
 print("x:", x)
 
 # 4. Example: Projection with aggregation
-df2 = df.select(foo="bar", "boo", moo="zoo") 
+df2 = df.select(foo="bar", "boo", moo="zoo")
+
+# 5. Example: Projection with chain
+df2 = df.select("foo").filter(1)

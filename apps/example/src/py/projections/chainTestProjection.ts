@@ -9,7 +9,7 @@ const selectFunction = pythonParser.subPattern("selectFunction")`
 select(${selectCondition})
 `;
 
-const filterCondition = arg("filterCondition", ["number"]);
+const filterCondition = arg("filterCondition", ["integer"]);
 const fitlerFunction = pythonParser.subPattern("filterFunction")`
 filter(${filterCondition})
 `;

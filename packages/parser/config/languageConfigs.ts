@@ -11,8 +11,8 @@ const languageConfigs: Record<Language, LanguageConfig> = {
     chains: {
       chainNodeType: "call",
       pathToCallRoot: new TreePath([0]),
+      pathToCallBegin: new TreePath([0, 1]),
       pathToNextChainLink: new TreePath([0, 0]),
-      pathToArguments: new TreePath([1]),
     },
     blocks: {
       blockNodeType: "block",
@@ -27,8 +27,8 @@ const languageConfigs: Record<Language, LanguageConfig> = {
     chains: {
       chainNodeType: "call_expression",
       pathToCallRoot: new TreePath([0]),
+      pathToCallBegin: new TreePath([0, 1]),
       pathToNextChainLink: new TreePath([0, 0]),
-      pathToArguments: new TreePath([1]),
     },
     blocks: {
       blockNodeType: "statement_block",

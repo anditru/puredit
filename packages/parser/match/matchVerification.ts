@@ -6,7 +6,7 @@ import type {
   CodeRangesMap,
   VerificationResult,
 } from "./types";
-import { Language, PatternMatching, createPatternMap, type Context } from "..";
+import { Language, PatternMatching, type Context } from "..";
 import Pattern from "../pattern/pattern";
 import ArgumentNode from "../pattern/nodes/argumentNode";
 import BlockNode from "../pattern/nodes/blockNode";
@@ -19,6 +19,7 @@ import ChainDecorator from "../pattern/decorators/chainDecorator";
 
 import { logProvider } from "../../../logconfig";
 import AstNode from "../ast/node";
+import ChainContinuationNode from "../pattern/nodes/chainContinuationNode";
 const logger = logProvider.getLogger("parser.match.MatchVerification");
 
 export default class MatchVerification {
@@ -46,7 +47,7 @@ export default class MatchVerification {
    * CandateMatches for the child nodes in a depth-first manner.
    */
   public execute(lastSiblingKeyword?: Keyword): VerificationResult {
-    logger.debug("Starting new verification of CandidateMatch");
+    logger.debug(`Starting new verification of CandidateMatch with Pattern ${this.pattern.name}`);
     this.recurse(lastSiblingKeyword);
     return {
       pattern: this.pattern,
@@ -76,6 +77,8 @@ export default class MatchVerification {
       this.visitAggregationNode();
     } else if (currentPatternNode instanceof ChainNode) {
       this.visitChainNode();
+    } else if (currentPatternNode instanceof ChainContinuationNode) {
+      this.visitChainContinuationNode();
     } else if (currentPatternNode instanceof BlockNode) {
       this.visitBlockNode(lastSiblingKeyword);
     } else if (currentPatternNode instanceof RegularNode) {
@@ -83,6 +86,26 @@ export default class MatchVerification {
     } else {
       logger.debug(`Unsupported node type ${currentPatternNode.type} encountered`);
       throw new DoesNotMatch();
+    }
+  }
+
+  /**
+   * The Python tree-sitter parser wrongly puts leading comments between
+   * a with-clause and its body.
+   * To still be able to match patterns that expect a body right after
+   * the with-clause, we simply skip the comments.
+   * The same applies to function definitions, where a comment on the
+   * first line of the function body is put between the parameters
+   * and the body.
+   * This fix applies to both cases.
+   * Also see https://github.com/tree-sitter/tree-sitter-python/issues/112.
+   */
+  private skipLeadingCommentsInBodies(): void {
+    while (
+      this.patternCursor.currentNode.fieldName === "body" &&
+      this.astCursor.currentNode.cleanNodeType === "comment"
+    ) {
+      this.astCursor.goToNextSibling();
     }
   }
 
@@ -105,13 +128,33 @@ export default class MatchVerification {
     this.aggregationToRangesMap[aggregationNode.templateAggregation.name] = aggregationRanges;
   }
 
+  private extractAggregationRangesFor(aggregationNode: AggregationNode): CodeRange[] {
+    const currentAstNode = this.astCursor.currentNode;
+
+    const aggregationPartRoots = currentAstNode.children.filter((astNode) => {
+      return !(
+        astNode.text === aggregationNode.startToken ||
+        astNode.text === aggregationNode.delimiterToken ||
+        astNode.text === aggregationNode.endToken
+      );
+    });
+
+    return aggregationPartRoots.map((aggregationPartRoot) => ({
+      node: aggregationPartRoot,
+      context: aggregationNode.templateAggregation.context,
+      from: aggregationPartRoot.startIndex,
+      to: aggregationPartRoot.endIndex,
+      language: aggregationNode.language,
+    }));
+  }
+
   private visitChainNode() {
     const chainNode = this.patternCursor.currentNode as ChainNode;
     if (!chainNode.matches(this.astCursor)) {
       logger.debug("AST node does not match ChainNode");
       throw new DoesNotMatch();
     }
-    if (chainNode.hasChildren()) {
+    if (this.astCursor.currentNode.hasChildren()) {
       this.visitChainNodeChildren();
     } else {
       logger.debug("ChainNode does not have children");
@@ -121,25 +164,90 @@ export default class MatchVerification {
 
   private visitChainNodeChildren() {
     const chainNode = this.patternCursor.currentNode as ChainNode;
-    const pattern = this.pattern as ChainDecorator;
+    this.initializeChainToLinkRangesMapFor(chainNode);
+
     const chainsConfig = loadChainsConfigFor(chainNode.language);
     const pathToNextChainLink = chainsConfig.pathToNextChainLink;
-    const startPattern = pattern.getStartPatternFor(chainNode.templateChain.name);
-    while (this.astCursor.follow(pathToNextChainLink)) {
+
+    let chainDepth = -1;
+    do {
+      chainDepth++;
       if (this.astCursor.currentNode.type === chainsConfig.chainNodeType) {
-        continue;
-      }
-      const startPatternMatching = new PatternMatching(
-        createPatternMap([startPattern]),
-        this.astCursor,
-        this.context
-      );
-      const startPatternMatchingResult = startPatternMatching.executeOnlySpanningEntireRange();
-      if (startPatternMatchingResult.matches.length === 0) {
+        this.extractChainLinkRangeFor(chainNode);
+      } else if (this.chainStartReachedFor(chainNode)) {
+        this.extractChainStartRangeFor(chainNode);
+        break;
+      } else {
         throw new DoesNotMatch();
       }
+    } while (this.astCursor.follow(pathToNextChainLink));
+
+    if (chainDepth < 2) {
+      // We only match if at least two functions are called in a row
+      throw new DoesNotMatch();
     }
-    throw new DoesNotMatch();
+
+    for (let i = 0; i < chainDepth; i++) {
+      this.astCursor.reverseFollow(pathToNextChainLink);
+    }
+  }
+
+  private initializeChainToLinkRangesMapFor(chainNode: ChainNode) {
+    const chainName = chainNode.templateChain.name;
+    this.chainToLinkRangesMap[chainName] = [];
+  }
+
+  private extractChainLinkRangeFor(chainNode: ChainNode) {
+    const chainName = chainNode.templateChain.name;
+    const chainsConfig = loadChainsConfigFor(this.patternCursor.currentNode.language);
+
+    this.astCursor.follow(chainsConfig.pathToCallBegin);
+    const from = this.astCursor.currentNode.startIndex;
+    this.astCursor.reverseFollow(chainsConfig.pathToCallBegin);
+
+    const currentAstNode = this.astCursor.currentNode;
+    this.chainToLinkRangesMap[chainName].push({
+      node: currentAstNode,
+      context: {},
+      from,
+      to: currentAstNode.endIndex,
+      language: chainNode.language,
+    });
+  }
+
+  private extractChainStartRangeFor(chainNode: ChainNode) {
+    const currentAstNode = this.astCursor.currentNode;
+    const chainName = chainNode.templateChain.name;
+
+    this.chainToStartRangeMap[chainName] = {
+      node: currentAstNode,
+      context: {},
+      from: currentAstNode.startIndex,
+      to: currentAstNode.endIndex,
+      language: chainNode.language,
+    };
+  }
+
+  private chainStartReachedFor(chainNode: ChainNode): boolean {
+    const chainName = chainNode.templateChain.name;
+    const pattern = this.pattern as ChainDecorator;
+    const chainStartPatternMap = pattern.getStartPatternMapFor(chainName);
+
+    const chainStartPatternMatching = new PatternMatching(
+      chainStartPatternMap,
+      this.astCursor,
+      this.context
+    );
+    const result = chainStartPatternMatching.executeOnlySpanningEntireRange();
+    return result.matches.length > 0;
+  }
+
+  private visitChainContinuationNode() {
+    const chainContinuationNode = this.patternCursor.currentNode as ChainContinuationNode;
+    if (!chainContinuationNode.matches(this.astCursor)) {
+      logger.debug("AST node does not match ChainContinuationNode");
+      throw new DoesNotMatch();
+    }
   }
 
   private visitBlockNode(lastSiblingKeyword?: Keyword) {
@@ -150,6 +258,22 @@ export default class MatchVerification {
     }
     const blockRange = this.extractBlockRangeFor(blockNode, lastSiblingKeyword);
     this.blockRanges.push(blockRange);
+  }
+
+  private extractBlockRangeFor(blockNode: BlockNode, lastSiblingKeyword?: Keyword): CodeRange {
+    let from = this.astCursor.startIndex;
+    if (blockNode.language === Language.Python && lastSiblingKeyword?.type === ":") {
+      from = lastSiblingKeyword.pos;
+    }
+    const rangeModifierStart = 1;
+    const rangeModifierEnd = blockNode.language === Language.TypeScript ? 1 : 0;
+    return {
+      node: this.astCursor.currentNode,
+      context: blockNode.templateBlock.context,
+      from: from + rangeModifierStart,
+      to: this.astCursor.endIndex - rangeModifierEnd,
+      language: blockNode.language,
+    };
   }
 
   private visitRegularNode() {
@@ -179,7 +303,6 @@ export default class MatchVerification {
       this.recurse(lastKeyword);
 
       i += 1;
-      this.patternCursor.goToNextSibling();
       nextSiblingExists = this.astCursor.goToNextSibling();
 
       if (nextSiblingExists) {
@@ -194,6 +317,8 @@ export default class MatchVerification {
         logger.debug("AST node does not have sufficient amount of children");
         throw new DoesNotMatch();
       }
+
+      this.patternCursor.goToNextSibling();
     }
 
     this.astCursor.goToParent();
@@ -205,62 +330,6 @@ export default class MatchVerification {
       logger.debug("Error token in AST encountered");
       throw new DoesNotMatch();
     }
-  }
-
-  /**
-   * The Python tree-sitter parser wrongly puts leading comments between
-   * a with-clause and its body.
-   * To still be able to match patterns that expect a body right after
-   * the with-clause, we simply skip the comments.
-   * The same applies to function definitions, where a comment on the
-   * first line of the function body is put between the parameters
-   * and the body.
-   * This fix applies to both cases.
-   * Also see https://github.com/tree-sitter/tree-sitter-python/issues/112.
-   */
-  private skipLeadingCommentsInBodies(): void {
-    while (
-      this.patternCursor.currentNode.fieldName === "body" &&
-      this.astCursor.currentNode.cleanNodeType === "comment"
-    ) {
-      this.astCursor.goToNextSibling();
-    }
-  }
-
-  private extractAggregationRangesFor(aggregationNode: AggregationNode): CodeRange[] {
-    const currentAstNode = this.astCursor.currentNode;
-
-    const aggregationPartRoots = currentAstNode.children.filter((astNode) => {
-      return !(
-        astNode.text === aggregationNode.startToken ||
-        astNode.text === aggregationNode.delimiterToken ||
-        astNode.text === aggregationNode.endToken
-      );
-    });
-
-    return aggregationPartRoots.map((aggregationPartRoot) => ({
-      node: aggregationPartRoot,
-      context: aggregationNode.templateAggregation.context,
-      from: aggregationPartRoot.startIndex,
-      to: aggregationPartRoot.endIndex,
-      language: aggregationNode.language,
-    }));
-  }
-
-  private extractBlockRangeFor(blockNode: BlockNode, lastSiblingKeyword?: Keyword): CodeRange {
-    let from = this.astCursor.startIndex;
-    if (blockNode.language === Language.Python && lastSiblingKeyword?.type === ":") {
-      from = lastSiblingKeyword.pos;
-    }
-    const rangeModifierStart = 1;
-    const rangeModifierEnd = blockNode.language === Language.TypeScript ? 1 : 0;
-    return {
-      node: this.astCursor.currentNode,
-      context: blockNode.templateBlock.context,
-      from: from + rangeModifierStart,
-      to: this.astCursor.endIndex - rangeModifierEnd,
-      language: blockNode.language,
-    };
   }
 }
 

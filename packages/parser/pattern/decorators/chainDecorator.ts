@@ -13,12 +13,12 @@ export default class ChainDecorator extends PatternDecorator {
     super(pattern);
   }
 
-  getStartPatternFor(chainName: string): Pattern {
+  getStartPatternMapFor(chainName: string): PatternMap {
     const startPattern = this.startPatternMap[chainName];
     if (!startPattern) {
       throw new Error(`Chain with name ${chainName} not found`);
     }
-    return startPattern;
+    return createPatternMap([startPattern]);
   }
 
   getLinkPatternMapFor(chainName: string): PatternMap {

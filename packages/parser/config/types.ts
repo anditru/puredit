@@ -25,8 +25,8 @@ export type AggregatableNodeTypeConfig = {
 export type ChainsConfig = {
   chainNodeType: string;
   pathToCallRoot: TreePath;
+  pathToCallBegin: TreePath;
   pathToNextChainLink: TreePath;
-  pathToArguments: TreePath;
 };
 
 export type BlocksConfig = {
