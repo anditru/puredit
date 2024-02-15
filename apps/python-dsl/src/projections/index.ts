@@ -8,6 +8,7 @@ import { replaceProjection } from "./replaceProjection";
 export const projectionPluginConfig: ProjectionPluginConfig = {
   parser: pythonParser,
   projections: [changeProjection, replaceProjection, trimProjection],
+  subProjections: [],
   globalContextVariables,
   globalContextValues,
 };

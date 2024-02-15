@@ -9,6 +9,7 @@ import { trimProjection } from "./trimProjection";
 export const projectionPluginConfig: ProjectionPluginConfig = {
   parser: tsParser,
   projections: [changeProjection, replaceProjection, trimProjection, logProjection],
+  subProjections: [],
   globalContextVariables,
   globalContextValues,
 };

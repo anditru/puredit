@@ -7,6 +7,7 @@ import type {
   VerificationResult,
   SubMatchesMap,
   SubMatch,
+  CodeRange,
 } from "./types";
 import type { Context } from "..";
 import MatchVerification, { DoesNotMatch } from "./matchVerification";
@@ -87,13 +88,30 @@ export class PatternMatching {
 
   private postProcess(verificationResult: VerificationResult): void {
     const aggregationToSubMatchesMap = this.findMatchesInAggregationRangesOf(verificationResult);
+
+    let chainRanges = Object.values(verificationResult.chainToStartRangeMap).reduce(
+      (startRanges: CodeRange[], currentStartRange: CodeRange) => {
+        return startRanges.concat(currentStartRange);
+      },
+      []
+    );
+    chainRanges = Object.values(verificationResult.chainToLinkRangesMap).reduce(
+      (previousChainRanges: CodeRange[], newLinkRanges: CodeRange[]) => {
+        return previousChainRanges.concat(newLinkRanges);
+      },
+      chainRanges
+    );
     this.matches.push({
       pattern: verificationResult.pattern,
       node: this.astCursor.currentNode,
+      from: this.astCursor.currentNode.startIndex,
+      to: this.astCursor.currentNode.endIndex,
       argsToAstNodeMap: verificationResult.argsToAstNodeMap,
       aggregationToSubMatchesMap,
+      chainRanges,
       blockRanges: verificationResult.blockRanges,
     });
+
     this.findMatchesInBlockRangesOf(verificationResult);
     this.findMatchesInChainStartRangesOf(verificationResult);
     this.findMatchesInChainLinkRangesOf(verificationResult);
@@ -178,7 +196,6 @@ export class PatternMatching {
       Object.assign({}, this.context, chainStartRange.context)
     );
     const result = chainStartPatternMatching.executeOnlySpanningEntireRange();
-
     this.matches = this.matches.concat(result.matches);
     this.contextRanges = this.contextRanges.concat(result.contextRanges);
   }
@@ -205,6 +222,9 @@ export class PatternMatching {
       );
       const result = chainLinkPatternMatching.executeOnlySpanningEntireRange();
 
+      result.matches.forEach((match) => {
+        (match.from = chainLinkRange.from), (match.to = chainLinkRange.to);
+      });
       this.matches = this.matches.concat(result.matches);
       this.contextRanges = this.contextRanges.concat(result.contextRanges);
     }

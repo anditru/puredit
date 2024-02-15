@@ -20,6 +20,7 @@ export const projectionPluginConfig: ProjectionPluginConfig = {
     evaluateMathProjection,
     compileMathProjection,
   ],
+  subProjections: [],
   globalContextVariables,
   globalContextValues,
 };

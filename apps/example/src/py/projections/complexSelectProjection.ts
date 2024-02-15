@@ -2,13 +2,13 @@ import { arg, agg } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
 import type { Projection } from "@puredit/projections/types";
 import { pythonParser } from "./parser";
-import SelectProjection from "./SelectProjection.svelte";
+import SelectProjection from "./ComplexSelectProjection.svelte";
 
-const columnName = arg("columnName", ["string"]);
-const columnAlias = arg("columnAlias", ["identifier"]);
+const columnName = arg("columnName", ["identifier"]);
+const columnAlias = arg("columnAlias", ["string"]);
 export const column = pythonParser.subPattern("column")`${columnName}`;
 export const columnWithAlias = pythonParser.subPattern("columnWithAlias")`
-${columnAlias}=${columnName}
+${columnName}=${columnAlias}
 `;
 
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
@@ -21,8 +21,8 @@ ${targetDataFrame}=${sourceDataFrame}.select(${columns})
 
 export const widget = svelteProjection(SelectProjection);
 
-export const selectProjection: Projection = {
-  name: "select",
+export const complexSelectProjection: Projection = {
+  name: "Complex Select",
   description: "Select one or more columns",
   pattern,
   requiredContextVariables: [],

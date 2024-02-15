@@ -45,8 +45,11 @@ export interface CodeRange {
 export interface Match {
   pattern: Pattern;
   node: AstNode;
+  from: number;
+  to: number;
   argsToAstNodeMap: AstNodeMap;
   aggregationToSubMatchesMap: SubMatchesMap;
+  chainRanges: CodeRange[];
   blockRanges: CodeRange[];
 }
 export type SubMatchesMap = Record<string, SubMatch[]>;

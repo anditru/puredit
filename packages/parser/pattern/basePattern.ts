@@ -1,13 +1,14 @@
 import PatternNode from "./nodes/patternNode";
 import Pattern from "./pattern";
 import TreePath from "../cursor/treePath";
+import RawTemplate from "../define/rawTemplate";
 
 export default class BasePattern implements Pattern {
   private numberOfLeafNodes: number;
   private _name: string;
 
-  constructor(public readonly rootNode: PatternNode, name: string) {
-    this._name = name;
+  constructor(public readonly rootNode: PatternNode, public readonly template: RawTemplate) {
+    this._name = template.name;
     this.numberOfLeafNodes = this.countLeafNodes();
   }
 

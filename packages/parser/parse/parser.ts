@@ -49,7 +49,6 @@ export default class Parser {
     return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
       const rawTemplate = new RawTemplate(template, params, name);
       return this.patternBuilder
-        .setName(name)
         .setRawTemplate(rawTemplate)
         .setTargetLanguage(this.target)
         .setIsExpression(false)
@@ -66,7 +65,6 @@ export default class Parser {
     return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
       const rawTemplate = new RawTemplate(template, params, name);
       return this.patternBuilder
-        .setName(name)
         .setRawTemplate(rawTemplate)
         .setTargetLanguage(this.target)
         .setIsExpression(true)

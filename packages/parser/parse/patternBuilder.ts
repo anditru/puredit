@@ -15,7 +15,6 @@ import { Language } from "../config/types";
 import { loadChainsConfigFor } from "../config/load";
 
 export class PatternBuilder {
-  private name: string | undefined;
   private rawTemplate: RawTemplate | undefined;
   private isExpression: boolean | undefined;
   private targetLanguage: Language | undefined;
@@ -24,11 +23,6 @@ export class PatternBuilder {
   private nodeTransformVisitor: NodeTransformVisitor | undefined;
 
   constructor(private readonly parser: TreeSitterParser | undefined) {}
-
-  setName(name: string): PatternBuilder {
-    this.name = name;
-    return this;
-  }
 
   setRawTemplate(rawTemplate: RawTemplate): PatternBuilder {
     this.rawTemplate = rawTemplate;
@@ -57,7 +51,7 @@ export class PatternBuilder {
     );
 
     const rootNode = this.buildPatternTree();
-    let pattern = new BasePattern(rootNode, this.name!) as Pattern;
+    let pattern = new BasePattern(rootNode, this.rawTemplate!) as Pattern;
 
     if (this.rawTemplate!.hasAggregations()) {
       pattern = this.buildPatternWithAggregations(pattern);
@@ -106,7 +100,7 @@ export class PatternBuilder {
           patternTreeVariantCursor.goToFirstChild();
           const subPatternRoot = patternTreeVariantCursor.currentNode;
           subPatternRoot.cutOff();
-          return new BasePattern(subPatternRoot, aggregation.subPatterns[index].name);
+          return new BasePattern(subPatternRoot, aggregation.subPatterns[index]);
         });
 
       aggregationPatternMap[aggregation.name] = aggregationSubPatterns;
@@ -123,7 +117,7 @@ export class PatternBuilder {
     for (const chain of chains) {
       const startCodeString = chain.getCodeStringForChainStart();
       const startPatternRootNode = this.transformToPatternTree(startCodeString).children[0];
-      startPatternMap[chain.name] = new BasePattern(startPatternRootNode, chain.startPattern.name);
+      startPatternMap[chain.name] = new BasePattern(startPatternRootNode, chain.startPattern);
 
       const linkCodeStrings = chain.getCodeStringsForChainLinks();
       const linkPatterns = linkCodeStrings
@@ -142,7 +136,7 @@ export class PatternBuilder {
           linkPatternCursor.reverseFollow(this.pathToChainContinuation!.getSliceBeforeLastStep());
           linkPatternCursor.follow(this.pathToCallRoot!);
           linkRootNode = linkPatternCursor.currentNode.cutOff();
-          return new BasePattern(linkRootNode, chain.linkPatterns[index].name);
+          return new BasePattern(linkRootNode, chain.linkPatterns[index]);
         });
       linkPatternMap[chain.name] = linkPatterns;
     }

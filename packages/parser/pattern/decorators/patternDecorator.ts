@@ -28,4 +28,8 @@ export default abstract class PatternDecorator implements Pattern {
   get priority(): number {
     return this.pattern.priority;
   }
+
+  get template() {
+    return this.pattern.template;
+  }
 }

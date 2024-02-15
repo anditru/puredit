@@ -6,7 +6,8 @@ import { createPatternMap, PatternMatching } from "@puredit/parser";
 import type { Match, Pattern } from "@puredit/parser";
 import { pickedCompletion } from "@codemirror/autocomplete";
 import type { CodeRange, ContextRange, PatternMap } from "@puredit/parser/match/types";
-import type { Projection, ProjectionPluginConfig } from "./types";
+import type { Projection, ProjectionPluginConfig, SubProjection } from "./types";
+import RawTemplate from "@puredit/parser/define/rawTemplate";
 
 export interface ProjectionState {
   config: ProjectionPluginConfig;
@@ -66,28 +67,36 @@ function updateProjections(
   matches: Match[]
 ): DecorationSet {
   const projectionMap = new Map<Pattern, Projection>(config.projections.map((p) => [p.pattern, p]));
+  const subProjectionMap = new Map<RawTemplate, SubProjection>(
+    config.subProjections.map((p) => [p.pattern, p])
+  );
+
   let newDecorations = Decoration.none;
   const contexts: object[] = [config.globalContextValues];
   const contextBounds: number[] = [];
+
   for (const match of matches) {
-    if (contextBounds.length && match.node.startIndex >= contextBounds[contextBounds.length - 1]) {
+    if (contextBounds.length && match.from >= contextBounds[contextBounds.length - 1]) {
       contexts.pop();
       contextBounds.pop();
     }
-    const projection = projectionMap.get(match.pattern);
+    let projection: Projection | SubProjection = projectionMap.get(match.pattern);
     if (!projection) {
-      continue;
+      projection = subProjectionMap.get(match.pattern.template);
+      if (!projection) {
+        continue;
+      }
     }
     const { widgets, contextProvider } = projection;
     const context = Object.assign({}, ...contexts);
     if (contextProvider) {
       contexts.push(contextProvider(match, state.doc, Object.assign({}, context)));
-      contextBounds.push(match.node.endIndex);
+      contextBounds.push(match.to);
     }
-    const ranges = removeBlocksFromRange(
-      match.node.startIndex,
-      match.node.endIndex,
-      match.blockRanges
+    const ranges = removeBlockAndChainsFromRange(
+      match.from,
+      match.to,
+      match.blockRanges.concat(match.chainRanges)
     );
     for (const [{ from, to }, Widget] of zip(ranges, widgets)) {
       let found = false;
@@ -125,15 +134,28 @@ interface Range {
  * Splits a range into subranges that do not cover a given list of blocks.
  * @param from Start of the original range.
  * @param to End of the original range.
- * @param blockRanges A sorted list of blockRanges to exclude from the range.
+ * @param rangesToRemove A sorted list of rangesToRemove to exclude from the range.
  */
-function removeBlocksFromRange(from: number, to: number, blockRanges: CodeRange[]): Range[] {
+function removeBlockAndChainsFromRange(
+  from: number,
+  to: number,
+  rangesToRemove: CodeRange[]
+): Range[] {
   const ranges: Range[] = [];
-  for (const blockRange of blockRanges) {
-    if (blockRange.from !== from) {
-      ranges.push({ from, to: blockRange.from });
+  rangesToRemove.sort((rangeA, rangeB) => {
+    if (rangeA.from < rangeB.from) {
+      return -1;
+    } else if (rangeA.from > rangeB.from) {
+      return 1;
     }
-    from = blockRange.to;
+    return 0;
+  });
+
+  for (const rangeToRemove of rangesToRemove) {
+    if (rangeToRemove.from !== from) {
+      ranges.push({ from, to: rangeToRemove.from });
+    }
+    from = rangeToRemove.to;
   }
   if (from < to) {
     ranges.push({ from, to });

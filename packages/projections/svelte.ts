@@ -9,7 +9,7 @@ interface Props {
   isNew: boolean;
   view: EditorView | null;
   match: Match;
-  context: unknown;
+  context: object;
   state: EditorState;
   focusGroup: FocusGroup;
 }
