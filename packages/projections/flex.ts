@@ -1,9 +1,4 @@
-import {
-  Decoration,
-  EditorView,
-  ViewPlugin,
-  ViewUpdate,
-} from "@codemirror/view";
+import { Decoration, EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import type { DecorationSet, PluginValue } from "@codemirror/view";
 import type { Range } from "@codemirror/state";
 import { projectionState } from "./state";
@@ -27,7 +22,7 @@ function lines(view: EditorView) {
     }
     cursor.next();
   }
-  return Decoration.set(decorations);
+  return Decoration.set(decorations, true);
 }
 
 class FlexPlugin implements PluginValue {
