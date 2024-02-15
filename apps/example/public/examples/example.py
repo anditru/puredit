@@ -46,7 +46,11 @@ x = mathdsl.evaluate("r^r", locals())
 print("x:", x)
 
 # 4. Example: Projection with aggregation
-aliased_students = students.select(name="last_name", firstName="given_name", age)
+aliased_students = students.select(
+    name="last_name",
+    firstName="given_name",
+    age
+)
 
 # 5. Example: Projection with chain
 filtered_students = students.select("name", "age").filter(age=24)
