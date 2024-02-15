@@ -17,5 +17,5 @@ export const selectSubProjection: SubProjection = {
   description: "Select a column from a table",
   pattern: selectFunction,
   requiredContextVariables: [],
-  widgets: [widget],
+  segmentWidgets: [widget],
 };

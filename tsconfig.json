@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "ignoreDeprecations": "5.0",
     "target": "esnext",
     "module": "esnext",
     "useDefineForClassFields": false,
@@ -9,5 +10,6 @@
     "checkJs": true,
     "resolveJsonModule": true
   },
+  "include": ["*.d.ts", "*.ts", "*.svelte"],
   "exclude": ["node_modules"]
 }

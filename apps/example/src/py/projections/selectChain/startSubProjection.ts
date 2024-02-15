@@ -14,5 +14,5 @@ export const startSubProjection: SubProjection = {
   description: "Dataframe to select from",
   pattern: chainStart,
   requiredContextVariables: [],
-  widgets: [widget],
+  segmentWidgets: [widget],
 };

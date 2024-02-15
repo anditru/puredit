@@ -17,5 +17,5 @@ export const filterSubProjection: SubProjection = {
   description: "Filter selection result",
   pattern: filterFunction,
   requiredContextVariables: [],
-  widgets: [widget],
+  segmentWidgets: [widget],
 };

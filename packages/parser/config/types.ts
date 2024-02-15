@@ -1,4 +1,4 @@
-import TreePath from "../cursor/treePath";
+import type TreePath from "../cursor/treePath";
 
 export enum Language {
   TypeScript = "ts",

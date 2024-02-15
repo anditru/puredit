@@ -1,5 +1,5 @@
 import { arg } from "@puredit/parser";
-import type { Projection } from "@puredit/projections/types";
+import type { RootProjection } from "@puredit/projections/types";
 import { simpleProjection } from "@puredit/simple-projection";
 import { tsParser } from "./parser";
 
@@ -11,10 +11,10 @@ console.log(${message});
 
 export const widget = simpleProjection(["log", message, "to console"]);
 
-export const logProjection: Projection = {
+export const logProjection: RootProjection = {
   name: "log message",
   description: "Log a message to the console",
   pattern,
   requiredContextVariables: [],
-  widgets: [widget],
+  segmentWidgets: [widget],
 };

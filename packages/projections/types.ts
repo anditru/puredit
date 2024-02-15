@@ -2,7 +2,7 @@ import type { Text } from "@codemirror/state";
 import type { Context, Match, Parser } from "@puredit/parser";
 import type { ProjectionWidgetClass } from "./projection";
 import type { Pattern } from "@puredit/parser";
-import RawTemplate from "@puredit/parser/define/rawTemplate";
+import type RawTemplate from "@puredit/parser/define/rawTemplate";
 
 export interface ProjectionCompletion {
   label: string;
@@ -13,25 +13,25 @@ export interface ProjectionCompletion {
 export interface Projection {
   name: string;
   description: string;
-  pattern: Pattern;
   requiredContextVariables: string[];
-  widgets: Array<ProjectionWidgetClass>;
-  contextProvider?(match: Match, text: Text, context: object): object;
+  prefixWidget?: ProjectionWidgetClass;
+  segmentWidgets: Array<ProjectionWidgetClass>;
+  postWidget?: ProjectionWidgetClass;
+  contextProvider?(match: Match, text: Text, context: Context): object;
 }
 
-export interface SubProjection {
-  name: string;
-  description: string;
+export interface RootProjection extends Projection {
+  pattern: Pattern;
+}
+
+export interface SubProjection extends Projection {
   pattern: RawTemplate;
-  requiredContextVariables: string[];
-  widgets: Array<ProjectionWidgetClass>;
-  contextProvider?(match: Match, text: Text, context: object): object;
 }
 
 export interface ProjectionPluginConfig {
   parser: Parser;
-  projections: Projection[];
+  projections: RootProjection[];
   subProjections: SubProjection[];
   globalContextVariables: Context;
-  globalContextValues: object;
+  globalContextValues: any;
 }

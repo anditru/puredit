@@ -5,7 +5,7 @@ import { Language } from "../config/types";
 
 export type PatternMap = Record<string, Pattern[]>;
 
-export type Context = Record<string, string>;
+export type Context = Record<string, any>;
 export interface ContextRange {
   from: number;
   to: number;

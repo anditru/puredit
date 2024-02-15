@@ -1,12 +1,12 @@
-import { EditorState } from "@codemirror/state";
+import type { EditorState } from "@codemirror/state";
 import { Decoration } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { zip } from "@puredit/utils";
 import type { Match, Pattern } from "@puredit/parser";
-import type { CodeRange } from "@puredit/parser/match/types";
-import type { Projection, ProjectionPluginConfig, SubProjection } from "./types";
-import RawTemplate from "@puredit/parser/define/rawTemplate";
-import { ProjectionWidgetClass } from "./projection";
+import type { CodeRange, Context } from "@puredit/parser/match/types";
+import type { Projection, ProjectionPluginConfig, RootProjection, SubProjection } from "./types";
+import type RawTemplate from "@puredit/parser/define/rawTemplate";
+import type { ProjectionWidgetClass } from "./projection";
 
 export default class DecorationSetBuilder {
   private config: ProjectionPluginConfig;
@@ -15,7 +15,7 @@ export default class DecorationSetBuilder {
   private state: EditorState;
   private matches: Match[];
 
-  private projectionMap: Map<Pattern, Projection>;
+  private projectionMap: Map<Pattern, RootProjection>;
   private subProjectionMap: Map<RawTemplate, SubProjection>;
   private newDecorations = Decoration.none;
   private contextBounds: number[] = [];
@@ -50,7 +50,7 @@ export default class DecorationSetBuilder {
   build(): DecorationSet {
     for (const match of this.matches) {
       this.removeContextOutOfBoundsFor(match);
-      let projection: Projection | SubProjection;
+      let projection: Projection;
       try {
         projection = this.getProjectionFor(match);
       } catch (error) {
@@ -61,7 +61,7 @@ export default class DecorationSetBuilder {
         }
       }
 
-      const { widgets, contextProvider } = projection;
+      const { segmentWidgets: widgets, contextProvider } = projection;
       const context = Object.assign({}, ...this.contexts);
       if (contextProvider) {
         this.extractContextFrom(match, contextProvider);
@@ -87,12 +87,12 @@ export default class DecorationSetBuilder {
     this.contextBounds.push(match.to);
   }
 
-  private getProjectionFor(match: Match): Projection | SubProjection {
+  private getProjectionFor(match: Match): Projection {
     if (!this.projectionMap || !this.subProjectionMap) {
       this.initProjectionMaps();
     }
 
-    let projection: Projection | SubProjection = this.projectionMap.get(match.pattern);
+    let projection: Projection | undefined = this.projectionMap.get(match.pattern);
     if (!projection) {
       projection = this.subProjectionMap.get(match.pattern.template);
       if (!projection) {
@@ -103,8 +103,12 @@ export default class DecorationSetBuilder {
   }
 
   private initProjectionMaps(): void {
-    this.projectionMap = new Map(this.config.projections.map((p) => [p.pattern, p]));
-    this.subProjectionMap = new Map(this.config.subProjections.map((p) => [p.pattern, p]));
+    this.projectionMap = new Map(
+      this.config.projections.map((p: RootProjection) => [p.pattern, p])
+    );
+    this.subProjectionMap = new Map(
+      this.config.subProjections.map((p: SubProjection) => [p.pattern, p])
+    );
   }
 
   private sortByFrom(ranges: CodeRange[]): CodeRange[] {
@@ -120,7 +124,7 @@ export default class DecorationSetBuilder {
     return sortedRanges;
   }
 
-  private extractDecoratorsFor(match: Match, widgets: ProjectionWidgetClass[], context: object) {
+  private extractDecoratorsFor(match: Match, widgets: ProjectionWidgetClass[], context: Context) {
     const ranges = this.getActualRangesFor(match);
 
     for (const [range, Widget] of zip(ranges, widgets)) {
@@ -159,7 +163,7 @@ export default class DecorationSetBuilder {
   private updateExistsingWidgetForRange(
     range: Range,
     match: Match,
-    context: object,
+    context: Context,
     Widget: ProjectionWidgetClass
   ) {
     let found = false;
@@ -185,7 +189,7 @@ export default class DecorationSetBuilder {
   private createNewWidgetForRange(
     range: Range,
     match: Match,
-    context: object,
+    context: Context,
     Widget: ProjectionWidgetClass
   ) {
     this.newDecorations = this.newDecorations.update({

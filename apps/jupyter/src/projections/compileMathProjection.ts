@@ -1,6 +1,6 @@
 import { arg, contextVariable } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
-import type { Projection } from "@puredit/projections/types";
+import type { RootProjection } from "@puredit/projections/types";
 import MathProjection from "./MathProjection.svelte";
 import { pythonParser } from "./parser";
 
@@ -13,11 +13,11 @@ ${dsl}.compile(${latex})
 
 export const widget = svelteProjection(MathProjection);
 
-export const compileMathProjection: Projection = {
+export const compileMathProjection: RootProjection = {
   name: "compile math",
   description:
     "Transforms an expression in mathematical notation into a reusable functions, using free symbols as named parameters.",
   pattern,
   requiredContextVariables: [],
-  widgets: [widget],
+  segmentWidgets: [widget],
 };

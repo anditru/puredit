@@ -1,5 +1,5 @@
 import languageConfigs from "./languageConfigs";
-import { AggregationsConfig, BlocksConfig, ChainsConfig, Language } from "./types";
+import type { AggregationsConfig, BlocksConfig, ChainsConfig, Language } from "./types";
 
 export function loadAggregationsConfigFor(language: Language): AggregationsConfig {
   return languageConfigs[language].aggregations;

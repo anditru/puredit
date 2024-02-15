@@ -1,6 +1,6 @@
 import { arg, contextVariable } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
-import type { Projection } from "@puredit/projections/types";
+import type { RootProjection } from "@puredit/projections/types";
 import { pythonParser } from "./parser";
 import StoreSheetProjection from "./StoreSheetProjection.svelte";
 
@@ -15,10 +15,10 @@ ${dsl}.store_sheet(${fileName}, ${sheetName}, ${columns})
 
 export const widget = svelteProjection(StoreSheetProjection);
 
-export const storeSheetProjection: Projection = {
+export const storeSheetProjection: RootProjection = {
   name: "store sheet",
   description: "Stores the given columns as an Excel file",
   pattern,
   requiredContextVariables: ["dsl"],
-  widgets: [widget],
+  segmentWidgets: [widget],
 };

@@ -1,6 +1,6 @@
 import type { EditorView } from "@codemirror/view";
 import { EditorState, EditorSelection } from "@codemirror/state";
-import type { Match } from "@puredit/parser";
+import type { Context, Match } from "@puredit/parser";
 import { FocusGroup } from "./focus";
 import type { FocusGroupHandler } from "./focus";
 import { ProjectionWidget } from "./projection";
@@ -9,7 +9,9 @@ interface Props {
   isNew: boolean;
   view: EditorView | null;
   match: Match;
-  context: object;
+  /* Type any is suboptimal but it seems to be the only way to allow
+   * types with additional properties for the context in the editor */
+  context: any;
   state: EditorState;
   focusGroup: FocusGroup;
 }
@@ -19,7 +21,7 @@ export const svelteProjection = (Component: ComponentClass<Props>) =>
     component!: SvelteComponent<Props>;
     focusGroup!: FocusGroup;
 
-    protected initialize(match: Match, context: object, state: EditorState): HTMLElement {
+    protected initialize(match: Match, context: Context, state: EditorState): HTMLElement {
       const target = document.createElement("span");
       this.focusGroup = new FocusGroup(this);
       this.component = new Component({
@@ -36,7 +38,7 @@ export const svelteProjection = (Component: ComponentClass<Props>) =>
       return target;
     }
 
-    protected update(match: Match, context: object, state: EditorState): void {
+    protected update(match: Match, context: Context, state: EditorState): void {
       this.component.$set({ isNew: this.isNew, match, context, state });
     }
 

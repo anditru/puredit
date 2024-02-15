@@ -12,23 +12,22 @@ export const definitionTemplate = (options: {
   const projectionName = options.prefix + "Projection";
   return `import { arg } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
-import type { Projection } from "@puredit/projections/types";
+import type { RootProjection } from "@puredit/projections/types";
 import { ${options.parserName} } from "${options.parserModule}";
 import ${componentName} from "./${componentName}.svelte";
 
-export const pattern = ${options.parserName}.statementPattern\`
+export const pattern = ${options.parserName}.statementPattern("${options.prefix}")\`
 ${options.codeTemplate}
 \`;
 
 export const widget = svelteProjection(${componentName});
 
-export const ${projectionName}: Projection = {
+export const ${projectionName}: RootProjection = {
     name: "${options.prefix}",
     description: "${options.prefix}",
     pattern,
-    draft,
     requiredContextVariables: [],
-    widgets: [widget],
+    segmentWidgets: [widget],
 };
 `;
 };

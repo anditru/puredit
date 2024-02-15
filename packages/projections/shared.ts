@@ -3,9 +3,9 @@ import type { EditorView } from "@codemirror/view";
 import { highlightingFor } from "@codemirror/language";
 import type { EditorState, ChangeSpec } from "@codemirror/state";
 import type { Text } from "@codemirror/state";
-import type { Match } from "@puredit/parser";
+import type { Context, Match } from "@puredit/parser";
 import { ProjectionWidget } from "./projection";
-import AstNode from "@puredit/parser/ast/node";
+import type AstNode from "@puredit/parser/ast/node";
 
 const stringTypes = ["string", "template_string"];
 
@@ -76,7 +76,7 @@ export function span(text: string): HTMLElement {
 
 export const staticWidget = (initialize: (state: EditorState) => HTMLElement) =>
   class extends ProjectionWidget {
-    protected initialize(_match: Match, _context: object, state: EditorState): HTMLElement {
+    protected initialize(_match: Match, _context: Context, state: EditorState): HTMLElement {
       return initialize(state);
     }
 

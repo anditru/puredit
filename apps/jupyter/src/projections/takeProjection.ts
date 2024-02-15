@@ -1,6 +1,6 @@
 import { arg, contextVariable } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
-import type { Projection } from "@puredit/projections/types";
+import type { RootProjection } from "@puredit/projections/types";
 import { pythonParser } from "./parser";
 import TakeProjection from "./TakeProjection.svelte";
 
@@ -15,10 +15,10 @@ ${columns} = ${sheet}.take(${sheetRange}, ${expression})
 
 export const widget = svelteProjection(TakeProjection);
 
-export const takeProjection: Projection = {
+export const takeProjection: RootProjection = {
   name: "take columns from sheet range",
   description: "Extracts all columns from a sheet range that match the criteria",
   pattern,
   requiredContextVariables: ["sheet"],
-  widgets: [widget],
+  segmentWidgets: [widget],
 };

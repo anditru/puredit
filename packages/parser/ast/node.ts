@@ -1,4 +1,4 @@
-import { SyntaxNode } from "web-tree-sitter";
+import type { SyntaxNode } from "web-tree-sitter";
 import TemplateArgument from "../define/templateArgument";
 import TemplateAggregation from "../define/templateAggregation";
 import TemplateBlock from "../define/templateBlock";

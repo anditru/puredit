@@ -1,6 +1,6 @@
 import { arg, contextVariable } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
-import type { Projection } from "@puredit/projections/types";
+import type { RootProjection } from "@puredit/projections/types";
 import { pythonParser } from "./parser";
 import JoinProjection from "./JoinProjection.svelte";
 
@@ -18,10 +18,10 @@ ${columns} = ${sheet}.join(${sheetRange}, ${targetColumn}, ${expression}, ${dsl}
 
 export const widget = svelteProjection(JoinProjection);
 
-export const joinProjection: Projection = {
+export const joinProjection: RootProjection = {
   name: "join columns from sheet range",
   description: "Join all columns from a sheet range on another column",
   pattern,
   requiredContextVariables: ["dsl", "sheet"],
-  widgets: [widget],
+  segmentWidgets: [widget],
 };

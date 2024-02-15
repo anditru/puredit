@@ -1,4 +1,4 @@
-import Pattern from "./pattern/pattern";
+import type Pattern from "./pattern/pattern";
 import type { PatternMap } from "./match/types";
 
 /**

@@ -1,39 +1,26 @@
 import type { EditorState } from "@codemirror/state";
 import { EditorView, WidgetType } from "@codemirror/view";
-import type { Match } from "@puredit/parser";
+import type { Context, Match } from "@puredit/parser";
 
 export abstract class ProjectionWidget extends WidgetType {
   private dom: HTMLElement;
   protected view: EditorView | null = null;
 
-  constructor(
-    protected isNew: boolean,
-    public match: Match,
-    context: object,
-    state: EditorState
-  ) {
+  constructor(protected isNew: boolean, public match: Match, context: Context, state: EditorState) {
     super();
     this.dom = this.initialize(match, context, state);
     this.update(match, context, state);
   }
 
-  set(match: Match, context: object, state: EditorState) {
+  set(match: Match, context: Context, state: EditorState) {
     this.isNew = false;
     this.match = match;
     this.update(match, context, state);
   }
 
-  protected abstract initialize(
-    match: Match,
-    context: object,
-    state: EditorState
-  ): HTMLElement;
+  protected abstract initialize(match: Match, context: Context, state: EditorState): HTMLElement;
 
-  protected abstract update(
-    match: Match,
-    context: object,
-    state: EditorState
-  ): void;
+  protected abstract update(match: Match, context: Context, state: EditorState): void;
 
   get position(): number | undefined {
     return this.view?.posAtDOM(this.dom);
@@ -68,10 +55,5 @@ export abstract class ProjectionWidget extends WidgetType {
 }
 
 export interface ProjectionWidgetClass {
-  new (
-    isNew: boolean,
-    match: Match,
-    context: unknown,
-    state: EditorState
-  ): ProjectionWidget;
+  new (isNew: boolean, match: Match, context: unknown, state: EditorState): ProjectionWidget;
 }

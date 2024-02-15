@@ -1,5 +1,5 @@
 import TreePath from "../cursor/treePath";
-import { Language, LanguageConfig } from "./types";
+import { Language, type LanguageConfig } from "./types";
 
 const languageConfigs: Record<Language, LanguageConfig> = {
   [Language.Python]: {

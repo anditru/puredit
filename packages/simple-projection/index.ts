@@ -2,21 +2,21 @@ import { tags } from "@lezer/highlight";
 import { EditorSelection, EditorState } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import { highlightingFor } from "@codemirror/language";
-import type { Match } from "@puredit/parser";
+import type { Context, Match } from "@puredit/parser";
 import { FocusGroup } from "@puredit/projections/focus";
 import type { FocusGroupHandler } from "@puredit/projections/focus";
 import { ProjectionWidget } from "@puredit/projections/projection";
 import TextInput from "@puredit/projections/TextInput.svelte";
 import { isString } from "@puredit/utils";
 import type { SvelteComponent } from "@puredit/projections/svelte";
-import TemplateArgument from "@puredit/parser/define/templateArgument";
+import type TemplateArgument from "@puredit/parser/define/templateArgument";
 
 export const simpleProjection = (template: Array<string | TemplateArgument | TemplateArgument[]>) =>
   class extends ProjectionWidget implements FocusGroupHandler {
     focusGroup!: FocusGroup;
     inputs: Array<[TemplateArgument[], SvelteComponent<any>]>;
 
-    protected initialize(match: Match, _context: object, state: EditorState): HTMLElement {
+    protected initialize(match: Match, _context: Context, state: EditorState): HTMLElement {
       this.focusGroup = new FocusGroup(this);
       this.inputs = [];
       const target = document.createElement("span");
@@ -47,7 +47,7 @@ export const simpleProjection = (template: Array<string | TemplateArgument | Tem
       return target;
     }
 
-    protected update(match: Match, context: object, state: EditorState): void {
+    protected update(match: Match, context: Context, state: EditorState): void {
       for (const [args, component] of this.inputs) {
         component.$set({
           node: match.argsToAstNodeMap[args[0].name],

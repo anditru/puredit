@@ -1,6 +1,6 @@
 import { arg, agg } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
-import type { Projection } from "@puredit/projections/types";
+import type { RootProjection } from "@puredit/projections/types";
 import { pythonParser } from "./parser";
 import SelectProjection from "./ComplexSelectProjection.svelte";
 
@@ -21,10 +21,10 @@ ${targetDataFrame}=${sourceDataFrame}.select(${columns})
 
 export const widget = svelteProjection(SelectProjection);
 
-export const complexSelectProjection: Projection = {
+export const complexSelectProjection: RootProjection = {
   name: "Complex Select",
   description: "Select one or more columns",
   pattern,
   requiredContextVariables: [],
-  widgets: [widget],
+  segmentWidgets: [widget],
 };

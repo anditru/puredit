@@ -1,6 +1,6 @@
 import { arg, contextVariable } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
-import type { Projection } from "@puredit/projections/types";
+import type { RootProjection } from "@puredit/projections/types";
 import MathProjection from "./MathProjection.svelte";
 import { pythonParser } from "./parser";
 
@@ -13,11 +13,11 @@ ${dsl}.evaluate(${latex}, locals())
 
 export const widget = svelteProjection(MathProjection);
 
-export const evaluateMathProjection: Projection = {
+export const evaluateMathProjection: RootProjection = {
   name: "evaluate math",
   description:
     "Evaluates an expression in mathematical notation using the variables from the current local scope.",
   pattern,
   requiredContextVariables: [],
-  widgets: [widget],
+  segmentWidgets: [widget],
 };

@@ -1,6 +1,6 @@
 import { arg, contextVariable } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
-import type { Projection } from "@puredit/projections/types";
+import type { RootProjection } from "@puredit/projections/types";
 import { pythonParser } from "./parser";
 import DisplayProjection from "./DisplayProjection.svelte";
 
@@ -13,10 +13,10 @@ ${dsl}.display(${columns})
 
 export const widget = svelteProjection(DisplayProjection);
 
-export const displayProjection: Projection = {
+export const displayProjection: RootProjection = {
   name: "display columns",
   description: "Displays the given columns in Jupyter",
   pattern,
   requiredContextVariables: ["dsl"],
-  widgets: [widget],
+  segmentWidgets: [widget],
 };

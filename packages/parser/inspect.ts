@@ -5,9 +5,10 @@
  */
 
 import { NodeTransformVisitor } from "./parse/nodeTransformVisitor";
-import type { ArgMap, Match } from "./match/types";
+import type { AstNodeMap, Match } from "./match/types";
 import AstNode from "./ast/node";
 import PatternNode from "./pattern/nodes/patternNode";
+import { Language } from "./config/types";
 
 export function patternToString(node: PatternNode, indent = ""): string {
   let out = indent + (node.fieldName ? node.fieldName + ": " : "") + node.type;
@@ -23,23 +24,23 @@ export function patternToString(node: PatternNode, indent = ""): string {
   return out;
 }
 
-export function syntaxNodeToString(node: AstNode, text: string, indent = ""): string {
-  const nodeTransformVisitor = new NodeTransformVisitor([]);
-  return patternToString(nodeTransformVisitor.visit(node.walk(), text)[0], indent);
+export function syntaxNodeToString(node: AstNode, language: Language, indent = ""): string {
+  const nodeTransformVisitor = new NodeTransformVisitor(language, []);
+  return patternToString(nodeTransformVisitor.visit(node.walk())[0], indent);
 }
 
-export function argMapToString(args: ArgMap, text: string, indent = ""): string {
+export function argMapToString(args: AstNodeMap, language: Language, indent = ""): string {
   let out = "{\n";
   for (const key of Object.keys(args)) {
     out +=
       indent +
-      `  ${key} = {\n${syntaxNodeToString(args[key], text, indent + "    ") + indent}  }\n`;
+      `  ${key} = {\n${syntaxNodeToString(args[key], language, indent + "    ") + indent}  }\n`;
   }
   return out + indent + "}";
 }
 
-export function matchToString(match: Match, text: string): string {
+export function matchToString(match: Match): string {
   return `Match {
-  args = ${argMapToString(match.argsToAstNodeMap, text, "  ")}
+  args = ${argMapToString(match.argsToAstNodeMap, match.pattern.rootNode.language, "  ")}
 }`;
 }

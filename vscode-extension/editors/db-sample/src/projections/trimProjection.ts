@@ -1,6 +1,6 @@
 import { arg, contextVariable } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
-import type { Projection } from "@puredit/projections/types";
+import type { RootProjection } from "@puredit/projections/types";
 import { tsParser } from "./parser";
 import TrimProjection from "./TrimProjection.svelte";
 
@@ -15,10 +15,10 @@ ${table}[${columnTarget}] = ${table}[${columnSource}].trim(${direction});
 
 export const widget = svelteProjection(TrimProjection);
 
-export const trimProjection: Projection = {
+export const trimProjection: RootProjection = {
   name: "trim column",
   description: "Remove whitespace on the given sides of a column",
   pattern,
   requiredContextVariables: ["table"],
-  widgets: [widget],
+  segmentWidgets: [widget],
 };
