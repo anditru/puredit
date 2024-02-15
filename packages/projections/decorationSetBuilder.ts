@@ -61,13 +61,21 @@ export default class DecorationSetBuilder {
         }
       }
 
-      const { segmentWidgets: widgets, contextProvider } = projection;
+      const { segmentWidgets, prefixWidget, postfixWidget, contextProvider } = projection;
       const context = Object.assign({}, ...this.contexts);
       if (contextProvider) {
         this.extractContextFrom(match, contextProvider);
       }
 
-      this.extractDecoratorsFor(match, widgets, context);
+      this.extractSegmentDecoratorsFor(match, segmentWidgets, context);
+
+      if (prefixWidget) {
+        this.extractPrefixDecoratorFor(match, prefixWidget, context);
+      }
+
+      if (postfixWidget) {
+        this.extractPostfixDecoratorFor(match, postfixWidget, context);
+      }
     }
     return this.newDecorations;
   }
@@ -124,15 +132,19 @@ export default class DecorationSetBuilder {
     return sortedRanges;
   }
 
-  private extractDecoratorsFor(match: Match, widgets: ProjectionWidgetClass[], context: Context) {
+  private extractSegmentDecoratorsFor(
+    match: Match,
+    widgets: ProjectionWidgetClass[],
+    context: Context
+  ) {
     const ranges = this.getActualRangesFor(match);
 
     for (const [range, Widget] of zip(ranges, widgets)) {
       try {
-        this.updateExistsingWidgetForRange(range, match, context, Widget);
+        this.updateExistsingSegmentWidgetForRange(range, match, context, Widget);
       } catch (error) {
         if (error instanceof NoWidgetFound) {
-          this.createNewWidgetForRange(range, match, context, Widget);
+          this.createNewSegmentWidgetForRange(range, match, context, Widget);
         } else {
           throw error;
         }
@@ -160,7 +172,7 @@ export default class DecorationSetBuilder {
     return ranges;
   }
 
-  private updateExistsingWidgetForRange(
+  private updateExistsingSegmentWidgetForRange(
     range: Range,
     match: Match,
     context: Context,
@@ -186,7 +198,7 @@ export default class DecorationSetBuilder {
     }
   }
 
-  private createNewWidgetForRange(
+  private createNewSegmentWidgetForRange(
     range: Range,
     match: Match,
     context: Context,
@@ -197,6 +209,106 @@ export default class DecorationSetBuilder {
         Decoration.replace({
           widget: new Widget(this.isCompletion, match, context, this.state),
         }).range(range.from, range.to),
+      ],
+    });
+  }
+
+  private extractPostfixDecoratorFor(
+    match: Match,
+    Widget: ProjectionWidgetClass,
+    context: Context
+  ) {
+    try {
+      this.updateExistsingPostfixWidgetFor(match, context, Widget);
+    } catch (error) {
+      if (error instanceof NoWidgetFound) {
+        this.createNewPostfixWidgetFor(match, context, Widget);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  private updateExistsingPostfixWidgetFor(
+    match: Match,
+    context: Context,
+    Widget: ProjectionWidgetClass
+  ) {
+    let found = false;
+    this.decorations.between(match.from, match.to, (decorationFrom, decorationTo, decoration) => {
+      const widget = decoration.spec.widget;
+      if (
+        (decorationFrom === match.from || decorationTo === match.to) &&
+        widget instanceof Widget
+      ) {
+        widget.set(match, context, this.state);
+        this.newDecorations = this.newDecorations.update({
+          add: [decoration.range(match.to, match.to)],
+        });
+        found = true;
+        return false;
+      }
+    });
+    if (!found) {
+      throw new NoWidgetFound();
+    }
+  }
+
+  private createNewPostfixWidgetFor(match: Match, context: Context, Widget: ProjectionWidgetClass) {
+    this.newDecorations = this.newDecorations.update({
+      add: [
+        Decoration.widget({
+          widget: new Widget(this.isCompletion, match, context, this.state),
+          side: 1000,
+        }).range(match.to, match.to),
+      ],
+    });
+  }
+
+  private extractPrefixDecoratorFor(match: Match, Widget: ProjectionWidgetClass, context: Context) {
+    try {
+      this.updateExistsingPrefixWidgetFor(match, context, Widget);
+    } catch (error) {
+      if (error instanceof NoWidgetFound) {
+        this.createNewPrefixWidgetFor(match, context, Widget);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  private updateExistsingPrefixWidgetFor(
+    match: Match,
+    context: Context,
+    Widget: ProjectionWidgetClass
+  ) {
+    let found = false;
+    this.decorations.between(match.from, match.to, (decorationFrom, decorationTo, decoration) => {
+      const widget = decoration.spec.widget;
+      if (
+        (decorationFrom === match.from || decorationTo === match.to) &&
+        widget instanceof Widget
+      ) {
+        widget.set(match, context, this.state);
+        this.newDecorations = this.newDecorations.update({
+          add: [decoration.range(match.from, match.from)],
+        });
+        found = true;
+        return false;
+      }
+    });
+    if (!found) {
+      throw new NoWidgetFound();
+    }
+  }
+
+  private createNewPrefixWidgetFor(match: Match, context: Context, Widget: ProjectionWidgetClass) {
+    this.newDecorations = this.newDecorations.update({
+      add: [
+        Decoration.widget({
+          widget: new Widget(this.isCompletion, match, context, this.state),
+          side: -1000,
+        }).range(match.from, match.from),
       ],
     });
   }

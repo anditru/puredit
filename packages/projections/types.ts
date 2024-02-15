@@ -16,7 +16,7 @@ export interface Projection {
   requiredContextVariables: string[];
   prefixWidget?: ProjectionWidgetClass;
   segmentWidgets: Array<ProjectionWidgetClass>;
-  postWidget?: ProjectionWidgetClass;
+  postfixWidget?: ProjectionWidgetClass;
   contextProvider?(match: Match, text: Text, context: Context): object;
 }
 

@@ -6,6 +6,7 @@ import ChainTestProjection from "./SelectChainProjection.svelte";
 import { selectFunction } from "./selectSubProjection";
 import { filterFunction } from "./filterSubProjection";
 import { chainStart } from "./startSubProjection";
+import IntoProjection from "./IntoSubProjection.svelte";
 
 const processingChain = chain("processingChain", chainStart, [selectFunction, filterFunction]);
 
@@ -15,6 +16,7 @@ ${targetDataFrame} = ${processingChain}
 `;
 
 export const widget = svelteProjection(ChainTestProjection);
+const intoWidget = svelteProjection(IntoProjection);
 
 export const selectChainProjection: RootProjection = {
   name: "Select Chain",
@@ -22,4 +24,5 @@ export const selectChainProjection: RootProjection = {
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],
+  postfixWidget: intoWidget,
 };

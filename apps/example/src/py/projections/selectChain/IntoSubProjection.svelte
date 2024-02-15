@@ -25,4 +25,14 @@
   });
 </script>
 
-<span class="inline-flex" />
+<span class="inline-flex">
+  <span>into</span>
+  <TextInput
+    className={highlightingFor(state, [tags.atom])}
+    node={match.argsToAstNodeMap.targetDataFrame}
+    {state}
+    {view}
+    {focusGroup}
+    placeholder="data frame"
+  />
+</span>
