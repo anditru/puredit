@@ -48,16 +48,9 @@ export interface Match {
   from: number;
   to: number;
   argsToAstNodeMap: AstNodeMap;
-  aggregationToSubMatchesMap: SubMatchesMap;
+  aggregationRanges: CodeRange[];
   chainRanges: CodeRange[];
   blockRanges: CodeRange[];
-}
-export type SubMatchesMap = Record<string, SubMatch[]>;
-
-export interface SubMatch {
-  pattern: Pattern;
-  node: AstNode;
-  argsToAstNodeMap: AstNodeMap;
 }
 
 // Result of Phase 4 (Consolidation)

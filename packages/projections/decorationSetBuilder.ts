@@ -7,6 +7,9 @@ import type { CodeRange, Context } from "@puredit/parser/match/types";
 import type { Projection, ProjectionPluginConfig, RootProjection, SubProjection } from "./types";
 import type RawTemplate from "@puredit/parser/define/rawTemplate";
 import type { ProjectionWidgetClass } from "./projection";
+import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
+import { loadAggregationsConfigFor } from "@puredit/parser/config/load";
+import type { AggregatableNodeTypeConfig } from "@puredit/parser/config/types";
 
 export default class DecorationSetBuilder {
   private config: ProjectionPluginConfig;
@@ -119,19 +122,6 @@ export default class DecorationSetBuilder {
     );
   }
 
-  private sortByFrom(ranges: CodeRange[]): CodeRange[] {
-    const sortedRanges = [...ranges];
-    sortedRanges.sort((rangeA, rangeB) => {
-      if (rangeA.from < rangeB.from) {
-        return -1;
-      } else if (rangeA.from > rangeB.from) {
-        return 1;
-      }
-      return 0;
-    });
-    return sortedRanges;
-  }
-
   private extractSegmentDecoratorsFor(
     match: Match,
     widgets: ProjectionWidgetClass[],
@@ -153,10 +143,12 @@ export default class DecorationSetBuilder {
   }
 
   private getActualRangesFor(match: Match): Range[] {
-    let rangesToRemove = match.blockRanges.concat(match.chainRanges);
+    let rangesToRemove = match.blockRanges
+      .concat(match.chainRanges)
+      .concat(match.aggregationRanges);
     rangesToRemove = this.sortByFrom(rangesToRemove);
 
-    const ranges: Range[] = [];
+    let ranges: Range[] = [];
     let currentFrom = match.from;
     for (const rangeToRemove of rangesToRemove) {
       if (rangeToRemove.from !== currentFrom) {
@@ -169,7 +161,64 @@ export default class DecorationSetBuilder {
       ranges.push({ from: currentFrom, to: match.to });
     }
 
+    this.removeWhitespaceFromRanges(ranges, match);
+    if (match.pattern instanceof AggregationDecorator) {
+      ranges = this.removeSeparatorTokenRanges(ranges, match);
+    }
+
     return ranges;
+  }
+
+  private sortByFrom(ranges: CodeRange[]): CodeRange[] {
+    const sortedRanges = [...ranges];
+    sortedRanges.sort((rangeA, rangeB) => {
+      if (rangeA.from < rangeB.from) {
+        return -1;
+      } else if (rangeA.from > rangeB.from) {
+        return 1;
+      }
+      return 0;
+    });
+    return sortedRanges;
+  }
+
+  private removeWhitespaceFromRanges(ranges: Range[], match: Match) {
+    for (const range of ranges) {
+      let relativeFrom = range.from - match.from;
+      let relativeTo = range.to - match.from;
+
+      const rangeText = match.node.text.slice(relativeFrom, relativeTo);
+      let textPointer = 0;
+      while (/\s/g.test(rangeText.charAt(textPointer))) {
+        textPointer++;
+        relativeFrom++;
+      }
+      textPointer = rangeText.length - 1;
+      while (/\s/g.test(rangeText.charAt(relativeTo - 1))) {
+        textPointer--;
+        relativeTo--;
+      }
+
+      range.from = relativeFrom + match.from;
+      range.to = relativeTo + match.from;
+    }
+  }
+
+  private removeSeparatorTokenRanges(ranges: Range[], match: Match) {
+    const separatorTokens = loadAggregationsConfigFor(
+      match.pattern.rootNode.language
+    ).aggregatableNodeTypes.reduce(
+      (separatorTokens: string[], nodeTypeConfig: AggregatableNodeTypeConfig) => {
+        return separatorTokens.concat(nodeTypeConfig.delimiterToken);
+      },
+      []
+    );
+    return ranges.filter((range) => {
+      const relativeFrom = range.from - match.from;
+      const relativeTo = range.to - match.from;
+      const trimmedRangeText = match.node.text.slice(relativeFrom, relativeTo).trim();
+      return !separatorTokens.includes(trimmedRangeText);
+    });
   }
 
   private updateExistsingSegmentWidgetForRange(

@@ -71,9 +71,15 @@ export const svelteProjection = (Component: ComponentClass<Props>) =>
     }
 
     destroy(dom: HTMLElement): void {
-      this.component.$set({ view: null });
-      this.component.$destroy();
-      super.destroy(dom);
+      /* Sometimes codemirror decides to destroy projections close to a
+       * even tough it should not. Leaving this function empty obviously
+       * prevents it from doing so. One would expect this to cause
+       * duplicate projections or similar effects but until now it
+       * does not.
+       *
+       * this.component.$set({ view: null });
+       * this.component.$destroy();
+       * super.destroy(dom);  */
     }
 
     enterFromStart(): boolean {

@@ -47,9 +47,9 @@ print("x:", x)
 
 # 4. Example: Projection with aggregation
 aliased_students = students.select(
+    "age",
     name="last_name",
-    firstName="given_name",
-    age
+    firstName="given_name"
 )
 
 # 5. Example: Projection with chain
