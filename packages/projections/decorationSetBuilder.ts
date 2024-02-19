@@ -184,8 +184,8 @@ export default class DecorationSetBuilder {
 
   private removeWhitespaceFromRanges(ranges: Range[], match: Match) {
     for (const range of ranges) {
-      let relativeFrom = range.from - match.from;
-      let relativeTo = range.to - match.from;
+      let relativeFrom = range.from - match.node.startIndex;
+      let relativeTo = range.to - match.node.startIndex;
 
       const rangeText = match.node.text.slice(relativeFrom, relativeTo);
       let textPointer = 0;
@@ -194,28 +194,29 @@ export default class DecorationSetBuilder {
         relativeFrom++;
       }
       textPointer = rangeText.length - 1;
-      while (/\s/g.test(rangeText.charAt(relativeTo - 1))) {
+      while (/\s/g.test(rangeText.charAt(textPointer))) {
         textPointer--;
         relativeTo--;
       }
 
-      range.from = relativeFrom + match.from;
-      range.to = relativeTo + match.from;
+      range.from = relativeFrom + match.node.startIndex;
+      range.to = relativeTo + match.node.startIndex;
     }
   }
 
   private removeSeparatorTokenRanges(ranges: Range[], match: Match) {
-    const separatorTokens = loadAggregationsConfigFor(
+    const aggregatableNodeTypes = loadAggregationsConfigFor(
       match.pattern.rootNode.language
-    ).aggregatableNodeTypes.reduce(
+    ).aggregatableNodeTypes;
+    const separatorTokens = Object.values(aggregatableNodeTypes).reduce(
       (separatorTokens: string[], nodeTypeConfig: AggregatableNodeTypeConfig) => {
         return separatorTokens.concat(nodeTypeConfig.delimiterToken);
       },
       []
     );
     return ranges.filter((range) => {
-      const relativeFrom = range.from - match.from;
-      const relativeTo = range.to - match.from;
+      const relativeFrom = range.from - match.node.startIndex;
+      const relativeTo = range.to - match.node.startIndex;
       const trimmedRangeText = match.node.text.slice(relativeFrom, relativeTo).trim();
       return !separatorTokens.includes(trimmedRangeText);
     });

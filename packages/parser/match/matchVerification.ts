@@ -16,10 +16,10 @@ import AggregationNode from "../pattern/nodes/aggregationNode";
 import ChainNode from "../pattern/nodes/chainNode";
 import { loadChainsConfigFor } from "../config/load";
 import ChainDecorator from "../pattern/decorators/chainDecorator";
-
-import { logProvider } from "../../../logconfig";
 import AstNode from "../ast/node";
 import ChainContinuationNode from "../pattern/nodes/chainContinuationNode";
+
+import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.MatchVerification");
 
 export default class MatchVerification {
@@ -62,11 +62,6 @@ export default class MatchVerification {
 
   private recurse(lastSiblingKeyword?: Keyword) {
     const currentPatternNode = this.patternCursor.currentNode;
-    const currentAstNode = this.astCursor.currentNode;
-    logger.debug(
-      `Pattern node type: ${currentPatternNode.type}, ` +
-        `AST node type: ${currentAstNode.cleanNodeType}`
-    );
 
     this.checkNoErrorToken();
     this.skipLeadingCommentsInBodies();
@@ -111,6 +106,10 @@ export default class MatchVerification {
 
   private visitArgumentNode() {
     const argumentNode = this.patternCursor.currentNode as ArgumentNode;
+    logger.debug(
+      `Visiting ArgumentNode comparing to AST node of type ${this.astCursor.currentNode.type}`
+    );
+
     if (!argumentNode.matches(this.astCursor)) {
       logger.debug("AST does not match ArgumentNode");
       throw new DoesNotMatch();
@@ -120,6 +119,10 @@ export default class MatchVerification {
 
   private visitAggregationNode() {
     const aggregationNode = this.patternCursor.currentNode as AggregationNode;
+    logger.debug(
+      `Visiting AggregationNode comparing to AST node of type ${this.astCursor.currentNode.type}`
+    );
+
     if (!aggregationNode.matches(this.astCursor)) {
       logger.debug("AST node does not match AggregationNode");
       throw new DoesNotMatch();
@@ -150,6 +153,10 @@ export default class MatchVerification {
 
   private visitChainNode() {
     const chainNode = this.patternCursor.currentNode as ChainNode;
+    logger.debug(
+      `Visiting ChainNode comparing to AST node of type ${this.astCursor.currentNode.type}`
+    );
+
     if (!chainNode.matches(this.astCursor)) {
       logger.debug("AST node does not match ChainNode");
       throw new DoesNotMatch();
@@ -173,17 +180,28 @@ export default class MatchVerification {
     do {
       chainDepth++;
       if (this.astCursor.currentNode.type === chainsConfig.chainNodeType) {
+        logger.debug(`Found ${chainDepth + 1}. chain link`);
         this.extractChainLinkRangeFor(chainNode);
       } else if (this.chainStartReachedFor(chainNode)) {
+        logger.debug(`Reached chain start at depth ${chainDepth}`);
         this.extractChainStartRangeFor(chainNode);
         break;
       } else {
+        logger.debug(
+          `ChainNode does not match since AST node of type ${this.astCursor.currentNode.type} ` +
+            `with text ${this.astCursor.currentNode.text} matches neither chain link not chain start`
+        );
         throw new DoesNotMatch();
       }
     } while (this.astCursor.follow(pathToNextChainLink));
 
     if (chainDepth < 2) {
       // We only match if at least two functions are called in a row
+      logger.debug(
+        `ChainNode does not match since only ${
+          chainDepth + 1
+        } consecutive function calls were found`
+      );
       throw new DoesNotMatch();
     }
 
@@ -233,6 +251,7 @@ export default class MatchVerification {
     const pattern = this.pattern as ChainDecorator;
     const chainStartPatternMap = pattern.getStartPatternMapFor(chainName);
 
+    logger.debug("Checking if chain start has been reached");
     const chainStartPatternMatching = new PatternMatching(
       chainStartPatternMap,
       this.astCursor,
@@ -244,6 +263,10 @@ export default class MatchVerification {
 
   private visitChainContinuationNode() {
     const chainContinuationNode = this.patternCursor.currentNode as ChainContinuationNode;
+    logger.debug(
+      `Visiting ChainContinuationNode comparing to AST node of type ${this.astCursor.currentNode.type}`
+    );
+
     if (!chainContinuationNode.matches(this.astCursor)) {
       logger.debug("AST node does not match ChainContinuationNode");
       throw new DoesNotMatch();
@@ -252,6 +275,10 @@ export default class MatchVerification {
 
   private visitBlockNode(lastSiblingKeyword?: Keyword) {
     const blockNode = this.patternCursor.currentNode as BlockNode;
+    logger.debug(
+      `Visiting BlockNode comparing to AST node of type ${this.astCursor.currentNode.type}`
+    );
+
     if (!blockNode.matches(this.astCursor)) {
       logger.debug("AST does not match BlockNode");
       throw new DoesNotMatch();
@@ -278,6 +305,10 @@ export default class MatchVerification {
 
   private visitRegularNode() {
     const regularNode = this.patternCursor.currentNode as RegularNode;
+    logger.debug(
+      `Visiting RegularNode of type ${regularNode.type} comparing to AST node of type ${this.astCursor.currentNode.type}`
+    );
+
     if (!regularNode.matches(this.astCursor, this.context)) {
       logger.debug("AST does not match RegularNode.");
       throw new DoesNotMatch();

@@ -1,12 +1,17 @@
 import TreePath from "../cursor/treePath";
-import { Language, type LanguageConfig } from "./types";
+import { Language, aggregationPlaceHolder, type LanguageConfig } from "./types";
 
 const languageConfigs: Record<Language, LanguageConfig> = {
   [Language.Python]: {
     aggregations: {
-      aggregatableNodeTypes: [
-        { name: "argument_list", startToken: "(", delimiterToken: ",", endToken: ")" },
-      ],
+      aggregatableNodeTypes: {
+        argument_list: {
+          startToken: "(",
+          delimiterToken: ",",
+          endToken: ")",
+          contextTemplate: `someFunction(${aggregationPlaceHolder})`,
+        },
+      },
     },
     chains: {
       chainNodeType: "call",
@@ -20,9 +25,14 @@ const languageConfigs: Record<Language, LanguageConfig> = {
   },
   [Language.TypeScript]: {
     aggregations: {
-      aggregatableNodeTypes: [
-        { name: "arguments", startToken: "(", delimiterToken: ",", endToken: ")" },
-      ],
+      aggregatableNodeTypes: {
+        arguments: {
+          startToken: "(",
+          delimiterToken: ",",
+          endToken: ")",
+          contextTemplate: `someFunction(${aggregationPlaceHolder})`,
+        },
+      },
     },
     chains: {
       chainNodeType: "call_expression",

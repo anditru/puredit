@@ -1,14 +1,15 @@
+import { isString } from "@puredit/utils";
 import AstCursor from "../ast/cursor";
 import TemplateParameter from "../define/templateParameter";
-import { isString } from "@puredit/utils";
+import TemplateAggregation from "../define/templateAggregation";
+import TemplateChain from "../define/templateChain";
 import PatternNode from "../pattern/nodes/patternNode";
 import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
-import TemplateAggregation from "../define/templateAggregation";
 import AggregationNode from "../pattern/nodes/aggregationNode";
-import TemplateChain from "../define/templateChain";
 import { Language } from "../config/types";
+import TemporaryAggregationNode from "../pattern/nodes/temporaryAggregationNode";
 
-export class NodeTransformVisitor {
+export default class NodeTransformVisitor {
   cursor: AstCursor | undefined;
 
   constructor(
@@ -75,10 +76,8 @@ export class NodeTransformVisitor {
       return firstChild;
     }
     if (patternNodeBuilder.buildsParentOfAggregationNode()) {
-      const firstChild = patternNodeBuilder.children[0] as AggregationNode;
-      firstChild.astNodeType = patternNodeBuilder.type!;
-      firstChild.fieldName = patternNodeBuilder.fieldName!;
-      return firstChild;
+      const firstChild = patternNodeBuilder.children[0] as TemporaryAggregationNode;
+      return firstChild.toAggregationNode(patternNodeBuilder.type!, patternNodeBuilder.fieldName!);
     }
 
     return patternNodeBuilder.buildAndSetParentOnChildren();

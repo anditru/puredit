@@ -1,7 +1,7 @@
 import { arg } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
 import type { SubProjection } from "@puredit/projections/types";
-import { pythonParser } from "../parser";
+import { pythonParser } from "../../parser";
 import FilterProjection from "./FilterSubProjection.svelte";
 
 const filterColumn = arg("filterColumn", ["identifier"]);

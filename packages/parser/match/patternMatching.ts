@@ -2,10 +2,10 @@ import type {
   ContextRange,
   PatternMatchingResult,
   Match,
-  PatternMap,
   CandidateMatch,
   VerificationResult,
   CodeRange,
+  PatternsMap,
 } from "./types";
 import type { Context } from "..";
 import MatchVerification, { DoesNotMatch } from "./matchVerification";
@@ -15,13 +15,16 @@ import { TreeCursor } from "web-tree-sitter";
 import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
 import ChainDecorator from "../pattern/decorators/chainDecorator";
 
+import { logProvider } from "../../../logconfig";
+const logger = logProvider.getLogger("parser.match.PatternMatching");
+
 export class PatternMatching {
   private matches: Match[] = [];
   private contextRanges: ContextRange[] = [];
   private astCursor: AstCursor;
 
   constructor(
-    private patternMap: PatternMap,
+    private patternMap: PatternsMap,
     cursor: AstCursor | TreeCursor,
     private context: Context = {}
   ) {
@@ -33,14 +36,16 @@ export class PatternMatching {
   }
 
   execute(): PatternMatchingResult {
+    logger.debug("Starting new pattern matching");
+
     do {
       const candidateMatches = this.getCandidateMatches();
       const verificationResult = this.verify(candidateMatches);
       if (verificationResult) {
         this.postProcess(verificationResult);
-        continue;
+      } else {
+        this.findMatchesInFirstChild();
       }
-      this.findMatchesInFirstChild();
     } while (this.astCursor.goToNextSibling());
 
     return { matches: this.matches, contextRanges: this.contextRanges };
@@ -52,11 +57,14 @@ export class PatternMatching {
     const candidatePatterns = exactlyFittingPatterns.concat(wildCardRootNodePatterns);
 
     const sortedCandidatePatterns = this.sortByPriority(candidatePatterns);
-    return sortedCandidatePatterns.map((candidatePattern) => ({
+    const candidateMatches = sortedCandidatePatterns.map((candidatePattern) => ({
       pattern: candidatePattern,
       cursor: this.astCursor.currentNode.walk(),
       context: this.context,
     }));
+
+    logger.debug(`Found ${candidateMatches.length} candidate matches`);
+    return candidateMatches;
   }
 
   private sortByPriority(patterns: Pattern[]): Pattern[] {
@@ -73,18 +81,28 @@ export class PatternMatching {
   private verify(candidateMatches: CandidateMatch[]): VerificationResult | undefined {
     for (const candidateMatch of candidateMatches) {
       const candidateMatchVerification = new MatchVerification(candidateMatch);
+      let verificationResult;
       try {
-        return candidateMatchVerification.execute();
+        verificationResult = candidateMatchVerification.execute();
       } catch (error) {
-        if (!(error instanceof DoesNotMatch)) {
+        if (error instanceof DoesNotMatch) {
+          continue;
+        } else {
           throw error;
         }
-        continue;
       }
+      logger.debug(
+        `Pattern ${verificationResult.pattern.name} ` +
+          `matched AST node with text ${this.astCursor.currentNode.text}`
+      );
+      return verificationResult;
     }
   }
 
   private postProcess(verificationResult: VerificationResult): void {
+    logger.debug(
+      `Postprocessing verification result with pattern ${verificationResult.pattern.name}`
+    );
     const aggregationRanges = this.getAggregationRangesOf(verificationResult);
     const chainRanges = this.getChainRangesOf(verificationResult);
 
@@ -225,10 +243,13 @@ export class PatternMatching {
       );
       const result = chainLinkPatternMatching.executeOnlySpanningEntireRange();
 
-      result.matches.forEach((match) => {
-        match.from = chainLinkRange.from;
-        match.to = chainLinkRange.to;
-      });
+      result.matches
+        .filter((match) => pattern.getAllLinkPatterns().includes(match.pattern))
+        .forEach((match) => {
+          match.from = chainLinkRange.from;
+          match.to = chainLinkRange.to;
+        });
+
       this.matches = this.matches.concat(result.matches);
       this.contextRanges = this.contextRanges.concat(result.contextRanges);
     }
@@ -250,6 +271,7 @@ export class PatternMatching {
   }
 
   executeOnlySpanningEntireRange() {
+    logger.debug("Starting new pattern matching only spanning entire range");
     const candidateMatches = this.getCandidateMatches();
     const verificationResult = this.verify(candidateMatches);
     if (verificationResult) {

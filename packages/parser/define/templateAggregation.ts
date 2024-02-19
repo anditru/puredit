@@ -3,8 +3,8 @@ import RawTemplate from "./rawTemplate";
 import { Context } from "../match/types";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../pattern/nodes/patternNode";
-import AggregationNode from "../pattern/nodes/aggregationNode";
 import { Language } from "../config/types";
+import TemporaryAggregationNode from "../pattern/nodes/temporaryAggregationNode";
 
 export default class TemplateAggregation extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_agg_";
@@ -29,7 +29,7 @@ export default class TemplateAggregation extends TemplateParameter {
   }
 
   toPatternNode(cursor: AstCursor, language: Language): PatternNode {
-    return new AggregationNode(
+    return new TemporaryAggregationNode(
       language,
       cursor.currentNode.text,
       cursor.currentFieldName,

@@ -4,23 +4,16 @@ import { globalContextValues, globalContextVariables } from "./context";
 import { evaluateMathProjection } from "./evaluateMathProjection";
 import { compileMathProjection } from "./compileMathProjection";
 
-import { complexSelectProjection } from "./complexSelect/complexSelectProjection";
-
 import { selectChainProjection } from "./selectChain/selectChainProjection";
-import { selectSubProjection } from "./selectChain/selectSubProjection";
-import { filterSubProjection } from "./selectChain/filterSubProjection";
-import { startSubProjection } from "./selectChain/startSubProjection";
-import { columnSubProjection } from "./complexSelect/columnSubProjection";
-import { columnWithAliasSubProjection } from "./complexSelect/columnWithAliasSubProjection";
+import { selectSubProjection } from "./selectChain/selectFunction/selectSubProjection";
+import { filterSubProjection } from "./selectChain/filterFunction/filterSubProjection";
+import { startSubProjection } from "./selectChain/start/startSubProjection";
+import { columnSubProjection } from "./selectChain/selectFunction/columnSubProjection";
+import { columnWithAliasSubProjection } from "./selectChain/selectFunction/columnWithAliasSubProjection";
 
 export const projectionPluginConfig: ProjectionPluginConfig = {
   parser: pythonParser,
-  projections: [
-    evaluateMathProjection,
-    compileMathProjection,
-    complexSelectProjection,
-    selectChainProjection,
-  ],
+  projections: [evaluateMathProjection, compileMathProjection, selectChainProjection],
   subProjections: [
     columnSubProjection,
     columnWithAliasSubProjection,

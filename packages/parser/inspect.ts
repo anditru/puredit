@@ -4,7 +4,7 @@
  * string representation
  */
 
-import { NodeTransformVisitor } from "./parse/nodeTransformVisitor";
+import { NodeTransformVisitor } from "./parse/internal";
 import type { AstNodeMap, Match } from "./match/types";
 import AstNode from "./ast/node";
 import PatternNode from "./pattern/nodes/patternNode";

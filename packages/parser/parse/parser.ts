@@ -1,10 +1,9 @@
-import TemplateArgument from "../define/templateArgument";
 import TemplateParameter from "../define/templateParameter";
 import RawTemplate from "../define/rawTemplate";
 import type { TreeSitterParser } from "../treeSitterParser";
 import { createTreeSitterParser } from "../treeSitterParser";
-import { PatternBuilder } from "./patternBuilder";
 import { Language } from "../config/types";
+import { CompletePatternGeneration } from "./internal";
 
 export default class Parser {
   static async load(target: Language): Promise<Parser> {
@@ -12,13 +11,13 @@ export default class Parser {
     return new Parser(treeSitterParser, target);
   }
 
-  patternBuilder: PatternBuilder;
+  patternGeneration: CompletePatternGeneration;
 
   private constructor(
     private treeSitterParser: TreeSitterParser,
     public readonly target: Language
   ) {
-    this.patternBuilder = new PatternBuilder(treeSitterParser);
+    this.patternGeneration = new CompletePatternGeneration(treeSitterParser, target);
   }
 
   parse(
@@ -35,7 +34,7 @@ export default class Parser {
    * @returns RawTemplate
    */
   subPattern(name: string) {
-    return (template: TemplateStringsArray, ...params: (string | TemplateArgument)[]) => {
+    return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
       return new RawTemplate(template, params, name);
     };
   }
@@ -48,11 +47,7 @@ export default class Parser {
   statementPattern(name: string) {
     return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
       const rawTemplate = new RawTemplate(template, params, name);
-      return this.patternBuilder
-        .setRawTemplate(rawTemplate)
-        .setTargetLanguage(this.target)
-        .setIsExpression(false)
-        .build();
+      return this.patternGeneration.setRawTemplate(rawTemplate).setIsExpression(false).execute();
     };
   }
 
@@ -64,11 +59,7 @@ export default class Parser {
   expressionPattern(name: string) {
     return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
       const rawTemplate = new RawTemplate(template, params, name);
-      return this.patternBuilder
-        .setRawTemplate(rawTemplate)
-        .setTargetLanguage(this.target)
-        .setIsExpression(true)
-        .build();
+      return this.patternGeneration.setRawTemplate(rawTemplate).setIsExpression(true).execute();
     };
   }
 }

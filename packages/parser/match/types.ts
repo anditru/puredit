@@ -3,7 +3,8 @@ import Pattern from "../pattern/pattern";
 import AstCursor from "../ast/cursor";
 import { Language } from "../config/types";
 
-export type PatternMap = Record<string, Pattern[]>;
+export type PatternMap = Record<string, Pattern>;
+export type PatternsMap = Record<string, Pattern[]>;
 
 export type Context = Record<string, any>;
 export interface ContextRange {

@@ -1,15 +1,15 @@
 import Pattern from "../pattern";
 import PatternDecorator from "./patternDecorator";
-import { SubPatternMap } from "../types";
+import { PatternsMap } from "../types";
 import { createPatternMap } from "../../common";
 import { PatternMap } from "../../match/types";
 
 export default class AggregationDecorator extends PatternDecorator {
-  constructor(pattern: Pattern, private aggregationPatternMap: SubPatternMap) {
+  constructor(pattern: Pattern, private aggregationPatternMap: PatternsMap) {
     super(pattern);
   }
 
-  getAggregationPatternMapFor(aggregationName: string): PatternMap {
+  getAggregationPatternMapFor(aggregationName: string): PatternsMap {
     const subPatterns = this.aggregationPatternMap[aggregationName];
     if (!subPatterns) {
       throw new Error(`Aggregation with name ${aggregationName} not found`);

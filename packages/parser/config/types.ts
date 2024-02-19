@@ -12,15 +12,17 @@ export type LanguageConfig = {
 };
 
 export type AggregationsConfig = {
-  aggregatableNodeTypes: AggregatableNodeTypeConfig[];
+  aggregatableNodeTypes: Record<string, AggregatableNodeTypeConfig>;
 };
 
 export type AggregatableNodeTypeConfig = {
-  name: string;
   startToken: string;
   delimiterToken: string;
   endToken: string;
+  contextTemplate: string;
 };
+
+export const aggregationPlaceHolder = "__agg__";
 
 export type ChainsConfig = {
   chainNodeType: string;

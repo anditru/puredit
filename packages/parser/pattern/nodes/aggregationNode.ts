@@ -2,7 +2,7 @@ import PatternNode from "./patternNode";
 import TemplateAggregation from "../../define/templateAggregation";
 import AstCursor from "../../ast/cursor";
 import { Language } from "../../config/types";
-import { loadAggregationsConfigFor } from "../../config/load";
+import { loadAggregatableNodeTypeConfigFor, loadAggregationsConfigFor } from "../../config/load";
 
 export default class AggregationNode extends PatternNode {
   static readonly TYPE = "AggregationNode";
@@ -20,10 +20,7 @@ export default class AggregationNode extends PatternNode {
   ) {
     super(language, AggregationNode.TYPE, text, fieldName);
 
-    const aggregationsConfig = loadAggregationsConfigFor(language);
-    const nodeTypeConfig = aggregationsConfig.aggregatableNodeTypes.find(
-      (nodeTypeConfig) => (nodeTypeConfig.name = astNodeType)
-    );
+    const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(language, astNodeType);
     if (!nodeTypeConfig) {
       throw new Error(
         `AST node type ${astNodeType} of language ${language} is not supported for aggregation`

@@ -1,18 +1,18 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { tags } from "@lezer/highlight";
   import type { EditorState } from "@codemirror/state";
   import type { EditorView } from "@codemirror/view";
-  import { highlightingFor } from "@codemirror/language";
   import type { Match } from "@puredit/parser";
   import type { FocusGroup } from "@puredit/projections/focus";
-  import TextInput from "@puredit/projections/TextInput.svelte";
 
   export let isNew: boolean;
+  //svelte-ignore unused-export-let
   export let view: EditorView | null;
+  //svelte-ignore unused-export-let
   export let match: Match;
   //svelte-ignore unused-export-let
-  export let context: object;
+  export let context: any;
+  //svelte-ignore unused-export-let
   export let state: EditorState;
   export let focusGroup: FocusGroup;
 
@@ -25,4 +25,4 @@
   });
 </script>
 
-<span class="inline-flex" />
+<span class="inline-flex">read column(s)</span>

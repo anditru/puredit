@@ -1,7 +1,7 @@
 import { arg } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
 import type { SubProjection } from "@puredit/projections/types";
-import { pythonParser } from "../parser";
+import { pythonParser } from "../../parser";
 import ColumnWithAliasSubProjection from "./ColumnWithAliasSubProjection.svelte";
 
 const columnName = arg("columnName", ["identifier"]);

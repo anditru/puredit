@@ -1,19 +1,18 @@
 import Pattern from "../pattern";
 import PatternDecorator from "./patternDecorator";
-import { SubPatternMap } from "../types";
 import { createPatternMap } from "../../common";
-import { PatternMap } from "../../match/types";
+import { PatternMap, PatternsMap } from "../../match/types";
 
 export default class ChainDecorator extends PatternDecorator {
   constructor(
     pattern: Pattern,
-    private startPatternMap: Record<string, Pattern>,
-    private linkPatternMap: SubPatternMap
+    private startPatternMap: PatternMap,
+    private linkPatternMap: PatternsMap
   ) {
     super(pattern);
   }
 
-  getStartPatternMapFor(chainName: string): PatternMap {
+  getStartPatternMapFor(chainName: string): PatternsMap {
     const startPattern = this.startPatternMap[chainName];
     if (!startPattern) {
       throw new Error(`Chain with name ${chainName} not found`);
@@ -21,7 +20,16 @@ export default class ChainDecorator extends PatternDecorator {
     return createPatternMap([startPattern]);
   }
 
-  getLinkPatternMapFor(chainName: string): PatternMap {
+  getAllLinkPatterns(): Pattern[] {
+    return Object.values(this.linkPatternMap).reduce(
+      (allLinkPatterns: Pattern[], currentLinkPatterns: Pattern[]) => {
+        return allLinkPatterns.concat(currentLinkPatterns);
+      },
+      []
+    );
+  }
+
+  getLinkPatternMapFor(chainName: string): PatternsMap {
     const linkPatterns = this.linkPatternMap[chainName];
     if (!linkPatterns) {
       throw new Error(`Chain with name ${chainName} not found`);
