@@ -10,7 +10,6 @@ import TemplateBlock from "./templateBlock";
 import TemplateContextVariable from "./templateContextVariable";
 import RawTemplate from "./rawTemplate";
 import TemplateChain from "./templateChain";
-import Pattern from "../pattern/pattern";
 
 /**
  * Defines a TemplateArgument

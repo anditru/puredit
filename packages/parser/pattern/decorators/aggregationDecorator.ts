@@ -1,8 +1,7 @@
 import Pattern from "../pattern";
 import PatternDecorator from "./patternDecorator";
-import { PatternsMap } from "../types";
 import { createPatternMap } from "../../common";
-import { PatternMap } from "../../match/types";
+import { PatternsMap } from "../../match/types";
 
 export default class AggregationDecorator extends PatternDecorator {
   constructor(pattern: Pattern, private aggregationPatternMap: PatternsMap) {
