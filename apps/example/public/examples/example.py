@@ -16,6 +16,7 @@
 # https://github.com/niklaskorz/puredit/tree/main/apps/example/src/py/projections
 # The projections make use of the https://cortexjs.io/mathlive/ library (MIT license).
 import mathdsl
+import polars as pl
 
 # Click on the blue keyboard icon to edit a mathematical expression.
 # You also type directly using your keyboard. Commonly used names such as "pi"
@@ -47,6 +48,7 @@ print("x:", x)
 
 # 5. Example: Projection with aggregation and chain
 filtered_students = students.select(
+    pl.col("first_name").name.toLowerCase(),
     "age", 
     name="last_name"
 ).filter(age=24)

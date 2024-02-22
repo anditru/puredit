@@ -16,7 +16,7 @@ export default class ContextVariableNode extends RegularNode {
   }
 
   getMatchedTypes(): string[] {
-    return ["*"];
+    return ["identifier"];
   }
 
   matches(astCursor: AstCursor, context?: Context): boolean {

@@ -1,11 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { FocusGroup } from "@puredit/projections/focus";
-  import type { EditorView } from "codemirror";
-  import type { Match } from "@puredit/parser";
   import type { EditorState } from "@codemirror/state";
+  import type { EditorView } from "@codemirror/view";
+  import type { Match } from "@puredit/parser";
+  import type { FocusGroup } from "@puredit/projections/focus";
 
-  //svelte-ignore unused-export-let
   export let isNew: boolean;
   //svelte-ignore unused-export-let
   export let view: EditorView | null;
@@ -15,7 +14,6 @@
   export let context: object;
   //svelte-ignore unused-export-let
   export let state: EditorState;
-  //svelte-ignore unused-export-let
   export let focusGroup: FocusGroup;
 
   onMount(() => {
@@ -27,4 +25,6 @@
   });
 </script>
 
-<span class="inline-flex" />
+<span class="inline-flex">
+  <span style="padding-right: 10px;">converted to lowercase</span>
+</span>

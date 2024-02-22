@@ -6,8 +6,13 @@ import EmptyWidget from "../../../../EmptyWidget.svelte";
 import { agg } from "@puredit/parser";
 import { column } from "./columnSubProjection";
 import { columnWithAlias } from "./columnWithAliasSubProjection";
+import { columnChain } from "../../columnChain/columnChainProjection";
 
-const columns = agg("columns", [column, columnWithAlias]);
+const columnChainPattern = pythonParser.subPattern("columnChainSubPattern")`
+${columnChain}
+`;
+
+const columns = agg("columns", [column, columnWithAlias, columnChainPattern]);
 export const selectFunction = pythonParser.subPattern("selectFunction")`
 select(${columns})
 `;

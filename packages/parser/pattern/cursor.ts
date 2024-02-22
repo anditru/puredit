@@ -9,6 +9,7 @@ export default class PatternCursor extends Cursor {
   private _currentNode: PatternNode;
 
   private runningTransaction = false;
+  private runningRollback = false;
   private operationLog: TransactionOperation[] = [];
 
   constructor(source: Pattern | PatternNode | PatternDecorator) {
@@ -33,6 +34,8 @@ export default class PatternCursor extends Cursor {
   }
 
   protected rollbackTransaction() {
+    this.runningRollback = true;
+
     while (this.operationLog.length > 0) {
       const operation = this.operationLog.pop();
       if (operation === TransactionOperation.GOTO_FIRST_CHILD) {
@@ -45,6 +48,8 @@ export default class PatternCursor extends Cursor {
         this.goToNextSibling();
       }
     }
+
+    this.runningRollback = false;
     this.runningTransaction = false;
   }
 
@@ -93,7 +98,7 @@ export default class PatternCursor extends Cursor {
       return false;
     }
     this._currentNode = this._currentNode.children[0];
-    if (this.runningTransaction) {
+    if (this.runningTransaction && !this.runningRollback) {
       this.operationLog.push(TransactionOperation.GOTO_FIRST_CHILD);
     }
     return true;
@@ -104,7 +109,7 @@ export default class PatternCursor extends Cursor {
       return false;
     }
     this._currentNode = this._currentNode.parent;
-    if (this.runningTransaction) {
+    if (this.runningTransaction && !this.runningRollback) {
       this.operationLog.push(TransactionOperation.GOTO_PARENT);
     }
     return true;
@@ -118,7 +123,7 @@ export default class PatternCursor extends Cursor {
     const currentChildNodeIndex = this.getCurrentChildNodeIndex();
     this._currentNode = this._currentNode.parent!.children[currentChildNodeIndex + 1];
 
-    if (this.runningTransaction) {
+    if (this.runningTransaction && !this.runningRollback) {
       this.operationLog.push(TransactionOperation.GOTO_NEXT_SIBLING);
     }
     return true;
@@ -138,7 +143,7 @@ export default class PatternCursor extends Cursor {
     const currentChildNodeIndex = this.getCurrentChildNodeIndex();
     this._currentNode = this._currentNode.parent!.children[currentChildNodeIndex - 1];
 
-    if (this.runningTransaction) {
+    if (this.runningTransaction && !this.runningRollback) {
       this.operationLog.push(TransactionOperation.GOTO_PREVIOUS_SIBLING);
     }
     return true;

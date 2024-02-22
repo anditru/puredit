@@ -9,7 +9,7 @@ export const chainStart = pythonParser.subPattern("chainStart")`${sourceDataFram
 
 export const widget = svelteProjection(FilterProjection);
 
-export const startSubProjection: SubProjection = {
+export const selectStartSubProjection: SubProjection = {
   name: "Start Dataframe",
   description: "Dataframe to select from",
   pattern: chainStart,

@@ -4,6 +4,7 @@ import Cursor from "../cursor/cursor";
 
 export default class AstCursor extends Cursor {
   private runningTransaction = false;
+  private runningRollback = false;
   private operationLog: TransactionOperation[] = [];
 
   constructor(private treeCursor: TreeCursor) {
@@ -21,6 +22,8 @@ export default class AstCursor extends Cursor {
   }
 
   protected rollbackTransaction() {
+    this.runningRollback = true;
+
     while (this.operationLog.length > 0) {
       const operation = this.operationLog.pop();
       if (operation === TransactionOperation.GOTO_FIRST_CHILD) {
@@ -29,12 +32,13 @@ export default class AstCursor extends Cursor {
         this.goToFirstChild();
       }
     }
+    this.runningRollback = false;
     this.runningTransaction = false;
   }
 
   goToParent(): boolean {
     if (this.treeCursor.gotoParent()) {
-      if (this.runningTransaction) {
+      if (this.runningTransaction && !this.runningRollback) {
         this.operationLog.push(TransactionOperation.GOTO_PARENT);
       }
       return true;
@@ -45,7 +49,7 @@ export default class AstCursor extends Cursor {
 
   goToFirstChild(): boolean {
     if (this.treeCursor.gotoFirstChild()) {
-      if (this.runningTransaction) {
+      if (this.runningTransaction && !this.runningRollback) {
         this.operationLog.push(TransactionOperation.GOTO_FIRST_CHILD);
       }
       return true;
