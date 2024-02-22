@@ -17,7 +17,7 @@ export default class CompletePatternGeneration extends PatternGeneration {
 
     const codeString = this.rawTemplate!.toCodeString();
     const rootNode = this.transformToPatternTree(codeString);
-    let pattern = new BasePattern(rootNode, this.rawTemplate!) as Pattern;
+    let pattern = new BasePattern(rootNode, this.rawTemplate!, this.targetLanguage) as Pattern;
 
     if (this.rawTemplate!.hasAggregations()) {
       pattern = this.buildAggregationSubPatterns(pattern);

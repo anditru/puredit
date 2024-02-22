@@ -3,6 +3,14 @@ import { Language, aggregationPlaceHolder, type LanguageConfig } from "./types";
 
 const languageConfigs: Record<Language, LanguageConfig> = {
   [Language.Python]: {
+    arguments: {
+      draftTypeMapping: {
+        string: `""`,
+        number: "1",
+        list: "[]",
+        default: "__empty_<type>",
+      },
+    },
     aggregations: {
       aggregatableNodeTypes: {
         argument_list: {
@@ -28,9 +36,18 @@ const languageConfigs: Record<Language, LanguageConfig> = {
     },
     blocks: {
       blockNodeType: "block",
+      draft: "pass # instructions go here",
     },
   },
   [Language.TypeScript]: {
+    arguments: {
+      draftTypeMapping: {
+        string: `""`,
+        number: "1",
+        list: "[]",
+        default: "__empty_<type>",
+      },
+    },
     aggregations: {
       aggregatableNodeTypes: {
         arguments: {
@@ -56,6 +73,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
     },
     blocks: {
       blockNodeType: "statement_block",
+      draft: "{\n  // instructions go here\n}",
     },
   },
 };

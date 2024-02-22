@@ -27,4 +27,8 @@ export default class TemplateContextVariable extends TemplateParameter {
       this
     );
   }
+
+  toDraftString(language: Language): string {
+    return this.name;
+  }
 }

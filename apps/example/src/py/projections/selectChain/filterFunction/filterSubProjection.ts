@@ -6,9 +6,9 @@ import FilterProjection from "./FilterSubProjection.svelte";
 
 const filterColumn = arg("filterColumn", ["identifier"]);
 const compareValue = arg("compareValue", ["integer"]);
-export const filterFunction = pythonParser.subPattern("filterFunction")`
-filter(${filterColumn}=${compareValue})
-`;
+export const filterFunction = pythonParser.subPattern(
+  "filterFunction"
+)`filter(${filterColumn}=${compareValue})`;
 
 export const widget = svelteProjection(FilterProjection);
 

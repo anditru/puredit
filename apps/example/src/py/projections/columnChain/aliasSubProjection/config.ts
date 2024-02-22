@@ -5,9 +5,7 @@ import { pythonParser } from "../../parser";
 import Widget from "./Widget.svelte";
 
 const columnName = arg("columnName", ["string"]);
-export const pattern = pythonParser.subPattern("aliasFunction")`
-alias(${columnName})
-`;
+export const pattern = pythonParser.subPattern("aliasFunction")`alias(${columnName})`;
 
 const widget = svelteProjection(Widget);
 

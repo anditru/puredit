@@ -2,7 +2,7 @@ import type { Context } from "@puredit/parser";
 
 export const globalContextVariables: Context = {
   mathdsl: "mathdsl",
-  polars: "pl",
+  pl: "pl",
 };
 
 export const globalContextValues = {};

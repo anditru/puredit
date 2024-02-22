@@ -6,10 +6,17 @@ export enum Language {
 }
 
 export type LanguageConfig = {
+  arguments: ArgumentsConfig;
   aggregations: AggregationsConfig;
   chains: ChainsConfig;
   blocks: BlocksConfig;
 };
+
+export type ArgumentsConfig = {
+  draftTypeMapping: DraftTypeMapping;
+};
+
+export type DraftTypeMapping = Record<string, string>;
 
 export type AggregationsConfig = {
   aggregatableNodeTypes: Record<string, AggregatableNodeTypeConfig>;
@@ -36,4 +43,7 @@ export type ChainableNodeTypeConfig = {
 
 export type BlocksConfig = {
   blockNodeType: string;
+  draft: string;
 };
+
+export const typePlaceHolder = "<type>";

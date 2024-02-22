@@ -8,9 +8,7 @@ import { column } from "./columnSubProjection";
 import { columnWithAlias } from "./columnWithAliasSubProjection";
 import { columnChain } from "../../columnChain/columnChainProjection";
 
-const columnChainPattern = pythonParser.subPattern("columnChainSubPattern")`
-${columnChain}
-`;
+const columnChainPattern = pythonParser.subPattern("columnChainSubPattern")`${columnChain}`;
 
 const columns = agg("columns", [column, columnWithAlias, columnChainPattern]);
 export const selectFunction = pythonParser.subPattern("selectFunction")`

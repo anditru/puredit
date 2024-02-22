@@ -1,5 +1,5 @@
 import AstCursor from "../ast/cursor";
-import { Language } from "@puredit/language-config";
+import { Language, loadArgumentsConfigFor, typePlaceHolder } from "@puredit/language-config";
 import ArgumentNode from "../pattern/nodes/argumentNode";
 import TemplateParameter from "./templateParameter";
 
@@ -19,5 +19,27 @@ export default class TemplateArgument extends TemplateParameter {
 
   toPatternNode(cursor: AstCursor, language: Language) {
     return new ArgumentNode(language, cursor.currentNode.text, cursor.currentFieldName, this);
+  }
+
+  toDraftString(language: Language): string {
+    if (this.types.length === 1) {
+      return this.getDraftStringForSingeType(this.types[0], language);
+    } else {
+      return this.getDraftStringForMultipleTypes(language);
+    }
+  }
+
+  private getDraftStringForSingeType(type: string, language: Language): string {
+    const argumentsConfig = loadArgumentsConfigFor(language);
+    const maybeDraft = argumentsConfig.draftTypeMapping[type];
+    if (maybeDraft) {
+      return maybeDraft;
+    } else {
+      return argumentsConfig.draftTypeMapping["default"].replace(typePlaceHolder, this.types[0]);
+    }
+  }
+
+  private getDraftStringForMultipleTypes(language: Language): string {
+    return this.types.map((type) => this.getDraftStringForSingeType(type, language)).join("_or_");
   }
 }

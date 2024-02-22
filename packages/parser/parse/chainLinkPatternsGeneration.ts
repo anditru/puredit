@@ -79,6 +79,6 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
     linkPatternCursor.follow(this.chainsConfig.pathToFirstLink);
     const linkRootNode = linkPatternCursor.currentNode.cutOff();
 
-    return new BasePattern(linkRootNode, this.rawTemplate!);
+    return new BasePattern(linkRootNode, this.rawTemplate!, this.targetLanguage);
   }
 }

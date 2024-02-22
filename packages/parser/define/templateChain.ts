@@ -36,4 +36,12 @@ export default class TemplateChain extends TemplateParameter {
   toPatternNode(cursor: AstCursor, language: Language): PatternNode {
     return new ChainNode(language, cursor.currentNode.text, cursor.currentFieldName, this);
   }
+
+  toDraftString(language: Language): string {
+    const startDraftString = this.startPattern.toDraftString(language);
+    const linkDraftPatterns = this.linkPatterns
+      .slice(0, 2)
+      .map((linkPattern) => linkPattern.toDraftString(language));
+    return [startDraftString, ...linkDraftPatterns].join(".");
+  }
 }

@@ -16,4 +16,5 @@ export default abstract class TemplateParameter {
 
   abstract toCodeString(): string;
   abstract toPatternNode(cursor: AstCursor, language: Language): PatternNode;
+  abstract toDraftString(language: Language): string;
 }

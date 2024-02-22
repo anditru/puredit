@@ -6,9 +6,9 @@ import ColumnWithAliasSubProjection from "./ColumnWithAliasSubProjection.svelte"
 
 const columnName = arg("columnName", ["identifier"]);
 const columnAlias = arg("columnAlias", ["string"]);
-export const columnWithAlias = pythonParser.subPattern("columnWithAlias")`
-${columnName}=${columnAlias}
-`;
+export const columnWithAlias = pythonParser.subPattern(
+  "columnWithAlias"
+)`${columnName}=${columnAlias}`;
 
 const widget = svelteProjection(ColumnWithAliasSubProjection);
 

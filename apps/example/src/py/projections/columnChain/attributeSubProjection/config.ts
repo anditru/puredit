@@ -5,9 +5,7 @@ import { pythonParser } from "../../parser";
 import Widget from "./Widget.svelte";
 
 const attributeName = arg("attributeName", ["identifier"]);
-export const pattern = pythonParser.subPattern("attributePattern")`
-${attributeName}
-`;
+export const pattern = pythonParser.subPattern("attributePattern")`${attributeName}`;
 
 const widget = svelteProjection(Widget);
 

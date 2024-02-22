@@ -2,11 +2,16 @@ import languageConfigs from "./languageConfigs";
 import type {
   AggregatableNodeTypeConfig,
   AggregationsConfig,
+  ArgumentsConfig,
   BlocksConfig,
   ChainableNodeTypeConfig,
   ChainsConfig,
   Language,
 } from "./types";
+
+export function loadArgumentsConfigFor(language: Language): ArgumentsConfig {
+  return languageConfigs[language].arguments;
+}
 
 export function loadAggregationsConfigFor(language: Language): AggregationsConfig {
   return languageConfigs[language].aggregations;

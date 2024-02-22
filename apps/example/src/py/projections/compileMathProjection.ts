@@ -7,9 +7,7 @@ import { pythonParser } from "./parser";
 const dsl = contextVariable("mathdsl");
 const latex = arg("latex", ["string"]);
 
-export const pattern = pythonParser.expressionPattern("compileMath")`
-${dsl}.compile(${latex})
-`;
+export const pattern = pythonParser.expressionPattern("compileMath")`${dsl}.compile(${latex})`;
 
 export const widget = svelteProjection(MathProjection);
 

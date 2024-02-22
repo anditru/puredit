@@ -37,4 +37,8 @@ export default class TemplateAggregation extends TemplateParameter {
       this
     );
   }
+
+  toDraftString(language: Language): string {
+    return this.subPatterns[0].toDraftString(language);
+  }
 }

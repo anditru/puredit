@@ -2,6 +2,7 @@ import { isString } from "@puredit/utils";
 import TemplateParameter from "./templateParameter";
 import TemplateAggregation from "./templateAggregation";
 import TemplateChain from "./templateChain";
+import { Language } from "@puredit/language-config";
 
 export default class RawTemplate {
   constructor(
@@ -37,5 +38,18 @@ export default class RawTemplate {
       }
     });
     return String.raw(this.template!, ...substitutions);
+  }
+
+  toDraftString(language: Language): string {
+    return String.raw(
+      this.template,
+      this.params.map((param) => {
+        if (typeof param === "string") {
+          return param;
+        } else {
+          return param.toDraftString(language);
+        }
+      })
+    );
   }
 }

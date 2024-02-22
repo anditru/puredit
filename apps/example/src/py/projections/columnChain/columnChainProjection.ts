@@ -18,9 +18,7 @@ export const columnChain = chain("columnChain", startPattern, [
   attributePattern,
 ]);
 
-const pattern = pythonParser.statementPattern("columnChainPattern")`
-${columnChain}
-`;
+const pattern = pythonParser.statementPattern("columnChainPattern")`${columnChain}`;
 
 const widget = svelteProjection(EmptyWidget);
 

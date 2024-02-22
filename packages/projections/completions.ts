@@ -2,7 +2,7 @@ import { getIndentation, indentString } from "@codemirror/language";
 import { CompletionContext, pickedCompletion } from "@codemirror/autocomplete";
 import type { Completion, CompletionResult } from "@codemirror/autocomplete";
 import type { Context } from "@puredit/parser";
-import { projectionState } from "../state";
+import { projectionState } from "./state";
 
 /**
  * Transforms the registered projections into suggestions for the code completion
@@ -46,7 +46,7 @@ export function completions(completionContext: CompletionContext): CompletionRes
               from,
               to,
               insert: projection.pattern
-                .getDraft()
+                .toDraftString()
                 .split("\n")
                 .join("\n" + indentString(view.state, indentation)),
             },

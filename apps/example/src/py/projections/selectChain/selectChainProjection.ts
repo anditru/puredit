@@ -11,9 +11,9 @@ import IntoProjection from "./IntoSubProjection.svelte";
 const processingChain = chain("processingChain", chainStart, [selectFunction, filterFunction]);
 
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
-const pattern = pythonParser.statementPattern("selectChainPattern")`
-${targetDataFrame} = ${processingChain}
-`;
+const pattern = pythonParser.statementPattern(
+  "selectChainPattern"
+)`${targetDataFrame} = ${processingChain}`;
 
 const widget = svelteProjection(EmptyWidget);
 const intoWidget = svelteProjection(IntoProjection);

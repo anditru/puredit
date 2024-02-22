@@ -3,7 +3,7 @@ import { Context } from "../match/types";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../pattern/nodes/patternNode";
 import BlockNode from "../pattern/nodes/blockNode";
-import { Language } from "@puredit/language-config";
+import { Language, loadBlocksConfigFor } from "@puredit/language-config";
 
 export default class TemplateBlock extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_block_";
@@ -21,5 +21,10 @@ export default class TemplateBlock extends TemplateParameter {
 
   toPatternNode(cursor: AstCursor, language: Language): PatternNode {
     return new BlockNode(language, cursor.currentNode.text, cursor.currentFieldName, this);
+  }
+
+  toDraftString(language: Language): string {
+    const blocksConfig = loadBlocksConfigFor(language);
+    return blocksConfig.draft;
   }
 }

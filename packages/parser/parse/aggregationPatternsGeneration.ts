@@ -54,7 +54,7 @@ export default class AggregationPatternsGeneration extends PatternGeneration {
     patternTreeCursor.follow(aggregationRootPath);
     const subPatternRoot = patternTreeCursor.currentNode;
     subPatternRoot.cutOff();
-    return new BasePattern(subPatternRoot, this.rawTemplate!);
+    return new BasePattern(subPatternRoot, this.rawTemplate!, this.targetLanguage);
   }
 
   private getAggregationRootPath() {
@@ -62,7 +62,8 @@ export default class AggregationPatternsGeneration extends PatternGeneration {
     const contextTemplateTree = this.transformToPatternTree(contextTemplate);
     const contextTemplatePattern = new BasePattern(
       contextTemplateTree,
-      this.rawTemplate! // TODO: Find a more sensible template to pass here
+      this.rawTemplate!, // TODO: Find a more sensible template to pass here
+      this.targetLanguage
     );
     return contextTemplatePattern.getPathToNodeWithText(aggregationPlaceHolder);
   }

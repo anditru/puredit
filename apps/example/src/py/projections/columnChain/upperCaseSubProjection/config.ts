@@ -3,9 +3,7 @@ import type { SubProjection } from "@puredit/projections/types";
 import { pythonParser } from "../../parser";
 import UppercaseSubProjection from "./Widget.svelte";
 
-export const pattern = pythonParser.subPattern("upperCaseFunction")`
-toUpperCase()
-`;
+export const pattern = pythonParser.subPattern("upperCaseFunction")`toUpperCase()`;
 
 export const widget = svelteProjection(UppercaseSubProjection);
 

@@ -4,7 +4,7 @@ import type { SubProjection } from "@puredit/projections/types";
 import { pythonParser } from "../parser";
 import EmptyWidget from "../../../EmptyWidget.svelte";
 
-const polars = contextVariable("polars");
+const polars = contextVariable("pl");
 export const pattern = pythonParser.subPattern("columnChainStart")`${polars}`;
 
 const widget = svelteProjection(EmptyWidget);
