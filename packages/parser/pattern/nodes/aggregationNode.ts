@@ -1,8 +1,11 @@
 import PatternNode from "./patternNode";
 import TemplateAggregation from "../../define/templateAggregation";
 import AstCursor from "../../ast/cursor";
-import { Language } from "../../config/types";
-import { loadAggregatableNodeTypeConfigFor, loadAggregationsConfigFor } from "../../config/load";
+import { Language } from "@puredit/language-config";
+import {
+  loadAggregatableNodeTypeConfigFor,
+  loadAggregationsConfigFor,
+} from "@puredit/language-config";
 
 export default class AggregationNode extends PatternNode {
   static readonly TYPE = "AggregationNode";

@@ -3,7 +3,7 @@ import RawTemplate from "./rawTemplate";
 import { Context } from "../match/types";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../pattern/nodes/patternNode";
-import { Language } from "../config/types";
+import { Language } from "@puredit/language-config";
 import TemporaryAggregationNode from "../pattern/nodes/temporaryAggregationNode";
 
 export default class TemplateAggregation extends TemplateParameter {

@@ -1,4 +1,4 @@
-import type TreePath from "../cursor/treePath";
+import type { TreePath } from "@puredit/parser";
 
 export enum Language {
   TypeScript = "ts",

@@ -65,11 +65,6 @@ export default class BasePattern implements Pattern {
     return null;
   }
 
-  getDraft(): string {
-    // TODO: Implement draft generation considering Aggregation variants
-    return "__pattern";
-  }
-
   get name(): string {
     return this._name;
   }

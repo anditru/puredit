@@ -17,10 +17,6 @@ export default abstract class PatternDecorator implements Pattern {
     return this.pattern.getPathToNodeWithText(text);
   }
 
-  getDraft(): string {
-    return this.pattern.getDraft();
-  }
-
   get name(): string {
     return this.pattern.name;
   }

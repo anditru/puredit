@@ -8,8 +8,8 @@ import type { Projection, ProjectionPluginConfig, RootProjection, SubProjection 
 import type RawTemplate from "@puredit/parser/define/rawTemplate";
 import type { ProjectionWidgetClass } from "./projection";
 import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
-import { loadAggregationsConfigFor } from "@puredit/parser/config/load";
-import type { AggregatableNodeTypeConfig } from "@puredit/parser/config/types";
+import { loadAggregationsConfigFor } from "@puredit/language-config";
+import type { AggregatableNodeTypeConfig } from "@puredit/language-config";
 
 export default class DecorationSetBuilder {
   private config: ProjectionPluginConfig;

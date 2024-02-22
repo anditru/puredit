@@ -1,8 +1,8 @@
 import PatternNode from "./patternNode";
 import TemplateChain from "../../define/templateChain";
 import AstCursor from "../../ast/cursor";
-import { Language } from "../../config/types";
-import { loadChainableNodeTypesFor } from "../../config/load";
+import { Language } from "@puredit/language-config";
+import { loadChainableNodeTypesFor } from "@puredit/language-config";
 
 export default class ChainNode extends PatternNode {
   static readonly TYPE = "ChainNode";

@@ -6,7 +6,7 @@ import TemplateChain from "../define/templateChain";
 import PatternNode from "../pattern/nodes/patternNode";
 import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
 import AggregationNode from "../pattern/nodes/aggregationNode";
-import { Language } from "../config/types";
+import { Language } from "@puredit/language-config";
 import TemporaryAggregationNode from "../pattern/nodes/temporaryAggregationNode";
 
 export default class NodeTransformVisitor {

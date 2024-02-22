@@ -1,7 +1,7 @@
 import PatternNode from "./patternNode";
 import TemplateAggregation from "../../define/templateAggregation";
 import AstCursor from "../../ast/cursor";
-import { Language } from "../../config/types";
+import { Language } from "@puredit/language-config";
 import AggregationNode from "./aggregationNode";
 
 export default class TemporaryAggregationNode extends PatternNode {

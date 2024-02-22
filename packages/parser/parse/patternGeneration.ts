@@ -8,8 +8,8 @@ import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
 import ChainDecorator from "../pattern/decorators/chainDecorator";
 import PatternCursor from "../pattern/cursor";
 import { PatternMap, PatternsMap } from "../match/types";
-import { Language } from "../config/types";
-import { loadAggregatableNodeTypeConfigFor } from "../config/load";
+import { Language } from "@puredit/language-config";
+import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
 import {
   NodeTransformVisitor,
   AggregationPatternsGeneration,

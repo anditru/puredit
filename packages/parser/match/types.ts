@@ -1,7 +1,7 @@
 import AstNode from "../ast/node";
 import Pattern from "../pattern/pattern";
 import AstCursor from "../ast/cursor";
-import { Language } from "../config/types";
+import { Language } from "@puredit/language-config";
 
 export type PatternMap = Record<string, Pattern>;
 export type PatternsMap = Record<string, Pattern[]>;

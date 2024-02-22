@@ -1,5 +1,5 @@
 import TreeSitterParser from "web-tree-sitter";
-import { Language } from "./config/types";
+import { Language } from "@puredit/language-config";
 
 const VSCODE_BASE_PATH = "https://file+.vscode-resource.vscode-cdn.net";
 

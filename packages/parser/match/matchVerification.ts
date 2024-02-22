@@ -6,7 +6,7 @@ import type {
   CodeRangesMap,
   VerificationResult,
 } from "./types";
-import { Language, PatternMatching, type Context } from "..";
+import { PatternMatching, type Context } from "..";
 import Pattern from "../pattern/pattern";
 import ArgumentNode from "../pattern/nodes/argumentNode";
 import BlockNode from "../pattern/nodes/blockNode";
@@ -14,11 +14,14 @@ import PatternCursor from "../pattern/cursor";
 import RegularNode from "../pattern/nodes/regularNode";
 import AggregationNode from "../pattern/nodes/aggregationNode";
 import ChainNode from "../pattern/nodes/chainNode";
-import { loadChainableNodeTypeConfigFor } from "../config/load";
 import ChainDecorator from "../pattern/decorators/chainDecorator";
 import AstNode from "../ast/node";
 import ChainContinuationNode from "../pattern/nodes/chainContinuationNode";
-import { ChainableNodeTypeConfig } from "../config/types";
+import {
+  Language,
+  loadChainableNodeTypeConfigFor,
+  ChainableNodeTypeConfig,
+} from "@puredit/language-config";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.MatchVerification");

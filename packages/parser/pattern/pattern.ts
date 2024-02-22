@@ -4,7 +4,6 @@ import RawTemplate from "../define/rawTemplate";
 
 export default interface Pattern {
   getTypesMatchedByRootNode(): string[];
-  getDraft(): string;
   getPathToNodeWithText(text: string): TreePath;
   get template(): RawTemplate;
   get name(): string;

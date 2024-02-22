@@ -4,7 +4,7 @@ import { Context } from "../match/types";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../pattern/nodes/patternNode";
 import ChainNode from "../pattern/nodes/chainNode";
-import { Language } from "../config/types";
+import { Language } from "@puredit/language-config";
 
 export default class TemplateChain extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_chain_";

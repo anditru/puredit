@@ -3,7 +3,11 @@ import BasePattern from "../pattern/basePattern";
 import Pattern from "../pattern/pattern";
 import PatternCursor from "../pattern/cursor";
 import PatternNode from "../pattern/nodes/patternNode";
-import { AggregatableNodeTypeConfig, Language, aggregationPlaceHolder } from "../config/types";
+import {
+  AggregatableNodeTypeConfig,
+  Language,
+  aggregationPlaceHolder,
+} from "@puredit/language-config";
 import { PatternGeneration, NodeTransformVisitor } from "./internal";
 
 export default class AggregationPatternsGeneration extends PatternGeneration {

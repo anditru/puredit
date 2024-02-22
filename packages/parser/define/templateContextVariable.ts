@@ -1,5 +1,5 @@
 import AstCursor from "../ast/cursor";
-import { Language } from "../config/types";
+import { Language } from "@puredit/language-config";
 import ContextVariableNode from "../pattern/nodes/contextVariableNode";
 import PatternNode from "../pattern/nodes/patternNode";
 import TemplateParameter from "./templateParameter";

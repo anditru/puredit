@@ -2,7 +2,7 @@ import TemplateParameter from "../define/templateParameter";
 import RawTemplate from "../define/rawTemplate";
 import type { TreeSitterParser } from "../treeSitterParser";
 import { createTreeSitterParser } from "../treeSitterParser";
-import { Language } from "../config/types";
+import { Language } from "@puredit/language-config";
 import { CompletePatternGeneration } from "./internal";
 
 export default class Parser {

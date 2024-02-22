@@ -1,4 +1,4 @@
-import TreePath from "../cursor/treePath";
+import { TreePath } from "@puredit/parser";
 import { Language, aggregationPlaceHolder, type LanguageConfig } from "./types";
 
 const languageConfigs: Record<Language, LanguageConfig> = {

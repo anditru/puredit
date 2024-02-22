@@ -1,8 +1,8 @@
 import PatternNode from "./patternNode";
 import TemplateBlock from "../../define/templateBlock";
 import AstCursor from "../../ast/cursor";
-import { Language } from "../../config/types";
-import { loadBlocksConfigFor } from "../../config/load";
+import { Language } from "@puredit/language-config";
+import { loadBlocksConfigFor } from "@puredit/language-config";
 
 export default class BlockNode extends PatternNode {
   static readonly TYPE = "BlockNode";

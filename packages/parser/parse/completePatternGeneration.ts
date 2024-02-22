@@ -1,7 +1,7 @@
 import { TreeSitterParser } from "../treeSitterParser";
 import BasePattern from "../pattern/basePattern";
 import Pattern from "../pattern/pattern";
-import { Language } from "../config/types";
+import { Language } from "@puredit/language-config";
 import { NodeTransformVisitor, PatternGeneration } from "./internal";
 
 export default class CompletePatternGeneration extends PatternGeneration {

@@ -1,7 +1,7 @@
 import TemplateArgument from "../../define/templateArgument";
 import PatternNode from "./patternNode";
 import AstCursor from "../../ast/cursor";
-import { Language } from "../../config/types";
+import { Language } from "@puredit/language-config";
 
 export default class ArgumentNode extends PatternNode {
   static readonly TYPE: string = "ArgumentNode";

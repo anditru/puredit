@@ -2,16 +2,14 @@ import { getIndentation, indentString } from "@codemirror/language";
 import { CompletionContext, pickedCompletion } from "@codemirror/autocomplete";
 import type { Completion, CompletionResult } from "@codemirror/autocomplete";
 import type { Context } from "@puredit/parser";
-import { projectionState } from "./state";
+import { projectionState } from "../state";
 
 /**
  * Transforms the registered projections into suggestions for the code completion
  * @param completionContext
  * @returns
  */
-export function completions(
-  completionContext: CompletionContext
-): CompletionResult | null {
+export function completions(completionContext: CompletionContext): CompletionResult | null {
   const word = completionContext.matchBefore(/\w*/);
   if (!word || (word.from === word.to && !completionContext.explicit)) {
     return null;
@@ -19,8 +17,7 @@ export function completions(
 
   const indentation = getIndentation(completionContext.state, word.from) || 0;
 
-  const { config, contextRanges } =
-    completionContext.state.field(projectionState);
+  const { config, contextRanges } = completionContext.state.field(projectionState);
   const context: Context = { ...config.globalContextVariables };
   for (const contextRange of contextRanges) {
     if (contextRange.from <= word.from && contextRange.to >= word.to) {

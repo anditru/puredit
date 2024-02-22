@@ -1,7 +1,8 @@
 import parseArgv from "yargs/yargs";
 import path from "path";
 import fs from "fs";
-import { Language, Parser } from "@puredit/parser";
+import { Parser } from "@puredit/parser";
+import { Language } from "@puredit/language-config";
 import { scanCode } from "./code.js";
 import { scanProjections } from "./projections.js";
 import { serializePattern } from "./serialize.js";

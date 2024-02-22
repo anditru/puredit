@@ -3,7 +3,7 @@ import { Context } from "../match/types";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../pattern/nodes/patternNode";
 import BlockNode from "../pattern/nodes/blockNode";
-import { Language } from "../config/types";
+import { Language } from "@puredit/language-config";
 
 export default class TemplateBlock extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_block_";
