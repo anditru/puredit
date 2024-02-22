@@ -14,10 +14,11 @@ import PatternCursor from "../pattern/cursor";
 import RegularNode from "../pattern/nodes/regularNode";
 import AggregationNode from "../pattern/nodes/aggregationNode";
 import ChainNode from "../pattern/nodes/chainNode";
-import { loadChainsConfigFor } from "../config/load";
+import { loadChainableNodeTypeConfigFor } from "../config/load";
 import ChainDecorator from "../pattern/decorators/chainDecorator";
 import AstNode from "../ast/node";
 import ChainContinuationNode from "../pattern/nodes/chainContinuationNode";
+import { ChainableNodeTypeConfig } from "../config/types";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.MatchVerification");
@@ -173,27 +174,34 @@ export default class MatchVerification {
     const chainNode = this.patternCursor.currentNode as ChainNode;
     this.initializeChainToLinkRangesMapFor(chainNode);
 
-    const chainsConfig = loadChainsConfigFor(chainNode.language);
-    const pathToNextChainLink = chainsConfig.pathToNextChainLink;
-
+    const followedPaths = [];
     let chainDepth = -1;
+    let chainableNodeTypeConfig;
     do {
       chainDepth++;
-      if (this.astCursor.currentNode.type === chainsConfig.chainNodeType) {
+      const currentAstNode = this.astCursor.currentNode;
+      chainableNodeTypeConfig = loadChainableNodeTypeConfigFor(
+        chainNode.language,
+        currentAstNode.type
+      );
+      if (chainableNodeTypeConfig) {
         logger.debug(`Found ${chainDepth + 1}. chain link`);
-        this.extractChainLinkRangeFor(chainNode);
+        this.extractChainLinkRangeFor(chainNode, chainableNodeTypeConfig);
       } else if (this.chainStartReachedFor(chainNode)) {
         logger.debug(`Reached chain start at depth ${chainDepth}`);
         this.extractChainStartRangeFor(chainNode);
         break;
       } else {
         logger.debug(
-          `ChainNode does not match since AST node of type ${this.astCursor.currentNode.type} ` +
-            `with text ${this.astCursor.currentNode.text} matches neither chain link not chain start`
+          `ChainNode does not match since AST node of type ${currentAstNode.type} ` +
+            `with text ${currentAstNode.text} matches neither chain link not chain start`
         );
         throw new DoesNotMatch();
       }
-    } while (this.astCursor.follow(pathToNextChainLink));
+    } while (
+      this.astCursor.follow(chainableNodeTypeConfig.pathToNextLink) &&
+      followedPaths.push(chainableNodeTypeConfig.pathToNextLink)
+    );
 
     if (chainDepth < 2) {
       // We only match if at least two functions are called in a row
@@ -205,8 +213,8 @@ export default class MatchVerification {
       throw new DoesNotMatch();
     }
 
-    for (let i = 0; i < chainDepth; i++) {
-      this.astCursor.reverseFollow(pathToNextChainLink);
+    for (const path of followedPaths) {
+      this.astCursor.reverseFollow(path);
     }
   }
 
@@ -215,13 +223,15 @@ export default class MatchVerification {
     this.chainToLinkRangesMap[chainName] = [];
   }
 
-  private extractChainLinkRangeFor(chainNode: ChainNode) {
+  private extractChainLinkRangeFor(
+    chainNode: ChainNode,
+    chainableNodeTypeConfig: ChainableNodeTypeConfig
+  ) {
     const chainName = chainNode.templateChain.name;
-    const chainsConfig = loadChainsConfigFor(this.patternCursor.currentNode.language);
 
-    this.astCursor.follow(chainsConfig.pathToCallBegin);
+    this.astCursor.follow(chainableNodeTypeConfig.pathToLinkBegin);
     const from = this.astCursor.currentNode.startIndex;
-    this.astCursor.reverseFollow(chainsConfig.pathToCallBegin);
+    this.astCursor.reverseFollow(chainableNodeTypeConfig.pathToLinkBegin);
 
     const currentAstNode = this.astCursor.currentNode;
     this.chainToLinkRangesMap[chainName].push({

@@ -14,10 +14,17 @@ const languageConfigs: Record<Language, LanguageConfig> = {
       },
     },
     chains: {
-      chainNodeType: "call",
-      pathToCallRoot: new TreePath([0]),
-      pathToCallBegin: new TreePath([0, 1]),
-      pathToNextChainLink: new TreePath([0, 0]),
+      pathToFirstLink: new TreePath([0]),
+      chainableNodeTypes: {
+        call: {
+          pathToLinkBegin: new TreePath([0, 1]),
+          pathToNextLink: new TreePath([0, 0]),
+        },
+        attribute: {
+          pathToLinkBegin: new TreePath([1]),
+          pathToNextLink: new TreePath([0]),
+        },
+      },
     },
     blocks: {
       blockNodeType: "block",
@@ -35,10 +42,17 @@ const languageConfigs: Record<Language, LanguageConfig> = {
       },
     },
     chains: {
-      chainNodeType: "call_expression",
-      pathToCallRoot: new TreePath([0]),
-      pathToCallBegin: new TreePath([0, 1]),
-      pathToNextChainLink: new TreePath([0, 0]),
+      pathToFirstLink: new TreePath([0]),
+      chainableNodeTypes: {
+        call_expression: {
+          pathToLinkBegin: new TreePath([0, 1]),
+          pathToNextLink: new TreePath([0, 0]),
+        },
+        member_expression: {
+          pathToLinkBegin: new TreePath([1]),
+          pathToNextLink: new TreePath([0]),
+        },
+      },
     },
     blocks: {
       blockNodeType: "statement_block",

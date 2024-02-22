@@ -25,10 +25,13 @@ export type AggregatableNodeTypeConfig = {
 export const aggregationPlaceHolder = "__agg__";
 
 export type ChainsConfig = {
-  chainNodeType: string;
-  pathToCallRoot: TreePath;
-  pathToCallBegin: TreePath;
-  pathToNextChainLink: TreePath;
+  pathToFirstLink: TreePath;
+  chainableNodeTypes: Record<string, ChainableNodeTypeConfig>;
+};
+
+export type ChainableNodeTypeConfig = {
+  pathToLinkBegin: TreePath;
+  pathToNextLink: TreePath;
 };
 
 export type BlocksConfig = {

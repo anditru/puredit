@@ -2,7 +2,7 @@ import PatternNode from "./patternNode";
 import AstCursor from "../../ast/cursor";
 import { Language } from "../../config/types";
 import TemplateChain from "../../define/templateChain";
-import { loadChainsConfigFor } from "../../config/load";
+import { loadChainableNodeTypesFor } from "../../config/load";
 
 export default class ChainContinuationNode extends PatternNode {
   static readonly TYPE = "ChainContinuationNode";
@@ -15,8 +15,8 @@ export default class ChainContinuationNode extends PatternNode {
     public readonly templateChain: TemplateChain
   ) {
     super(language, ChainContinuationNode.TYPE, "__chain_continuation_", undefined);
-    const chainsConfig = loadChainsConfigFor(language);
-    this.astNodeTypes = [chainsConfig.chainNodeType, ...startPatternRootNode.getMatchedTypes()];
+    const chainableNodeTypes = loadChainableNodeTypesFor(language);
+    this.astNodeTypes = [...chainableNodeTypes, ...startPatternRootNode.getMatchedTypes()];
   }
 
   getMatchedTypes(): string[] {

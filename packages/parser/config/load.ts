@@ -3,6 +3,7 @@ import type {
   AggregatableNodeTypeConfig,
   AggregationsConfig,
   BlocksConfig,
+  ChainableNodeTypeConfig,
   ChainsConfig,
   Language,
 } from "./types";
@@ -20,6 +21,17 @@ export function loadAggregatableNodeTypeConfigFor(
 
 export function loadChainsConfigFor(language: Language): ChainsConfig {
   return languageConfigs[language].chains;
+}
+
+export function loadChainableNodeTypeConfigFor(
+  language: Language,
+  nodeType: string
+): ChainableNodeTypeConfig {
+  return languageConfigs[language].chains.chainableNodeTypes[nodeType];
+}
+
+export function loadChainableNodeTypesFor(language: Language): string[] {
+  return Object.keys(languageConfigs[language].chains.chainableNodeTypes);
 }
 
 export function loadBlocksConfigFor(language: Language): BlocksConfig {

@@ -2,12 +2,12 @@ import PatternNode from "./patternNode";
 import TemplateChain from "../../define/templateChain";
 import AstCursor from "../../ast/cursor";
 import { Language } from "../../config/types";
-import { loadChainsConfigFor } from "../../config/load";
+import { loadChainableNodeTypesFor } from "../../config/load";
 
 export default class ChainNode extends PatternNode {
   static readonly TYPE = "ChainNode";
 
-  public astNodeType: string;
+  private astNodeTypes: string[];
 
   constructor(
     language: Language,
@@ -16,16 +16,17 @@ export default class ChainNode extends PatternNode {
     public readonly templateChain: TemplateChain
   ) {
     super(language, ChainNode.TYPE, text, fieldName);
-    const chainsConfig = loadChainsConfigFor(language);
-    this.astNodeType = chainsConfig.chainNodeType;
+    this.astNodeTypes = loadChainableNodeTypesFor(language);
   }
 
   getMatchedTypes(): string[] {
-    return [this.astNodeType];
+    return this.astNodeTypes;
   }
 
   matches(astCursor: AstCursor): boolean {
     const astNode = astCursor.currentNode;
-    return this.astNodeType === astNode.type && this.fieldName === astCursor.currentFieldName;
+    return (
+      this.astNodeTypes.includes(astNode.type) && this.fieldName === astCursor.currentFieldName
+    );
   }
 }
