@@ -162,6 +162,8 @@ export default class DecorationSetBuilder {
     }
 
     this.removeWhitespaceFromRanges(ranges, match);
+    ranges = ranges.filter((range) => range.from !== range.to);
+
     if (match.pattern instanceof AggregationDecorator) {
       ranges = this.removeSeparatorTokenRanges(ranges, match);
     }
@@ -189,12 +191,13 @@ export default class DecorationSetBuilder {
 
       const rangeText = match.node.text.slice(relativeFrom, relativeTo);
       let textPointer = 0;
-      while (/\s/g.test(rangeText.charAt(textPointer))) {
+      while (/\s/g.test(rangeText.charAt(textPointer)) && relativeFrom < relativeTo) {
         textPointer++;
         relativeFrom++;
       }
+
       textPointer = rangeText.length - 1;
-      while (/\s/g.test(rangeText.charAt(textPointer))) {
+      while (/\s/g.test(rangeText.charAt(textPointer)) && relativeFrom < relativeTo) {
         textPointer--;
         relativeTo--;
       }
