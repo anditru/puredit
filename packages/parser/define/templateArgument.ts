@@ -18,7 +18,7 @@ export default class TemplateArgument extends TemplateParameter {
   }
 
   toPatternNode(cursor: AstCursor, language: Language) {
-    return new ArgumentNode(language, cursor.currentNode.text, cursor.currentFieldName, this);
+    return new ArgumentNode(cursor.currentNode.text, cursor.currentFieldName, this);
   }
 
   toDraftString(language: Language): string {

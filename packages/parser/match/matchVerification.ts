@@ -151,7 +151,7 @@ export default class MatchVerification {
       context: aggregationNode.templateAggregation.context,
       from: aggregationPartRoot.startIndex,
       to: aggregationPartRoot.endIndex,
-      language: aggregationNode.language,
+      language: this.pattern.language,
     }));
   }
 
@@ -184,7 +184,7 @@ export default class MatchVerification {
       chainDepth++;
       const currentAstNode = this.astCursor.currentNode;
       chainableNodeTypeConfig = loadChainableNodeTypeConfigFor(
-        chainNode.language,
+        this.pattern.language,
         currentAstNode.type
       );
       if (chainableNodeTypeConfig) {
@@ -242,7 +242,7 @@ export default class MatchVerification {
       context: {},
       from,
       to: currentAstNode.endIndex,
-      language: chainNode.language,
+      language: this.pattern.language,
     });
   }
 
@@ -255,7 +255,7 @@ export default class MatchVerification {
       context: {},
       from: currentAstNode.startIndex,
       to: currentAstNode.endIndex,
-      language: chainNode.language,
+      language: this.pattern.language,
     };
   }
 
@@ -302,17 +302,17 @@ export default class MatchVerification {
 
   private extractBlockRangeFor(blockNode: BlockNode, lastSiblingKeyword?: Keyword): CodeRange {
     let from = this.astCursor.startIndex;
-    if (blockNode.language === Language.Python && lastSiblingKeyword?.type === ":") {
+    if (this.pattern.language === Language.Python && lastSiblingKeyword?.type === ":") {
       from = lastSiblingKeyword.pos;
     }
     const rangeModifierStart = 1;
-    const rangeModifierEnd = blockNode.language === Language.TypeScript ? 1 : 0;
+    const rangeModifierEnd = this.pattern.language === Language.TypeScript ? 1 : 0;
     return {
       node: this.astCursor.currentNode,
       context: blockNode.templateBlock.context,
       from: from + rangeModifierStart,
       to: this.astCursor.endIndex - rangeModifierEnd,
-      language: blockNode.language,
+      language: this.pattern.language,
     };
   }
 

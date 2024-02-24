@@ -14,7 +14,7 @@ export default class ChainContinuationNode extends PatternNode {
     startPatternRootNode: PatternNode,
     public readonly templateChain: TemplateChain
   ) {
-    super(language, ChainContinuationNode.TYPE, "__chain_continuation_", undefined);
+    super(ChainContinuationNode.TYPE, "__chain_continuation_", undefined);
     const chainableNodeTypes = loadChainableNodeTypesFor(language);
     this.astNodeTypes = [...chainableNodeTypes, ...startPatternRootNode.getMatchedTypes()];
   }

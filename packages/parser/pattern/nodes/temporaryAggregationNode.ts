@@ -8,13 +8,13 @@ export default class TemporaryAggregationNode extends PatternNode {
   static readonly TYPE = "TemporaryAggregationNode";
 
   constructor(
-    language: Language,
+    private readonly language: Language,
     text: string,
     fieldName: string | undefined,
     public readonly astNodeType: string,
     public readonly templateAggregation: TemplateAggregation
   ) {
-    super(language, TemporaryAggregationNode.TYPE, text, fieldName);
+    super(TemporaryAggregationNode.TYPE, text, fieldName);
   }
 
   toAggregationNode(astNodeType: string, fieldName: string) {

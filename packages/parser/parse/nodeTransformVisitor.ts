@@ -62,7 +62,6 @@ export default class NodeTransformVisitor {
   private transformNonAtomicNode(): PatternNode {
     const patternNodeBuilder = new RegularNodeBuilder();
     patternNodeBuilder
-      .setLanguage(this.language)
       .setType(this.cursor!.currentNode.type)
       .setText(this.cursor!.currentNode.text)
       .setFieldName(this.cursor!.currentFieldName);
@@ -143,7 +142,6 @@ export default class NodeTransformVisitor {
 
   private transformRegularNode() {
     return new RegularNode(
-      this.language,
       this.cursor!.currentNode.type,
       this.cursor!.currentNode.text,
       this.cursor!.currentFieldName

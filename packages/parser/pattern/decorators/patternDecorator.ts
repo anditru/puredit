@@ -1,6 +1,7 @@
 import PatternNode from "../nodes/patternNode";
 import Pattern from "../pattern";
 import TreePath from "../../cursor/treePath";
+import { Language } from "@puredit/language-config";
 
 export default abstract class PatternDecorator implements Pattern {
   constructor(private pattern: Pattern) {}
@@ -23,6 +24,10 @@ export default abstract class PatternDecorator implements Pattern {
 
   get name(): string {
     return this.pattern.name;
+  }
+
+  get language(): Language {
+    return this.pattern.language;
   }
 
   get priority(): number {

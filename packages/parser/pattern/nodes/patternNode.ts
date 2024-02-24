@@ -1,5 +1,4 @@
 import AstCursor from "../../ast/cursor";
-import { Language } from "@puredit/language-config";
 import { Context } from "../../match/types";
 
 export default abstract class PatternNode {
@@ -7,7 +6,6 @@ export default abstract class PatternNode {
   private _parent: PatternNode | null | undefined;
 
   constructor(
-    public readonly language: Language,
     public type: string,
     public readonly text: string,
     fieldName: string | undefined,

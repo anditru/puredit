@@ -209,7 +209,7 @@ export default class DecorationSetBuilder {
 
   private removeSeparatorTokenRanges(ranges: Range[], match: Match) {
     const aggregatableNodeTypes = loadAggregationsConfigFor(
-      match.pattern.rootNode.language
+      match.pattern.language
     ).aggregatableNodeTypes;
     const separatorTokens = Object.values(aggregatableNodeTypes).reduce(
       (separatorTokens: string[], nodeTypeConfig: AggregatableNodeTypeConfig) => {

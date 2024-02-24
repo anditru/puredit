@@ -7,12 +7,11 @@ export default class ArgumentNode extends PatternNode {
   static readonly TYPE: string = "ArgumentNode";
 
   constructor(
-    language: Language,
     text: string,
     fieldName: string | undefined,
     public readonly templateArgument: TemplateArgument
   ) {
-    super(language, ArgumentNode.TYPE, text, fieldName);
+    super(ArgumentNode.TYPE, text, fieldName);
   }
 
   getMatchedTypes(): string[] {

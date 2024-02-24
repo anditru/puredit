@@ -5,13 +5,12 @@ import PatternNode from "./patternNode";
 
 export default class RegularNode extends PatternNode {
   constructor(
-    language: Language,
     type: string,
     text: string,
     fieldName: string | undefined,
     children: PatternNode[] = []
   ) {
-    super(language, type, text, fieldName, children);
+    super(type, text, fieldName, children);
   }
 
   getMatchedTypes(): string[] {
@@ -31,16 +30,10 @@ export default class RegularNode extends PatternNode {
 }
 
 export class RegularNodeBuilder {
-  private _language: Language | undefined;
   private _type: string | undefined;
   private _text: string | undefined;
   private _fieldName: string | null | undefined;
   private _children: PatternNode[] = [];
-
-  setLanguage(language: Language): RegularNodeBuilder {
-    this._language = language;
-    return this;
-  }
 
   setType(type: string): RegularNodeBuilder {
     this._type = type;
@@ -63,13 +56,7 @@ export class RegularNodeBuilder {
   }
 
   buildAndSetParentOnChildren() {
-    const regularNode = new RegularNode(
-      this._language!,
-      this._type!,
-      this._text!,
-      this._fieldName!,
-      this._children
-    );
+    const regularNode = new RegularNode(this._type!, this._text!, this._fieldName!, this._children);
     this._children.forEach((child) => (child.parent = regularNode));
     return regularNode;
   }

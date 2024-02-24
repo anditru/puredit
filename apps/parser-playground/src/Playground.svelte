@@ -35,7 +35,7 @@
   const matchStrings = matches.map((match) => matchToString(match)).join("\n");
 </script>
 
-<pre>{syntaxNodeToString(new AstNode(snippetNode), snippet)}</pre>
+<pre>{syntaxNodeToString(new AstNode(snippetNode), parser.language)}</pre>
 <pre>{matchStrings}</pre>
 
 <style>

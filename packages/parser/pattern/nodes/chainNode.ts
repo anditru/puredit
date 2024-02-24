@@ -15,7 +15,7 @@ export default class ChainNode extends PatternNode {
     fieldName: string | undefined,
     public readonly templateChain: TemplateChain
   ) {
-    super(language, ChainNode.TYPE, text, fieldName);
+    super(ChainNode.TYPE, text, fieldName);
     this.astNodeTypes = loadChainableNodeTypesFor(language);
   }
 

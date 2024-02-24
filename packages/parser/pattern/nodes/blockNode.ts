@@ -15,7 +15,7 @@ export default class BlockNode extends PatternNode {
     fieldName: string | undefined,
     public readonly templateBlock: TemplateBlock
   ) {
-    super(language, BlockNode.TYPE, text, fieldName);
+    super(BlockNode.TYPE, text, fieldName);
     const blocksConfig = loadBlocksConfigFor(language);
     this.astNodeType = blocksConfig.blockNodeType;
   }

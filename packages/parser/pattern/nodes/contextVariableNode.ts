@@ -6,13 +6,12 @@ import RegularNode from "./regularNode";
 
 export default class ContextVariableNode extends RegularNode {
   constructor(
-    language: Language,
     type: string,
     text: string,
     fieldName: string | undefined,
     public readonly templateContextVariable: TemplateContextVariable
   ) {
-    super(language, type, text, fieldName);
+    super(type, text, fieldName);
   }
 
   getMatchedTypes(): string[] {
