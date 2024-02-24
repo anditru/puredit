@@ -17,6 +17,13 @@ export function loadAggregationsConfigFor(language: Language): AggregationsConfi
   return languageConfigs[language].aggregations;
 }
 
+export function loadAggregationDelimiterTokensFor(language: Language): string[] {
+  const aggregationsConfig = loadAggregationsConfigFor(language);
+  return Object.values(aggregationsConfig.aggregatableNodeTypes).map(
+    (aggregatableNodeTypeConfig) => aggregatableNodeTypeConfig.delimiterToken
+  );
+}
+
 export function loadAggregatableNodeTypeConfigFor(
   language: Language,
   nodeType: string

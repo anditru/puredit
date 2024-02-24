@@ -5,10 +5,13 @@ import { zip } from "@puredit/utils";
 import type { Match, Pattern } from "@puredit/parser";
 import type { CodeRange, Context } from "@puredit/parser/match/types";
 import type { Projection, ProjectionPluginConfig, RootProjection, SubProjection } from "../types";
-import type Template from "@puredit/parser/define/template";
+import type { Template } from "@puredit/parser";
 import type { ProjectionWidgetClass } from "../projection";
 import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
-import { loadAggregationsConfigFor } from "@puredit/language-config";
+import {
+  loadAggregationDelimiterTokensFor,
+  loadAggregationsConfigFor,
+} from "@puredit/language-config";
 import type { AggregatableNodeTypeConfig } from "@puredit/language-config";
 
 export default class DecorationSetBuilder {
@@ -189,15 +192,24 @@ export default class DecorationSetBuilder {
       let relativeFrom = range.from - match.node.startIndex;
       let relativeTo = range.to - match.node.startIndex;
 
+      const delimiterTokens = loadAggregationDelimiterTokensFor(match.pattern.language);
       const rangeText = match.node.text.slice(relativeFrom, relativeTo);
       let textPointer = 0;
-      while (/\s/g.test(rangeText.charAt(textPointer)) && relativeFrom < relativeTo) {
+      while (
+        (/\s/g.test(rangeText.charAt(textPointer)) ||
+          delimiterTokens.includes(rangeText.charAt(textPointer))) &&
+        relativeFrom < relativeTo
+      ) {
         textPointer++;
         relativeFrom++;
       }
 
       textPointer = rangeText.length - 1;
-      while (/\s/g.test(rangeText.charAt(textPointer)) && relativeFrom < relativeTo) {
+      while (
+        (/\s/g.test(rangeText.charAt(textPointer)) ||
+          delimiterTokens.includes(rangeText.charAt(textPointer))) &&
+        relativeFrom < relativeTo
+      ) {
         textPointer--;
         relativeTo--;
       }

@@ -1,6 +1,7 @@
 import Pattern from "./pattern/pattern";
 import PatternNode from "./pattern/nodes/patternNode";
 import TreePath from "./cursor/treePath";
+import Template from "./template/template";
 
 export type { SyntaxNode } from "web-tree-sitter";
 export { Parser } from "./parse/internal";
@@ -9,4 +10,4 @@ export { PatternMatching } from "./match/patternMatching";
 export { createPatternMap } from "./common";
 export type { PatternMap, AstNodeMap, Match, Context } from "./match/types";
 export type { Pattern, PatternNode };
-export { TreePath };
+export { Template, TreePath };
