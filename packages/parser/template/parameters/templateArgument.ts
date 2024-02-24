@@ -1,6 +1,6 @@
-import AstCursor from "../ast/cursor";
+import AstCursor from "../../ast/cursor";
 import { Language, loadArgumentsConfigFor, typePlaceHolder } from "@puredit/language-config";
-import ArgumentNode from "../pattern/nodes/argumentNode";
+import ArgumentNode from "../../pattern/nodes/argumentNode";
 import TemplateParameter from "./templateParameter";
 
 export default class TemplateArgument extends TemplateParameter {

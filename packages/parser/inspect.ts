@@ -9,7 +9,7 @@ import type { AstNodeMap, Match } from "./match/types";
 import AstNode from "./ast/node";
 import PatternNode from "./pattern/nodes/patternNode";
 import { Language } from "@puredit/language-config";
-import Template from "./define/template";
+import Template from "./template/template";
 
 export function patternToString(node: PatternNode, indent = ""): string {
   let out = indent + (node.fieldName ? node.fieldName + ": " : "") + node.type;

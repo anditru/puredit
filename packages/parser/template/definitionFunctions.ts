@@ -4,12 +4,12 @@
  */
 
 import { Context } from "../match/types";
-import TemplateAggregation from "./templateAggregation";
-import TemplateArgument from "./templateArgument";
-import TemplateBlock from "./templateBlock";
-import TemplateContextVariable from "./templateContextVariable";
+import TemplateAggregation from "./parameters/templateAggregation";
+import TemplateArgument from "./parameters/templateArgument";
+import TemplateBlock from "./parameters/templateBlock";
+import TemplateContextVariable from "./parameters/templateContextVariable";
 import Template from "./template";
-import TemplateChain from "./templateChain";
+import TemplateChain from "./parameters/templateChain";
 
 /**
  * Defines a TemplateArgument

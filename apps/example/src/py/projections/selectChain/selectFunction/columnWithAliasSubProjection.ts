@@ -13,8 +13,8 @@ export const columnWithAlias = pythonParser.subPattern(
 const widget = svelteProjection(ColumnWithAliasSubProjection);
 
 export const columnWithAliasSubProjection: SubProjection = {
-  name: "Column",
-  description: "Column to select from a table",
+  name: "Column with alias",
+  description: "Column with alias to select from a table",
   pattern: columnWithAlias,
   requiredContextVariables: [],
   segmentWidgets: [widget],

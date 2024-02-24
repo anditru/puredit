@@ -1,5 +1,5 @@
-import TemplateParameter from "../define/templateParameter";
-import Template from "../define/template";
+import TemplateParameter from "../template/parameters/templateParameter";
+import Template from "../template/template";
 import type { TreeSitterParser } from "../treeSitterParser";
 import { createTreeSitterParser } from "../treeSitterParser";
 import { Language } from "@puredit/language-config";

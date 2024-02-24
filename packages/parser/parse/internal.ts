@@ -1,12 +1,12 @@
 import PatternGeneration from "./patternGeneration";
-import AggregationPatternsGeneration from "./aggregationPatternsGeneration";
+import AggregationPartPatternsGeneration from "./aggregationPartPatternsGeneration";
 import ChainLinkPatternsGeneration from "./chainLinkPatternsGeneration";
 import CompletePatternGeneration from "./completePatternGeneration";
 import NodeTransformVisitor from "./nodeTransformVisitor";
 import Parser from "./parser";
 
 export {
-  AggregationPatternsGeneration,
+  AggregationPartPatternsGeneration as AggregationPatternsGeneration,
   ChainLinkPatternsGeneration,
   CompletePatternGeneration,
   PatternGeneration,

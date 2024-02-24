@@ -1,5 +1,5 @@
 import PatternNode from "./patternNode";
-import TemplateAggregation from "../../define/templateAggregation";
+import TemplateAggregation from "../../template/parameters/templateAggregation";
 import AstCursor from "../../ast/cursor";
 import { Language } from "@puredit/language-config";
 import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";

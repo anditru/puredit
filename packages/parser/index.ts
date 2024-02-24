@@ -4,7 +4,7 @@ import TreePath from "./cursor/treePath";
 
 export type { SyntaxNode } from "web-tree-sitter";
 export { Parser } from "./parse/internal";
-export { arg, agg, chain, block, contextVariable } from "./define/definitionFunctions";
+export { arg, agg, chain, block, contextVariable } from "./template/definitionFunctions";
 export { PatternMatching } from "./match/patternMatching";
 export { createPatternMap } from "./common";
 export type { PatternMap, AstNodeMap, Match, Context } from "./match/types";

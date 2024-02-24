@@ -1,7 +1,8 @@
 import PatternNode from "./nodes/patternNode";
 import Pattern from "./pattern";
 import TreePath from "../cursor/treePath";
-import Template from "../define/template";
+import Template from "../template/template";
+import { Language } from "@puredit/language-config";
 
 export default class BasePattern implements Pattern {
   private numberOfLeafNodes: number;
@@ -73,7 +74,7 @@ export default class BasePattern implements Pattern {
     return this._name;
   }
 
-  get language(): string {
+  get language(): Language {
     return this.template.language;
   }
 

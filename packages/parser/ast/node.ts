@@ -1,10 +1,10 @@
 import type { SyntaxNode } from "web-tree-sitter";
-import TemplateArgument from "../define/templateArgument";
-import TemplateAggregation from "../define/templateAggregation";
-import TemplateBlock from "../define/templateBlock";
-import TemplateContextVariable from "../define/templateContextVariable";
+import TemplateArgument from "../template/parameters/templateArgument";
+import TemplateAggregation from "../template/parameters/templateAggregation";
+import TemplateBlock from "../template/parameters/templateBlock";
+import TemplateContextVariable from "../template/parameters/templateContextVariable";
 import AstCursor from "./cursor";
-import TemplateChain from "../define/templateChain";
+import TemplateChain from "../template/parameters/templateChain";
 
 export default class AstNode {
   constructor(private readonly syntaxNode: SyntaxNode) {}

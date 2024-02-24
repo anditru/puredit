@@ -1,7 +1,7 @@
 import { TreeSitterParser } from "../treeSitterParser";
 import AstCursor from "../ast/cursor";
-import Template from "../define/template";
-import TemplateAggregation from "../define/templateAggregation";
+import Template from "../template/template";
+import TemplateAggregation from "../template/parameters/templateAggregation";
 import PatternNode from "../pattern/nodes/patternNode";
 import Pattern from "../pattern/pattern";
 import AggregationDecorator from "../pattern/decorators/aggregationDecorator";

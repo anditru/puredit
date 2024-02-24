@@ -6,7 +6,7 @@ export default abstract class PatternNode {
   private _parent: PatternNode | null | undefined;
 
   constructor(
-    public type: string,
+    public readonly type: string,
     public readonly text: string,
     fieldName: string | undefined,
     public readonly children: PatternNode[] = []

@@ -1,7 +1,7 @@
 import { ChangeSet, EditorSelection, EditorState } from "@codemirror/state";
 import type { ChangeSpec } from "@codemirror/state";
 import { ProjectionWidget } from "./projection";
-import { projectionState } from "./state";
+import { projectionState } from "./state/state";
 
 export const transactionFilter = EditorState.transactionFilter.of((tr) => {
   const { decorations } = tr.startState.field(projectionState);
@@ -20,10 +20,7 @@ export const transactionFilter = EditorState.transactionFilter.of((tr) => {
     // filtering insertion directly before or after a decoration.
     decorations.between(from + 1, to - 1, (fromDec, toDec, dec) => {
       const widget: ProjectionWidget = dec.spec.widget;
-      if (
-        (from === fromDec && to === from + 1) ||
-        (to === toDec && from === to - 1)
-      ) {
+      if ((from === fromDec && to === from + 1) || (to === toDec && from === to - 1)) {
         change.from = widget.match.node.startIndex;
         change.to = widget.match.node.endIndex;
         Object.assign(tr, {
@@ -44,21 +41,13 @@ export const transactionFilter = EditorState.transactionFilter.of((tr) => {
   }, true);
   if (modifyChanges) {
     Object.assign(tr, {
-      changes: ChangeSet.of(
-        changes,
-        tr.changes.length,
-        tr.startState.lineBreak
-      ),
+      changes: ChangeSet.of(changes, tr.changes.length, tr.startState.lineBreak),
     });
   }
 
   // Handle cursor movements into projections
   const { selection } = tr;
-  if (
-    !modifyChanges &&
-    selection?.ranges.length === 1 &&
-    selection.main.empty
-  ) {
+  if (!modifyChanges && selection?.ranges.length === 1 && selection.main.empty) {
     const pos = selection.main.anchor;
     const assoc = selection.main.assoc;
     // Find decorations that _contain_ the cursor (hence the +/- 1),

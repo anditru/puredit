@@ -1,7 +1,7 @@
 import { isString } from "@puredit/utils";
-import TemplateParameter from "./templateParameter";
-import TemplateAggregation from "./templateAggregation";
-import TemplateChain from "./templateChain";
+import TemplateParameter from "./parameters/templateParameter";
+import TemplateAggregation from "./parameters/templateAggregation";
+import TemplateChain from "./parameters/templateChain";
 import { Language } from "@puredit/language-config";
 
 export default class Template {
@@ -42,15 +42,13 @@ export default class Template {
   }
 
   toDraftString(): string {
-    return String.raw(
-      this.templateStrings,
-      this.params.map((param) => {
-        if (typeof param === "string") {
-          return param;
-        } else {
-          return param.toDraftString(this.language);
-        }
-      })
-    );
+    const substitutions = this.params.map((param) => {
+      if (isString(param)) {
+        return param;
+      } else {
+        return param.toDraftString(this.language);
+      }
+    });
+    return String.raw(this.templateStrings, ...substitutions);
   }
 }

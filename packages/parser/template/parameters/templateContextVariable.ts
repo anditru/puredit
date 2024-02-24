@@ -1,7 +1,7 @@
-import AstCursor from "../ast/cursor";
+import AstCursor from "../../ast/cursor";
 import { Language } from "@puredit/language-config";
-import ContextVariableNode from "../pattern/nodes/contextVariableNode";
-import PatternNode from "../pattern/nodes/patternNode";
+import ContextVariableNode from "../../pattern/nodes/contextVariableNode";
+import PatternNode from "../../pattern/nodes/patternNode";
 import TemplateParameter from "./templateParameter";
 
 export default class TemplateContextVariable extends TemplateParameter {

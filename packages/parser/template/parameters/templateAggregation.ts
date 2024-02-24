@@ -1,10 +1,10 @@
-import AstCursor from "../ast/cursor";
-import Template from "./template";
-import { Context } from "../match/types";
+import AstCursor from "../../ast/cursor";
+import Template from "../template";
+import { Context } from "../../match/types";
 import TemplateParameter from "./templateParameter";
-import PatternNode from "../pattern/nodes/patternNode";
+import PatternNode from "../../pattern/nodes/patternNode";
 import { Language } from "@puredit/language-config";
-import TemporaryAggregationNode from "../pattern/nodes/temporaryAggregationNode";
+import TemporaryAggregationNode from "../../pattern/nodes/temporaryAggregationNode";
 
 export default class TemplateAggregation extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_agg_";

@@ -1,9 +1,9 @@
-import AstCursor from "../ast/cursor";
-import Template from "./template";
-import { Context } from "../match/types";
+import AstCursor from "../../ast/cursor";
+import Template from "../template";
+import { Context } from "../../match/types";
 import TemplateParameter from "./templateParameter";
-import PatternNode from "../pattern/nodes/patternNode";
-import ChainNode from "../pattern/nodes/chainNode";
+import PatternNode from "../../pattern/nodes/patternNode";
+import ChainNode from "../../pattern/nodes/chainNode";
 import { Language } from "@puredit/language-config";
 
 export default class TemplateChain extends TemplateParameter {

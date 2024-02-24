@@ -6,14 +6,14 @@ import PatternNode from "../pattern/nodes/patternNode";
 import { AggregatableNodeTypeConfig, aggregationPlaceHolder } from "@puredit/language-config";
 import { PatternGeneration, NodeTransformVisitor } from "./internal";
 
-export default class AggregationPatternsGeneration extends PatternGeneration {
+export default class AggregationPartPatternsGeneration extends PatternGeneration {
   private nodeTypeConfig: AggregatableNodeTypeConfig | undefined;
 
   constructor(parser: TreeSitterParser) {
     super(parser);
   }
 
-  setNodeTypeConfig(nodeTypeConfig: AggregatableNodeTypeConfig): AggregationPatternsGeneration {
+  setNodeTypeConfig(nodeTypeConfig: AggregatableNodeTypeConfig): AggregationPartPatternsGeneration {
     this.nodeTypeConfig = nodeTypeConfig;
     return this;
   }

@@ -1,5 +1,5 @@
 import PatternNode from "./patternNode";
-import TemplateBlock from "../../define/templateBlock";
+import TemplateBlock from "../../template/parameters/templateBlock";
 import AstCursor from "../../ast/cursor";
 import { Language } from "@puredit/language-config";
 import { loadBlocksConfigFor } from "@puredit/language-config";

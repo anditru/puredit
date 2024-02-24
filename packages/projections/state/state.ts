@@ -3,8 +3,8 @@ import { Decoration, EditorView } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { createPatternMap, PatternMatching } from "@puredit/parser";
 import { pickedCompletion } from "@codemirror/autocomplete";
-import type { ContextRange, PatternMap, PatternsMap } from "@puredit/parser/match/types";
-import type { ProjectionPluginConfig } from "./types";
+import type { ContextRange, PatternsMap } from "@puredit/parser/match/types";
+import type { ProjectionPluginConfig } from "../types";
 import DecorationSetBuilder from "./decorationSetBuilder";
 
 export interface ProjectionState {

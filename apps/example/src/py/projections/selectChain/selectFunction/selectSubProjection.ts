@@ -11,9 +11,7 @@ import { columnChain } from "../../columnChain/columnChainProjection";
 const columnChainPattern = pythonParser.subPattern("columnChainSubPattern")`${columnChain}`;
 
 const columns = agg("columns", [column, columnWithAlias, columnChainPattern]);
-export const selectFunction = pythonParser.subPattern("selectFunction")`
-select(${columns})
-`;
+export const selectFunction = pythonParser.subPattern("selectFunction")`select(${columns})`;
 
 export const widget = svelteProjection(SelectSubProjection);
 export const emptyWidget = svelteProjection(EmptyWidget);

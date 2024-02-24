@@ -6,7 +6,7 @@ import PatternCursor from "../pattern/cursor";
 import { ChainsConfig } from "@puredit/language-config";
 import { loadChainableNodeTypeConfigFor, loadChainsConfigFor } from "@puredit/language-config";
 import { NodeTransformVisitor, PatternGeneration } from "./internal";
-import TemplateChain from "../define/templateChain";
+import TemplateChain from "../template/parameters/templateChain";
 import ChainContinuationNode from "../pattern/nodes/chainContinuationNode";
 
 export default class ChainLinkPatternsGeneration extends PatternGeneration {

@@ -1,8 +1,8 @@
-import AstCursor from "../ast/cursor";
-import { Context } from "../match/types";
+import AstCursor from "../../ast/cursor";
+import { Context } from "../../match/types";
 import TemplateParameter from "./templateParameter";
-import PatternNode from "../pattern/nodes/patternNode";
-import BlockNode from "../pattern/nodes/blockNode";
+import PatternNode from "../../pattern/nodes/patternNode";
+import BlockNode from "../../pattern/nodes/blockNode";
 import { Language, loadBlocksConfigFor } from "@puredit/language-config";
 
 export default class TemplateBlock extends TemplateParameter {

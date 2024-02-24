@@ -6,7 +6,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
     arguments: {
       draftTypeMapping: {
         string: `""`,
-        number: "1",
+        integer: "1",
         list: "[]",
         default: "__empty_<type>",
       },

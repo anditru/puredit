@@ -1,6 +1,6 @@
 import AstCursor from "../../ast/cursor";
 import { Language } from "@puredit/language-config";
-import TemplateContextVariable from "../../define/templateContextVariable";
+import TemplateContextVariable from "../../template/parameters/templateContextVariable";
 import { Context } from "../../match/types";
 import RegularNode from "./regularNode";
 

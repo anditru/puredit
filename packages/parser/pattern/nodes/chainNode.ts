@@ -1,5 +1,5 @@
 import PatternNode from "./patternNode";
-import TemplateChain from "../../define/templateChain";
+import TemplateChain from "../../template/parameters/templateChain";
 import AstCursor from "../../ast/cursor";
 import { Language } from "@puredit/language-config";
 import { loadChainableNodeTypesFor } from "@puredit/language-config";

@@ -1,4 +1,4 @@
-import TemplateArgument from "../../define/templateArgument";
+import TemplateArgument from "../../template/parameters/templateArgument";
 import PatternNode from "./patternNode";
 import AstCursor from "../../ast/cursor";
 import { Language } from "@puredit/language-config";

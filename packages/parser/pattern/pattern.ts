@@ -1,6 +1,6 @@
 import PatternNode from "./nodes/patternNode";
 import TreePath from "../cursor/treePath";
-import Template from "../define/template";
+import Template from "../template/template";
 import { Language } from "@puredit/language-config";
 
 export default interface Pattern {

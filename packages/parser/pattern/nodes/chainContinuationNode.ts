@@ -1,7 +1,7 @@
 import PatternNode from "./patternNode";
 import AstCursor from "../../ast/cursor";
 import { Language } from "@puredit/language-config";
-import TemplateChain from "../../define/templateChain";
+import TemplateChain from "../../template/parameters/templateChain";
 import { loadChainableNodeTypesFor } from "@puredit/language-config";
 
 export default class ChainContinuationNode extends PatternNode {

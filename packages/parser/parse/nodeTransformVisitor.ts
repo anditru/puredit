@@ -1,12 +1,12 @@
 import { isString } from "@puredit/utils";
 import AstCursor from "../ast/cursor";
-import TemplateParameter from "../define/templateParameter";
-import TemplateAggregation from "../define/templateAggregation";
-import TemplateChain from "../define/templateChain";
+import TemplateParameter from "../template/parameters/templateParameter";
+import TemplateAggregation from "../template/parameters/templateAggregation";
+import TemplateChain from "../template/parameters/templateChain";
 import PatternNode from "../pattern/nodes/patternNode";
 import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
 import TemporaryAggregationNode from "../pattern/nodes/temporaryAggregationNode";
-import Template from "../define/template";
+import Template from "../template/template";
 import { Language } from "@puredit/language-config";
 
 export default class NodeTransformVisitor {

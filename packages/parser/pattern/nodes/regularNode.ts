@@ -1,5 +1,4 @@
 import AstCursor from "../../ast/cursor";
-import { Language } from "@puredit/language-config";
 import { Context } from "../../match/types";
 import PatternNode from "./patternNode";
 

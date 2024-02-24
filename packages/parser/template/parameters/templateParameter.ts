@@ -1,6 +1,6 @@
-import AstCursor from "../ast/cursor";
+import AstCursor from "../../ast/cursor";
 import { Language } from "@puredit/language-config";
-import PatternNode from "../pattern/nodes/patternNode";
+import PatternNode from "../../pattern/nodes/patternNode";
 
 export default abstract class TemplateParameter {
   private static highestId = -1;
