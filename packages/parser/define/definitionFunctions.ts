@@ -8,7 +8,7 @@ import TemplateAggregation from "./templateAggregation";
 import TemplateArgument from "./templateArgument";
 import TemplateBlock from "./templateBlock";
 import TemplateContextVariable from "./templateContextVariable";
-import RawTemplate from "./rawTemplate";
+import Template from "./template";
 import TemplateChain from "./templateChain";
 
 /**
@@ -30,7 +30,7 @@ export function arg(name: string, types: string[]): TemplateArgument {
  */
 export function agg(
   name: string,
-  subPatterns: RawTemplate[],
+  subPatterns: Template[],
   context: Context = {}
 ): TemplateAggregation {
   return new TemplateAggregation(name, subPatterns, context);
@@ -46,8 +46,8 @@ export function agg(
  */
 export function chain(
   name: string,
-  startPattern: RawTemplate,
-  linkPatterns: RawTemplate[],
+  startPattern: Template,
+  linkPatterns: Template[],
   context: Context = {}
 ): TemplateChain {
   return new TemplateChain(name, startPattern, linkPatterns, context);

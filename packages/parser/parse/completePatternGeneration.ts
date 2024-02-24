@@ -9,16 +9,16 @@ export default class CompletePatternGeneration extends PatternGeneration {
   }
 
   execute(): Pattern {
-    this.nodeTransformVisitor = new NodeTransformVisitor(this.rawTemplate!);
+    this.nodeTransformVisitor = new NodeTransformVisitor(this.template!);
 
-    const codeString = this.rawTemplate!.toCodeString();
+    const codeString = this.template!.toCodeString();
     const rootNode = this.transformToPatternTree(codeString);
-    let pattern = new BasePattern(rootNode, this.rawTemplate!) as Pattern;
+    let pattern = new BasePattern(rootNode, this.template!) as Pattern;
 
-    if (this.rawTemplate!.hasAggregations()) {
+    if (this.template!.hasAggregations()) {
       pattern = this.buildAggregationSubPatterns(pattern);
     }
-    if (this.rawTemplate!.hasChains()) {
+    if (this.template!.hasChains()) {
       pattern = this.buildChainSubPatterns(pattern);
     }
 

@@ -1,6 +1,6 @@
 import { TreeSitterParser } from "../treeSitterParser";
 import AstCursor from "../ast/cursor";
-import RawTemplate from "../define/rawTemplate";
+import Template from "../define/template";
 import TemplateAggregation from "../define/templateAggregation";
 import PatternNode from "../pattern/nodes/patternNode";
 import Pattern from "../pattern/pattern";
@@ -19,7 +19,7 @@ import {
 import AggregationNode from "../pattern/nodes/aggregationNode";
 
 export default abstract class PatternGeneration {
-  protected rawTemplate: RawTemplate | undefined;
+  protected template: Template | undefined;
   protected isExpression: boolean | undefined;
   protected nodeTransformVisitor: NodeTransformVisitor | undefined;
 
@@ -30,8 +30,8 @@ export default abstract class PatternGeneration {
     return this;
   }
 
-  setRawTemplate(rawTemplate: RawTemplate): PatternGeneration {
-    this.rawTemplate = rawTemplate;
+  setTemplate(template: Template): PatternGeneration {
+    this.template = template;
     return this;
   }
 
@@ -51,11 +51,11 @@ export default abstract class PatternGeneration {
 
   protected buildAggregationSubPatterns(pattern: Pattern): AggregationDecorator {
     const aggregationPatternMap: PatternsMap = {};
-    const aggregations = this.rawTemplate!.getAggregations();
+    const aggregations = this.template!.getAggregations();
     for (const aggregation of aggregations) {
       const aggregatedNodeType = this.getAggregatedNodeType(pattern, aggregation);
       const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(
-        this.rawTemplate!.language,
+        this.template!.language,
         aggregatedNodeType
       );
       const aggregationSubPatterns = aggregation.subPatterns.map((subTemplate) => {
@@ -63,7 +63,7 @@ export default abstract class PatternGeneration {
         return aggregationPatternsGeneration
           .setNodeTypeConfig(nodeTypeConfig)
           .setIsExpression(false)
-          .setRawTemplate(subTemplate)
+          .setTemplate(subTemplate)
           .execute();
       });
       aggregationPatternMap[aggregation.name] = aggregationSubPatterns;
@@ -83,12 +83,12 @@ export default abstract class PatternGeneration {
   protected buildChainSubPatterns(pattern: Pattern): ChainDecorator {
     const startPatternMap: PatternMap = {};
     const linkPatternMap: PatternsMap = {};
-    const chains = this.rawTemplate!.getChains();
+    const chains = this.template!.getChains();
     for (const chain of chains) {
       const startPatternGeneration = new CompletePatternGeneration(this.parser);
       const startPattern = startPatternGeneration
         .setIsExpression(true)
-        .setRawTemplate(chain.startPattern)
+        .setTemplate(chain.startPattern)
         .execute();
 
       const linkPatterns = chain.linkPatterns.map((linkTemplate) => {
@@ -97,7 +97,7 @@ export default abstract class PatternGeneration {
           .setTemplateChain(chain)
           .setStartPatternRootNode(startPattern.rootNode)
           .setIsExpression(false)
-          .setRawTemplate(linkTemplate)
+          .setTemplate(linkTemplate)
           .execute();
       });
       startPatternMap[chain.name] = startPattern;

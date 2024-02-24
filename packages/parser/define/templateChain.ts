@@ -1,5 +1,5 @@
 import AstCursor from "../ast/cursor";
-import RawTemplate from "./rawTemplate";
+import Template from "./template";
 import { Context } from "../match/types";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../pattern/nodes/patternNode";
@@ -11,8 +11,8 @@ export default class TemplateChain extends TemplateParameter {
 
   constructor(
     public readonly name: string,
-    public readonly startPattern: RawTemplate,
-    public readonly linkPatterns: RawTemplate[],
+    public readonly startPattern: Template,
+    public readonly linkPatterns: Template[],
     public readonly context: Context = {}
   ) {
     super();

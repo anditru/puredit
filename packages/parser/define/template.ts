@@ -4,11 +4,11 @@ import TemplateAggregation from "./templateAggregation";
 import TemplateChain from "./templateChain";
 import { Language } from "@puredit/language-config";
 
-export default class RawTemplate {
+export default class Template {
   constructor(
     public readonly name: string,
     public readonly language: Language,
-    public readonly template: TemplateStringsArray,
+    public readonly templateStrings: TemplateStringsArray,
     public readonly params: (string | TemplateParameter)[]
   ) {}
 
@@ -38,12 +38,12 @@ export default class RawTemplate {
         return param.toCodeString();
       }
     });
-    return String.raw(this.template!, ...substitutions);
+    return String.raw(this.templateStrings!, ...substitutions);
   }
 
   toDraftString(): string {
     return String.raw(
-      this.template,
+      this.templateStrings,
       this.params.map((param) => {
         if (typeof param === "string") {
           return param;

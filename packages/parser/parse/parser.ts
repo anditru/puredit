@@ -1,5 +1,5 @@
 import TemplateParameter from "../define/templateParameter";
-import RawTemplate from "../define/rawTemplate";
+import Template from "../define/template";
 import type { TreeSitterParser } from "../treeSitterParser";
 import { createTreeSitterParser } from "../treeSitterParser";
 import { Language } from "@puredit/language-config";
@@ -31,11 +31,11 @@ export default class Parser {
   /**
    * Parses an aggregation subpattern
    * @param name Name of the aggregation subpattern
-   * @returns RawTemplate
+   * @returns Template
    */
   subPattern(name: string) {
-    return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
-      return new RawTemplate(name, this.language, template, params);
+    return (templateStrings: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
+      return new Template(name, this.language, templateStrings, params);
     };
   }
 
@@ -45,9 +45,9 @@ export default class Parser {
    * @returns Pattern
    */
   statementPattern(name: string) {
-    return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
-      const rawTemplate = new RawTemplate(name, this.language, template, params);
-      return this.patternGeneration.setRawTemplate(rawTemplate).setIsExpression(false).execute();
+    return (templateStrings: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
+      const template = new Template(name, this.language, templateStrings, params);
+      return this.patternGeneration.setTemplate(template).setIsExpression(false).execute();
     };
   }
 
@@ -57,9 +57,9 @@ export default class Parser {
    * @returns Pattern
    */
   expressionPattern(name: string) {
-    return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
-      const rawTemplate = new RawTemplate(name, this.language, template, params);
-      return this.patternGeneration.setRawTemplate(rawTemplate).setIsExpression(true).execute();
+    return (templateStrings: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
+      const template = new Template(name, this.language, templateStrings, params);
+      return this.patternGeneration.setTemplate(template).setIsExpression(true).execute();
     };
   }
 }

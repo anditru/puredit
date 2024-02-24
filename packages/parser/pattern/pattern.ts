@@ -1,12 +1,12 @@
 import PatternNode from "./nodes/patternNode";
 import TreePath from "../cursor/treePath";
-import RawTemplate from "../define/rawTemplate";
+import Template from "../define/template";
 
 export default interface Pattern {
   getTypesMatchedByRootNode(): string[];
   getPathToNodeWithText(text: string): TreePath;
   toDraftString(): string;
-  get template(): RawTemplate;
+  get template(): Template;
   get name(): string;
   get rootNode(): PatternNode;
   get priority(): number;

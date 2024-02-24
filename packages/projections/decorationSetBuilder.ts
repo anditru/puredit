@@ -5,7 +5,7 @@ import { zip } from "@puredit/utils";
 import type { Match, Pattern } from "@puredit/parser";
 import type { CodeRange, Context } from "@puredit/parser/match/types";
 import type { Projection, ProjectionPluginConfig, RootProjection, SubProjection } from "./types";
-import type RawTemplate from "@puredit/parser/define/rawTemplate";
+import type Template from "@puredit/parser/define/template";
 import type { ProjectionWidgetClass } from "./projection";
 import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
 import { loadAggregationsConfigFor } from "@puredit/language-config";
@@ -19,7 +19,7 @@ export default class DecorationSetBuilder {
   private matches: Match[];
 
   private projectionMap: Map<Pattern, RootProjection>;
-  private subProjectionMap: Map<RawTemplate, SubProjection>;
+  private subProjectionMap: Map<Template, SubProjection>;
   private newDecorations = Decoration.none;
   private contextBounds: number[] = [];
   private contexts: object[] = [];

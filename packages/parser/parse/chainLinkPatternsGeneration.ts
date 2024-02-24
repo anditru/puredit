@@ -29,17 +29,17 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
   }
 
   execute(): Pattern {
-    this.chainsConfig = loadChainsConfigFor(this.rawTemplate!.language);
-    this.nodeTransformVisitor = new NodeTransformVisitor(this.rawTemplate!);
+    this.chainsConfig = loadChainsConfigFor(this.template!.language);
+    this.nodeTransformVisitor = new NodeTransformVisitor(this.template!);
 
     const codeString = this.buildCodeString();
     const rootNode = this.transformToPatternTree(codeString);
     let pattern = this.extractChainLinkPattern(rootNode) as Pattern;
 
-    if (this.rawTemplate!.hasAggregations()) {
+    if (this.template!.hasAggregations()) {
       pattern = this.buildAggregationSubPatterns(pattern);
     }
-    if (this.rawTemplate!.hasChains()) {
+    if (this.template!.hasChains()) {
       pattern = this.buildChainSubPatterns(pattern);
     }
 
@@ -47,7 +47,7 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
   }
 
   private buildCodeString(): string {
-    const linkCodeString = this.rawTemplate!.toCodeString();
+    const linkCodeString = this.template!.toCodeString();
     return `a.${linkCodeString}`;
   }
 
@@ -56,7 +56,7 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
 
     linkPatternCursor.follow(this.chainsConfig!.pathToFirstLink);
     const chainableNodeTypeConfig = loadChainableNodeTypeConfigFor(
-      this.rawTemplate!.language,
+      this.template!.language,
       linkPatternCursor.currentNode.type
     );
     linkPatternCursor.reverseFollow(this.chainsConfig!.pathToFirstLink);
@@ -66,7 +66,7 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
 
     linkPatternCursor.follow(pathToNextChainLink.getSliceBeforeLastStep());
     const chainContinuationNode = new ChainContinuationNode(
-      this.rawTemplate!.language,
+      this.template!.language,
       this.startPatternRootNode!,
       this.templateChain!
     );
@@ -76,6 +76,6 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
     linkPatternCursor.follow(this.chainsConfig!.pathToFirstLink);
     const linkRootNode = linkPatternCursor.currentNode.cutOff();
 
-    return new BasePattern(linkRootNode, this.rawTemplate!);
+    return new BasePattern(linkRootNode, this.template!);
   }
 }

@@ -6,7 +6,7 @@ import TemplateChain from "../define/templateChain";
 import PatternNode from "../pattern/nodes/patternNode";
 import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
 import TemporaryAggregationNode from "../pattern/nodes/temporaryAggregationNode";
-import RawTemplate from "../define/rawTemplate";
+import Template from "../define/template";
 import { Language } from "@puredit/language-config";
 
 export default class NodeTransformVisitor {
@@ -14,9 +14,9 @@ export default class NodeTransformVisitor {
   private params: (TemplateParameter | string)[];
   private language: Language;
 
-  constructor(rawTemplate: RawTemplate) {
-    this.params = rawTemplate.params;
-    this.language = rawTemplate.language;
+  constructor(template: Template) {
+    this.params = template.params;
+    this.language = template.language;
   }
 
   visit(cursor: AstCursor): PatternNode[] {
