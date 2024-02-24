@@ -6,18 +6,18 @@ import { Language } from "@puredit/language-config";
 import { CompletePatternGeneration } from "./internal";
 
 export default class Parser {
-  static async load(target: Language): Promise<Parser> {
-    const treeSitterParser = await createTreeSitterParser(target);
-    return new Parser(treeSitterParser, target);
+  static async load(language: Language): Promise<Parser> {
+    const treeSitterParser = await createTreeSitterParser(language);
+    return new Parser(treeSitterParser, language);
   }
 
   patternGeneration: CompletePatternGeneration;
 
   private constructor(
     private treeSitterParser: TreeSitterParser,
-    public readonly target: Language
+    public readonly language: Language
   ) {
-    this.patternGeneration = new CompletePatternGeneration(treeSitterParser, target);
+    this.patternGeneration = new CompletePatternGeneration(treeSitterParser);
   }
 
   parse(
@@ -35,7 +35,7 @@ export default class Parser {
    */
   subPattern(name: string) {
     return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
-      return new RawTemplate(template, params, name);
+      return new RawTemplate(name, this.language, template, params);
     };
   }
 
@@ -46,7 +46,7 @@ export default class Parser {
    */
   statementPattern(name: string) {
     return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
-      const rawTemplate = new RawTemplate(template, params, name);
+      const rawTemplate = new RawTemplate(name, this.language, template, params);
       return this.patternGeneration.setRawTemplate(rawTemplate).setIsExpression(false).execute();
     };
   }
@@ -58,7 +58,7 @@ export default class Parser {
    */
   expressionPattern(name: string) {
     return (template: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
-      const rawTemplate = new RawTemplate(template, params, name);
+      const rawTemplate = new RawTemplate(name, this.language, template, params);
       return this.patternGeneration.setRawTemplate(rawTemplate).setIsExpression(true).execute();
     };
   }

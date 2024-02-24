@@ -37,11 +37,11 @@ export default class TemplateChain extends TemplateParameter {
     return new ChainNode(language, cursor.currentNode.text, cursor.currentFieldName, this);
   }
 
-  toDraftString(language: Language): string {
-    const startDraftString = this.startPattern.toDraftString(language);
+  toDraftString(): string {
+    const startDraftString = this.startPattern.toDraftString();
     const linkDraftPatterns = this.linkPatterns
       .slice(0, 2)
-      .map((linkPattern) => linkPattern.toDraftString(language));
+      .map((linkPattern) => linkPattern.toDraftString());
     return [startDraftString, ...linkDraftPatterns].join(".");
   }
 }

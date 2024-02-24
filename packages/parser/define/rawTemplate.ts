@@ -6,9 +6,10 @@ import { Language } from "@puredit/language-config";
 
 export default class RawTemplate {
   constructor(
+    public readonly name: string,
+    public readonly language: Language,
     public readonly template: TemplateStringsArray,
-    public readonly params: (string | TemplateParameter)[],
-    public readonly name: string
+    public readonly params: (string | TemplateParameter)[]
   ) {}
 
   hasAggregations(): boolean {
@@ -40,14 +41,14 @@ export default class RawTemplate {
     return String.raw(this.template!, ...substitutions);
   }
 
-  toDraftString(language: Language): string {
+  toDraftString(): string {
     return String.raw(
       this.template,
       this.params.map((param) => {
         if (typeof param === "string") {
           return param;
         } else {
-          return param.toDraftString(language);
+          return param.toDraftString(this.language);
         }
       })
     );

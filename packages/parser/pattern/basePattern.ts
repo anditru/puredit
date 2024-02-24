@@ -2,17 +2,12 @@ import PatternNode from "./nodes/patternNode";
 import Pattern from "./pattern";
 import TreePath from "../cursor/treePath";
 import RawTemplate from "../define/rawTemplate";
-import { Language } from "@puredit/language-config";
 
 export default class BasePattern implements Pattern {
   private numberOfLeafNodes: number;
   private _name: string;
 
-  constructor(
-    public readonly rootNode: PatternNode,
-    public readonly template: RawTemplate,
-    public readonly language: Language
-  ) {
+  constructor(public readonly rootNode: PatternNode, public readonly template: RawTemplate) {
     this._name = template.name;
     this.numberOfLeafNodes = this.countLeafNodes();
   }
@@ -71,11 +66,15 @@ export default class BasePattern implements Pattern {
   }
 
   toDraftString(): string {
-    return this.template.toDraftString(this.language);
+    return this.template.toDraftString();
   }
 
   get name(): string {
     return this._name;
+  }
+
+  get language(): string {
+    return this.template.language;
   }
 
   get priority(): number {

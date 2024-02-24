@@ -23,10 +23,7 @@ export default abstract class PatternGeneration {
   protected isExpression: boolean | undefined;
   protected nodeTransformVisitor: NodeTransformVisitor | undefined;
 
-  constructor(
-    protected readonly parser: TreeSitterParser,
-    protected readonly targetLanguage: Language
-  ) {}
+  constructor(protected readonly parser: TreeSitterParser) {}
 
   setIsExpression(isExpression: boolean): PatternGeneration {
     this.isExpression = isExpression;
@@ -58,14 +55,11 @@ export default abstract class PatternGeneration {
     for (const aggregation of aggregations) {
       const aggregatedNodeType = this.getAggregatedNodeType(pattern, aggregation);
       const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(
-        this.targetLanguage,
+        this.rawTemplate!.language,
         aggregatedNodeType
       );
       const aggregationSubPatterns = aggregation.subPatterns.map((subTemplate) => {
-        const aggregationPatternsGeneration = new AggregationPatternsGeneration(
-          this.parser,
-          this.targetLanguage
-        );
+        const aggregationPatternsGeneration = new AggregationPatternsGeneration(this.parser);
         return aggregationPatternsGeneration
           .setNodeTypeConfig(nodeTypeConfig)
           .setIsExpression(false)
@@ -91,20 +85,14 @@ export default abstract class PatternGeneration {
     const linkPatternMap: PatternsMap = {};
     const chains = this.rawTemplate!.getChains();
     for (const chain of chains) {
-      const startPatternGeneration = new CompletePatternGeneration(
-        this.parser,
-        this.targetLanguage
-      );
+      const startPatternGeneration = new CompletePatternGeneration(this.parser);
       const startPattern = startPatternGeneration
         .setIsExpression(true)
         .setRawTemplate(chain.startPattern)
         .execute();
 
       const linkPatterns = chain.linkPatterns.map((linkTemplate) => {
-        const linkPatternGeneration = new ChainLinkPatternsGeneration(
-          this.parser,
-          this.targetLanguage
-        );
+        const linkPatternGeneration = new ChainLinkPatternsGeneration(this.parser);
         return linkPatternGeneration
           .setTemplateChain(chain)
           .setStartPatternRootNode(startPattern.rootNode)

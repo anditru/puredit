@@ -5,17 +5,19 @@ import TemplateAggregation from "../define/templateAggregation";
 import TemplateChain from "../define/templateChain";
 import PatternNode from "../pattern/nodes/patternNode";
 import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
-import AggregationNode from "../pattern/nodes/aggregationNode";
-import { Language } from "@puredit/language-config";
 import TemporaryAggregationNode from "../pattern/nodes/temporaryAggregationNode";
+import RawTemplate from "../define/rawTemplate";
+import { Language } from "@puredit/language-config";
 
 export default class NodeTransformVisitor {
-  cursor: AstCursor | undefined;
+  private cursor: AstCursor | undefined;
+  private params: (TemplateParameter | string)[];
+  private language: Language;
 
-  constructor(
-    public readonly targetLanguage: Language,
-    private params: (string | TemplateParameter)[]
-  ) {}
+  constructor(rawTemplate: RawTemplate) {
+    this.params = rawTemplate.params;
+    this.language = rawTemplate.language;
+  }
 
   visit(cursor: AstCursor): PatternNode[] {
     this.cursor = cursor;
@@ -60,7 +62,7 @@ export default class NodeTransformVisitor {
   private transformNonAtomicNode(): PatternNode {
     const patternNodeBuilder = new RegularNodeBuilder();
     patternNodeBuilder
-      .setLanguage(this.targetLanguage)
+      .setLanguage(this.language)
       .setType(this.cursor!.currentNode.type)
       .setText(this.cursor!.currentNode.text)
       .setFieldName(this.cursor!.currentFieldName);
@@ -87,7 +89,7 @@ export default class NodeTransformVisitor {
     if (this.cursor!.currentNode.isTemplateParameterNode()) {
       const parameterId = this.cursor!.currentNode.getTemplateParameterId();
       const correspondingParameter = this.findTemplateParameterBy(parameterId);
-      return correspondingParameter.toPatternNode(this.cursor!, this.targetLanguage);
+      return correspondingParameter.toPatternNode(this.cursor!, this.language);
     } else {
       return this.transformRegularNode();
     }
@@ -141,7 +143,7 @@ export default class NodeTransformVisitor {
 
   private transformRegularNode() {
     return new RegularNode(
-      this.targetLanguage,
+      this.language,
       this.cursor!.currentNode.type,
       this.cursor!.currentNode.text,
       this.cursor!.currentFieldName

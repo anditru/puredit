@@ -3,20 +3,19 @@ import PatternNode from "../pattern/nodes/patternNode";
 import BasePattern from "../pattern/basePattern";
 import Pattern from "../pattern/pattern";
 import PatternCursor from "../pattern/cursor";
-import { ChainsConfig, Language } from "@puredit/language-config";
+import { ChainsConfig } from "@puredit/language-config";
 import { loadChainableNodeTypeConfigFor, loadChainsConfigFor } from "@puredit/language-config";
 import { NodeTransformVisitor, PatternGeneration } from "./internal";
 import TemplateChain from "../define/templateChain";
 import ChainContinuationNode from "../pattern/nodes/chainContinuationNode";
 
 export default class ChainLinkPatternsGeneration extends PatternGeneration {
-  private chainsConfig: ChainsConfig;
+  private chainsConfig: ChainsConfig | undefined;
   private templateChain: TemplateChain | undefined;
   private startPatternRootNode: PatternNode | undefined;
 
-  constructor(parser: TreeSitterParser, targetLanguage: Language) {
-    super(parser, targetLanguage);
-    this.chainsConfig = loadChainsConfigFor(targetLanguage);
+  constructor(parser: TreeSitterParser) {
+    super(parser);
   }
 
   setTemplateChain(templateChain: TemplateChain): ChainLinkPatternsGeneration {
@@ -30,10 +29,8 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
   }
 
   execute(): Pattern {
-    this.nodeTransformVisitor = new NodeTransformVisitor(
-      this.targetLanguage!,
-      this.rawTemplate!.params
-    );
+    this.chainsConfig = loadChainsConfigFor(this.rawTemplate!.language);
+    this.nodeTransformVisitor = new NodeTransformVisitor(this.rawTemplate!);
 
     const codeString = this.buildCodeString();
     const rootNode = this.transformToPatternTree(codeString);
@@ -57,28 +54,28 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
   private extractChainLinkPattern(linkCallRoot: PatternNode): BasePattern {
     const linkPatternCursor = new PatternCursor(linkCallRoot);
 
-    linkPatternCursor.follow(this.chainsConfig.pathToFirstLink);
+    linkPatternCursor.follow(this.chainsConfig!.pathToFirstLink);
     const chainableNodeTypeConfig = loadChainableNodeTypeConfigFor(
-      this.targetLanguage,
+      this.rawTemplate!.language,
       linkPatternCursor.currentNode.type
     );
-    linkPatternCursor.reverseFollow(this.chainsConfig.pathToFirstLink);
+    linkPatternCursor.reverseFollow(this.chainsConfig!.pathToFirstLink);
 
     const pathToNextChainLink = chainableNodeTypeConfig.pathToNextLink;
     const lastStep = pathToNextChainLink.getLastStep();
 
     linkPatternCursor.follow(pathToNextChainLink.getSliceBeforeLastStep());
     const chainContinuationNode = new ChainContinuationNode(
-      this.targetLanguage!,
+      this.rawTemplate!.language,
       this.startPatternRootNode!,
       this.templateChain!
     );
     linkPatternCursor.currentNode.insertChild(chainContinuationNode, lastStep);
     linkPatternCursor.reverseFollow(pathToNextChainLink.getSliceBeforeLastStep());
 
-    linkPatternCursor.follow(this.chainsConfig.pathToFirstLink);
+    linkPatternCursor.follow(this.chainsConfig!.pathToFirstLink);
     const linkRootNode = linkPatternCursor.currentNode.cutOff();
 
-    return new BasePattern(linkRootNode, this.rawTemplate!, this.targetLanguage);
+    return new BasePattern(linkRootNode, this.rawTemplate!);
   }
 }

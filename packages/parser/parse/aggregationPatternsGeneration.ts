@@ -3,18 +3,14 @@ import BasePattern from "../pattern/basePattern";
 import Pattern from "../pattern/pattern";
 import PatternCursor from "../pattern/cursor";
 import PatternNode from "../pattern/nodes/patternNode";
-import {
-  AggregatableNodeTypeConfig,
-  Language,
-  aggregationPlaceHolder,
-} from "@puredit/language-config";
+import { AggregatableNodeTypeConfig, aggregationPlaceHolder } from "@puredit/language-config";
 import { PatternGeneration, NodeTransformVisitor } from "./internal";
 
 export default class AggregationPatternsGeneration extends PatternGeneration {
   private nodeTypeConfig: AggregatableNodeTypeConfig | undefined;
 
-  constructor(parser: TreeSitterParser, targetLanguage: Language) {
-    super(parser, targetLanguage);
+  constructor(parser: TreeSitterParser) {
+    super(parser);
   }
 
   setNodeTypeConfig(nodeTypeConfig: AggregatableNodeTypeConfig): AggregationPatternsGeneration {
@@ -23,10 +19,7 @@ export default class AggregationPatternsGeneration extends PatternGeneration {
   }
 
   execute(): Pattern {
-    this.nodeTransformVisitor = new NodeTransformVisitor(
-      this.targetLanguage!,
-      this.rawTemplate!.params
-    );
+    this.nodeTransformVisitor = new NodeTransformVisitor(this.rawTemplate!);
 
     const codeString = this.buildCodeString();
     const rootNode = this.transformToPatternTree(codeString);
@@ -54,7 +47,7 @@ export default class AggregationPatternsGeneration extends PatternGeneration {
     patternTreeCursor.follow(aggregationRootPath);
     const subPatternRoot = patternTreeCursor.currentNode;
     subPatternRoot.cutOff();
-    return new BasePattern(subPatternRoot, this.rawTemplate!, this.targetLanguage);
+    return new BasePattern(subPatternRoot, this.rawTemplate!);
   }
 
   private getAggregationRootPath() {
@@ -62,8 +55,7 @@ export default class AggregationPatternsGeneration extends PatternGeneration {
     const contextTemplateTree = this.transformToPatternTree(contextTemplate);
     const contextTemplatePattern = new BasePattern(
       contextTemplateTree,
-      this.rawTemplate!, // TODO: Find a more sensible template to pass here
-      this.targetLanguage
+      this.rawTemplate! // TODO: Find a more sensible template to pass here
     );
     return contextTemplatePattern.getPathToNodeWithText(aggregationPlaceHolder);
   }

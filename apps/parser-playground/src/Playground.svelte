@@ -32,7 +32,7 @@
   const patternMatching = new PatternMatching(patternMap, snippetNode.walk());
   const { matches } = patternMatching.execute();
   console.timeEnd("findPatterns");
-  const matchStrings = matches.map((match) => matchToString(match, snippet)).join("\n");
+  const matchStrings = matches.map((match) => matchToString(match)).join("\n");
 </script>
 
 <pre>{syntaxNodeToString(new AstNode(snippetNode), snippet)}</pre>
