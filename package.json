@@ -64,6 +64,7 @@
     ]
   },
   "dependencies": {
+    "generator-generator": "^5.1.0",
     "typescript-logging": "^2.1.0",
     "typescript-logging-log4ts-style": "^2.1.0"
   }
