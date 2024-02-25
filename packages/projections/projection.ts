@@ -55,5 +55,5 @@ export abstract class ProjectionWidget extends WidgetType {
 }
 
 export interface ProjectionWidgetClass {
-  new (isNew: boolean, match: Match, context: unknown, state: EditorState): ProjectionWidget;
+  new (isNew: boolean, match: Match, context: Context, state: EditorState): ProjectionWidget;
 }

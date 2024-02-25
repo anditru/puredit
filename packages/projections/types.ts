@@ -2,7 +2,7 @@ import type { Text } from "@codemirror/state";
 import type { Context, Match, Parser } from "@puredit/parser";
 import type { ProjectionWidgetClass } from "./projection";
 import type { Pattern } from "@puredit/parser";
-import type Template from "@puredit/parser/define/template";
+import type Template from "@puredit/parser/template/template";
 
 export interface ProjectionCompletion {
   label: string;
@@ -22,6 +22,7 @@ export interface Projection {
 
 export interface RootProjection extends Projection {
   pattern: Pattern;
+  subProjections?: SubProjection[];
 }
 
 export interface SubProjection extends Projection {

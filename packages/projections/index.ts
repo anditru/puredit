@@ -2,10 +2,10 @@ import { flexPlugin } from "./flex";
 import { createProjectionState, projectionState } from "./state/state";
 import { transactionFilter } from "./filter";
 import { completions } from "./completions/completions";
-import type { ProjectionPluginConfig } from "./types";
+import type { ProjectionPluginConfig, Projection, SubProjection, RootProjection } from "./types";
 import { style } from "./style";
 
-export type { ProjectionPluginConfig };
+export type { ProjectionPluginConfig, Projection, SubProjection, RootProjection };
 
 export const projectionPlugin = (config: ProjectionPluginConfig) => [
   style,
