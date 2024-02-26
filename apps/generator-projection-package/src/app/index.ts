@@ -5,8 +5,7 @@ import path from "path";
 
 interface PackageAnswers {
   language: string;
-  displayName: string;
-  technicalName: string;
+  name: string;
   description: string;
 }
 
@@ -14,9 +13,15 @@ interface AdditionalFeaturesAnswers {
   projection: boolean;
 }
 
+const shortLanguages = {
+  Python: "py",
+  TypeScript: "ts",
+};
+
 export default class extends Generator<object> {
   packageAnswers: PackageAnswers;
   additionalFeaturesAnswers: AdditionalFeaturesAnswers;
+  fullPackageName: string;
 
   constructor(args: string | string[], options: object) {
     super(args, options);
@@ -30,21 +35,15 @@ export default class extends Generator<object> {
         name: "language",
         message: "For which language will your package be?",
         choices: [
-          { name: "TypeScript", value: "ts" },
-          { name: "Python", value: "py" },
+          { name: "TypeScript", value: "TypeScript" },
+          { name: "Python", value: "Python" },
         ],
       },
       {
         type: "input",
-        name: "displayName",
-        message: "What shall be the display name for your package?",
-        default: "My Projection Package",
-      },
-      {
-        type: "input",
-        name: "technicalName",
-        message: "What shall be the technical name for your package?",
-        default: "myProjectionPackage",
+        name: "name",
+        message: "What shall be the name for your package?",
+        default: "my-package",
       },
       {
         type: "input",
@@ -54,6 +53,9 @@ export default class extends Generator<object> {
       },
     ];
     this.packageAnswers = await this.prompt<PackageAnswers>(packageAnswersPrompts);
+    this.fullPackageName = `${shortLanguages[this.packageAnswers.language]}-${
+      this.packageAnswers.name
+    }`;
 
     const additionalFeaturesPrompts: Generator.Question[] = [
       {
@@ -72,15 +74,21 @@ export default class extends Generator<object> {
       __dirname,
       "../../../..",
       "packages",
-      "projection-lib",
-      this.packageAnswers.language,
-      this.packageAnswers.technicalName
+      "projection-libs",
+      this.fullPackageName
     );
     this.destinationRoot(destinationRoot);
 
+    this.fs.copyTpl(this.templatePath("index.tts"), this.destinationPath("index.ts"));
+
+    this.fs.copyTpl(this.templatePath("package.tjson"), this.destinationPath("package.json"), {
+      ...this.packageAnswers,
+      fullPackageName: this.fullPackageName,
+    });
+
     this.fs.copyTpl(
-      this.templatePath("index.tts"),
-      this.destinationPath("index.ts"),
+      this.templatePath("parser.tts"),
+      this.destinationPath("parser.ts"),
       this.packageAnswers
     );
 

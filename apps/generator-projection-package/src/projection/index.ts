@@ -60,8 +60,8 @@ export default class extends Generator<Options> {
           name: "language",
           message: "For which language will your projection be?",
           choices: [
-            { name: "TypeScript", value: "ts" },
-            { name: "Python", value: "py" },
+            { name: "TypeScript", value: "TypeScript" },
+            { name: "Python", value: "Python" },
           ],
         },
       ];

@@ -9,7 +9,7 @@ const pattern = parser.statementPattern(
 
 const widget = svelteProjection(Widget);
 
-export const <%= technicalName %>Projection: RootProjection = {
+export const <%= technicalName %>: RootProjection = {
   name: "<%= displayName %>",
   description: "<%= description %>",
   pattern,

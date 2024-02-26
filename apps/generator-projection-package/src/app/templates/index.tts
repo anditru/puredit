@@ -1,7 +1,2 @@
-import type { ProjectionPackageConfig } from "../../types";
-
-export const <%= technicalName %>: ProjectionPackageConfig = {
-  name: "<%= displayName %>",
-  description: "<%= description %>",
-  projections: [],
-};
+export const projections = [];
+export {};
