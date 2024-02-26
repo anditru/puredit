@@ -3,20 +3,20 @@ import { green } from "chalk";
 import yosay from "yosay";
 import path from "path";
 
-interface PackageInfo {
+interface PackageAnswers {
   language: string;
   displayName: string;
   technicalName: string;
   description: string;
 }
 
-interface AdditionalFeatures {
+interface AdditionalFeaturesAnswers {
   projection: boolean;
 }
 
 export default class extends Generator<object> {
-  packageInfo: PackageInfo;
-  additionalFeatures: AdditionalFeatures;
+  packageAnswers: PackageAnswers;
+  additionalFeaturesAnswers: AdditionalFeaturesAnswers;
 
   constructor(args: string | string[], options: object) {
     super(args, options);
@@ -24,7 +24,7 @@ export default class extends Generator<object> {
 
   async prompting() {
     this.log(yosay(`Welcome to the ${green("Projection Package")} generator!`));
-    const packageInfoPrompts: Generator.Question[] = [
+    const packageAnswersPrompts: Generator.Question[] = [
       {
         type: "list",
         name: "language",
@@ -53,7 +53,7 @@ export default class extends Generator<object> {
         default: "A package with projections.",
       },
     ];
-    this.packageInfo = await this.prompt<PackageInfo>(packageInfoPrompts);
+    this.packageAnswers = await this.prompt<PackageAnswers>(packageAnswersPrompts);
 
     const additionalFeaturesPrompts: Generator.Question[] = [
       {
@@ -62,7 +62,9 @@ export default class extends Generator<object> {
         message: "Do you want to create a projection?",
       },
     ];
-    this.additionalFeatures = await this.prompt<AdditionalFeatures>(additionalFeaturesPrompts);
+    this.additionalFeaturesAnswers = await this.prompt<AdditionalFeaturesAnswers>(
+      additionalFeaturesPrompts
+    );
   }
 
   writing() {
@@ -71,18 +73,18 @@ export default class extends Generator<object> {
       "../../../..",
       "packages",
       "projection-lib",
-      this.packageInfo.language,
-      this.packageInfo.technicalName
+      this.packageAnswers.language,
+      this.packageAnswers.technicalName
     );
     this.destinationRoot(destinationRoot);
 
     this.fs.copyTpl(
       this.templatePath("index.tts"),
       this.destinationPath("index.ts"),
-      this.packageInfo
+      this.packageAnswers
     );
 
-    if (this.additionalFeatures.projection) {
+    if (this.additionalFeaturesAnswers.projection) {
       this.composeWith(require.resolve("../projection/index.js"), {
         packagePath: this.destinationRoot(),
       });

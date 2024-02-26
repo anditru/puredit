@@ -4,38 +4,56 @@ import fs from "fs";
 
 interface Options {
   packagePath?: string;
+  inCurrentDirectory: boolean;
 }
 
-interface LanguageInfo {
+interface LanguageAnswers {
   language: string;
 }
 
-interface PackageInfo {
+interface PackageAnswers {
   technicalName: string;
 }
 
-interface ProjectionInfo {
+interface ProjectionAnswers {
   displayName: string;
   technicalName: string;
   description: string;
 }
 
 export default class extends Generator<Options> {
-  languageInfo: LanguageInfo;
-  packageInfo: PackageInfo;
-  projectionInfo: ProjectionInfo;
+  languageAnswers: LanguageAnswers;
+  packageAnswers: PackageAnswers;
+  projectionAnswers: ProjectionAnswers;
+
+  packagePath: string;
 
   constructor(args: string | string[], options: Options) {
     super(args, options);
-    this.argument("packagePath", {
+    this.option("packagePath", {
       type: String,
-      required: false,
+      alias: "p",
       description: "Path of the package to create the projection in.",
+    });
+    this.option("inCurrentDirectory", {
+      type: Boolean,
+      alias: "c",
+      default: false,
+      description: "Generate in the current directory",
     });
   }
 
   async prompting() {
-    if (!this.options.packagePath) {
+    if (this.options.packagePath && this.options.inCurrentDirectory) {
+      this.log.error(
+        "Either option --packagePath (p) can provide package path or --inCurrentDirectory (c) can be set to true but not both"
+      );
+      process.exit(-1);
+    } else if (this.options.packagePath && !this.options.inCurrentDirectory) {
+      this.packagePath = this.options.packagePath;
+    } else if (!this.options.packagePath && this.options.inCurrentDirectory) {
+      this.packagePath = "./";
+    } else if (!this.options.packagePath && !this.options.inCurrentDirectory) {
       const languagePrompts: Generator.Question[] = [
         {
           type: "list",
@@ -47,14 +65,14 @@ export default class extends Generator<Options> {
           ],
         },
       ];
-      this.languageInfo = await this.prompt<LanguageInfo>(languagePrompts);
+      this.languageAnswers = await this.prompt<LanguageAnswers>(languagePrompts);
 
       const languagePath = path.resolve(
         __dirname,
         "../../../..",
         "packages",
         "projection-lib",
-        this.languageInfo.language
+        this.languageAnswers.language
       );
       const projectionPackages = getAllDirectories(languagePath);
 
@@ -69,11 +87,11 @@ export default class extends Generator<Options> {
           })),
         },
       ];
-      this.packageInfo = await this.prompt<PackageInfo>(packagePrompts);
-      this.options.packagePath = path.resolve(languagePath, this.packageInfo.technicalName);
+      this.packageAnswers = await this.prompt<PackageAnswers>(packagePrompts);
+      this.packagePath = path.resolve(languagePath, this.packageAnswers.technicalName);
     }
 
-    const projectionInfoPrompts: Generator.Question[] = [
+    const projectionAnswersPrompts: Generator.Question[] = [
       {
         type: "input",
         name: "displayName",
@@ -93,25 +111,22 @@ export default class extends Generator<Options> {
         default: "A fancy projection.",
       },
     ];
-    this.projectionInfo = await this.prompt<ProjectionInfo>(projectionInfoPrompts);
+    this.projectionAnswers = await this.prompt<ProjectionAnswers>(projectionAnswersPrompts);
   }
 
   writing() {
-    const destinationRoot = path.resolve(
-      this.options.packagePath,
-      this.projectionInfo.technicalName
-    );
+    const destinationRoot = path.resolve(this.packagePath, this.projectionAnswers.technicalName);
     this.destinationRoot(destinationRoot);
 
     this.fs.copyTpl(this.templatePath("index.tts"), this.destinationPath("index.ts"), {
-      ...this.packageInfo,
-      ...this.projectionInfo,
+      ...this.packageAnswers,
+      ...this.projectionAnswers,
     });
 
     this.fs.copyTpl(
       this.templatePath("Widget.tsvelte"),
       this.destinationPath("Widget.svelte"),
-      this.projectionInfo
+      this.projectionAnswers
     );
   }
 }
