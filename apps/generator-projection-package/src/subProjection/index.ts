@@ -31,6 +31,7 @@ export default class extends Generator<Options> {
   subProjectionAnswers: SubProjectionAnswers;
 
   projectionPath: string;
+  relativeSubProjectionPath: string;
 
   constructor(args: string | string[], options: Options) {
     super(args, options);
@@ -48,6 +49,7 @@ export default class extends Generator<Options> {
   }
 
   async prompting() {
+    const relativePathParts = [];
     if (this.options.projectionPath && this.options.inCurrentDirectory) {
       this.log.error(
         "Either option --projectionPath (p) can provide package path or --inCurrentDirectory (c) can be set to true but not both"
@@ -56,7 +58,23 @@ export default class extends Generator<Options> {
     } else if (this.options.projectionPath && !this.options.inCurrentDirectory) {
       this.projectionPath = this.options.projectionPath;
     } else if (!this.options.projectionPath && this.options.inCurrentDirectory) {
-      this.projectionPath = "./";
+      let currentProjectionPath = path.resolve(".");
+      while (
+        !this.fs.exists(path.resolve(currentProjectionPath, "main.ts")) ||
+        currentProjectionPath === "/"
+      ) {
+        this.log(currentProjectionPath);
+        relativePathParts.push(currentProjectionPath.split("/").pop());
+        currentProjectionPath = path.resolve(currentProjectionPath, "..");
+      }
+      if (currentProjectionPath === "/") {
+        this.log(
+          `${chalk.bold.yellow("Warning:")} Failed to find projection main. ` +
+            "Registration of sub projection will be skipped."
+        );
+      } else {
+        this.projectionPath = currentProjectionPath;
+      }
     } else if (!this.options.projectionPath && !this.options.inCurrentDirectory) {
       const packagesPath = path.resolve(__dirname, "../../../..", "packages", "projection-libs");
       const projectionPackages = getAllDirectories(packagesPath);
@@ -87,7 +105,6 @@ export default class extends Generator<Options> {
         },
       ];
       this.projectionAnswers = await this.prompt<ProjectionAnswers>(projectionPrompts);
-      this.projectionPath = path.resolve(projectionsPath, this.projectionAnswers.technicalName);
     }
 
     const subProjectionAnswersPrompts: Generator.Question[] = [
@@ -113,13 +130,23 @@ export default class extends Generator<Options> {
     this.subProjectionAnswers = await this.prompt<SubProjectionAnswers>(
       subProjectionAnswersPrompts
     );
+
+    if (relativePathParts.length > 0) {
+      this.relativeSubProjectionPath = `./${relativePathParts.reverse().join("/")}/${
+        this.subProjectionAnswers.technicalName
+      }/config`;
+    } else {
+      this.relativeSubProjectionPath = `./${this.subProjectionAnswers.technicalName}/config`;
+    }
   }
 
   writing() {
-    const destinationRoot = path.resolve(
-      this.projectionPath,
-      this.subProjectionAnswers.technicalName
-    );
+    let destinationRoot: string;
+    if (this.options.inCurrentDirectory) {
+      destinationRoot = path.resolve(".", this.subProjectionAnswers.technicalName);
+    } else {
+      destinationRoot = path.resolve(this.projectionPath, this.subProjectionAnswers.technicalName);
+    }
     this.destinationRoot(destinationRoot);
 
     this.fs.copyTpl(
@@ -134,14 +161,14 @@ export default class extends Generator<Options> {
       this.subProjectionAnswers
     );
 
-    const mainPath = path.resolve(destinationRoot, "../main.ts");
+    const mainPath = path.resolve(this.projectionPath, "main.ts");
     let mainText: string;
     try {
       mainText = this.fs.read(mainPath);
     } catch (error) {
       this.log(
-        `${chalk.bold.yellow("Warning:")} Failed to read projection main at ${mainPath}. ` +
-          "Skipping registration of sub projection."
+        `${chalk.bold.yellow("Warning:")} Failed to read package index at ${mainPath}. ` +
+          "Skipping registration of projection."
       );
       return;
     }
@@ -168,7 +195,7 @@ export default class extends Generator<Options> {
           identifier(this.subProjectionAnswers.technicalName)
         ),
       ],
-      stringLiteral(`./${this.subProjectionAnswers.technicalName}/config`)
+      stringLiteral(this.relativeSubProjectionPath)
     );
     mainAst.program.body.splice(importIndex + 1, 0, importDecl);
 
