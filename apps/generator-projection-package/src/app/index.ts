@@ -10,8 +10,13 @@ interface PackageInfo {
   description: string;
 }
 
+interface AdditionalFeatures {
+  projection: boolean;
+}
+
 export default class extends Generator<object> {
   packageInfo: PackageInfo;
+  additionalFeatures: AdditionalFeatures;
 
   constructor(args: string | string[], options: object) {
     super(args, options);
@@ -19,7 +24,7 @@ export default class extends Generator<object> {
 
   async prompting() {
     this.log(yosay(`Welcome to the ${green("Projection Package")} generator!`));
-    const prompts: Generator.Question[] = [
+    const packageInfoPrompts: Generator.Question[] = [
       {
         type: "list",
         name: "language",
@@ -48,7 +53,16 @@ export default class extends Generator<object> {
         default: "A package with projections.",
       },
     ];
-    this.packageInfo = await this.prompt<PackageInfo>(prompts);
+    this.packageInfo = await this.prompt<PackageInfo>(packageInfoPrompts);
+
+    const additionalFeaturesPrompts: Generator.Question[] = [
+      {
+        type: "confirm",
+        name: "projection",
+        message: "Do you want to create a projection?",
+      },
+    ];
+    this.additionalFeatures = await this.prompt<AdditionalFeatures>(additionalFeaturesPrompts);
   }
 
   writing() {
@@ -67,5 +81,11 @@ export default class extends Generator<object> {
       this.destinationPath("index.ts"),
       this.packageInfo
     );
+
+    if (this.additionalFeatures.projection) {
+      this.composeWith(require.resolve("../projection/index.js"), {
+        packagePath: this.destinationRoot(),
+      });
+    }
   }
 }
