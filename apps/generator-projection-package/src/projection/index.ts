@@ -1,6 +1,17 @@
 import Generator from "yeoman-generator";
 import path from "path";
 import fs from "fs";
+import * as parser from "@babel/parser";
+import generate from "@babel/generator";
+import {
+  exportSpecifier,
+  identifier,
+  importDeclaration,
+  importSpecifier,
+  stringLiteral,
+} from "@babel/types";
+import traverse from "@babel/traverse";
+import chalk from "chalk";
 
 interface Options {
   packagePath?: string;
@@ -12,7 +23,7 @@ interface LanguageAnswers {
 }
 
 interface PackageAnswers {
-  technicalName: string;
+  fullPackageName: string;
 }
 
 interface ProjectionAnswers {
@@ -54,32 +65,12 @@ export default class extends Generator<Options> {
     } else if (!this.options.packagePath && this.options.inCurrentDirectory) {
       this.packagePath = "./";
     } else if (!this.options.packagePath && !this.options.inCurrentDirectory) {
-      const languagePrompts: Generator.Question[] = [
-        {
-          type: "list",
-          name: "language",
-          message: "For which language will your projection be?",
-          choices: [
-            { name: "TypeScript", value: "TypeScript" },
-            { name: "Python", value: "Python" },
-          ],
-        },
-      ];
-      this.languageAnswers = await this.prompt<LanguageAnswers>(languagePrompts);
-
-      const languagePath = path.resolve(
-        __dirname,
-        "../../../..",
-        "packages",
-        "projection-lib",
-        this.languageAnswers.language
-      );
-      const projectionPackages = getAllDirectories(languagePath);
-
+      const packagesPath = path.resolve(__dirname, "../../../..", "packages", "projection-libs");
+      const projectionPackages = getAllDirectories(packagesPath);
       const packagePrompts: Generator.Question[] = [
         {
           type: "list",
-          name: "technicalName",
+          name: "fullPackageName",
           message: "For which package will your projection be?",
           choices: projectionPackages.map((technicalName) => ({
             name: technicalName,
@@ -88,7 +79,7 @@ export default class extends Generator<Options> {
         },
       ];
       this.packageAnswers = await this.prompt<PackageAnswers>(packagePrompts);
-      this.packagePath = path.resolve(languagePath, this.packageAnswers.technicalName);
+      this.packagePath = path.resolve(packagesPath, this.packageAnswers.fullPackageName);
     }
 
     const projectionAnswersPrompts: Generator.Question[] = [
@@ -128,6 +119,55 @@ export default class extends Generator<Options> {
       this.destinationPath("Widget.svelte"),
       this.projectionAnswers
     );
+
+    const indexPath = path.resolve(destinationRoot, "../index.ts");
+    let indexText: string;
+    try {
+      indexText = this.fs.read(indexPath);
+    } catch (error) {
+      this.log(
+        `${chalk.bold.yellow("Warning:")} Failed to read package index at ${indexPath}.` +
+          "Skipping registration of projection."
+      );
+      return;
+    }
+
+    const indexAst = parser.parse(indexText, {
+      sourceType: "module",
+      plugins: [["typescript", {}]],
+    });
+
+    const importIndex = indexAst.program.body.findLastIndex(
+      (node) => node.type === "ImportDeclaration"
+    );
+    const importDecl = importDeclaration(
+      [
+        importSpecifier(
+          identifier(this.projectionAnswers.technicalName),
+          identifier(this.projectionAnswers.technicalName)
+        ),
+      ],
+      stringLiteral(`./${this.projectionAnswers.technicalName}/main`)
+    );
+    indexAst.program.body.splice(importIndex + 1, 0, importDecl);
+
+    const that = this;
+    traverse(indexAst, {
+      ArrayExpression(path) {
+        path.node.elements.push(identifier(that.projectionAnswers.technicalName));
+      },
+      ExportNamedDeclaration(path) {
+        path.node.specifiers.push(
+          exportSpecifier(
+            identifier(that.projectionAnswers.technicalName),
+            identifier(that.projectionAnswers.technicalName)
+          )
+        );
+      },
+    });
+
+    const transformedIndexText = generate(indexAst).code;
+    this.fs.write(indexPath, transformedIndexText);
   }
 }
 
