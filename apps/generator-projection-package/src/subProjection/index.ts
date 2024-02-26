@@ -1,8 +1,7 @@
 import Generator from "yeoman-generator";
 import path from "path";
 import fs from "fs";
-import * as parser from "@babel/parser";
-import generate from "@babel/generator";
+import * as recast from "recast";
 import { identifier, importDeclaration, importSpecifier, stringLiteral } from "@babel/types";
 import traverse from "@babel/traverse";
 import chalk from "chalk";
@@ -147,13 +146,20 @@ export default class extends Generator<Options> {
       return;
     }
 
-    const mainAst = parser.parse(mainText, {
-      sourceType: "module",
-      plugins: [["typescript", {}]],
+    const mainAst = recast.parse(mainText, {
+      parser: {
+        parse(source: string) {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          return require("@babel/parser").parse(source, {
+            sourceType: "module",
+            plugins: [["typescript", {}]],
+          });
+        },
+      },
     });
 
     const importIndex = mainAst.program.body.findLastIndex(
-      (node) => node.type === "ImportDeclaration"
+      (node: any) => node.type === "ImportDeclaration"
     );
     const importDecl = importDeclaration(
       [
@@ -180,8 +186,8 @@ export default class extends Generator<Options> {
       },
     });
 
-    const transformedIndexText = generate(mainAst).code;
-    this.fs.write(mainPath, transformedIndexText);
+    const transformedMainText = recast.print(mainAst).code;
+    this.fs.write(mainPath, transformedMainText);
   }
 }
 

@@ -1,8 +1,7 @@
 import Generator from "yeoman-generator";
 import path from "path";
 import fs from "fs";
-import * as parser from "@babel/parser";
-import generate from "@babel/generator";
+import * as recast from "recast";
 import {
   exportSpecifier,
   identifier,
@@ -143,13 +142,20 @@ export default class extends Generator<Options> {
       return;
     }
 
-    const indexAst = parser.parse(indexText, {
-      sourceType: "module",
-      plugins: [["typescript", {}]],
+    const indexAst = recast.parse(indexText, {
+      parser: {
+        parse(source: string) {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          return require("@babel/parser").parse(source, {
+            sourceType: "module",
+            plugins: [["typescript", {}]],
+          });
+        },
+      },
     });
 
     const importIndex = indexAst.program.body.findLastIndex(
-      (node) => node.type === "ImportDeclaration"
+      (node: any) => node.type === "ImportDeclaration"
     );
     const importDecl = importDeclaration(
       [
@@ -177,7 +183,7 @@ export default class extends Generator<Options> {
       },
     });
 
-    const transformedIndexText = generate(indexAst).code;
+    const transformedIndexText = recast.print(indexAst).code;
     this.fs.write(indexPath, transformedIndexText);
 
     if (this.additionalFeaturesAnswers.subProjection) {
