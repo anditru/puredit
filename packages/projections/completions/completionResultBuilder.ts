@@ -1,6 +1,6 @@
-import { Context } from "@puredit/parser";
-import { RootProjection, SubProjection } from "../types";
-import { Completion } from "@codemirror/autocomplete";
+import type { Context } from "@puredit/parser";
+import type { RootProjection, SubProjection } from "../types";
+import type { Completion } from "@codemirror/autocomplete";
 import { indentString } from "@codemirror/language";
 import { pickedCompletion } from "@codemirror/autocomplete";
 
@@ -24,11 +24,9 @@ export default class CompletionsBuilder {
 
   setRootProjections(rootProjections: RootProjection[]): CompletionsBuilder {
     this.rootProjections = rootProjections;
-    return this;
-  }
-
-  setSubProjections(subProjections: SubProjection[]): CompletionsBuilder {
-    this.subProjections = subProjections;
+    for (const projection of rootProjections) {
+      this.subProjections = this.subProjections.concat(projection.subProjections);
+    }
     return this;
   }
 

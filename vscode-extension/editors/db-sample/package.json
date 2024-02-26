@@ -26,7 +26,7 @@
     "@puredit/editor-interface": "*",
     "@puredit/language-config": "*",
     "@puredit/projections": "*",
-    "@puredit/projection-lib": "*",
+    "@puredit/ts-db-sample": "*",
     "@puredit/simple-projection": "*",
     "@puredit/utils": "*",
     "@replit/codemirror-indentation-markers": "6",

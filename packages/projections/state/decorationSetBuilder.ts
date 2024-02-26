@@ -121,7 +121,9 @@ export default class DecorationSetBuilder {
       this.config.projections.map((p: RootProjection) => [p.pattern, p])
     );
     this.subProjectionMap = new Map(
-      this.config.subProjections.map((p: SubProjection) => [p.pattern, p])
+      this.config.projections.flatMap((p: RootProjection) =>
+        p.subProjections.map((s) => [s.pattern, s])
+      )
     );
   }
 

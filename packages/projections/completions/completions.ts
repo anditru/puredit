@@ -31,7 +31,6 @@ export function completions(completionContext: CompletionContext): CompletionRes
     .setIndendation(indentation)
     .setContext(context)
     .setRootProjections(config.projections)
-    .setSubProjections(config.subProjections)
     .build();
 
   return {

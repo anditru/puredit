@@ -4,12 +4,6 @@ import type { ProjectionWidgetClass } from "./projection";
 import type { Pattern } from "@puredit/parser";
 import type Template from "@puredit/parser/template/template";
 
-export interface ProjectionCompletion {
-  label: string;
-  info: string;
-  draft(context: Context): string;
-}
-
 export interface Projection {
   name: string;
   description: string;
@@ -22,7 +16,7 @@ export interface Projection {
 
 export interface RootProjection extends Projection {
   pattern: Pattern;
-  subProjections?: SubProjection[];
+  subProjections: SubProjection[];
 }
 
 export interface SubProjection extends Projection {
@@ -32,7 +26,6 @@ export interface SubProjection extends Projection {
 export interface ProjectionPluginConfig {
   parser: Parser;
   projections: RootProjection[];
-  subProjections: SubProjection[];
   globalContextVariables: Context;
   globalContextValues: any;
 }
