@@ -18,10 +18,6 @@ interface Options {
   inCurrentDirectory: boolean;
 }
 
-interface LanguageAnswers {
-  language: string;
-}
-
 interface PackageAnswers {
   fullPackageName: string;
 }
@@ -32,10 +28,14 @@ interface ProjectionAnswers {
   description: string;
 }
 
+interface AdditionalFeaturesAnswers {
+  subProjection: boolean;
+}
+
 export default class extends Generator<Options> {
-  languageAnswers: LanguageAnswers;
   packageAnswers: PackageAnswers;
   projectionAnswers: ProjectionAnswers;
+  additionalFeaturesAnswers: AdditionalFeaturesAnswers;
 
   packagePath: string;
 
@@ -92,7 +92,7 @@ export default class extends Generator<Options> {
       {
         type: "input",
         name: "technicalName",
-        message: "What shall be the technical name for your porjection?",
+        message: "What shall be the technical name for your projection?",
         default: "myProjection",
       },
       {
@@ -103,13 +103,24 @@ export default class extends Generator<Options> {
       },
     ];
     this.projectionAnswers = await this.prompt<ProjectionAnswers>(projectionAnswersPrompts);
+
+    const additionalFeaturesPrompts: Generator.Question[] = [
+      {
+        type: "confirm",
+        name: "subProjection",
+        message: "Do you want to create a sub projection?",
+      },
+    ];
+    this.additionalFeaturesAnswers = await this.prompt<AdditionalFeaturesAnswers>(
+      additionalFeaturesPrompts
+    );
   }
 
   writing() {
     const destinationRoot = path.resolve(this.packagePath, this.projectionAnswers.technicalName);
     this.destinationRoot(destinationRoot);
 
-    this.fs.copyTpl(this.templatePath("index.tts"), this.destinationPath("index.ts"), {
+    this.fs.copyTpl(this.templatePath("main.tts"), this.destinationPath("main.ts"), {
       ...this.packageAnswers,
       ...this.projectionAnswers,
     });
@@ -126,7 +137,7 @@ export default class extends Generator<Options> {
       indexText = this.fs.read(indexPath);
     } catch (error) {
       this.log(
-        `${chalk.bold.yellow("Warning:")} Failed to read package index at ${indexPath}.` +
+        `${chalk.bold.yellow("Warning:")} Failed to read package index at ${indexPath}. ` +
           "Skipping registration of projection."
       );
       return;
@@ -168,6 +179,12 @@ export default class extends Generator<Options> {
 
     const transformedIndexText = generate(indexAst).code;
     this.fs.write(indexPath, transformedIndexText);
+
+    if (this.additionalFeaturesAnswers.subProjection) {
+      this.composeWith(require.resolve("../subProjection/index.js"), {
+        projectionPath: this.destinationRoot(),
+      });
+    }
   }
 }
 
