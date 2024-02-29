@@ -5,8 +5,8 @@ import EmptyWidget from "@puredit/projections/EmptyWidget.svelte";
 
 import { parser } from "../../parser";
 import { agg } from "@puredit/parser";
-import { column } from "./columnSubProjection/config";
-import { columnWithAlias } from "./columnWithAliasSubProjection/config";
+import { column } from "../columnSubProjection/config";
+import { columnWithAlias } from "../columnWithAliasSubProjection/config";
 import { columnChain } from "../../columnChainProjection/main";
 
 const columnChainPattern = parser.subPattern("columnChain")`${columnChain}`;

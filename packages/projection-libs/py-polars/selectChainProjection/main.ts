@@ -7,16 +7,17 @@ import IntoWidget from "./IntoWidget.svelte";
 
 import { selectStartSubProjection } from "./selectStartSubProjection/config";
 import { selectSubProjection } from "./selectSubProjection/config";
-import { columnSubProjection } from "./selectSubProjection/columnSubProjection/config";
-import { columnWithAliasSubProjection } from "./selectSubProjection/columnWithAliasSubProjection/config";
+import { columnSubProjection } from "./columnSubProjection/config";
+import { columnWithAliasSubProjection } from "./columnWithAliasSubProjection/config";
 import { filterSubProjection } from "./filterSubProjection/config";
-
 import { dropNullsSubProjection } from "./dropNullsSubProjection/config";
+import { groupBySubProjection } from "./groupBySubProjection/config";
 
 const processingChain = chain("processingChain", selectStartSubProjection.pattern, [
   selectSubProjection.pattern,
   filterSubProjection.pattern,
   dropNullsSubProjection.pattern,
+  groupBySubProjection.pattern,
 ]);
 
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
@@ -41,5 +42,6 @@ export const selectChainProjection: RootProjection = {
     columnWithAliasSubProjection,
     filterSubProjection,
     dropNullsSubProjection,
+    groupBySubProjection,
   ],
 };
