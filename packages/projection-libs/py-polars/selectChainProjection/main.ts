@@ -19,7 +19,7 @@ const processingChain = chain("processingChain", selectStartSubProjection.patter
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
 const pattern = parser.statementPattern(
   "selectChainPattern"
-)`${targetDataFrame} = ${processingChain}`;
+)`${targetDataFrame} = (${processingChain})`;
 
 const widget = svelteProjection(EmptyWidget);
 const intoWidget = svelteProjection(IntoWidget);
@@ -29,7 +29,7 @@ export const selectChainProjection: RootProjection = {
   description: "selelct columns and apply transformations",
   pattern,
   requiredContextVariables: [],
-  segmentWidgets: [widget],
+  segmentWidgets: [widget, widget],
   postfixWidget: intoWidget,
   subProjections: [
     selectStartSubProjection,
