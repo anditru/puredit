@@ -47,8 +47,9 @@ x = mathdsl.evaluate("r^r", locals())
 print("x:", x)
 
 # 5. Example: Projection with aggregation and chain
-filtered_students = students.select(
-    pl.col("first_name").name.toLowerCase(),
-    "age", 
-    name="last_name"
-).filter(age=24)
+filtered_students = (students.select(
+        pl.col("first_name").name.toLowerCase(),
+        "age", 
+        name="last_name")
+    .filter(age=24)
+    .drop_nulls())
