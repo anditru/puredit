@@ -12,12 +12,14 @@ import { columnWithAliasSubProjection } from "./columnWithAliasSubProjection/con
 import { filterSubProjection } from "./filterSubProjection/config";
 import { dropNullsSubProjection } from "./dropNullsSubProjection/config";
 import { groupBySubProjection } from "./groupBySubProjection/config";
+import { aggSubProjection } from "./aggSubProjection/config";
 
 const processingChain = chain("processingChain", selectStartSubProjection.pattern, [
   selectSubProjection.pattern,
   filterSubProjection.pattern,
   dropNullsSubProjection.pattern,
   groupBySubProjection.pattern,
+  aggSubProjection.pattern,
 ]);
 
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
@@ -43,5 +45,6 @@ export const selectChainProjection: RootProjection = {
     filterSubProjection,
     dropNullsSubProjection,
     groupBySubProjection,
+    aggSubProjection,
   ],
 };

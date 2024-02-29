@@ -10,6 +10,8 @@ import { upperCaseSubProjection } from "./upperCaseSubProjection/config";
 import { lowerCaseSubProjection } from "./lowerCaseSubProjection/config";
 import { aliasSubProjection } from "./aliasSubProjection/config";
 import { attributeSubProjection } from "./attributeSubProjection/config";
+import { sumAggregationSubProjection } from "./sumAggregationSubProjection/config";
+import { avgAggregationSubProjection } from "./avgAggregationSubProjection/config";
 
 export const columnChain = chain("columnChain", columnStartSubProjection.pattern, [
   colSubProjection.pattern,
@@ -17,6 +19,8 @@ export const columnChain = chain("columnChain", columnStartSubProjection.pattern
   lowerCaseSubProjection.pattern,
   aliasSubProjection.pattern,
   attributeSubProjection.pattern,
+  sumAggregationSubProjection.pattern,
+  avgAggregationSubProjection.pattern,
 ]);
 
 const pattern = parser.statementPattern("columnChain")`${columnChain}`;
@@ -35,5 +39,7 @@ export const columnChainProjection: RootProjection = {
     lowerCaseSubProjection,
     aliasSubProjection,
     attributeSubProjection,
+    sumAggregationSubProjection,
+    avgAggregationSubProjection,
   ],
 };

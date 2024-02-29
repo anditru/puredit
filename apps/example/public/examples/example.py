@@ -49,8 +49,13 @@ print("x:", x)
 # 5. Example: Projection with aggregation and chain
 filtered_students = (students.select(
         pl.col("first_name").name.toLowerCase(),
-        "age", 
+        "age",
+        "semester",
         name="last_name")
     .filter(age=24)
     .drop_nulls()
-    .group_by("age"))
+    .group_by("age")
+    .agg(
+        "last_name",
+        pl.col("semster").avg()
+    ))
