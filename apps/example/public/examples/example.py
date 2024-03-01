@@ -58,4 +58,4 @@ filtered_students = (students.select(
     .agg(
         "last_name",
         pl.col("semster").avg()
-    ))
+    ).drop("last_name"))

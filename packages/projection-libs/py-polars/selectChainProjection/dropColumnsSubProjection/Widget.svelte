@@ -21,6 +21,6 @@
   });
 </script>
 
-<span class="inline-flex" style="margin-right: 10px;">
-  <span>then remove nulls</span>
+<span class="inline-flex">
+  <span>then remove column(s)</span>
 </span>
