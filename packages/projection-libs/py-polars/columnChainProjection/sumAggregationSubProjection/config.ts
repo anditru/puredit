@@ -5,7 +5,7 @@ import Widget from "./Widget.svelte";
 
 const pattern = parser.subPattern("sumAggregationSubProjectionPattern")`sum()`;
 
-export const widget = svelteProjection(Widget);
+const widget = svelteProjection(Widget);
 
 export const sumAggregationSubProjection: SubProjection = {
   name: "Sum aggregation",

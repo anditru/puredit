@@ -5,7 +5,7 @@ import Widget from "./Widget.svelte";
 
 const pattern = parser.subPattern("dropNullsPattern")`drop_nulls()`;
 
-export const widget = svelteProjection(Widget);
+const widget = svelteProjection(Widget);
 
 export const dropNullsSubProjection: SubProjection = {
   name: "Drop nulls",

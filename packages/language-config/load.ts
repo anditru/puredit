@@ -1,5 +1,5 @@
 import languageConfigs from "./languageConfigs";
-import type {
+import {
   AggregatableNodeTypeConfig,
   AggregationsConfig,
   ArgumentsConfig,
@@ -11,6 +11,13 @@ import type {
 
 export function loadArgumentsConfigFor(language: Language): ArgumentsConfig {
   return languageConfigs[language].arguments;
+}
+
+export function loadAggregatableNodeTypes(): string[] {
+  const languages = Object.values(Language) as Language[];
+  return languages.flatMap((language: Language) =>
+    Object.keys(languageConfigs[language].aggregations.aggregatableNodeTypes)
+  );
 }
 
 export function loadAggregationsConfigFor(language: Language): AggregationsConfig {

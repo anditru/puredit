@@ -78,7 +78,7 @@ export default class NodeTransformVisitor {
     }
     if (patternNodeBuilder.buildsParentOfAggregationNode()) {
       const firstChild = patternNodeBuilder.children[0] as TemporaryAggregationNode;
-      return firstChild.toAggregationNode(patternNodeBuilder.type!, patternNodeBuilder.fieldName!);
+      return firstChild.toAggregationNode(patternNodeBuilder.fieldName!);
     }
 
     return patternNodeBuilder.buildAndSetParentOnChildren();

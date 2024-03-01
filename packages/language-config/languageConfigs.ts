@@ -19,6 +19,24 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           endToken: ")",
           contextTemplate: `someFunction(${aggregationPlaceHolder})`,
         },
+        dictionary: {
+          startToken: "{",
+          delimiterToken: ",",
+          endToken: "}",
+          contextTemplate: `{${aggregationPlaceHolder}}`,
+        },
+        set: {
+          startToken: "{",
+          delimiterToken: ",",
+          endToken: "}",
+          contextTemplate: `{${aggregationPlaceHolder}}`,
+        },
+        list: {
+          startToken: "[",
+          delimiterToken: ",",
+          endToken: "]",
+          contextTemplate: `[${aggregationPlaceHolder}]`,
+        },
       },
     },
     chains: {

@@ -1,3 +1,4 @@
+import { loadAggregatableNodeTypes } from "@puredit/language-config";
 import AstCursor from "../../ast/cursor";
 import { Context } from "../../match/types";
 import PatternNode from "./patternNode";
@@ -68,8 +69,9 @@ export class RegularNodeBuilder {
   }
 
   buildsParentOfAggregationNode() {
+    const aggregatableNodeTypes = loadAggregatableNodeTypes();
     return (
-      ["argument_list"].includes(this._type!) &&
+      aggregatableNodeTypes.includes(this._type!) &&
       this._children[0]?.type === "TemporaryAggregationNode"
     );
   }

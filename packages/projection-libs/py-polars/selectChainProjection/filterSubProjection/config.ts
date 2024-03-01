@@ -10,7 +10,7 @@ export const filterFunction = parser.subPattern(
   "filterFunction"
 )`filter(${filterColumn}=${compareValue})`;
 
-export const widget = svelteProjection(Widget);
+const widget = svelteProjection(Widget);
 
 export const filterSubProjection: SubProjection = {
   name: "Filter Function",

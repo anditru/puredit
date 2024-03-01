@@ -5,7 +5,7 @@ import Widget from "./Widget.svelte";
 
 const pattern = parser.subPattern("avgAggregationSubProjectionPattern")`avg()`;
 
-export const widget = svelteProjection(Widget);
+const widget = svelteProjection(Widget);
 
 export const avgAggregationSubProjection: SubProjection = {
   name: "Average aggregation",

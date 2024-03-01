@@ -8,11 +8,11 @@ import { column } from "../columnSubProjection/config";
 import { columnChain } from "../../columnChainProjection/main";
 
 const columnChainPattern = parser.subPattern("columnChain")`${columnChain}`;
-const columns = agg("columns", [column, columnChainPattern]);
+const columns = agg("columns", "argument_list", [column, columnChainPattern]);
 const pattern = parser.subPattern("dropColumnsSubProjectionPattern")`drop(${columns})`;
 
-export const widget = svelteProjection(Widget);
-export const emptyWidget = svelteProjection(EmptyWidget);
+const widget = svelteProjection(Widget);
+const emptyWidget = svelteProjection(EmptyWidget);
 
 export const dropColumnsSubProjection: SubProjection = {
   name: "Drop columns function",

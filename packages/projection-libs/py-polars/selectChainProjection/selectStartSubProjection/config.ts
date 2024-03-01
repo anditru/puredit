@@ -7,7 +7,7 @@ import FilterProjection from "./Widget.svelte";
 const sourceDataFrame = arg("sourceDataFrame", ["identifier"]);
 export const chainStart = parser.subPattern("chainStart")`${sourceDataFrame}`;
 
-export const widget = svelteProjection(FilterProjection);
+const widget = svelteProjection(FilterProjection);
 
 export const selectStartSubProjection: SubProjection = {
   name: "Select Chain Start",

@@ -10,7 +10,7 @@ import { columnWithAlias } from "../columnWithAliasSubProjection/config";
 import { columnChain } from "../../columnChainProjection/main";
 
 const columnChainPattern = parser.subPattern("columnChain")`${columnChain}`;
-const columns = agg("columns", [column, columnWithAlias, columnChainPattern]);
+const columns = agg("columns", "argument_list", [column, columnWithAlias, columnChainPattern]);
 
 const selectFunction = parser.subPattern("selectFunction")`select(${columns})`;
 

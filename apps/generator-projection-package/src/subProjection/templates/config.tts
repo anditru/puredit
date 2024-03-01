@@ -7,7 +7,7 @@ const pattern = parser.subPattern(
   "<%= technicalName %>Pattern"
 )`console.log("Hello World")`;
 
-export const widget = svelteProjection(Widget);
+const widget = svelteProjection(Widget);
 
 export const <%= technicalName %>: SubProjection = {
   name: "<%= displayName %>",

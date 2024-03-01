@@ -5,20 +5,18 @@ import Widget from "./Widget.svelte";
 import EmptyWidget from "@puredit/projections/EmptyWidget.svelte";
 
 import { agg } from "@puredit/parser";
-import { column } from "../columnSubProjection/config";
-import { columnChain } from "../../columnChainProjection/main";
+import { columnMapping } from "../columnMappingSubProjection/config";
 
-const columnChainPattern = parser.subPattern("columnChain")`${columnChain}`;
-const columns = agg("columns", "argument_list", [column, columnChainPattern]);
+const columnMappings = agg("columnMappings", "dictionary", [columnMapping]);
 
-const pattern = parser.subPattern("aggSubProjectionPattern")`agg(${columns})`;
+const pattern = parser.subPattern("renameColumnsSubProjectionPattern")`rename({${columnMappings}})`;
 
 const widget = svelteProjection(Widget);
 const emptyWidget = svelteProjection(EmptyWidget);
 
-export const aggSubProjection: SubProjection = {
-  name: "Aggregate function",
-  description: "Aggregate columns after group by",
+export const renameColumnsSubProjection: SubProjection = {
+  name: "Rename columns function",
+  description: "Rename columns in dataframe.",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget, emptyWidget],

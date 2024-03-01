@@ -11,18 +11,17 @@ export default class TemporaryAggregationNode extends PatternNode {
     private readonly language: Language,
     text: string,
     fieldName: string | undefined,
-    public readonly astNodeType: string,
     public readonly templateAggregation: TemplateAggregation
   ) {
     super(TemporaryAggregationNode.TYPE, text, fieldName);
   }
 
-  toAggregationNode(astNodeType: string, fieldName: string) {
+  toAggregationNode(fieldName: string) {
     return new AggregationNode(
       this.language,
       this.text,
       fieldName,
-      astNodeType,
+      this.templateAggregation.type,
       this.templateAggregation
     );
   }

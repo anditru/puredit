@@ -11,6 +11,7 @@ export default class TemplateAggregation extends TemplateParameter {
 
   constructor(
     public readonly name: string,
+    public readonly type: string,
     public readonly subPatterns: Template[],
     public readonly context: Context = {}
   ) {
@@ -33,7 +34,6 @@ export default class TemplateAggregation extends TemplateParameter {
       language,
       cursor.currentNode.text,
       cursor.currentFieldName,
-      cursor.currentNode.type,
       this
     );
   }

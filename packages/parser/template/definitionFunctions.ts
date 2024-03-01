@@ -30,10 +30,11 @@ export function arg(name: string, types: string[]): TemplateArgument {
  */
 export function agg(
   name: string,
+  type: string,
   subPatterns: Template[],
   context: Context = {}
 ): TemplateAggregation {
-  return new TemplateAggregation(name, subPatterns, context);
+  return new TemplateAggregation(name, type, subPatterns, context);
 }
 
 /**

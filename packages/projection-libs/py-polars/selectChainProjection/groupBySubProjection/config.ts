@@ -6,10 +6,10 @@ import EmptyWidget from "@puredit/projections/EmptyWidget.svelte";
 import { agg } from "@puredit/parser";
 import { column } from "../columnSubProjection/config";
 
-const columns = agg("columns", [column]);
+const columns = agg("columns", "argument_list", [column]);
 const pattern = parser.subPattern("groupBySubProjectionPattern")`group_by(${columns})`;
 
-export const widget = svelteProjection(Widget);
+const widget = svelteProjection(Widget);
 const emptyWidget = svelteProjection(EmptyWidget);
 
 export const groupBySubProjection: SubProjection = {
