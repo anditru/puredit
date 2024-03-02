@@ -60,3 +60,7 @@ filtered_students = (students.select(
         pl.col("semster").avg()
     ).rename({"last_name": "LastName"})
     .drop("last_name"))
+
+extended_students = students.with_columns(
+    (pl.col("first_name") + pl.col("last_name")).alias("full_name")
+)

@@ -8,7 +8,7 @@ export default class CompletionsBuilder {
   private indentation: number;
   private context: Context;
   private rootProjections: RootProjection[];
-  private subProjections: SubProjection[];
+  private subProjections: SubProjection[] = [];
 
   private completions: Completion[] = [];
 
