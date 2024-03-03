@@ -19,10 +19,7 @@ export default class TemplateChain extends TemplateParameter {
   }
 
   toCodeString(): string {
-    if (this._id === undefined) {
-      this._id = TemplateParameter.issueId();
-    }
-    return TemplateChain.CODE_STRING_PREFIX + this._id.toString();
+    return TemplateChain.CODE_STRING_PREFIX + this.id.toString();
   }
 
   getCodeStringForChainStart(): string {

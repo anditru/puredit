@@ -11,10 +11,7 @@ export default class TemplateArgument extends TemplateParameter {
   }
 
   toCodeString(): string {
-    if (this._id === undefined) {
-      this._id = TemplateParameter.issueId();
-    }
-    return TemplateArgument.CODE_STRING_PREFIX + this._id.toString();
+    return TemplateArgument.CODE_STRING_PREFIX + this.id.toString();
   }
 
   toPatternNode(cursor: AstCursor, language: Language) {

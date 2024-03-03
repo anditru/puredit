@@ -13,10 +13,7 @@ export default class TemplateBlock extends TemplateParameter {
   }
 
   toCodeString(): string {
-    if (this._id === undefined) {
-      this._id = TemplateParameter.issueId();
-    }
-    return TemplateBlock.CODE_STRING_PREFIX + this._id.toString();
+    return TemplateBlock.CODE_STRING_PREFIX + this.id.toString();
   }
 
   toPatternNode(cursor: AstCursor, language: Language): PatternNode {

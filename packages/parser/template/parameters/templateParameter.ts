@@ -4,14 +4,18 @@ import PatternNode from "../../pattern/nodes/patternNode";
 
 export default abstract class TemplateParameter {
   private static highestId = -1;
+  public static templateParameterRegistry: Map<number, TemplateParameter> = new Map();
+
   public static issueId(): number {
     this.highestId++;
     return this.highestId;
   }
 
-  protected _id: number | undefined;
-  get id() {
-    return this._id;
+  public readonly id: number;
+
+  constructor() {
+    this.id = TemplateParameter.issueId();
+    TemplateParameter.templateParameterRegistry.set(this.id, this);
   }
 
   abstract toCodeString(): string;

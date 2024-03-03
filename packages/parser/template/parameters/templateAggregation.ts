@@ -19,10 +19,7 @@ export default class TemplateAggregation extends TemplateParameter {
   }
 
   toCodeString(): string {
-    if (this._id === undefined) {
-      this._id = TemplateParameter.issueId();
-    }
-    return TemplateAggregation.CODE_STRING_PREFIX + this._id.toString();
+    return TemplateAggregation.CODE_STRING_PREFIX + this.id.toString();
   }
 
   getCodeStringsForParts(): string[] {

@@ -46,21 +46,35 @@ r = 5
 x = mathdsl.evaluate("r^r", locals())
 print("x:", x)
 
-# 5. Example: Projection with aggregation and chain
+# 5. Example: Projections with aggregations and chains
+# CONTEXT: { city: string, date: string, temperature: number }
+aggregated_weather = weather.pivot(
+    index=[
+        "date"
+    ], columns=[
+        "city"
+    ], values=[
+        "temperature"
+    ], aggregate_function="mean"
+)
+
+# CONTEXT: { first_name: string, last_name: string, age: number, semester: number }
 filtered_students = (students.select(
         pl.col("first_name").name.toLowerCase(),
         "age",
         "semester",
-        name="last_name")
-    .filter(age=24)
+        name="last_name"
+    ).filter(age=24)
     .drop_nulls()
     .group_by("age")
     .agg(
         "last_name",
         pl.col("semster").avg()
     ).rename({"last_name": "LastName"})
-    .drop("last_name"))
+    .drop("LastName")
+)
 
-extended_students = students.with_columns(
-    (pl.col("first_name") + pl.col("last_name")).alias("full_name")
+# CONTEXT: { item: string, item_price: number, quantity: number }
+extended_pices = pices.with_columns(
+    (pl.col("item_pice") + pl.col("quantity")).alias("total_price")
 )

@@ -1,8 +1,5 @@
-import { isString } from "@puredit/utils";
 import AstCursor from "../ast/cursor";
 import TemplateParameter from "../template/parameters/templateParameter";
-import TemplateAggregation from "../template/parameters/templateAggregation";
-import TemplateChain from "../template/parameters/templateChain";
 import PatternNode from "../pattern/nodes/patternNode";
 import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
 import TemporaryAggregationNode from "../pattern/nodes/temporaryAggregationNode";
@@ -11,11 +8,9 @@ import { Language } from "@puredit/language-config";
 
 export default class NodeTransformVisitor {
   private cursor: AstCursor | undefined;
-  private params: (TemplateParameter | string)[];
   private language: Language;
 
   constructor(template: Template) {
-    this.params = template.params;
     this.language = template.language;
   }
 
@@ -95,49 +90,11 @@ export default class NodeTransformVisitor {
   }
 
   private findTemplateParameterBy(id: number) {
-    const result = this.recursefindTemplateParameterBy(id, this.params!);
-    if (result !== null) {
-      return result;
-    } else {
+    const result = TemplateParameter.templateParameterRegistry.get(id);
+    if (!result) {
       throw new Error(`No parameter with ID ${id} found`);
     }
-  }
-
-  private recursefindTemplateParameterBy(
-    id: number,
-    params: (string | TemplateParameter)[]
-  ): TemplateParameter | null {
-    for (const param of params) {
-      if (isString(param)) {
-        continue;
-      }
-      if (param.id === id) {
-        return param;
-      }
-      if (param instanceof TemplateAggregation) {
-        for (const allowedPattern of param.subPatterns) {
-          const result = this.recursefindTemplateParameterBy(id, allowedPattern.params);
-          if (result !== null) {
-            return result;
-          }
-        }
-        return null;
-      }
-      if (param instanceof TemplateChain) {
-        let result = this.recursefindTemplateParameterBy(id, param.startPattern.params);
-        if (result !== null) {
-          return result;
-        }
-        for (const linkPattern of param.linkPatterns) {
-          result = this.recursefindTemplateParameterBy(id, [...linkPattern.params]);
-          if (result !== null) {
-            return result;
-          }
-        }
-        return null;
-      }
-    }
-    return null;
+    return result;
   }
 
   private transformRegularNode() {

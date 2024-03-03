@@ -17,7 +17,7 @@ const widget = svelteProjection(Widget);
 
 export const binColumnCompositionSubProjection: SubProjection = {
   name: "Binary Column Composition",
-  description: "Combine the values of two columns or a fixed value with a binary operator.",
+  description: "Combine the values of two columns with a binary operator.",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],

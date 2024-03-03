@@ -12,10 +12,7 @@ export default class TemplateContextVariable extends TemplateParameter {
   }
 
   toCodeString(): string {
-    if (this._id === undefined) {
-      this._id = TemplateParameter.issueId();
-    }
-    return TemplateContextVariable.CODE_STRING_PREFIX + this._id.toString();
+    return TemplateContextVariable.CODE_STRING_PREFIX + this.id.toString();
   }
 
   toPatternNode(cursor: AstCursor, language: Language): PatternNode {
