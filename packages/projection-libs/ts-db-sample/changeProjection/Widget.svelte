@@ -8,7 +8,7 @@
   import type { FocusGroup } from "@puredit/projections/focus";
   import TextInput from "@puredit/projections/TextInput.svelte";
   import { validateFromList } from "@puredit/projections/shared";
-  import type { ContextGlobal } from "./context";
+  import type { ContextGlobal } from "../context";
 
   export let isNew: boolean;
   export let view: EditorView | null;

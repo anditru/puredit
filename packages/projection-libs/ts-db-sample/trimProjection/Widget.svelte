@@ -8,7 +8,7 @@
   import type { FocusGroup } from "@puredit/projections/focus";
   import { stringLiteralValue, validateFromList } from "@puredit/projections/shared";
   import TextInput from "@puredit/projections/TextInput.svelte";
-  import type { ContextTable } from "./context";
+  import type { ContextTable } from "../context";
 
   export let isNew: boolean;
   export let view: EditorView | null;

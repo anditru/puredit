@@ -9,9 +9,13 @@
   import { tags } from "@lezer/highlight";
 
   export let isNew: boolean;
+  // svelte-ignore unused-export-let
   export let view: EditorView | null;
+  // svelte-ignore unused-export-let
   export let match: Match;
+  // svelte-ignore unused-export-let
   export let context: Context;
+  // svelte-ignore unused-export-let
   export let state: EditorState;
   export let focusGroup: FocusGroup;
 
