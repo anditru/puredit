@@ -3,8 +3,15 @@ import { Decoration } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { zip } from "@puredit/utils";
 import type { Match, Pattern } from "@puredit/parser";
-import type { CodeRange, Context } from "@puredit/parser/match/types";
-import type { Projection, ProjectionPluginConfig, RootProjection, SubProjection } from "../types";
+import type { CodeRange } from "@puredit/parser/match/types";
+import type {
+  ContextInformation,
+  FnContextProvider,
+  Projection,
+  ProjectionPluginConfig,
+  RootProjection,
+  SubProjection,
+} from "../types";
 import type { Template } from "@puredit/parser";
 import type { ProjectionWidgetClass } from "../projection";
 import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
@@ -15,21 +22,25 @@ import {
 import type { AggregatableNodeTypeConfig } from "@puredit/language-config";
 
 export default class DecorationSetBuilder {
-  private config: ProjectionPluginConfig;
-  private decorations: DecorationSet;
-  private isCompletion: boolean;
-  private state: EditorState;
-  private matches: Match[];
+  // Input
+  private config!: ProjectionPluginConfig;
+  private decorations!: DecorationSet;
+  private isCompletion!: boolean;
+  private state!: EditorState;
+  private matches!: Match[];
 
-  private projectionMap: Map<Pattern, RootProjection>;
-  private subProjectionMap: Map<Template, SubProjection>;
-  private newDecorations = Decoration.none;
+  // State
+  private projectionMap!: Map<Pattern, RootProjection>;
+  private subProjectionMap!: Map<Template, SubProjection>;
   private contextBounds: number[] = [];
-  private contexts: object[] = [];
+  private contextInformations: ContextInformation[] = [];
+
+  // Output
+  private newDecorations = Decoration.none;
 
   setProjectionPluginConfig(config: ProjectionPluginConfig) {
     this.config = config;
-    this.contexts = [config.globalContextValues];
+    this.contextInformations = [config.globalContextInformation];
     return this;
   }
 
@@ -68,7 +79,7 @@ export default class DecorationSetBuilder {
       }
 
       const { segmentWidgets, prefixWidget, postfixWidget, contextProvider } = projection;
-      const context = Object.assign({}, ...this.contexts);
+      const context = Object.assign({}, ...this.contextInformations);
       if (contextProvider) {
         this.extractContextFrom(match, contextProvider);
       }
@@ -91,13 +102,15 @@ export default class DecorationSetBuilder {
       this.contextBounds.length &&
       match.from >= this.contextBounds[this.contextBounds.length - 1]
     ) {
-      this.contexts.pop();
+      this.contextInformations.pop();
       this.contextBounds.pop();
     }
   }
 
-  private extractContextFrom(match: Match, contextProvider) {
-    this.contexts.push(contextProvider(match, this.state.doc, Object.assign({}, ...this.contexts)));
+  private extractContextFrom(match: Match, contextProvider: FnContextProvider) {
+    this.contextInformations.push(
+      contextProvider(match, this.state.doc, Object.assign({}, ...this.contextInformations))
+    );
     this.contextBounds.push(match.to);
   }
 
@@ -130,16 +143,16 @@ export default class DecorationSetBuilder {
   private extractSegmentDecoratorsFor(
     match: Match,
     widgets: ProjectionWidgetClass[],
-    context: Context
+    contextInformation: ContextInformation
   ) {
     const ranges = this.getActualRangesFor(match);
 
     for (const [range, Widget] of zip(ranges, widgets)) {
       try {
-        this.updateExistsingSegmentWidgetForRange(range, match, context, Widget);
+        this.updateExistsingSegmentWidgetForRange(range, match, contextInformation, Widget);
       } catch (error) {
         if (error instanceof NoWidgetFound) {
-          this.createNewSegmentWidgetForRange(range, match, context, Widget);
+          this.createNewSegmentWidgetForRange(range, match, contextInformation, Widget);
         } else {
           throw error;
         }
@@ -242,7 +255,7 @@ export default class DecorationSetBuilder {
   private updateExistsingSegmentWidgetForRange(
     range: Range,
     match: Match,
-    context: Context,
+    contextInformation: ContextInformation,
     Widget: ProjectionWidgetClass
   ) {
     let found = false;
@@ -252,7 +265,7 @@ export default class DecorationSetBuilder {
         (decorationFrom === range.from || decorationTo === range.to) &&
         widget instanceof Widget
       ) {
-        widget.set(match, context, this.state);
+        widget.set(match, contextInformation, this.state);
         this.newDecorations = this.newDecorations.update({
           add: [decoration.range(range.from, range.to)],
         });
@@ -268,13 +281,13 @@ export default class DecorationSetBuilder {
   private createNewSegmentWidgetForRange(
     range: Range,
     match: Match,
-    context: Context,
+    contextInformation: ContextInformation,
     Widget: ProjectionWidgetClass
   ) {
     this.newDecorations = this.newDecorations.update({
       add: [
         Decoration.replace({
-          widget: new Widget(this.isCompletion, match, context, this.state),
+          widget: new Widget(this.isCompletion, match, contextInformation, this.state),
         }).range(range.from, range.to),
       ],
     });
@@ -283,13 +296,13 @@ export default class DecorationSetBuilder {
   private extractPostfixDecoratorFor(
     match: Match,
     Widget: ProjectionWidgetClass,
-    context: Context
+    contextInformation: ContextInformation
   ) {
     try {
-      this.updateExistsingPostfixWidgetFor(match, context, Widget);
+      this.updateExistsingPostfixWidgetFor(match, contextInformation, Widget);
     } catch (error) {
       if (error instanceof NoWidgetFound) {
-        this.createNewPostfixWidgetFor(match, context, Widget);
+        this.createNewPostfixWidgetFor(match, contextInformation, Widget);
       } else {
         throw error;
       }
@@ -298,7 +311,7 @@ export default class DecorationSetBuilder {
 
   private updateExistsingPostfixWidgetFor(
     match: Match,
-    context: Context,
+    contextInformation: ContextInformation,
     Widget: ProjectionWidgetClass
   ) {
     let found = false;
@@ -308,7 +321,7 @@ export default class DecorationSetBuilder {
         (decorationFrom === match.from || decorationTo === match.to) &&
         widget instanceof Widget
       ) {
-        widget.set(match, context, this.state);
+        widget.set(match, contextInformation, this.state);
         this.newDecorations = this.newDecorations.update({
           add: [decoration.range(match.to, match.to)],
         });
@@ -321,23 +334,31 @@ export default class DecorationSetBuilder {
     }
   }
 
-  private createNewPostfixWidgetFor(match: Match, context: Context, Widget: ProjectionWidgetClass) {
+  private createNewPostfixWidgetFor(
+    match: Match,
+    contextInformation: ContextInformation,
+    Widget: ProjectionWidgetClass
+  ) {
     this.newDecorations = this.newDecorations.update({
       add: [
         Decoration.widget({
-          widget: new Widget(this.isCompletion, match, context, this.state),
+          widget: new Widget(this.isCompletion, match, contextInformation, this.state),
           side: 1000,
         }).range(match.to, match.to),
       ],
     });
   }
 
-  private extractPrefixDecoratorFor(match: Match, Widget: ProjectionWidgetClass, context: Context) {
+  private extractPrefixDecoratorFor(
+    match: Match,
+    Widget: ProjectionWidgetClass,
+    contextInformation: ContextInformation
+  ) {
     try {
-      this.updateExistsingPrefixWidgetFor(match, context, Widget);
+      this.updateExistsingPrefixWidgetFor(match, contextInformation, Widget);
     } catch (error) {
       if (error instanceof NoWidgetFound) {
-        this.createNewPrefixWidgetFor(match, context, Widget);
+        this.createNewPrefixWidgetFor(match, contextInformation, Widget);
       } else {
         throw error;
       }
@@ -346,7 +367,7 @@ export default class DecorationSetBuilder {
 
   private updateExistsingPrefixWidgetFor(
     match: Match,
-    context: Context,
+    contextInformation: ContextInformation,
     Widget: ProjectionWidgetClass
   ) {
     let found = false;
@@ -356,7 +377,7 @@ export default class DecorationSetBuilder {
         (decorationFrom === match.from || decorationTo === match.to) &&
         widget instanceof Widget
       ) {
-        widget.set(match, context, this.state);
+        widget.set(match, contextInformation, this.state);
         this.newDecorations = this.newDecorations.update({
           add: [decoration.range(match.from, match.from)],
         });
@@ -369,11 +390,15 @@ export default class DecorationSetBuilder {
     }
   }
 
-  private createNewPrefixWidgetFor(match: Match, context: Context, Widget: ProjectionWidgetClass) {
+  private createNewPrefixWidgetFor(
+    match: Match,
+    contextInformation: ContextInformation,
+    Widget: ProjectionWidgetClass
+  ) {
     this.newDecorations = this.newDecorations.update({
       add: [
         Decoration.widget({
-          widget: new Widget(this.isCompletion, match, context, this.state),
+          widget: new Widget(this.isCompletion, match, contextInformation, this.state),
           side: -1000,
         }).range(match.from, match.from),
       ],

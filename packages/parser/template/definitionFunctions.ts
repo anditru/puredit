@@ -3,13 +3,13 @@
  * Implements functions to define template parameters.
  */
 
-import { Context } from "../match/types";
 import TemplateAggregation from "./parameters/templateAggregation";
 import TemplateArgument from "./parameters/templateArgument";
 import TemplateBlock from "./parameters/templateBlock";
 import TemplateContextVariable from "./parameters/templateContextVariable";
 import Template from "./template";
 import TemplateChain from "./parameters/templateChain";
+import { ContextVariableMap } from "@puredit/projections";
 
 /**
  * Defines a TemplateArgument
@@ -32,9 +32,9 @@ export function agg(
   name: string,
   type: string,
   subPatterns: Template[],
-  context: Context = {}
+  contextVariables: ContextVariableMap = {}
 ): TemplateAggregation {
-  return new TemplateAggregation(name, type, subPatterns, context);
+  return new TemplateAggregation(name, type, subPatterns, contextVariables);
 }
 
 /**
@@ -49,9 +49,9 @@ export function chain(
   name: string,
   startPattern: Template,
   linkPatterns: Template[],
-  context: Context = {}
+  contextVariables: ContextVariableMap = {}
 ): TemplateChain {
-  return new TemplateChain(name, startPattern, linkPatterns, context);
+  return new TemplateChain(name, startPattern, linkPatterns, contextVariables);
 }
 
 /**
@@ -59,8 +59,8 @@ export function chain(
  * @param context Context Variables required in the Block
  * @returns TemplateBlock
  */
-export function block(context: Context = {}): TemplateBlock {
-  return new TemplateBlock(context);
+export function block(contextVariables: ContextVariableMap = {}): TemplateBlock {
+  return new TemplateBlock(contextVariables);
 }
 
 /**

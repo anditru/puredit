@@ -1,14 +1,14 @@
 import AstCursor from "../../ast/cursor";
-import { Context } from "../../match/types";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../../pattern/nodes/patternNode";
 import BlockNode from "../../pattern/nodes/blockNode";
 import { Language, loadBlocksConfigFor } from "@puredit/language-config";
+import { ContextVariableMap } from "@puredit/projections";
 
 export default class TemplateBlock extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_block_";
 
-  constructor(public readonly context: Context) {
+  constructor(public readonly contextVariables: ContextVariableMap) {
     super();
   }
 

@@ -3,7 +3,7 @@ import { arg, block, contextVariable } from "@puredit/parser";
 import type { Match } from "@puredit/parser";
 import { stringLiteralValue } from "@puredit/projections/shared";
 import { svelteProjection } from "@puredit/projections/svelte";
-import type { RootProjection } from "@puredit/projections/types";
+import type { ContextInformation, RootProjection } from "@puredit/projections";
 import Widget from "./Widget.svelte";
 import type { ContextColumns, ContextTables } from "../context";
 import { parser } from "../parser";
@@ -32,10 +32,10 @@ export const changeProjection: RootProjection = {
   pattern,
   requiredContextVariables: ["db"],
   segmentWidgets: [widget],
-  contextProvider(match: Match, text: Text, context: OuterContext): InnerContext {
+  contextProvider(match: Match, text: Text, contextInformation: ContextInformation): InnerContext {
     const tableName = stringLiteralValue(match.argsToAstNodeMap.table, text);
     return {
-      columns: context.tables[tableName]?.columns || {},
+      columns: contextInformation.tables[tableName]?.columns || {},
     };
   },
   subProjections: [],

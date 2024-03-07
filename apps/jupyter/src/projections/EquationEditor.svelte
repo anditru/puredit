@@ -1,17 +1,14 @@
 <script type="ts">
   import type { EditorState } from "@codemirror/state";
   import type { EditorView } from "@codemirror/view";
-  import type { SyntaxNode } from "@puredit/parser";
+  import type AstNode from "@puredit/parser/ast/node";
   import type { FocusGroup } from "@puredit/projections/focus";
-  import {
-    stringLiteralValue,
-    stringLiteralValueChange,
-  } from "@puredit/projections/shared";
+  import { stringLiteralValue, stringLiteralValueChange } from "@puredit/projections/shared";
   import { MathfieldElement } from "mathlive";
   import { onDestroy, onMount } from "svelte";
 
   export let view: EditorView | null;
-  export let node: SyntaxNode;
+  export let node: AstNode;
   export let state: EditorState;
   export let focusGroup: FocusGroup | null = null;
 

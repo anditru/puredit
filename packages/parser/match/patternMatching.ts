@@ -1,5 +1,6 @@
 import type {
-  ContextRange,
+  ContextVariableRange,
+  ContextInformationRange,
   PatternMatchingResult,
   Match,
   CandidateMatch,
@@ -7,27 +8,35 @@ import type {
   CodeRange,
   PatternsMap,
 } from "./types";
-import type { Context } from "..";
 import MatchVerification, { DoesNotMatch } from "./matchVerification";
 import AstCursor from "../ast/cursor";
 import Pattern from "../pattern/pattern";
 import { TreeCursor } from "web-tree-sitter";
 import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
 import ChainDecorator from "../pattern/decorators/chainDecorator";
+import { ContextVariableMap } from "@puredit/projections";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.PatternMatching");
 
 export class PatternMatching {
-  private matches: Match[] = [];
-  private contextRanges: ContextRange[] = [];
+  // Input
+  private patternMap: PatternsMap;
   private astCursor: AstCursor;
+  private contextVariables: ContextVariableMap;
+
+  // Output
+  private matches: Match[] = [];
+  private contextVariableRanges: ContextVariableRange[] = [];
+  private contextInformationRanges: ContextInformationRange[] = [];
 
   constructor(
-    private patternMap: PatternsMap,
+    patternMap: PatternsMap,
     cursor: AstCursor | TreeCursor,
-    private context: Context = {}
+    contextVariables: ContextVariableMap = {}
   ) {
+    this.patternMap = patternMap;
+    this.contextVariables = contextVariables;
     if (!(cursor instanceof AstCursor)) {
       this.astCursor = new AstCursor(cursor);
     } else {
@@ -48,7 +57,11 @@ export class PatternMatching {
       }
     } while (this.astCursor.goToNextSibling());
 
-    return { matches: this.matches, contextRanges: this.contextRanges };
+    return {
+      matches: this.matches,
+      contextVariableRanges: this.contextVariableRanges,
+      contextInformationRanges: this.contextInformationRanges,
+    };
   }
 
   private getCandidateMatches(): CandidateMatch[] {
@@ -57,10 +70,10 @@ export class PatternMatching {
     const candidatePatterns = exactlyFittingPatterns.concat(wildCardRootNodePatterns);
 
     const sortedCandidatePatterns = this.sortByPriority(candidatePatterns);
-    const candidateMatches = sortedCandidatePatterns.map((candidatePattern) => ({
+    const candidateMatches: CandidateMatch[] = sortedCandidatePatterns.map((candidatePattern) => ({
       pattern: candidatePattern,
       cursor: this.astCursor.currentNode.walk(),
-      context: this.context,
+      contextVariables: this.contextVariables,
     }));
 
     logger.debug(`Found ${candidateMatches.length} candidate matches`);
@@ -105,6 +118,7 @@ export class PatternMatching {
     );
     const aggregationRanges = this.getAggregationRangesOf(verificationResult);
     const chainRanges = this.getChainRangesOf(verificationResult);
+    // TODO: Extract context information from comments
 
     this.matches.push({
       pattern: verificationResult.pattern,
@@ -165,35 +179,41 @@ export class PatternMatching {
     const aggregationRanges = verificationResult.aggregationToRangesMap[aggregationName];
 
     for (const aggregationRange of aggregationRanges) {
+      this.contextVariableRanges.push({
+        from: aggregationRange.node.startIndex,
+        to: aggregationRange.node.endIndex,
+        contextVariables: aggregationRange.contextVariables,
+      });
+
       const aggregationPatternMatching = new PatternMatching(
         subPatternMap,
         aggregationRange.node.walk(),
-        Object.assign({}, this.context, aggregationRange.context)
+        Object.assign({}, this.contextVariables, aggregationRange.contextVariables)
       );
       const result = aggregationPatternMatching.executeOnlySpanningEntireRange();
 
       this.matches = this.matches.concat(result.matches);
-      this.contextRanges = this.contextRanges.concat(result.contextRanges);
+      this.contextVariableRanges = this.contextVariableRanges.concat(result.contextVariableRanges);
     }
   }
 
   private findMatchesInBlockRangesOf(verificationResult: VerificationResult): void {
     for (const blockRange of verificationResult.blockRanges) {
-      this.contextRanges.push({
+      this.contextVariableRanges.push({
         from: blockRange.node.startIndex,
         to: blockRange.node.endIndex,
-        context: blockRange.context,
+        contextVariables: blockRange.contextVariables,
       });
 
       const blockPatternMatching = new PatternMatching(
         this.patternMap,
         blockRange.node.walk(),
-        Object.assign({}, this.context, blockRange.context)
+        Object.assign({}, this.contextVariables, blockRange.contextVariables)
       );
       const result = blockPatternMatching.execute();
 
       this.matches = this.matches.concat(result.matches);
-      this.contextRanges = this.contextRanges.concat(result.contextRanges);
+      this.contextVariableRanges = this.contextVariableRanges.concat(result.contextVariableRanges);
     }
   }
 
@@ -211,14 +231,20 @@ export class PatternMatching {
     const chainStartPatternMap = pattern.getStartPatternMapFor(chainName);
     const chainStartRange = verificationResult.chainToStartRangeMap[chainName];
 
+    this.contextVariableRanges.push({
+      from: chainStartRange.node.startIndex,
+      to: chainStartRange.node.endIndex,
+      contextVariables: chainStartRange.contextVariables,
+    });
+
     const chainStartPatternMatching = new PatternMatching(
       chainStartPatternMap,
       chainStartRange.node.walk(),
-      Object.assign({}, this.context, chainStartRange.context)
+      Object.assign({}, this.contextVariables, chainStartRange.contextVariables)
     );
     const result = chainStartPatternMatching.executeOnlySpanningEntireRange();
     this.matches = this.matches.concat(result.matches);
-    this.contextRanges = this.contextRanges.concat(result.contextRanges);
+    this.contextVariableRanges = this.contextVariableRanges.concat(result.contextVariableRanges);
   }
 
   private findMatchesInChainLinkRangesOf(verificationResult: VerificationResult): void {
@@ -236,10 +262,16 @@ export class PatternMatching {
     const chainLinkRanges = verificationResult.chainToLinkRangesMap[chainName];
 
     for (const chainLinkRange of chainLinkRanges) {
+      this.contextVariableRanges.push({
+        from: chainLinkRange.node.startIndex,
+        to: chainLinkRange.node.endIndex,
+        contextVariables: chainLinkRange.contextVariables,
+      });
+
       const chainLinkPatternMatching = new PatternMatching(
         chainLinkPatterns,
         chainLinkRange.node.walk(),
-        Object.assign({}, this.context, chainLinkRange.context)
+        Object.assign({}, this.contextVariables, chainLinkRange.contextVariables)
       );
       const result = chainLinkPatternMatching.executeOnlySpanningEntireRange();
 
@@ -251,7 +283,7 @@ export class PatternMatching {
         });
 
       this.matches = this.matches.concat(result.matches);
-      this.contextRanges = this.contextRanges.concat(result.contextRanges);
+      this.contextVariableRanges = this.contextVariableRanges.concat(result.contextVariableRanges);
     }
   }
 
@@ -260,23 +292,27 @@ export class PatternMatching {
       const childPatternMatching = new PatternMatching(
         this.patternMap,
         this.astCursor,
-        this.context
+        this.contextVariables
       );
       const result = childPatternMatching.execute();
       this.matches = this.matches.concat(result.matches);
-      this.contextRanges = this.contextRanges.concat(result.contextRanges);
+      this.contextVariableRanges = this.contextVariableRanges.concat(result.contextVariableRanges);
 
       this.astCursor.goToParent();
     }
   }
 
-  executeOnlySpanningEntireRange() {
+  executeOnlySpanningEntireRange(): PatternMatchingResult {
     logger.debug("Starting new pattern matching only spanning entire range");
     const candidateMatches = this.getCandidateMatches();
     const verificationResult = this.verify(candidateMatches);
     if (verificationResult) {
       this.postProcess(verificationResult);
     }
-    return { matches: this.matches, contextRanges: this.contextRanges };
+    return {
+      matches: this.matches,
+      contextVariableRanges: this.contextVariableRanges,
+      contextInformationRanges: this.contextInformationRanges,
+    };
   }
 }

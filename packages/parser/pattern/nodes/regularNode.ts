@@ -1,7 +1,7 @@
 import { loadAggregatableNodeTypes } from "@puredit/language-config";
 import AstCursor from "../../ast/cursor";
-import { Context } from "../../match/types";
 import PatternNode from "./patternNode";
+import { ContextVariableMap } from "@puredit/projections";
 
 export default class RegularNode extends PatternNode {
   constructor(
@@ -17,7 +17,7 @@ export default class RegularNode extends PatternNode {
     return [this.type];
   }
 
-  matches(astCursor: AstCursor, context?: Context): boolean {
+  matches(astCursor: AstCursor, contextVariables?: ContextVariableMap): boolean {
     if (astCursor.currentFieldName !== this.fieldName) {
       return false;
     }

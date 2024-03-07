@@ -3,7 +3,7 @@ import { Decoration, EditorView } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { createPatternMap, PatternMatching } from "@puredit/parser";
 import { pickedCompletion } from "@codemirror/autocomplete";
-import type { ContextRange, PatternsMap } from "@puredit/parser/match/types";
+import type { ContextVariableRange, PatternsMap } from "@puredit/parser";
 import type { ProjectionPluginConfig } from "../types";
 import DecorationSetBuilder from "./decorationSetBuilder";
 
@@ -11,7 +11,7 @@ export interface ProjectionState {
   config: ProjectionPluginConfig;
   patternMap: PatternsMap;
   decorations: DecorationSet;
-  contextRanges: ContextRange[];
+  contextVariableRanges: ContextVariableRange[];
 }
 
 export function createProjectionState(
@@ -21,7 +21,7 @@ export function createProjectionState(
   const patternMap = createPatternMap(config.projections.map((p) => p.pattern));
   const cursor = config.parser.parse(state.sliceDoc(0)).walk();
   const patternMatching = new PatternMatching(patternMap, cursor, config.globalContextVariables);
-  const { matches, contextRanges } = patternMatching.execute();
+  const { matches, contextVariableRanges } = patternMatching.execute();
 
   const decorationSetBuilder = new DecorationSetBuilder();
   decorationSetBuilder
@@ -32,7 +32,7 @@ export function createProjectionState(
     .setMatches(matches);
   const decorations = decorationSetBuilder.build();
 
-  return { config, patternMap, decorations, contextRanges };
+  return { config, patternMap, decorations, contextVariableRanges };
 }
 
 export const projectionState = StateField.define<ProjectionState>({
@@ -48,7 +48,7 @@ export const projectionState = StateField.define<ProjectionState>({
     // TODO: reuse previous tree for incremental parsing
     const cursor = config.parser.parse(state.sliceDoc(0)).walk();
     const patternMatching = new PatternMatching(patternMap, cursor, config.globalContextVariables);
-    const { matches, contextRanges } = patternMatching.execute();
+    const { matches, contextVariableRanges } = patternMatching.execute();
 
     const decorationSetBuilder = new DecorationSetBuilder();
     decorationSetBuilder
@@ -59,7 +59,7 @@ export const projectionState = StateField.define<ProjectionState>({
       .setMatches(matches);
     decorations = decorationSetBuilder.build();
 
-    return { config, patternMap, decorations, contextRanges };
+    return { config, patternMap, decorations, contextVariableRanges };
   },
 
   provide(field: StateField<ProjectionState>) {

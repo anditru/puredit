@@ -1,12 +1,14 @@
 import AstCursor, { Keyword } from "../ast/cursor";
 import type {
+  AstNodeMap,
   CandidateMatch,
   CodeRange,
   CodeRangeMap,
   CodeRangesMap,
   VerificationResult,
 } from "./types";
-import { PatternMatching, type Context } from "..";
+import { PatternMatching } from "..";
+import { ContextVariableMap } from "@puredit/projections";
 import Pattern from "../pattern/pattern";
 import ArgumentNode from "../pattern/nodes/argumentNode";
 import BlockNode from "../pattern/nodes/blockNode";
@@ -15,7 +17,6 @@ import RegularNode from "../pattern/nodes/regularNode";
 import AggregationNode from "../pattern/nodes/aggregationNode";
 import ChainNode from "../pattern/nodes/chainNode";
 import ChainDecorator from "../pattern/decorators/chainDecorator";
-import AstNode from "../ast/node";
 import ChainContinuationNode from "../pattern/nodes/chainContinuationNode";
 import {
   Language,
@@ -27,12 +28,14 @@ import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.MatchVerification");
 
 export default class MatchVerification {
+  // Input
   private pattern: Pattern;
   private patternCursor: PatternCursor;
   private astCursor: AstCursor;
-  private context: Context;
+  private contextVariables: ContextVariableMap;
 
-  private argsToAstNodeMap: Record<string, AstNode> = {};
+  // Output
+  private argsToAstNodeMap: AstNodeMap = {};
   private blockRanges: CodeRange[] = [];
   private aggregationToRangesMap: CodeRangesMap = {};
   private chainToStartRangeMap: CodeRangeMap = {};
@@ -42,7 +45,7 @@ export default class MatchVerification {
     this.pattern = this.candidateMatch.pattern;
     this.patternCursor = new PatternCursor(this.pattern);
     this.astCursor = this.candidateMatch.cursor;
-    this.context = this.candidateMatch.context;
+    this.contextVariables = this.candidateMatch.contextVariables;
   }
 
   /**
@@ -148,7 +151,7 @@ export default class MatchVerification {
 
     return aggregationPartRoots.map((aggregationPartRoot) => ({
       node: aggregationPartRoot,
-      context: aggregationNode.templateAggregation.context,
+      contextVariables: aggregationNode.templateAggregation.contextVariables,
       from: aggregationPartRoot.startIndex,
       to: aggregationPartRoot.endIndex,
       language: this.pattern.language,
@@ -239,7 +242,7 @@ export default class MatchVerification {
     const currentAstNode = this.astCursor.currentNode;
     this.chainToLinkRangesMap[chainName].push({
       node: currentAstNode,
-      context: {},
+      contextVariables: chainNode.templateChain.contextVariables,
       from,
       to: currentAstNode.endIndex,
       language: this.pattern.language,
@@ -252,7 +255,7 @@ export default class MatchVerification {
 
     this.chainToStartRangeMap[chainName] = {
       node: currentAstNode,
-      context: {},
+      contextVariables: chainNode.templateChain.contextVariables,
       from: currentAstNode.startIndex,
       to: currentAstNode.endIndex,
       language: this.pattern.language,
@@ -268,7 +271,7 @@ export default class MatchVerification {
     const chainStartPatternMatching = new PatternMatching(
       chainStartPatternMap,
       this.astCursor,
-      this.context
+      this.contextVariables
     );
     const result = chainStartPatternMatching.executeOnlySpanningEntireRange();
     return result.matches.length > 0;
@@ -308,11 +311,11 @@ export default class MatchVerification {
     const rangeModifierStart = 1;
     const rangeModifierEnd = this.pattern.language === Language.TypeScript ? 1 : 0;
     return {
-      node: this.astCursor.currentNode,
-      context: blockNode.templateBlock.context,
       from: from + rangeModifierStart,
       to: this.astCursor.endIndex - rangeModifierEnd,
       language: this.pattern.language,
+      node: this.astCursor.currentNode,
+      contextVariables: blockNode.templateBlock.contextVariables,
     };
   }
 
@@ -322,7 +325,7 @@ export default class MatchVerification {
       `Visiting RegularNode of type ${regularNode.type} comparing to AST node of type ${this.astCursor.currentNode.type}`
     );
 
-    if (!regularNode.matches(this.astCursor, this.context)) {
+    if (!regularNode.matches(this.astCursor, this.contextVariables)) {
       logger.debug("AST does not match RegularNode.");
       throw new DoesNotMatch();
     }

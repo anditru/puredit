@@ -2,8 +2,9 @@
   import { onMount } from "svelte";
   import type { FocusGroup } from "@puredit/projections/focus";
   import type { EditorView } from "codemirror";
-  import type { Context, Match } from "@puredit/parser";
+  import type { Match } from "@puredit/parser";
   import type { EditorState } from "@codemirror/state";
+  import { ContextInformation } from "./types";
 
   //svelte-ignore unused-export-let
   export let isNew: boolean;
@@ -12,7 +13,7 @@
   //svelte-ignore unused-export-let
   export let match: Match;
   //svelte-ignore unused-export-let
-  export let context: Context;
+  export let context: ContextInformation;
   //svelte-ignore unused-export-let
   export let state: EditorState;
   //svelte-ignore unused-export-let

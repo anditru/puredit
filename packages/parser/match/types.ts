@@ -2,22 +2,28 @@ import AstNode from "../ast/node";
 import Pattern from "../pattern/pattern";
 import AstCursor from "../ast/cursor";
 import { Language } from "@puredit/language-config";
+import { ContextInformation, ContextVariableMap } from "@puredit/projections";
 
 export type PatternMap = Record<string, Pattern>;
 export type PatternsMap = Record<string, Pattern[]>;
 
-export type Context = Record<string, any>;
-export interface ContextRange {
+export interface ContextVariableRange {
   from: number;
   to: number;
-  context: Context;
+  contextVariables: ContextVariableMap;
+}
+
+export interface ContextInformationRange {
+  from: number;
+  to: number;
+  contextInformation: ContextInformation;
 }
 
 // Result of Phase 1 (Generation of candidate matches)
 export interface CandidateMatch {
   pattern: Pattern;
   cursor: AstCursor;
-  context: Context;
+  contextVariables: ContextVariableMap;
 }
 
 // Result of Phase 2 (Verification of candidate matches)
@@ -35,11 +41,11 @@ export type CodeRangesMap = Record<string, CodeRange[]>;
 export type CodeRangeMap = Record<string, CodeRange>;
 
 export interface CodeRange {
-  node: AstNode;
-  context: Context;
   from: number;
   to: number;
   language: Language;
+  node: AstNode;
+  contextVariables: ContextVariableMap;
 }
 
 // Result of Phase 3 (Post-processing)
@@ -57,5 +63,6 @@ export interface Match {
 // Result of Phase 4 (Consolidation)
 export interface PatternMatchingResult {
   matches: Match[];
-  contextRanges: ContextRange[];
+  contextVariableRanges: ContextVariableRange[];
+  contextInformationRanges: ContextInformationRange[];
 }

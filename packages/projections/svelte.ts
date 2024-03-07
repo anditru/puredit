@@ -1,9 +1,10 @@
 import type { EditorView } from "@codemirror/view";
 import { EditorState, EditorSelection } from "@codemirror/state";
-import type { Context, Match } from "@puredit/parser";
+import type { Match } from "@puredit/parser";
 import { FocusGroup } from "./focus";
 import type { FocusGroupHandler } from "./focus";
 import { ProjectionWidget } from "./projection";
+import { ContextInformation } from "./types";
 
 interface Props {
   isNew: boolean;
@@ -21,7 +22,11 @@ export const svelteProjection = (Component: ComponentClass<Props>) =>
     component!: SvelteComponent<Props>;
     focusGroup!: FocusGroup;
 
-    protected initialize(match: Match, context: Context, state: EditorState): HTMLElement {
+    protected initialize(
+      match: Match,
+      context: ContextInformation,
+      state: EditorState
+    ): HTMLElement {
       const target = document.createElement("span");
       this.focusGroup = new FocusGroup(this);
       this.component = new Component({
@@ -38,7 +43,7 @@ export const svelteProjection = (Component: ComponentClass<Props>) =>
       return target;
     }
 
-    protected update(match: Match, context: Context, state: EditorState): void {
+    protected update(match: Match, context: ContextInformation, state: EditorState): void {
       this.component.$set({ isNew: this.isNew, match, context, state });
     }
 

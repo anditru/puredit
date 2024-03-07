@@ -1,13 +1,12 @@
-import type { Context } from "@puredit/parser";
-import type { RootProjection, SubProjection } from "../types";
+import type { ContextVariableMap, RootProjection, SubProjection } from "../types";
 import type { Completion } from "@codemirror/autocomplete";
 import { indentString } from "@codemirror/language";
 import { pickedCompletion } from "@codemirror/autocomplete";
 
 export default class CompletionsBuilder {
-  private indentation: number;
-  private context: Context;
-  private rootProjections: RootProjection[];
+  private indentation!: number;
+  private contextVariables!: ContextVariableMap;
+  private rootProjections!: RootProjection[];
   private subProjections: SubProjection[] = [];
 
   private completions: Completion[] = [];
@@ -17,8 +16,8 @@ export default class CompletionsBuilder {
     return this;
   }
 
-  setContext(context: Context): CompletionsBuilder {
-    this.context = context;
+  setContext(contextVariables: ContextVariableMap): CompletionsBuilder {
+    this.contextVariables = contextVariables;
     return this;
   }
 
@@ -50,7 +49,7 @@ export default class CompletionsBuilder {
   private requiredContextExistsFor(projection: RootProjection | SubProjection): boolean {
     let requiredContextExists = true;
     for (const variable of projection.requiredContextVariables) {
-      if (!Object.prototype.hasOwnProperty.call(this.context, variable)) {
+      if (!Object.prototype.hasOwnProperty.call(this.contextVariables, variable)) {
         requiredContextExists = false;
         break;
       }

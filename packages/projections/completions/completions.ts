@@ -1,9 +1,9 @@
 import { getIndentation } from "@codemirror/language";
 import type { CompletionContext } from "@codemirror/autocomplete";
 import type { CompletionResult } from "@codemirror/autocomplete";
-import type { Context } from "@puredit/parser";
 import { projectionState } from "../state/state";
 import CompletionsBuilder from "./completionResultBuilder";
+import { ContextVariableMap } from "..";
 
 /**
  * Transforms the registered projections into suggestions for the code completion
@@ -18,18 +18,18 @@ export function completions(completionContext: CompletionContext): CompletionRes
 
   const indentation = getIndentation(completionContext.state, word.from) || 0;
 
-  const { config, contextRanges } = completionContext.state.field(projectionState);
-  const context: Context = { ...config.globalContextVariables };
-  for (const contextRange of contextRanges) {
+  const { config, contextVariableRanges } = completionContext.state.field(projectionState);
+  const contextVariables: ContextVariableMap = { ...config.globalContextVariables };
+  for (const contextRange of contextVariableRanges) {
     if (contextRange.from <= word.from && contextRange.to >= word.to) {
-      Object.assign(context, contextRange.context);
+      Object.assign(contextVariables, contextRange.contextVariables);
     }
   }
 
   const completionsBuilder = new CompletionsBuilder();
   const options = completionsBuilder
     .setIndendation(indentation)
-    .setContext(context)
+    .setContext(contextVariables)
     .setRootProjections(config.projections)
     .build();
 

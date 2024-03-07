@@ -1,10 +1,10 @@
 import AstCursor from "../../ast/cursor";
 import Template from "../template";
-import { Context } from "../../match/types";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../../pattern/nodes/patternNode";
 import ChainNode from "../../pattern/nodes/chainNode";
 import { Language } from "@puredit/language-config";
+import { ContextVariableMap } from "@puredit/projections";
 
 export default class TemplateChain extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_chain_";
@@ -13,7 +13,7 @@ export default class TemplateChain extends TemplateParameter {
     public readonly name: string,
     public readonly startPattern: Template,
     public readonly linkPatterns: Template[],
-    public readonly context: Context = {}
+    public readonly contextVariables: ContextVariableMap
   ) {
     super();
   }

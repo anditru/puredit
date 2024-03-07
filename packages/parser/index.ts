@@ -8,6 +8,14 @@ export { Parser } from "./parse/internal";
 export { arg, agg, chain, block, contextVariable } from "./template/definitionFunctions";
 export { PatternMatching } from "./match/patternMatching";
 export { createPatternMap } from "./common";
-export type { PatternMap, AstNodeMap, Match, Context } from "./match/types";
+export type {
+  PatternMap,
+  AstNodeMap,
+  Match,
+  CodeRange,
+  ContextInformationRange,
+  ContextVariableRange,
+  PatternsMap,
+} from "./match/types";
 export type { Pattern, PatternNode };
 export { Template, TreePath };

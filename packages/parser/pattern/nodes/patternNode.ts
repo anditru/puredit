@@ -1,5 +1,5 @@
+import { ContextVariableMap } from "@puredit/projections";
 import AstCursor from "../../ast/cursor";
-import { Context } from "../../match/types";
 
 export default abstract class PatternNode {
   public fieldName: string | undefined;
@@ -73,6 +73,6 @@ export default abstract class PatternNode {
     this._parent = parent;
   }
 
-  abstract matches(astCursor: AstCursor, context?: Context): boolean;
+  abstract matches(astCursor: AstCursor, contextVariables?: ContextVariableMap): boolean;
   abstract getMatchedTypes(): string[];
 }

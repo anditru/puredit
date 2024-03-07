@@ -6,12 +6,13 @@
   import { onMount } from "svelte";
 
   import EquationEditor from "./EquationEditor.svelte";
+  import type { ContextInformation } from "@puredit/projections";
 
   export let isNew: boolean;
   export let view: EditorView | null;
   export let match: Match;
   // svelte-ignore unused-export-let
-  export let context: object;
+  export let context: ContextInformation;
   export let state: EditorState;
   export let focusGroup: FocusGroup;
 

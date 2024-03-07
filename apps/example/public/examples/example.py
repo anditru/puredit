@@ -84,6 +84,6 @@ filtered_students = (students.select(
 )
 
 # CONTEXT: { item: string, item_price: number, quantity: number }
-extended_pices = pices.with_columns(
+extended_prices = prices.with_columns(
     (pl.col("item_pice") + pl.col("quantity")).alias("total_price")
 )
