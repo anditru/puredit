@@ -58,11 +58,11 @@ export interface Match {
   aggregationRanges: CodeRange[];
   chainRanges: CodeRange[];
   blockRanges: CodeRange[];
+  contextInformation: ContextInformation;
 }
 
 // Result of Phase 4 (Consolidation)
 export interface PatternMatchingResult {
   matches: Match[];
   contextVariableRanges: ContextVariableRange[];
-  contextInformationRanges: ContextInformationRange[];
 }

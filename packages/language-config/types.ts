@@ -10,6 +10,7 @@ export type LanguageConfig = {
   aggregations: AggregationsConfig;
   chains: ChainsConfig;
   blocks: BlocksConfig;
+  comments: CommentsConfig;
 };
 
 export type ArgumentsConfig = {
@@ -44,6 +45,14 @@ export type ChainableNodeTypeConfig = {
 export type BlocksConfig = {
   blockNodeType: string;
   draft: string;
+};
+
+export type CommentsConfig = {
+  commentTypes: Record<string, CommentTypeConfig>;
+};
+
+export type CommentTypeConfig = {
+  startTokenRegexes: string[];
 };
 
 export const typePlaceHolder = "<type>";

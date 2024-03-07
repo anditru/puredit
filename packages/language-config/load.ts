@@ -6,6 +6,7 @@ import {
   BlocksConfig,
   ChainableNodeTypeConfig,
   ChainsConfig,
+  CommentsConfig,
   Language,
 } from "./types";
 
@@ -55,4 +56,8 @@ export function loadChainableNodeTypesFor(language: Language): string[] {
 
 export function loadBlocksConfigFor(language: Language): BlocksConfig {
   return languageConfigs[language].blocks;
+}
+
+export function loadCommentsConfigFor(language: Language): CommentsConfig {
+  return languageConfigs[language].comments;
 }

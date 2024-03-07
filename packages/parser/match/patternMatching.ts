@@ -1,6 +1,5 @@
 import type {
   ContextVariableRange,
-  ContextInformationRange,
   PatternMatchingResult,
   Match,
   CandidateMatch,
@@ -15,6 +14,7 @@ import { TreeCursor } from "web-tree-sitter";
 import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
 import ChainDecorator from "../pattern/decorators/chainDecorator";
 import { ContextVariableMap } from "@puredit/projections";
+import CommentContextExtraction from "./commentContextExtraction";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.PatternMatching");
@@ -28,7 +28,6 @@ export class PatternMatching {
   // Output
   private matches: Match[] = [];
   private contextVariableRanges: ContextVariableRange[] = [];
-  private contextInformationRanges: ContextInformationRange[] = [];
 
   constructor(
     patternMap: PatternsMap,
@@ -60,7 +59,6 @@ export class PatternMatching {
     return {
       matches: this.matches,
       contextVariableRanges: this.contextVariableRanges,
-      contextInformationRanges: this.contextInformationRanges,
     };
   }
 
@@ -116,9 +114,9 @@ export class PatternMatching {
     logger.debug(
       `Postprocessing verification result with pattern ${verificationResult.pattern.name}`
     );
+    const contextInformation = this.extractContextInformation(verificationResult);
     const aggregationRanges = this.getAggregationRangesOf(verificationResult);
     const chainRanges = this.getChainRangesOf(verificationResult);
-    // TODO: Extract context information from comments
 
     this.matches.push({
       pattern: verificationResult.pattern,
@@ -129,12 +127,23 @@ export class PatternMatching {
       aggregationRanges,
       chainRanges,
       blockRanges: verificationResult.blockRanges,
+      contextInformation,
     });
 
     this.findMatchesInAggregationRangesOf(verificationResult);
     this.findMatchesInChainStartRangesOf(verificationResult);
     this.findMatchesInChainLinkRangesOf(verificationResult);
     this.findMatchesInBlockRangesOf(verificationResult);
+  }
+
+  private extractContextInformation(verificationResult: VerificationResult) {
+    const commentContextExtraction = new CommentContextExtraction(verificationResult);
+    const commentContext = commentContextExtraction.execute();
+    if (commentContext) {
+      return { commentContext };
+    } else {
+      return {};
+    }
   }
 
   private getAggregationRangesOf(verificationResult: VerificationResult): CodeRange[] {
@@ -312,7 +321,6 @@ export class PatternMatching {
     return {
       matches: this.matches,
       contextVariableRanges: this.contextVariableRanges,
-      contextInformationRanges: this.contextInformationRanges,
     };
   }
 }

@@ -56,6 +56,13 @@ const languageConfigs: Record<Language, LanguageConfig> = {
       blockNodeType: "block",
       draft: "pass # instructions go here",
     },
+    comments: {
+      commentTypes: {
+        comment: {
+          startTokenRegexes: ["#"],
+        },
+      },
+    },
   },
   [Language.TypeScript]: {
     arguments: {
@@ -92,6 +99,13 @@ const languageConfigs: Record<Language, LanguageConfig> = {
     blocks: {
       blockNodeType: "statement_block",
       draft: "{\n  // instructions go here\n}",
+    },
+    comments: {
+      commentTypes: {
+        comment: {
+          startTokenRegexes: ["//", "/*"],
+        },
+      },
     },
   },
 };

@@ -47,7 +47,7 @@ x = mathdsl.evaluate("r^r", locals())
 print("x:", x)
 
 # 5. Example: Projections with aggregations and chains
-# CONTEXT: { city: string, date: string, temperature: number }
+# CONTEXT: { "city": "string", "date": "string", "temperature": "number" }
 aggregated_weather = weather.pivot(
     index=[
         "date"
@@ -67,7 +67,7 @@ unpivoted_weather = aggregated_weather.melt(
     value_name="average_temperature"
 )
 
-# CONTEXT: { first_name: string, last_name: string, age: number, semester: number }
+# CONTEXT: { "first_name": "string", "last_name": "string", "age": "number", "semester": "number" }
 filtered_students = (students.select(
         pl.col("first_name").name.toLowerCase(),
         "age",
@@ -83,7 +83,7 @@ filtered_students = (students.select(
     .drop("LastName")
 )
 
-# CONTEXT: { item: string, item_price: number, quantity: number }
+# CONTEXT: { "item": "string", "item_price": "number", "quantity": "number" }
 extended_prices = prices.with_columns(
     (pl.col("item_pice") + pl.col("quantity")).alias("total_price")
 )
