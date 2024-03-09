@@ -22,10 +22,6 @@ export default class TemplateAggregation extends TemplateParameter {
     return TemplateAggregation.CODE_STRING_PREFIX + this.id.toString();
   }
 
-  getCodeStringsForParts(): string[] {
-    return this.subPatterns.map((pattern) => pattern.toCodeString());
-  }
-
   toPatternNode(cursor: AstCursor, language: Language): PatternNode {
     return new TemporaryAggregationNode(
       language,

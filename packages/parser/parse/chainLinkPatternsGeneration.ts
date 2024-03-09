@@ -8,6 +8,7 @@ import { loadChainableNodeTypeConfigFor, loadChainsConfigFor } from "@puredit/la
 import { NodeTransformVisitor, PatternGeneration } from "./internal";
 import TemplateChain from "../template/parameters/templateChain";
 import ChainContinuationNode from "../pattern/nodes/chainContinuationNode";
+import CodeString from "../template/codeString";
 
 export default class ChainLinkPatternsGeneration extends PatternGeneration {
   private chainsConfig: ChainsConfig | undefined;
@@ -46,9 +47,9 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
     return pattern;
   }
 
-  private buildCodeString(): string {
+  private buildCodeString(): CodeString {
     const linkCodeString = this.template!.toCodeString();
-    return `a.${linkCodeString}`;
+    return linkCodeString.insertInto("a.<link>", "<link>");
   }
 
   private extractChainLinkPattern(linkCallRoot: PatternNode): BasePattern {

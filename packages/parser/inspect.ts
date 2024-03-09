@@ -10,6 +10,7 @@ import AstNode from "./ast/node";
 import PatternNode from "./pattern/nodes/patternNode";
 import { Language } from "@puredit/language-config";
 import Template from "./template/template";
+import CodeString from "./template/codeString";
 
 export function patternToString(node: PatternNode, indent = ""): string {
   let out = indent + (node.fieldName ? node.fieldName + ": " : "") + node.type;
@@ -27,7 +28,10 @@ export function patternToString(node: PatternNode, indent = ""): string {
 
 export function syntaxNodeToString(node: AstNode, language: Language, indent = ""): string {
   const nodeTransformVisitor = new NodeTransformVisitor(new Template("test", language, [], []));
-  return patternToString(nodeTransformVisitor.visit(node.walk())[0], indent);
+  return patternToString(
+    nodeTransformVisitor.visit(node.walk(), new CodeString(node.text))[0],
+    indent
+  );
 }
 
 export function argMapToString(args: AstNodeMap, language: Language, indent = ""): string {

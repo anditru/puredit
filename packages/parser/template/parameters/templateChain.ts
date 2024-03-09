@@ -22,14 +22,6 @@ export default class TemplateChain extends TemplateParameter {
     return TemplateChain.CODE_STRING_PREFIX + this.id.toString();
   }
 
-  getCodeStringForChainStart(): string {
-    return this.startPattern.toCodeString();
-  }
-
-  getCodeStringsForChainLinks(): string[] {
-    return this.linkPatterns.map((pattern) => pattern.toCodeString());
-  }
-
   toPatternNode(cursor: AstCursor, language: Language): PatternNode {
     return new ChainNode(language, cursor.currentNode.text, cursor.currentFieldName, this);
   }

@@ -3,6 +3,7 @@ import TemplateParameter from "./parameters/templateParameter";
 import TemplateAggregation from "./parameters/templateAggregation";
 import TemplateChain from "./parameters/templateChain";
 import { Language } from "@puredit/language-config";
+import CodeString from "./codeString";
 
 export default class Template {
   constructor(
@@ -30,15 +31,8 @@ export default class Template {
     return this.params.filter((param) => param instanceof TemplateChain) as TemplateChain[];
   }
 
-  toCodeString(): string {
-    const substitutions = this.params.map((param) => {
-      if (isString(param)) {
-        return param;
-      } else {
-        return param.toCodeString();
-      }
-    });
-    return String.raw(this.templateStrings!, ...substitutions);
+  toCodeString(): CodeString {
+    return CodeString.fromTemplate(this.templateStrings!, this.params);
   }
 
   toDraftString(): string {

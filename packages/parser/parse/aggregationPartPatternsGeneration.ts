@@ -5,6 +5,7 @@ import PatternCursor from "../pattern/cursor";
 import PatternNode from "../pattern/nodes/patternNode";
 import { AggregatableNodeTypeConfig, aggregationPlaceHolder } from "@puredit/language-config";
 import { PatternGeneration, NodeTransformVisitor } from "./internal";
+import CodeString from "../template/codeString";
 
 export default class AggregationPartPatternsGeneration extends PatternGeneration {
   private nodeTypeConfig: AggregatableNodeTypeConfig | undefined;
@@ -35,10 +36,10 @@ export default class AggregationPartPatternsGeneration extends PatternGeneration
     return pattern;
   }
 
-  private buildCodeString(): string {
+  private buildCodeString(): CodeString {
     const contextTemplate = this.nodeTypeConfig!.contextTemplate;
     const partCodeString = this.template!.toCodeString();
-    return contextTemplate.replace(aggregationPlaceHolder, partCodeString);
+    return partCodeString.insertInto(contextTemplate, aggregationPlaceHolder);
   }
 
   private extractAggregationPattern(patternTreeRoot: PatternNode) {
@@ -52,7 +53,7 @@ export default class AggregationPartPatternsGeneration extends PatternGeneration
 
   private getAggregationRootPath() {
     const contextTemplate = this.nodeTypeConfig!.contextTemplate;
-    const contextTemplateTree = this.transformToPatternTree(contextTemplate);
+    const contextTemplateTree = this.transformToPatternTree(new CodeString(contextTemplate));
     const contextTemplatePattern = new BasePattern(
       contextTemplateTree,
       this.template! // TODO: Find a more sensible template to pass here

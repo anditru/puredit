@@ -1,21 +1,23 @@
 import AstCursor from "../ast/cursor";
-import TemplateParameter from "../template/parameters/templateParameter";
 import PatternNode from "../pattern/nodes/patternNode";
 import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
 import TemporaryAggregationNode from "../pattern/nodes/temporaryAggregationNode";
 import Template from "../template/template";
 import { Language } from "@puredit/language-config";
+import ParameterTable from "../template/codeString";
 
 export default class NodeTransformVisitor {
-  private cursor: AstCursor | undefined;
   private language: Language;
+  private cursor: AstCursor | undefined;
+  private codeString: ParameterTable | undefined;
 
   constructor(template: Template) {
     this.language = template.language;
   }
 
-  visit(cursor: AstCursor): PatternNode[] {
+  visit(cursor: AstCursor, codeString: ParameterTable): PatternNode[] {
     this.cursor = cursor;
+    this.codeString = codeString;
     return this.recurse();
   }
 
@@ -80,21 +82,15 @@ export default class NodeTransformVisitor {
   }
 
   private transformAtomicNode(): PatternNode {
-    if (this.cursor!.currentNode.isTemplateParameterNode()) {
-      const parameterId = this.cursor!.currentNode.getTemplateParameterId();
-      const correspondingParameter = this.findTemplateParameterBy(parameterId);
-      return correspondingParameter.toPatternNode(this.cursor!, this.language);
+    const templateParameter = this.codeString!.resolveParameter(
+      this.cursor!.currentNode.startIndex,
+      this.cursor!.currentNode.endIndex
+    );
+    if (templateParameter) {
+      return templateParameter.toPatternNode(this.cursor!, this.language);
     } else {
       return this.transformRegularNode();
     }
-  }
-
-  private findTemplateParameterBy(id: number) {
-    const result = TemplateParameter.templateParameterRegistry.get(id);
-    if (!result) {
-      throw new Error(`No parameter with ID ${id} found`);
-    }
-    return result;
   }
 
   private transformRegularNode() {

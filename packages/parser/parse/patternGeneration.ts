@@ -17,6 +17,7 @@ import {
   CompletePatternGeneration,
 } from "./internal";
 import AggregationNode from "../pattern/nodes/aggregationNode";
+import CodeString from "../template/codeString";
 
 export default abstract class PatternGeneration {
   protected template: Template | undefined;
@@ -37,12 +38,12 @@ export default abstract class PatternGeneration {
 
   abstract execute(): Pattern;
 
-  protected transformToPatternTree(codeString: string): PatternNode {
-    const cursor = new AstCursor(this.parser!.parse(codeString).walk());
+  protected transformToPatternTree(codeString: CodeString): PatternNode {
+    const cursor = new AstCursor(this.parser!.parse(codeString.raw).walk());
     if (this.isExpression) {
       cursor.goToExpression();
     }
-    const rootPatternNode = this.nodeTransformVisitor!.visit(cursor)[0];
+    const rootPatternNode = this.nodeTransformVisitor!.visit(cursor, codeString)[0];
     if (rootPatternNode.isTopNode() && rootPatternNode.children) {
       return rootPatternNode.children[0].cutOff();
     }
