@@ -9,7 +9,7 @@ import { columnMapping } from "../columnMappingSubProjection/config";
 
 const columnMappings = agg("columnMappings", "dictionary", [columnMapping]);
 
-const pattern = parser.subPattern("renameColumnsSubProjectionPattern")`rename({${columnMappings}})`;
+const pattern = parser.subPattern("renameColumnsSubProjectionPattern")`rename(${columnMappings})`;
 
 const widget = svelteProjection(Widget);
 const emptyWidget = svelteProjection(EmptyWidget);

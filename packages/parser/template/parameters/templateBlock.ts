@@ -2,7 +2,7 @@ import AstCursor from "../../ast/cursor";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../../pattern/nodes/patternNode";
 import BlockNode from "../../pattern/nodes/blockNode";
-import { Language, loadBlocksConfigFor } from "@puredit/language-config";
+import { loadBlocksConfigFor } from "@puredit/language-config";
 import { ContextVariableMap } from "@puredit/projections";
 
 export default class TemplateBlock extends TemplateParameter {
@@ -16,12 +16,19 @@ export default class TemplateBlock extends TemplateParameter {
     return TemplateBlock.CODE_STRING_PREFIX + this.id.toString();
   }
 
-  toPatternNode(cursor: AstCursor, language: Language): PatternNode {
-    return new BlockNode(language, cursor.currentNode.text, cursor.currentFieldName, this);
+  toPatternNode(cursor: AstCursor): PatternNode {
+    this.checkAssignedToTemplate();
+    return new BlockNode(
+      this.template!.language,
+      cursor.currentNode.text,
+      cursor.currentFieldName,
+      this
+    );
   }
 
-  toDraftString(language: Language): string {
-    const blocksConfig = loadBlocksConfigFor(language);
+  toDraftString(): string {
+    this.checkAssignedToTemplate();
+    const blocksConfig = loadBlocksConfigFor(this.template!.language);
     return blocksConfig.draft;
   }
 }

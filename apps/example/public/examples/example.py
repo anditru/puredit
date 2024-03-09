@@ -17,6 +17,7 @@
 # The projections make use of the https://cortexjs.io/mathlive/ library (MIT license).
 import mathdsl
 import polars as pl
+import torch
 
 # Click on the blue keyboard icon to edit a mathematical expression.
 # You also type directly using your keyboard. Commonly used names such as "pi"
@@ -87,3 +88,6 @@ filtered_students = (students.select(
 extended_prices = prices.with_columns(
     (pl.col("item_pice") + pl.col("quantity")).alias("total_price")
 )
+
+a = torch.arange(4.)
+torch.reshape(a, (2, 2))

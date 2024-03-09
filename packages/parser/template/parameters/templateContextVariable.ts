@@ -1,5 +1,4 @@
 import AstCursor from "../../ast/cursor";
-import { Language } from "@puredit/language-config";
 import ContextVariableNode from "../../pattern/nodes/contextVariableNode";
 import PatternNode from "../../pattern/nodes/patternNode";
 import TemplateParameter from "./templateParameter";
@@ -15,7 +14,7 @@ export default class TemplateContextVariable extends TemplateParameter {
     return TemplateContextVariable.CODE_STRING_PREFIX + this.id.toString();
   }
 
-  toPatternNode(cursor: AstCursor, language: Language): PatternNode {
+  toPatternNode(cursor: AstCursor): PatternNode {
     return new ContextVariableNode(
       cursor.currentNode.type,
       cursor.currentNode.text,
@@ -24,7 +23,7 @@ export default class TemplateContextVariable extends TemplateParameter {
     );
   }
 
-  toDraftString(language: Language): string {
+  toDraftString(): string {
     return this.name;
   }
 }

@@ -14,15 +14,17 @@ export default class TemplateArgument extends TemplateParameter {
     return TemplateArgument.CODE_STRING_PREFIX + this.id.toString();
   }
 
-  toPatternNode(cursor: AstCursor, language: Language) {
+  toPatternNode(cursor: AstCursor) {
+    this.checkAssignedToTemplate();
     return new ArgumentNode(cursor.currentNode.text, cursor.currentFieldName, this);
   }
 
-  toDraftString(language: Language): string {
+  toDraftString(): string {
+    this.checkAssignedToTemplate();
     if (this.types.length === 1) {
-      return this.getDraftStringForSingeType(this.types[0], language);
+      return this.getDraftStringForSingeType(this.types[0], this.template!.language);
     } else {
-      return this.getDraftStringForMultipleTypes(language);
+      return this.getDraftStringForMultipleTypes(this.template!.language);
     }
   }
 

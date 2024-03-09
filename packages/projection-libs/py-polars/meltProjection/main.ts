@@ -16,7 +16,7 @@ const valueColumnName = arg("valueColumnName", ["string"]);
 
 const pattern = parser.statementPattern(
   "meltProjectionPattern"
-)`${moltenDataFrame} = ${baseDataFrame}.melt(id_vars=[${idVars}], value_vars=[${valueVars}], variable_name=${variableColumnName}, value_name=${valueColumnName})`;
+)`${moltenDataFrame} = ${baseDataFrame}.melt(id_vars=${idVars}, value_vars=${valueVars}, variable_name=${variableColumnName}, value_name=${valueColumnName})`;
 
 const beginWidget = svelteProjection(BeginWidget);
 const valueVarsWidget = svelteProjection(ValueVarsWidget);

@@ -11,6 +11,6 @@ export default class TreePath {
   }
 
   getSliceBeforeLastStep(): TreePath {
-    return new TreePath(this.steps.slice(0, this.steps.length));
+    return new TreePath(this.steps.slice(0, this.steps.length - 1));
   }
 }

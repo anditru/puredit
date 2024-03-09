@@ -8,7 +8,6 @@ import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
 import ChainDecorator from "../pattern/decorators/chainDecorator";
 import PatternCursor from "../pattern/cursor";
 import { PatternMap, PatternsMap } from "../match/types";
-import { Language } from "@puredit/language-config";
 import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
 import {
   NodeTransformVisitor,
@@ -76,7 +75,7 @@ export default abstract class PatternGeneration {
     const aggregationCodeString = aggregation.toCodeString();
     const aggregationPath = pattern.getPathToNodeWithText(aggregationCodeString);
     const patternCursor = new PatternCursor(pattern);
-    patternCursor.follow(aggregationPath.getSliceBeforeLastStep());
+    patternCursor.follow(aggregationPath);
     const aggregationNode = patternCursor.currentNode as AggregationNode;
     return aggregationNode.astNodeType;
   }

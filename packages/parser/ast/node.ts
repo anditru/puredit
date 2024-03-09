@@ -16,15 +16,6 @@ export default class AstNode {
     return this.syntaxNode.childCount > 0;
   }
 
-  /**
-   * String literals may have children, in particular escape sequences.
-   * To keep it simple, we treat string literals as atomic nodes.
-   * @returns boolean
-   */
-  shouldTreatAsAtomicNode(): boolean {
-    return this.syntaxNode.type === "string";
-  }
-
   walk(): AstCursor {
     return new AstCursor(this.syntaxNode.walk());
   }

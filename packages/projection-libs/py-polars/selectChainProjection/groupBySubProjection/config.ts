@@ -7,7 +7,7 @@ import { agg } from "@puredit/parser";
 import { column } from "../columnSubProjection/config";
 
 const columns = agg("columns", "argument_list", [column]);
-const pattern = parser.subPattern("groupBySubProjectionPattern")`group_by(${columns})`;
+const pattern = parser.subPattern("groupBySubProjectionPattern")`group_by${columns}`;
 
 const widget = svelteProjection(Widget);
 const emptyWidget = svelteProjection(EmptyWidget);

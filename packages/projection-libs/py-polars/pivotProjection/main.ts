@@ -16,7 +16,7 @@ const columns = agg("columnColumns", "list", [columnSubProjection.pattern]);
 const aggFunction = arg("aggFunction", ["string"]);
 const pattern = parser.statementPattern(
   "pivotProjectionPattern"
-)`${pivotDataFrame} = ${baseDataFrame}.pivot(index=[${index}], columns=[${columns}], values=[${values}], aggregate_function=${aggFunction})`;
+)`${pivotDataFrame} = ${baseDataFrame}.pivot(index=${index}, columns=${columns}, values=${values}, aggregate_function=${aggFunction})`;
 
 const beginWidget = svelteProjection(BeginWidget);
 const valuesWidget = svelteProjection(ValuesWidget);

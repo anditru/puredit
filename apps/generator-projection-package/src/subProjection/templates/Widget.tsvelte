@@ -4,6 +4,7 @@
   import type { EditorView } from "@codemirror/view";
   import type { Match } from "@puredit/parser";
   import type { FocusGroup } from "@puredit/projections/focus";
+  import { ContextInformation } from "@puredit/projections";
 
   export let isNew: boolean;
   export let focusGroup: FocusGroup;

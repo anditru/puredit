@@ -8,10 +8,10 @@ import { agg } from "@puredit/parser";
 import { column } from "../columnSubProjection/config";
 import { columnChain } from "../../columnChainProjection/main";
 
-const columnChainPattern = parser.subPattern("columnChain")`${columnChain}`;
+const columnChainPattern = parser.subPattern("columnChain")`${columnChain.copy()}`;
 const columns = agg("columns", "argument_list", [column, columnChainPattern]);
 
-const pattern = parser.subPattern("aggSubProjectionPattern")`agg(${columns})`;
+const pattern = parser.subPattern("aggSubProjectionPattern")`agg${columns}`;
 
 const widget = svelteProjection(Widget);
 const emptyWidget = svelteProjection(EmptyWidget);

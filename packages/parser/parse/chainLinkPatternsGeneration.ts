@@ -31,7 +31,7 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
 
   execute(): Pattern {
     this.chainsConfig = loadChainsConfigFor(this.template!.language);
-    this.nodeTransformVisitor = new NodeTransformVisitor(this.template!);
+    this.nodeTransformVisitor = new NodeTransformVisitor();
 
     const codeString = this.buildCodeString();
     const rootNode = this.transformToPatternTree(codeString);
@@ -60,7 +60,6 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
       this.template!.language,
       linkPatternCursor.currentNode.type
     );
-    linkPatternCursor.reverseFollow(this.chainsConfig!.pathToFirstLink);
 
     const pathToNextChainLink = chainableNodeTypeConfig.pathToNextLink;
     const lastStep = pathToNextChainLink.getLastStep();
@@ -74,9 +73,7 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
     linkPatternCursor.currentNode.insertChild(chainContinuationNode, lastStep);
     linkPatternCursor.reverseFollow(pathToNextChainLink.getSliceBeforeLastStep());
 
-    linkPatternCursor.follow(this.chainsConfig!.pathToFirstLink);
     const linkRootNode = linkPatternCursor.currentNode.cutOff();
-
     return new BasePattern(linkRootNode, this.template!);
   }
 }

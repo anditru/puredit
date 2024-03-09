@@ -37,6 +37,12 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           endToken: "]",
           contextTemplate: `[${aggregationPlaceHolder}]`,
         },
+        tuple: {
+          startToken: "(",
+          delimiterToken: ",",
+          endToken: ")",
+          contextTemplate: `(${aggregationPlaceHolder}, 1)`,
+        },
       },
     },
     chains: {

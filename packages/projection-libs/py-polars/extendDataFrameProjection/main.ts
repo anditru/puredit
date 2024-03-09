@@ -13,7 +13,7 @@ const columnCombinations = agg("columnCombinations", "argument_list", [
 ]);
 const pattern = parser.statementPattern(
   "extendDataFrameProjectionPattern"
-)`${extendedDataFrame} = ${baseDataFrame}.with_columns(${columnCombinations})`;
+)`${extendedDataFrame} = ${baseDataFrame}.with_columns${columnCombinations}`;
 
 const beginWidget = svelteProjection(BeginWidget);
 const endWidget = svelteProjection(EndWidget);

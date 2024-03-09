@@ -9,7 +9,7 @@ export default class CompletePatternGeneration extends PatternGeneration {
   }
 
   execute(): Pattern {
-    this.nodeTransformVisitor = new NodeTransformVisitor(this.template!);
+    this.nodeTransformVisitor = new NodeTransformVisitor();
 
     const codeString = this.template!.toCodeString();
     const rootNode = this.transformToPatternTree(codeString);

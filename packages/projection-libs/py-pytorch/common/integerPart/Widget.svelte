@@ -6,6 +6,10 @@
   import type { FocusGroup } from "@puredit/projections/focus";
   import { ContextInformation } from "@puredit/projections";
 
+  import TextInput from "@puredit/projections/TextInput.svelte";
+  import { highlightingFor } from "@codemirror/language";
+  import { tags } from "@lezer/highlight";
+
   export let isNew: boolean;
   export let focusGroup: FocusGroup;
   // svelte-ignore unused-export-let
@@ -27,5 +31,12 @@
 </script>
 
 <span class="inline-flex">
-  <span><%= displayName %></span>
+  <TextInput
+    className={highlightingFor(state, [tags.atom])}
+    node={match.argsToAstNodeMap.integer}
+    {state}
+    {view}
+    {focusGroup}
+    placeholder="number"
+  />
 </span>

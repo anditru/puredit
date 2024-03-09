@@ -3,7 +3,6 @@ import Template from "../template";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../../pattern/nodes/patternNode";
 import ChainNode from "../../pattern/nodes/chainNode";
-import { Language } from "@puredit/language-config";
 import { ContextVariableMap } from "@puredit/projections";
 
 export default class TemplateChain extends TemplateParameter {
@@ -22,8 +21,14 @@ export default class TemplateChain extends TemplateParameter {
     return TemplateChain.CODE_STRING_PREFIX + this.id.toString();
   }
 
-  toPatternNode(cursor: AstCursor, language: Language): PatternNode {
-    return new ChainNode(language, cursor.currentNode.text, cursor.currentFieldName, this);
+  toPatternNode(cursor: AstCursor): PatternNode {
+    this.checkAssignedToTemplate();
+    return new ChainNode(
+      this.template!.language,
+      cursor.currentNode.text,
+      cursor.currentFieldName,
+      this
+    );
   }
 
   toDraftString(): string {
@@ -32,5 +37,14 @@ export default class TemplateChain extends TemplateParameter {
       .slice(0, 2)
       .map((linkPattern) => linkPattern.toDraftString());
     return [startDraftString, ...linkDraftPatterns].join(".");
+  }
+
+  copy(): TemplateChain {
+    return new TemplateChain(
+      this.name,
+      this.startPattern,
+      this.linkPatterns,
+      this.contextVariables
+    );
   }
 }

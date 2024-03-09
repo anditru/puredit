@@ -4,6 +4,7 @@ import type { TreeSitterParser } from "../treeSitterParser";
 import { createTreeSitterParser } from "../treeSitterParser";
 import { Language } from "@puredit/language-config";
 import { CompletePatternGeneration } from "./internal";
+import { isString } from "@puredit/utils";
 
 export default class Parser {
   static async load(language: Language): Promise<Parser> {
@@ -35,7 +36,13 @@ export default class Parser {
    */
   subPattern(name: string) {
     return (templateStrings: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
-      return new Template(name, this.language, templateStrings, params);
+      const template = new Template(name, this.language, templateStrings, params);
+      params.forEach((param) => {
+        if (!isString(param)) {
+          param.template = template;
+        }
+      });
+      return template;
     };
   }
 
@@ -47,6 +54,11 @@ export default class Parser {
   statementPattern(name: string) {
     return (templateStrings: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
       const template = new Template(name, this.language, templateStrings, params);
+      params.forEach((param) => {
+        if (!isString(param)) {
+          param.template = template;
+        }
+      });
       return this.patternGeneration.setTemplate(template).setIsExpression(false).execute();
     };
   }
@@ -59,6 +71,11 @@ export default class Parser {
   expressionPattern(name: string) {
     return (templateStrings: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
       const template = new Template(name, this.language, templateStrings, params);
+      params.forEach((param) => {
+        if (!isString(param)) {
+          param.template = template;
+        }
+      });
       return this.patternGeneration.setTemplate(template).setIsExpression(true).execute();
     };
   }

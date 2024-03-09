@@ -21,6 +21,10 @@ export function loadAggregatableNodeTypes(): string[] {
   );
 }
 
+export function loadAggregatableNodeTypesFor(language: Language): string[] {
+  return Object.keys(languageConfigs[language].aggregations.aggregatableNodeTypes);
+}
+
 export function loadAggregationsConfigFor(language: Language): AggregationsConfig {
   return languageConfigs[language].aggregations;
 }

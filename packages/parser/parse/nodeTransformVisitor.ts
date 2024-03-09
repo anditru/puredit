@@ -1,19 +1,11 @@
 import AstCursor from "../ast/cursor";
 import PatternNode from "../pattern/nodes/patternNode";
 import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
-import TemporaryAggregationNode from "../pattern/nodes/temporaryAggregationNode";
-import Template from "../template/template";
-import { Language } from "@puredit/language-config";
 import ParameterTable from "../template/codeString";
 
 export default class NodeTransformVisitor {
-  private language: Language;
   private cursor: AstCursor | undefined;
   private codeString: ParameterTable | undefined;
-
-  constructor(template: Template) {
-    this.language = template.language;
-  }
 
   visit(cursor: AstCursor, codeString: ParameterTable): PatternNode[] {
     this.cursor = cursor;
@@ -44,16 +36,22 @@ export default class NodeTransformVisitor {
 
   private transformCurrentNode(): PatternNode {
     let transformedNode;
-    if (
-      !this.cursor!.currentNode.shouldTreatAsAtomicNode() &&
-      this.cursor!.currentNode.hasChildren()
-    ) {
+    if (!this.mustTreatNodeAsAtomic() && this.cursor!.currentNode.hasChildren()) {
       transformedNode = this.transformNonAtomicNode();
       this.cursor!.goToParent();
     } else {
       transformedNode = this.transformAtomicNode();
     }
     return transformedNode;
+  }
+
+  private mustTreatNodeAsAtomic() {
+    const currentNode = this.cursor!.currentNode;
+    const templateParameter = this.codeString!.resolveParameter(
+      this.cursor!.currentNode.startIndex,
+      this.cursor!.currentNode.endIndex
+    );
+    return currentNode.type === "string" || templateParameter;
   }
 
   private transformNonAtomicNode(): PatternNode {
@@ -73,10 +71,6 @@ export default class NodeTransformVisitor {
       firstChild.fieldName = patternNodeBuilder.fieldName!;
       return firstChild;
     }
-    if (patternNodeBuilder.buildsParentOfAggregationNode()) {
-      const firstChild = patternNodeBuilder.children[0] as TemporaryAggregationNode;
-      return firstChild.toAggregationNode(patternNodeBuilder.fieldName!);
-    }
 
     return patternNodeBuilder.buildAndSetParentOnChildren();
   }
@@ -87,7 +81,7 @@ export default class NodeTransformVisitor {
       this.cursor!.currentNode.endIndex
     );
     if (templateParameter) {
-      return templateParameter.toPatternNode(this.cursor!, this.language);
+      return templateParameter.toPatternNode(this.cursor!);
     } else {
       return this.transformRegularNode();
     }

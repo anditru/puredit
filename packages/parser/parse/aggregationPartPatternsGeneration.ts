@@ -20,7 +20,7 @@ export default class AggregationPartPatternsGeneration extends PatternGeneration
   }
 
   execute(): Pattern {
-    this.nodeTransformVisitor = new NodeTransformVisitor(this.template!);
+    this.nodeTransformVisitor = new NodeTransformVisitor();
 
     const codeString = this.buildCodeString();
     const rootNode = this.transformToPatternTree(codeString);

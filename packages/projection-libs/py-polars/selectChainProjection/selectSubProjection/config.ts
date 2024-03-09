@@ -9,10 +9,10 @@ import { column } from "../columnSubProjection/config";
 import { columnWithAlias } from "../columnWithAliasSubProjection/config";
 import { columnChain } from "../../columnChainProjection/main";
 
-const columnChainPattern = parser.subPattern("columnChain")`${columnChain}`;
+const columnChainPattern = parser.subPattern("columnChain")`${columnChain.copy()}`;
 const columns = agg("columns", "argument_list", [column, columnWithAlias, columnChainPattern]);
 
-const selectFunction = parser.subPattern("selectFunction")`select(${columns})`;
+const selectFunction = parser.subPattern("selectFunction")`select${columns}`;
 
 const widget = svelteProjection(Widget);
 const emptyWidget = svelteProjection(EmptyWidget);
