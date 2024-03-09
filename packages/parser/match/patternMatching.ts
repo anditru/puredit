@@ -63,11 +63,8 @@ export class PatternMatching {
   }
 
   private getCandidateMatches(): CandidateMatch[] {
-    const exactlyFittingPatterns = this.patternMap[this.astCursor.currentNode.type] || [];
-    const wildCardRootNodePatterns = this.patternMap["*"] || [];
-    const candidatePatterns = exactlyFittingPatterns.concat(wildCardRootNodePatterns);
-
-    const sortedCandidatePatterns = this.sortByPriority(candidatePatterns);
+    const fittingPatterns = this.patternMap[this.astCursor.currentNode.cleanNodeType] || [];
+    const sortedCandidatePatterns = this.sortByPriority(fittingPatterns);
     const candidateMatches: CandidateMatch[] = sortedCandidatePatterns.map((candidatePattern) => ({
       pattern: candidatePattern,
       cursor: this.astCursor.currentNode.walk(),
