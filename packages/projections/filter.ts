@@ -35,6 +35,25 @@ export const transactionFilter = EditorState.transactionFilter.of((tr) => {
         return false;
       }
     });
+
+    // Correct transactions where text is inserted at the end of a line
+    // right after a widget to prevent the cursor from jumping to the next line.
+    const posNextToChange = from - 1;
+    decorations.between(posNextToChange, posNextToChange, (_, decTo, ___) => {
+      const charNextToChange = tr.startState.doc.toString().charAt(posNextToChange);
+      if (
+        decTo === posNextToChange &&
+        charNextToChange === "\n" &&
+        change.insert.toString() !== ""
+      ) {
+        modifyChanges = true;
+        change.from--;
+        change.to--;
+        Object.assign(tr, {
+          selection: EditorSelection.single(change.to + 1),
+        });
+      }
+    });
     if (accept) {
       changes.push(change);
     }
