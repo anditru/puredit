@@ -16,6 +16,15 @@ export default class AstNode {
     return this.syntaxNode.childCount > 0;
   }
 
+  getChildIndex(): number {
+    if (!this.syntaxNode.parent) {
+      throw new Error("Node does not have a parent");
+    }
+    return this.syntaxNode.parent.children.findIndex(
+      (childNode) => childNode.id === this.syntaxNode.id
+    );
+  }
+
   walk(): AstCursor {
     return new AstCursor(this.syntaxNode.walk());
   }

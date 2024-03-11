@@ -79,10 +79,10 @@ export default class DecorationSetBuilder {
       }
 
       const { segmentWidgets, prefixWidget, postfixWidget, contextProvider } = projection;
-      const context = Object.assign({}, ...this.contextInformations);
       if (contextProvider) {
         this.extractContextFrom(match, contextProvider);
       }
+      const context = Object.assign({}, ...this.contextInformations);
 
       this.extractSegmentDecoratorsFor(match, segmentWidgets, context);
 
@@ -109,7 +109,11 @@ export default class DecorationSetBuilder {
 
   private extractContextFrom(match: Match, contextProvider: FnContextProvider) {
     this.contextInformations.push(
-      contextProvider(match, this.state.doc, Object.assign({}, ...this.contextInformations))
+      contextProvider(
+        match,
+        this.state.doc,
+        Object.assign({}, ...this.contextInformations, match.contextInformation)
+      )
     );
     this.contextBounds.push(match.to);
   }

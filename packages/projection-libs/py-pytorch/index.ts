@@ -1,3 +1,3 @@
-import { reshapeProjection } from "./reshapeProjection/main";
-export const projections = [reshapeProjection];
-export { reshapeProjection };
+import { transposeProjection } from "./transposeProjection/main";
+export const projections = [transposeProjection];
+export { transposeProjection };

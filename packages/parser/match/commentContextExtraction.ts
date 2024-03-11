@@ -6,20 +6,22 @@ export default class CommentContextExtraction {
   constructor(private readonly verificationResult: VerificationResult) {}
 
   execute(): object | Array<any> | null {
-    const matchParent = this.verificationResult.node.parent;
-    if (!matchParent) {
+    let childIndex;
+    try {
+      childIndex = this.verificationResult.node.getChildIndex();
+    } catch (error) {
       return null;
     }
+    const matchParent = this.verificationResult.node.parent;
     const commentTypeConfigs = loadCommentsConfigFor(
       this.verificationResult.pattern.language
     ).commentTypes;
-    for (const child of matchParent.children) {
-      if (child === this.verificationResult.node) {
-        break;
-      }
+
+    for (let i = childIndex - 1; i >= 0; i--) {
+      const child = matchParent!.children[i];
       const commentTypeConfig = commentTypeConfigs[child.type];
       if (!commentTypeConfig) {
-        continue;
+        break;
       }
       const context = this.searchContextIn(child, commentTypeConfig);
       if (context) {

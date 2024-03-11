@@ -89,5 +89,5 @@ extended_prices = prices.with_columns(
     (pl.col("item_pice") + pl.col("quantity")).alias("total_price")
 )
 
-a = torch.arange(4.)
-torch.reshape(a, (2, 2))
+# CONTEXT: [ "Batch Size", "Channels", "Width", "Height" ]
+image_data.transpose(0, 1)
