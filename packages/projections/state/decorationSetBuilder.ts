@@ -20,6 +20,7 @@ import {
   loadAggregationsConfigFor,
 } from "@puredit/language-config";
 import type { AggregatableNodeTypeConfig } from "@puredit/language-config";
+import { toRootProjectionMap, toSubProjectionMap } from "../shared";
 
 export default class DecorationSetBuilder {
   // Input
@@ -134,14 +135,8 @@ export default class DecorationSetBuilder {
   }
 
   private initProjectionMaps(): void {
-    this.projectionMap = new Map(
-      this.config.projections.map((p: RootProjection) => [p.pattern, p])
-    );
-    this.subProjectionMap = new Map(
-      this.config.projections.flatMap((p: RootProjection) =>
-        p.subProjections.map((s) => [s.pattern, s])
-      )
-    );
+    this.projectionMap = toRootProjectionMap(this.config.projections);
+    this.subProjectionMap = toSubProjectionMap(this.config.projections);
   }
 
   private extractSegmentDecoratorsFor(

@@ -91,3 +91,7 @@ extended_prices = prices.with_columns(
 
 # CONTEXT: [ "Batch Size", "Channels", "Width", "Height" ]
 image_data.transpose(0, 1)
+
+
+# CONTEXT: [ "Batch Size", "Channels", "Width", "Height" ]
+image_data.permute(2, 3, 0, 1)

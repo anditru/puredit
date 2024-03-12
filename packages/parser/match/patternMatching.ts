@@ -6,6 +6,7 @@ import type {
   VerificationResult,
   CodeRange,
   PatternsMap,
+  MatchesMap,
 } from "./types";
 import MatchVerification, { DoesNotMatch } from "./matchVerification";
 import AstCursor from "../ast/cursor";
@@ -114,6 +115,7 @@ export class PatternMatching {
     const contextInformation = this.extractContextInformation(verificationResult);
     const aggregationRanges = this.getAggregationRangesOf(verificationResult);
     const chainRanges = this.getChainRangesOf(verificationResult);
+    const aggregationToMatchesMap = this.findMatchesInAggregationRangesOf(verificationResult);
 
     this.matches.push({
       pattern: verificationResult.pattern,
@@ -125,9 +127,9 @@ export class PatternMatching {
       chainRanges,
       blockRanges: verificationResult.blockRanges,
       contextInformation,
+      aggregationToMatchesMap,
     });
 
-    this.findMatchesInAggregationRangesOf(verificationResult);
     this.findMatchesInChainStartRangesOf(verificationResult);
     this.findMatchesInChainLinkRangesOf(verificationResult);
     this.findMatchesInBlockRangesOf(verificationResult);
@@ -167,22 +169,29 @@ export class PatternMatching {
     );
   }
 
-  private findMatchesInAggregationRangesOf(verificationResult: VerificationResult): void {
+  private findMatchesInAggregationRangesOf(verificationResult: VerificationResult): MatchesMap {
+    const matchesMap = {} as MatchesMap;
     if (!(verificationResult.pattern instanceof AggregationDecorator)) {
-      return;
+      return matchesMap;
     }
     for (const aggregationName in verificationResult.aggregationToRangesMap) {
-      this.findAggregationMatchesFor(aggregationName, verificationResult);
+      const aggregationMatches = this.findAggregationMatchesFor(
+        aggregationName,
+        verificationResult
+      );
+      matchesMap[aggregationName] = aggregationMatches;
     }
+    return matchesMap;
   }
 
   private findAggregationMatchesFor(
     aggregationName: string,
     verificationResult: VerificationResult
-  ) {
+  ): Match[] {
     const pattern = verificationResult.pattern as AggregationDecorator;
     const subPatternMap = pattern.getAggregationPatternMapFor(aggregationName);
     const aggregationRanges = verificationResult.aggregationToRangesMap[aggregationName];
+    let matches: Match[] = [];
 
     for (const aggregationRange of aggregationRanges) {
       this.contextVariableRanges.push({
@@ -198,9 +207,12 @@ export class PatternMatching {
       );
       const result = aggregationPatternMatching.executeOnlySpanningEntireRange();
 
-      this.matches = this.matches.concat(result.matches);
+      matches = matches.concat(result.matches);
       this.contextVariableRanges = this.contextVariableRanges.concat(result.contextVariableRanges);
     }
+
+    this.matches = this.matches.concat(matches);
+    return matches;
   }
 
   private findMatchesInBlockRangesOf(verificationResult: VerificationResult): void {

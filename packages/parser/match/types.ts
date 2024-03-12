@@ -59,7 +59,10 @@ export interface Match {
   chainRanges: CodeRange[];
   blockRanges: CodeRange[];
   contextInformation: ContextInformation;
+  aggregationToMatchesMap: MatchesMap;
 }
+
+export type MatchesMap = Record<string, Match[]>;
 
 // Result of Phase 4 (Consolidation)
 export interface PatternMatchingResult {

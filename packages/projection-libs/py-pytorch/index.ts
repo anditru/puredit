@@ -1,3 +1,4 @@
 import { transposeProjection } from "./transposeProjection/main";
-export const projections = [transposeProjection];
-export { transposeProjection };
+import { permuteProjection } from "./permuteProjection/main";
+export const projections = [transposeProjection, permuteProjection];
+export { transposeProjection, permuteProjection };

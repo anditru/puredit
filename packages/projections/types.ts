@@ -23,6 +23,12 @@ export type FnContextProvider = (
 export interface RootProjection extends Projection {
   pattern: Pattern;
   subProjections: SubProjection[];
+  lineAlignment?: LineAlignment;
+}
+
+export enum LineAlignment {
+  Top = "top",
+  Center = "center",
 }
 
 export interface SubProjection extends Projection {

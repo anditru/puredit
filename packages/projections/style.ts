@@ -1,9 +1,13 @@
 import { EditorView } from "@codemirror/view";
 
 export const style = EditorView.theme({
-  ".cm-line.flex": {
+  ".cm-line.flex-center": {
     display: "flex",
     alignItems: "center",
+  },
+  ".cm-line.flex-top": {
+    display: "flex",
+    alignItems: "start",
   },
   ".inline-flex": {
     display: "inline-flex",

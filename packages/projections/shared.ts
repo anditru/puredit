@@ -3,9 +3,10 @@ import type { EditorView } from "@codemirror/view";
 import { highlightingFor } from "@codemirror/language";
 import type { EditorState, ChangeSpec } from "@codemirror/state";
 import type { Text } from "@codemirror/state";
-import type { Context, Match } from "@puredit/parser";
+import type { Match } from "@puredit/parser";
 import { ProjectionWidget } from "./projection";
 import type AstNode from "@puredit/parser/ast/node";
+import { ContextInformation, RootProjection } from "./types";
 
 const stringTypes = ["string", "template_string"];
 
@@ -76,7 +77,11 @@ export function span(text: string): HTMLElement {
 
 export const staticWidget = (initialize: (state: EditorState) => HTMLElement) =>
   class extends ProjectionWidget {
-    protected initialize(_match: Match, _context: Context, state: EditorState): HTMLElement {
+    protected initialize(
+      _match: Match,
+      _context: ContextInformation,
+      state: EditorState
+    ): HTMLElement {
       return initialize(state);
     }
 
@@ -103,3 +108,13 @@ export const validateFromList = (allowedValues: string[]) => (value: string) => 
     return `invalid value ${value}`;
   }
 };
+
+export function toRootProjectionMap(projections: RootProjection[]) {
+  return new Map(projections.map((p: RootProjection) => [p.pattern, p]));
+}
+
+export function toSubProjectionMap(projections: RootProjection[]) {
+  return new Map(
+    projections.flatMap((p: RootProjection) => p.subProjections.map((s) => [s.pattern, s]))
+  );
+}

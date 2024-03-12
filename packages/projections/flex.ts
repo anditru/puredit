@@ -1,15 +1,23 @@
 import { Decoration, EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import type { DecorationSet, PluginValue } from "@codemirror/view";
 import type { Range } from "@codemirror/state";
-import { projectionState } from "./state/state";
+import { ProjectionState, projectionState } from "./state/state";
+import { toRootProjectionMap } from "./shared";
+import { LineAlignment } from "./types";
+
+const lineMarkMap = {
+  [LineAlignment.Center]: Decoration.line({ class: "flex-center" }),
+  [LineAlignment.Top]: Decoration.line({ class: "flex-top" }),
+};
 
 function lines(view: EditorView) {
   const state = view.state.field(projectionState);
   const preserveMark = Decoration.mark({ class: "preserve" });
-  const lineMark = Decoration.line({ class: "flex" });
   const decorations: Array<Range<Decoration>> = [];
   const cursor = state.decorations.iter();
   while (cursor.value) {
+    const lineAlignment = getLineAlignment(cursor.value, state);
+    const lineMark = lineMarkMap[lineAlignment];
     const start = view.state.doc.lineAt(cursor.from);
     const end = view.state.doc.lineAt(cursor.to);
     if (start.text) {
@@ -23,6 +31,17 @@ function lines(view: EditorView) {
     cursor.next();
   }
   return Decoration.set(decorations, true);
+}
+
+function getLineAlignment(decoration: Decoration, state: ProjectionState): LineAlignment {
+  const rootProjectionMap = toRootProjectionMap(state.config.projections);
+  const pattern = decoration.spec.widget.match.pattern;
+  const projection = rootProjectionMap.get(pattern);
+  if (!projection || !projection.lineAlignment) {
+    return LineAlignment.Center;
+  } else {
+    return projection.lineAlignment;
+  }
 }
 
 class FlexPlugin implements PluginValue {
