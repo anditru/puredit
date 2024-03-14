@@ -128,6 +128,7 @@ export class PatternMatching {
       blockRanges: verificationResult.blockRanges,
       contextInformation,
       aggregationToMatchesMap,
+      aggregationToRangeMap: verificationResult.aggregationToRangeMap,
     });
 
     this.findMatchesInChainStartRangesOf(verificationResult);
@@ -146,7 +147,7 @@ export class PatternMatching {
   }
 
   private getAggregationRangesOf(verificationResult: VerificationResult): CodeRange[] {
-    return Object.values(verificationResult.aggregationToRangesMap).reduce(
+    return Object.values(verificationResult.aggregationToPartRangesMap).reduce(
       (previousAggregationRanges: CodeRange[], currentAggregationRange: CodeRange[]) => {
         return previousAggregationRanges.concat(currentAggregationRange);
       },
@@ -174,7 +175,7 @@ export class PatternMatching {
     if (!(verificationResult.pattern instanceof AggregationDecorator)) {
       return matchesMap;
     }
-    for (const aggregationName in verificationResult.aggregationToRangesMap) {
+    for (const aggregationName in verificationResult.aggregationToPartRangesMap) {
       const aggregationMatches = this.findAggregationMatchesFor(
         aggregationName,
         verificationResult
@@ -190,7 +191,7 @@ export class PatternMatching {
   ): Match[] {
     const pattern = verificationResult.pattern as AggregationDecorator;
     const subPatternMap = pattern.getAggregationPatternMapFor(aggregationName);
-    const aggregationRanges = verificationResult.aggregationToRangesMap[aggregationName];
+    const aggregationRanges = verificationResult.aggregationToPartRangesMap[aggregationName];
     let matches: Match[] = [];
 
     for (const aggregationRange of aggregationRanges) {

@@ -6,7 +6,7 @@ import { pickedCompletion } from "@codemirror/autocomplete";
 export default class CompletionsBuilder {
   private indentation!: number;
   private contextVariables!: ContextVariableMap;
-  private rootProjections!: RootProjection[];
+  private rootProjections: RootProjection[] = [];
   private subProjections: SubProjection[] = [];
 
   private completions: Completion[] = [];
@@ -26,6 +26,11 @@ export default class CompletionsBuilder {
     for (const projection of rootProjections) {
       this.subProjections = this.subProjections.concat(projection.subProjections);
     }
+    return this;
+  }
+
+  setSubProjections(subProjections: SubProjection[]): CompletionsBuilder {
+    this.subProjections = this.subProjections.concat(subProjections);
     return this;
   }
 

@@ -5,11 +5,13 @@ import Widget from "./Widget.svelte";
 import EmptyWidget from "@puredit/projections/EmptyWidget.svelte";
 
 import { agg } from "@puredit/parser";
-import { column } from "../columnSubProjection/config";
-import { columnChain } from "../../columnChainProjection/main";
+import { columnSubProjection } from "../columnSubProjection/config";
+import { columnChainSubProjection } from "../columnChainSubProjection/config";
 
-const columnChainPattern = parser.subPattern("columnChain")`${columnChain.copy()}`;
-const columns = agg("columns", "argument_list", [column, columnChainPattern]);
+const columns = agg("columns", "argument_list", [
+  columnSubProjection.pattern,
+  columnChainSubProjection.pattern,
+]);
 
 const pattern = parser.subPattern("aggSubProjectionPattern")`agg${columns}`;
 

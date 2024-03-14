@@ -32,7 +32,8 @@ export interface VerificationResult {
   node: AstNode;
   argsToAstNodeMap: AstNodeMap;
   blockRanges: CodeRange[];
-  aggregationToRangesMap: CodeRangesMap;
+  aggregationToRangeMap: CodeRangeMap;
+  aggregationToPartRangesMap: CodeRangesMap;
   chainToStartRangeMap: CodeRangeMap;
   chainToLinkRangesMap: CodeRangesMap;
 }
@@ -59,6 +60,7 @@ export interface Match {
   chainRanges: CodeRange[];
   blockRanges: CodeRange[];
   contextInformation: ContextInformation;
+  aggregationToRangeMap: CodeRangeMap;
   aggregationToMatchesMap: MatchesMap;
 }
 

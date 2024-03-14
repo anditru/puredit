@@ -37,7 +37,8 @@ export default class MatchVerification {
   // Output
   private argsToAstNodeMap: AstNodeMap = {};
   private blockRanges: CodeRange[] = [];
-  private aggregationToRangesMap: CodeRangesMap = {};
+  private aggregationToRangeMap: CodeRangeMap = {};
+  private aggregationToPartRangesMap: CodeRangesMap = {};
   private chainToStartRangeMap: CodeRangeMap = {};
   private chainToLinkRangesMap: CodeRangesMap = {};
 
@@ -61,7 +62,8 @@ export default class MatchVerification {
       node: this.astCursor.currentNode,
       argsToAstNodeMap: this.argsToAstNodeMap,
       blockRanges: this.blockRanges,
-      aggregationToRangesMap: this.aggregationToRangesMap,
+      aggregationToRangeMap: this.aggregationToRangeMap,
+      aggregationToPartRangesMap: this.aggregationToPartRangesMap,
       chainToStartRangeMap: this.chainToStartRangeMap,
       chainToLinkRangesMap: this.chainToLinkRangesMap,
     };
@@ -134,11 +136,25 @@ export default class MatchVerification {
       logger.debug("AST node does not match AggregationNode");
       throw new DoesNotMatch();
     }
-    const aggregationRanges = this.extractAggregationRangesFor(aggregationNode);
-    this.aggregationToRangesMap[aggregationNode.templateAggregation.name] = aggregationRanges;
+
+    const aggregationRange = this.extractAggregationRangeFor(aggregationNode);
+    this.aggregationToRangeMap[aggregationNode.templateAggregation.name] = aggregationRange;
+    const aggregationRanges = this.extractAggregationPartRangesFor(aggregationNode);
+    this.aggregationToPartRangesMap[aggregationNode.templateAggregation.name] = aggregationRanges;
   }
 
-  private extractAggregationRangesFor(aggregationNode: AggregationNode): CodeRange[] {
+  private extractAggregationRangeFor(aggregationNode: AggregationNode): CodeRange {
+    const currentAstNode = this.astCursor.currentNode;
+    return {
+      node: currentAstNode,
+      contextVariables: aggregationNode.templateAggregation.contextVariables,
+      from: currentAstNode.startIndex,
+      to: currentAstNode.endIndex,
+      language: this.pattern.language,
+    };
+  }
+
+  private extractAggregationPartRangesFor(aggregationNode: AggregationNode): CodeRange[] {
     const currentAstNode = this.astCursor.currentNode;
 
     const aggregationPartRoots = currentAstNode.children.filter((astNode) => {

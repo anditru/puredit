@@ -16,6 +16,10 @@ export default class AggregationDecorator extends PatternDecorator {
     return createPatternMap(subPatterns);
   }
 
+  getSubPatternsFor(aggregationName: string): Pattern[] {
+    return this.aggregationPatternMap[aggregationName];
+  }
+
   hasAggregations(): boolean {
     return !!this.aggregationPatternMap;
   }
