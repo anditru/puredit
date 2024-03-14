@@ -7,6 +7,7 @@ import { ContextVariableMap, SubProjection } from "..";
 import { Match } from "@puredit/parser";
 import { toSubProjectionMap } from "../shared";
 import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
+import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
 
 /**
  * Transforms the registered projections into suggestions for the code completion
@@ -31,6 +32,7 @@ export function completions(completionContext: CompletionContext): CompletionRes
   }
 
   let relevantChildProjections: SubProjection[] | undefined;
+  let delimiterToken: string | undefined;
   const subProjectionsMap = toSubProjectionMap(config.projections);
   const decorationCursor = state.decorations.iter();
   while (decorationCursor.value) {
@@ -44,9 +46,20 @@ export function completions(completionContext: CompletionContext): CompletionRes
         relevantChildProjections = subPatterns.map(
           (subPattern) => subProjectionsMap.get(subPattern.template)!
         );
+        const aggregationPartRanges = match.aggregationToMatchesMap[aggregationName];
+        const endLastPartMatch = aggregationPartRanges[aggregationPartRanges.length - 1].to;
+        if (cursorPosition < endLastPartMatch) {
+          const aggregationNodeType = pattern.getNodeTypeFor(aggregationName);
+          const aggregatableNodeTypeConfig = loadAggregatableNodeTypeConfigFor(
+            pattern.language,
+            aggregationNodeType
+          );
+          delimiterToken = aggregatableNodeTypeConfig.delimiterToken;
+        }
         break;
       }
     }
+
     if (relevantChildProjections) {
       break;
     } else {
@@ -58,6 +71,9 @@ export function completions(completionContext: CompletionContext): CompletionRes
   completionsBuilder.setIndendation(indentation).setContext(contextVariables);
   let options: Completion[];
   if (relevantChildProjections) {
+    if (delimiterToken) {
+      completionsBuilder.setDelimiterToken(delimiterToken);
+    }
     options = completionsBuilder.setSubProjections(relevantChildProjections).build();
   } else {
     options = completionsBuilder.setRootProjections(config.projections).build();

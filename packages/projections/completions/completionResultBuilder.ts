@@ -6,6 +6,7 @@ import { pickedCompletion } from "@codemirror/autocomplete";
 export default class CompletionsBuilder {
   private indentation!: number;
   private contextVariables!: ContextVariableMap;
+  private delimiterToken = "";
   private rootProjections: RootProjection[] = [];
   private subProjections: SubProjection[] = [];
 
@@ -18,6 +19,11 @@ export default class CompletionsBuilder {
 
   setContext(contextVariables: ContextVariableMap): CompletionsBuilder {
     this.contextVariables = contextVariables;
+    return this;
+  }
+
+  setDelimiterToken(delimiterToken: string) {
+    this.delimiterToken = delimiterToken;
     return this;
   }
 
@@ -73,10 +79,11 @@ export default class CompletionsBuilder {
           changes: {
             from,
             to,
-            insert: projection.pattern
-              .toDraftString()
-              .split("\n")
-              .join("\n" + indentString(view.state, this.indentation)),
+            insert:
+              projection.pattern
+                .toDraftString()
+                .split("\n")
+                .join("\n" + indentString(view.state, this.indentation)) + this.delimiterToken,
           },
           annotations: pickedCompletion.of(completion),
         });

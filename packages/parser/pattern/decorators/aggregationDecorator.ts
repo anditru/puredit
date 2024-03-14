@@ -4,7 +4,11 @@ import { createPatternMap } from "../../common";
 import { PatternsMap } from "../../match/types";
 
 export default class AggregationDecorator extends PatternDecorator {
-  constructor(pattern: Pattern, private aggregationPatternMap: PatternsMap) {
+  constructor(
+    pattern: Pattern,
+    private aggregationPatternMap: PatternsMap,
+    private aggregationTypeMap: Record<string, string>
+  ) {
     super(pattern);
   }
 
@@ -18,6 +22,10 @@ export default class AggregationDecorator extends PatternDecorator {
 
   getSubPatternsFor(aggregationName: string): Pattern[] {
     return this.aggregationPatternMap[aggregationName];
+  }
+
+  getNodeTypeFor(aggregationName: string): string {
+    return this.aggregationTypeMap[aggregationName];
   }
 
   hasAggregations(): boolean {

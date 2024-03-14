@@ -51,6 +51,7 @@ export default abstract class PatternGeneration {
 
   protected buildAggregationSubPatterns(pattern: Pattern): AggregationDecorator {
     const aggregationPatternMap: PatternsMap = {};
+    const aggregationTypeMap: Record<string, string> = {};
     const aggregations = this.template!.getAggregations();
     for (const aggregation of aggregations) {
       const aggregatedNodeType = this.getAggregatedNodeType(pattern, aggregation);
@@ -67,8 +68,9 @@ export default abstract class PatternGeneration {
           .execute();
       });
       aggregationPatternMap[aggregation.name] = aggregationSubPatterns;
+      aggregationTypeMap[aggregation.name] = aggregatedNodeType;
     }
-    return new AggregationDecorator(pattern, aggregationPatternMap);
+    return new AggregationDecorator(pattern, aggregationPatternMap, aggregationTypeMap);
   }
 
   private getAggregatedNodeType(pattern: Pattern, aggregation: TemplateAggregation): string {
