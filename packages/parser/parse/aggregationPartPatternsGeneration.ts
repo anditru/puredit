@@ -37,9 +37,9 @@ export default class AggregationPartPatternsGeneration extends PatternGeneration
   }
 
   private buildCodeString(): CodeString {
-    const contextTemplate = this.nodeTypeConfig!.contextTemplate;
+    const contextTemplate = new CodeString(this.nodeTypeConfig!.contextTemplate);
     const partCodeString = this.template!.toCodeString();
-    return partCodeString.insertInto(contextTemplate, aggregationPlaceHolder);
+    return contextTemplate.replace(aggregationPlaceHolder, partCodeString);
   }
 
   private extractAggregationPattern(patternTreeRoot: PatternNode) {

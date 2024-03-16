@@ -25,6 +25,26 @@ export default class CodeString {
     this._raw = raw;
   }
 
+  replace(placeholder: string, replacement: CodeString): CodeString {
+    const parts = this._raw.split(placeholder);
+    if (parts.length === 1) {
+      throw new Error(`Placeholder ${placeholder} not found`);
+    } else if (parts.length > 2) {
+      throw new Error(`Placeholder ${placeholder} found multiple times`);
+    }
+    const startOffset = parts[0].length;
+    const replacementParameterTable = replacement.parameterTable;
+    replacementParameterTable.shift(startOffset);
+
+    const shiftBound = startOffset + placeholder.length;
+    const shiftOffset = replacement.raw.length - placeholder.length;
+    this.parameterTable.shiftStartingAfter(shiftBound, shiftOffset);
+
+    this.parameterTable.merge(replacementParameterTable);
+    this._raw = parts[0] + replacement.raw + parts[1];
+    return this;
+  }
+
   insertInto(target: string, placeholder: string): CodeString {
     const parts = target.split(placeholder);
     if (parts.length === 1) {
