@@ -17,9 +17,7 @@ export default class NodeTransformVisitor {
     const nodes: PatternNode[] = [];
     do {
       this.checkNoErrorToken();
-      if (this.cursor!.currentNode.isKeyword()) {
-        continue;
-      }
+
       nodes.push(this.transformCurrentNode());
     } while (this.cursor!.goToNextSibling());
     return nodes;

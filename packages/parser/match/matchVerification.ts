@@ -34,6 +34,9 @@ export default class MatchVerification {
   private astCursor: AstCursor;
   private contextVariables: ContextVariableMap;
 
+  // State
+  private lastSiblingKeyword: Keyword | null = null;
+
   // Output
   private argsToAstNodeMap: AstNodeMap = {};
   private blockRanges: CodeRange[] = [];
@@ -55,9 +58,9 @@ export default class MatchVerification {
    * AST at the position of the cursor by recursively creating new
    * CandateMatches for the child nodes in a depth-first manner.
    */
-  public execute(lastSiblingKeyword?: Keyword): VerificationResult {
+  public execute(): VerificationResult {
     logger.debug(`Starting new verification of CandidateMatch with Pattern ${this.pattern.name}`);
-    this.recurse(lastSiblingKeyword);
+    this.recurse();
     return {
       pattern: this.pattern,
       node: this.astCursor.currentNode,
@@ -71,13 +74,16 @@ export default class MatchVerification {
     };
   }
 
-  private recurse(lastSiblingKeyword?: Keyword) {
+  private recurse() {
+    const currentAstNode = this.astCursor.currentNode;
     const currentPatternNode = this.patternCursor.currentNode;
 
     this.checkNoErrorToken();
     this.skipLeadingCommentsInBodies();
 
-    if (currentPatternNode instanceof ArgumentNode) {
+    if (currentAstNode.isKeyword()) {
+      this.visitKeywordNode();
+    } else if (currentPatternNode instanceof ArgumentNode) {
       this.visitArgumentNode();
     } else if (currentPatternNode instanceof AggregationNode) {
       this.visitAggregationNode();
@@ -86,7 +92,7 @@ export default class MatchVerification {
     } else if (currentPatternNode instanceof ChainContinuationNode) {
       this.visitChainContinuationNode();
     } else if (currentPatternNode instanceof BlockNode) {
-      this.visitBlockNode(lastSiblingKeyword);
+      this.visitBlockNode();
     } else if (currentPatternNode instanceof RegularNode) {
       this.visitRegularNode();
     } else {
@@ -126,6 +132,18 @@ export default class MatchVerification {
       throw new DoesNotMatch();
     }
     this.argsToAstNodeMap[argumentNode.templateArgument.name] = this.astCursor.currentNode;
+  }
+
+  private visitKeywordNode() {
+    const regularNode = this.patternCursor.currentNode as RegularNode;
+    logger.debug(
+      `Visiting RegularNode comparing to AST node of type ${this.astCursor.currentNode.type}`
+    );
+
+    if (regularNode.text !== this.astCursor.currentNode.text) {
+      logger.debug("Keyword AST node does not match RegularNode");
+      throw new DoesNotMatch();
+    }
   }
 
   private visitAggregationNode() {
@@ -333,7 +351,7 @@ export default class MatchVerification {
     }
   }
 
-  private visitBlockNode(lastSiblingKeyword?: Keyword) {
+  private visitBlockNode() {
     const blockNode = this.patternCursor.currentNode as BlockNode;
     logger.debug(
       `Visiting BlockNode comparing to AST node of type ${this.astCursor.currentNode.type}`
@@ -343,14 +361,14 @@ export default class MatchVerification {
       logger.debug("AST does not match BlockNode");
       throw new DoesNotMatch();
     }
-    const blockRange = this.extractBlockRangeFor(blockNode, lastSiblingKeyword);
+    const blockRange = this.extractBlockRangeFor(blockNode);
     this.blockRanges.push(blockRange);
   }
 
-  private extractBlockRangeFor(blockNode: BlockNode, lastSiblingKeyword?: Keyword): CodeRange {
+  private extractBlockRangeFor(blockNode: BlockNode): CodeRange {
     let from = this.astCursor.startIndex;
-    if (this.pattern.language === Language.Python && lastSiblingKeyword?.type === ":") {
-      from = lastSiblingKeyword.pos;
+    if (this.pattern.language === Language.Python && this.lastSiblingKeyword?.type === ":") {
+      from = this.lastSiblingKeyword.pos;
     }
     const rangeModifierStart = 1;
     const rangeModifierEnd = this.pattern.language === Language.TypeScript ? 1 : 0;
@@ -383,35 +401,33 @@ export default class MatchVerification {
     this.patternCursor.goToFirstChild();
     this.astCursor.goToFirstChild();
 
-    let [nextSiblingExists, lastKeyword] = this.astCursor.skipKeywordsAndGetLast();
-    if (!nextSiblingExists) {
-      logger.debug("Patter node has children but AST node only has keywords as children");
+    const requiredNumberOfChildren = regularNode.children!.length;
+    for (let i = 0; i < requiredNumberOfChildren; i++) {
+      this.recurse();
+
+      if (this.astCursor.currentNode.isKeyword()) {
+        this.lastSiblingKeyword = {
+          type: this.astCursor.currentNode.type,
+          pos: this.astCursor.currentNode.startIndex,
+        };
+      }
+
+      if (i < requiredNumberOfChildren - 1) {
+        this.patternCursor.goToNextSibling();
+        const nextAstSiblingExists = this.astCursor.goToNextSibling();
+        if (!nextAstSiblingExists) {
+          logger.debug("AST Node has too few children");
+          throw new DoesNotMatch();
+        }
+      }
+    }
+
+    if (this.astCursor.goToNextSibling()) {
+      logger.debug("AST Node has too many children");
       throw new DoesNotMatch();
     }
 
-    const requiredNumberOfChildren = regularNode.children!.length;
-    for (let i = 0; i < requiredNumberOfChildren; ) {
-      this.recurse(lastKeyword);
-
-      i += 1;
-      nextSiblingExists = this.astCursor.goToNextSibling();
-
-      if (nextSiblingExists) {
-        [nextSiblingExists, lastKeyword] = this.astCursor.skipKeywordsAndGetLast();
-      }
-
-      // Check AST node does not have too few or too many children
-      if (
-        (i < requiredNumberOfChildren && !nextSiblingExists) ||
-        (i >= requiredNumberOfChildren && nextSiblingExists)
-      ) {
-        logger.debug("AST node does not have sufficient amount of children");
-        throw new DoesNotMatch();
-      }
-
-      this.patternCursor.goToNextSibling();
-    }
-
+    this.lastSiblingKeyword = null;
     this.astCursor.goToParent();
     this.patternCursor.goToParent();
   }

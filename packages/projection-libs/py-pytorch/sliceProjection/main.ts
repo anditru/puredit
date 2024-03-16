@@ -6,11 +6,24 @@ import EndWidget from "./EndWidget.svelte";
 import { Match, agg, arg } from "@puredit/parser";
 
 import { fromBeginningSubProjection } from "./fromBeginningSubProjection/config";
+import { untilEndSubProjection } from "./untilEndSubProjection/config";
+import { betweenIndicesSubProjection } from "./betweenIndicesSubProjection/config";
+import { singleItemSubProjection } from "./singleItemSubProjection/config";
 
 const targetTensor = arg("targetTensor", ["identifier"]);
 const baseTensor = arg("baseTensor", ["identifier"]);
 const startPattern = parser.subPattern("baseTensor")`${baseTensor}`;
-const slices = agg("slices", "subscript", [fromBeginningSubProjection.pattern], startPattern);
+const slices = agg(
+  "slices",
+  "subscript",
+  [
+    fromBeginningSubProjection.pattern,
+    untilEndSubProjection.pattern,
+    betweenIndicesSubProjection.pattern,
+    singleItemSubProjection.pattern,
+  ],
+  startPattern
+);
 const pattern = parser.statementPattern("sliceProjectionPattern")`${targetTensor} = ${slices}`;
 
 const beginWidget = svelteProjection(BeginWidget);
@@ -22,7 +35,12 @@ export const sliceProjection: RootProjection = {
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [beginWidget, endWidget],
-  subProjections: [fromBeginningSubProjection],
+  subProjections: [
+    fromBeginningSubProjection,
+    untilEndSubProjection,
+    betweenIndicesSubProjection,
+    singleItemSubProjection,
+  ],
   contextProvider(match: Match, _, contextInformation: ContextInformation): ContextInformation {
     return {
       commentContext: contextInformation.commentContext,

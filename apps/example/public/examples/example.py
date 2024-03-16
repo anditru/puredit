@@ -98,6 +98,12 @@ image_data.permute(2, 3, 0, 1, 4)
 
 # CONTEXT: { "Batches": 200, "Images": 64, "Channels": 3, "Width": 32, "Height": 32 }
 slice_1 = image_data[
-    :50:2,
+    50::2,
     :32:1
+]
+
+# CONTEXT: { "Batches": 200, "Images": 64, "Channels": 3, "Width": 32, "Height": 32 }
+slice_2 = image_data[
+    25:50:2,
+    1
 ]
