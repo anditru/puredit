@@ -42,11 +42,11 @@ export function completions(completionContext: CompletionContext): CompletionRes
     for (const [aggregationName, range] of Object.entries(match.aggregationToRangeMap)) {
       if (cursorPosition >= range.from && cursorPosition <= range.to) {
         const pattern = match.pattern as AggregationDecorator;
-        const subPatterns = pattern.getSubPatternsFor(aggregationName);
+        const subPatterns = pattern.getPartPatternsFor(aggregationName);
         relevantChildProjections = subPatterns.map(
           (subPattern) => subProjectionsMap.get(subPattern.template)!
         );
-        const aggregationPartRanges = match.aggregationToMatchesMap[aggregationName];
+        const aggregationPartRanges = match.aggregationToPartMatchesMap[aggregationName];
         const endLastPartMatch = aggregationPartRanges[aggregationPartRanges.length - 1].to;
         if (cursorPosition < endLastPartMatch) {
           const aggregationNodeType = pattern.getNodeTypeFor(aggregationName);

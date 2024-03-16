@@ -31,7 +31,7 @@ export const permuteProjection: RootProjection = {
     if (!commentContext) {
       return { reorderedDimensions: null };
     }
-    const permutation = match.aggregationToMatchesMap.dimensions.map((match) =>
+    const permutation = match.aggregationToPartMatchesMap.dimensions.map((match) =>
       parseInt(match.node.text)
     );
     if (permutation.length !== commentContext.length) {

@@ -32,9 +32,10 @@ export function agg(
   name: string,
   type: string,
   subPatterns: Template[],
+  specialStartPattern?: Template,
   contextVariables: ContextVariableMap = {}
 ): TemplateAggregation {
-  return new TemplateAggregation(name, type, subPatterns, contextVariables);
+  return new TemplateAggregation(name, type, subPatterns, specialStartPattern, contextVariables);
 }
 
 /**

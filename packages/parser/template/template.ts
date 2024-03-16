@@ -40,7 +40,7 @@ export default class Template {
       if (isString(param)) {
         return param;
       } else {
-        return param.toDraftString(this.language);
+        return param.toDraftString();
       }
     });
     return String.raw(this.templateStrings, ...substitutions);

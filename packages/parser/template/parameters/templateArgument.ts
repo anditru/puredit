@@ -34,11 +34,16 @@ export default class TemplateArgument extends TemplateParameter {
     if (maybeDraft) {
       return maybeDraft;
     } else {
-      return argumentsConfig.draftTypeMapping["default"].replace(typePlaceHolder, this.types[0]);
+      return argumentsConfig.draftTypeMapping["default"].replace(typePlaceHolder, type);
     }
   }
 
   private getDraftStringForMultipleTypes(language: Language): string {
-    return this.types.map((type) => this.getDraftStringForSingeType(type, language)).join("_or_");
+    return this.types
+      .map((type) => {
+        const argumentsConfig = loadArgumentsConfigFor(language);
+        return argumentsConfig.draftTypeMapping["default"].replace(typePlaceHolder, type);
+      })
+      .join("_or");
   }
 }

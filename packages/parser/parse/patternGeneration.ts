@@ -11,7 +11,8 @@ import { PatternMap, PatternsMap } from "../match/types";
 import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
 import {
   NodeTransformVisitor,
-  AggregationPatternsGeneration,
+  AggregationStartPatternGeneration,
+  AggregationPartPatternsGeneration,
   ChainLinkPatternsGeneration,
   CompletePatternGeneration,
 } from "./internal";
@@ -52,6 +53,7 @@ export default abstract class PatternGeneration {
   protected buildAggregationSubPatterns(pattern: Pattern): AggregationDecorator {
     const aggregationPatternMap: PatternsMap = {};
     const aggregationTypeMap: Record<string, string> = {};
+    const specialStartPatternMap: PatternMap = {};
     const aggregations = this.template!.getAggregations();
     for (const aggregation of aggregations) {
       const aggregatedNodeType = this.getAggregatedNodeType(pattern, aggregation);
@@ -59,9 +61,15 @@ export default abstract class PatternGeneration {
         this.template!.language,
         aggregatedNodeType
       );
+
+      const aggregationPartPatternsGeneration = new AggregationPartPatternsGeneration(this.parser);
+      if (aggregation.specialStartPattern) {
+        aggregationPartPatternsGeneration.setStartTemplateCodeString(
+          aggregation.specialStartPattern.toCodeString()
+        );
+      }
       const aggregationSubPatterns = aggregation.subPatterns.map((subTemplate) => {
-        const aggregationPatternsGeneration = new AggregationPatternsGeneration(this.parser);
-        return aggregationPatternsGeneration
+        return aggregationPartPatternsGeneration
           .setNodeTypeConfig(nodeTypeConfig)
           .setIsExpression(false)
           .setTemplate(subTemplate)
@@ -69,8 +77,25 @@ export default abstract class PatternGeneration {
       });
       aggregationPatternMap[aggregation.name] = aggregationSubPatterns;
       aggregationTypeMap[aggregation.name] = aggregatedNodeType;
+
+      if (aggregation.specialStartPattern) {
+        const aggregationStartPatternGeneration = new AggregationStartPatternGeneration(
+          this.parser
+        );
+        const aggregationStartPattern = aggregationStartPatternGeneration
+          .setNodeTypeConfig(nodeTypeConfig)
+          .setIsExpression(false)
+          .setTemplate(aggregation.specialStartPattern)
+          .execute();
+        specialStartPatternMap[aggregation.name] = aggregationStartPattern;
+      }
     }
-    return new AggregationDecorator(pattern, aggregationPatternMap, aggregationTypeMap);
+    return new AggregationDecorator(
+      pattern,
+      aggregationPatternMap,
+      specialStartPatternMap,
+      aggregationTypeMap
+    );
   }
 
   private getAggregatedNodeType(pattern: Pattern, aggregation: TemplateAggregation): string {

@@ -40,4 +40,8 @@ export default class AggregationNode extends PatternNode {
     const astNode = astCursor.currentNode;
     return this.astNodeType === astNode.type && this.fieldName === astCursor.currentFieldName;
   }
+
+  hasSpecialStartPattern(): boolean {
+    return !!this.templateAggregation.specialStartPattern;
+  }
 }

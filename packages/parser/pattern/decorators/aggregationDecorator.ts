@@ -1,27 +1,35 @@
 import Pattern from "../pattern";
 import PatternDecorator from "./patternDecorator";
 import { createPatternMap } from "../../common";
-import { PatternsMap } from "../../match/types";
+import { PatternMap, PatternsMap } from "../../match/types";
 
 export default class AggregationDecorator extends PatternDecorator {
   constructor(
     pattern: Pattern,
-    private aggregationPatternMap: PatternsMap,
+    private partPatternMap: PatternsMap,
+    private specialStartPatternMap: PatternMap,
     private aggregationTypeMap: Record<string, string>
   ) {
     super(pattern);
   }
 
-  getAggregationPatternMapFor(aggregationName: string): PatternsMap {
-    const subPatterns = this.aggregationPatternMap[aggregationName];
-    if (!subPatterns) {
-      throw new Error(`Aggregation with name ${aggregationName} not found`);
+  getStartPatternMapFor(aggregationName: string): PatternsMap | undefined {
+    const startPattern = this.specialStartPatternMap[aggregationName];
+    if (startPattern) {
+      return createPatternMap([startPattern]);
     }
-    return createPatternMap(subPatterns);
   }
 
-  getSubPatternsFor(aggregationName: string): Pattern[] {
-    return this.aggregationPatternMap[aggregationName];
+  getPartPatternsMapFor(aggregationName: string): PatternsMap {
+    const partPatterns = this.partPatternMap[aggregationName];
+    if (!partPatterns) {
+      throw new Error(`Aggregation with name ${aggregationName} not found`);
+    }
+    return createPatternMap(partPatterns);
+  }
+
+  getPartPatternsFor(aggregationName: string): Pattern[] {
+    return this.partPatternMap[aggregationName];
   }
 
   getNodeTypeFor(aggregationName: string): string {
@@ -29,6 +37,6 @@ export default class AggregationDecorator extends PatternDecorator {
   }
 
   hasAggregations(): boolean {
-    return !!this.aggregationPatternMap;
+    return !!this.partPatternMap;
   }
 }

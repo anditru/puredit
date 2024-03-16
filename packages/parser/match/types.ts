@@ -33,6 +33,7 @@ export interface VerificationResult {
   argsToAstNodeMap: AstNodeMap;
   blockRanges: CodeRange[];
   aggregationToRangeMap: CodeRangeMap;
+  aggregationToStartRangeMap: CodeRangeMap;
   aggregationToPartRangesMap: CodeRangesMap;
   chainToStartRangeMap: CodeRangeMap;
   chainToLinkRangesMap: CodeRangesMap;
@@ -61,9 +62,11 @@ export interface Match {
   blockRanges: CodeRange[];
   contextInformation: ContextInformation;
   aggregationToRangeMap: CodeRangeMap;
-  aggregationToMatchesMap: MatchesMap;
+  aggregationToStartMatchMap: MatchMap;
+  aggregationToPartMatchesMap: MatchesMap;
 }
 
+export type MatchMap = Record<string, Match>;
 export type MatchesMap = Record<string, Match[]>;
 
 // Result of Phase 4 (Consolidation)

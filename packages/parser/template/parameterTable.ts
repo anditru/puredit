@@ -45,17 +45,28 @@ export default class ParameterTable {
   }
 
   shift(offset: number) {
+    const tempTable: Record<string, TemplateParameter> = {};
     Object.keys(this.table).forEach((key: string) => {
       const { from, to } = this.decodeKey(key);
-      this.shiftParameter(from, to, offset);
+      const newFrom = from + offset;
+      const newTo = to + offset;
+      const parameter = this.get(from, to)!;
+      tempTable[this.getKey(newFrom, newTo)] = parameter;
     });
+    this.table = tempTable;
   }
 
   shiftStartingAfter(bound: number, offset: number) {
+    const tempTable: Record<string, TemplateParameter> = {};
     Object.keys(this.table).forEach((key: string) => {
       const { from, to } = this.decodeKey(key);
+      const parameter = this.get(from, to)!;
       if (from > bound) {
-        this.shiftParameter(from, to, offset);
+        const newFrom = from + offset;
+        const newTo = to + offset;
+        tempTable[this.getKey(newFrom, newTo)] = parameter;
+      } else {
+        tempTable[this.getKey(from, to)] = parameter;
       }
     });
   }
@@ -72,6 +83,9 @@ export default class ParameterTable {
   }
 
   private shiftParameter(from: number, to: number, offset: number) {
+    if (offset === 0) {
+      return;
+    }
     const newFrom = from + offset;
     const newTo = to + offset;
     const parameter = this.get(from, to);

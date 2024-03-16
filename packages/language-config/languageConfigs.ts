@@ -1,5 +1,10 @@
 import { TreePath } from "@puredit/parser";
-import { Language, aggregationPlaceHolder, type LanguageConfig } from "./types";
+import {
+  Language,
+  aggregationPlaceHolder,
+  aggregationStartPlaceHolder,
+  type LanguageConfig,
+} from "./types";
 
 const languageConfigs: Record<Language, LanguageConfig> = {
   [Language.Python]: {
@@ -8,7 +13,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
         string: `""`,
         integer: "1",
         list: "[]",
-        default: "__empty_<type>",
+        default: "_<type>",
       },
     },
     aggregations: {
@@ -18,30 +23,42 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           delimiterToken: ",",
           endToken: ")",
           contextTemplate: `someFunction(${aggregationPlaceHolder})`,
+          specialStartPattern: false,
         },
         dictionary: {
           startToken: "{",
           delimiterToken: ",",
           endToken: "}",
           contextTemplate: `{${aggregationPlaceHolder}}`,
+          specialStartPattern: false,
         },
         set: {
           startToken: "{",
           delimiterToken: ",",
           endToken: "}",
           contextTemplate: `{${aggregationPlaceHolder}}`,
+          specialStartPattern: false,
         },
         list: {
           startToken: "[",
           delimiterToken: ",",
           endToken: "]",
           contextTemplate: `[${aggregationPlaceHolder}]`,
+          specialStartPattern: false,
         },
         tuple: {
           startToken: "(",
           delimiterToken: ",",
           endToken: ")",
           contextTemplate: `(${aggregationPlaceHolder}, 1)`,
+          specialStartPattern: false,
+        },
+        subscript: {
+          startToken: "[",
+          delimiterToken: ",",
+          endToken: "]",
+          contextTemplate: `${aggregationStartPlaceHolder}[${aggregationPlaceHolder}]`,
+          specialStartPattern: true,
         },
       },
     },
@@ -86,6 +103,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           delimiterToken: ",",
           endToken: ")",
           contextTemplate: `someFunction(${aggregationPlaceHolder})`,
+          specialStartPattern: false,
         },
       },
     },

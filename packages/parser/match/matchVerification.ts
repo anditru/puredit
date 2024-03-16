@@ -38,6 +38,7 @@ export default class MatchVerification {
   private argsToAstNodeMap: AstNodeMap = {};
   private blockRanges: CodeRange[] = [];
   private aggregationToRangeMap: CodeRangeMap = {};
+  private aggregationToStartRangeMap: CodeRangeMap = {};
   private aggregationToPartRangesMap: CodeRangesMap = {};
   private chainToStartRangeMap: CodeRangeMap = {};
   private chainToLinkRangesMap: CodeRangesMap = {};
@@ -63,6 +64,7 @@ export default class MatchVerification {
       argsToAstNodeMap: this.argsToAstNodeMap,
       blockRanges: this.blockRanges,
       aggregationToRangeMap: this.aggregationToRangeMap,
+      aggregationToStartRangeMap: this.aggregationToStartRangeMap,
       aggregationToPartRangesMap: this.aggregationToPartRangesMap,
       chainToStartRangeMap: this.chainToStartRangeMap,
       chainToLinkRangesMap: this.chainToLinkRangesMap,
@@ -139,6 +141,13 @@ export default class MatchVerification {
 
     const aggregationRange = this.extractAggregationRangeFor(aggregationNode);
     this.aggregationToRangeMap[aggregationNode.templateAggregation.name] = aggregationRange;
+
+    if (aggregationNode.hasSpecialStartPattern()) {
+      const aggregationStartRange = this.extractAggregationStartRangeFor(aggregationNode);
+      this.aggregationToStartRangeMap[aggregationNode.templateAggregation.name] =
+        aggregationStartRange;
+    }
+
     const aggregationRanges = this.extractAggregationPartRangesFor(aggregationNode);
     this.aggregationToPartRangesMap[aggregationNode.templateAggregation.name] = aggregationRanges;
   }
@@ -154,10 +163,29 @@ export default class MatchVerification {
     };
   }
 
+  private extractAggregationStartRangeFor(aggregationNode: AggregationNode): CodeRange {
+    const currentAstNode = this.astCursor.currentNode;
+    const aggregationStartRoot = currentAstNode.children[0];
+    return {
+      node: aggregationStartRoot,
+      contextVariables: aggregationNode.templateAggregation.contextVariables,
+      from: aggregationStartRoot.startIndex,
+      to: aggregationStartRoot.endIndex,
+      language: this.pattern.language,
+    };
+  }
+
   private extractAggregationPartRangesFor(aggregationNode: AggregationNode): CodeRange[] {
     const currentAstNode = this.astCursor.currentNode;
 
-    const aggregationPartRoots = currentAstNode.children.filter((astNode) => {
+    let childNodes;
+    if (aggregationNode.hasSpecialStartPattern()) {
+      childNodes = currentAstNode.children.slice(1, currentAstNode.children.length);
+    } else {
+      childNodes = currentAstNode.children;
+    }
+
+    const aggregationPartRoots = childNodes.filter((astNode) => {
       return !(
         astNode.text === aggregationNode.startToken ||
         astNode.text === aggregationNode.delimiterToken ||

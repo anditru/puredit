@@ -28,8 +28,10 @@ export type AggregatableNodeTypeConfig = {
   delimiterToken: string;
   endToken: string;
   contextTemplate: string;
+  specialStartPattern: boolean;
 };
 
+export const aggregationStartPlaceHolder = "__start__";
 export const aggregationPlaceHolder = "__agg__";
 
 export type ChainsConfig = {
