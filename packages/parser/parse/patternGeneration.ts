@@ -1,4 +1,4 @@
-import { TreeSitterParser } from "../treeSitterParser";
+import { TreeSitterParser } from "../tree-sitter/treeSitterParser";
 import AstCursor from "../ast/cursor";
 import Template from "../template/template";
 import TemplateAggregation from "../template/parameters/templateAggregation";

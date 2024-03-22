@@ -1,14 +1,12 @@
 {
-  "name": "@puredit/language-config",
+  "name": "@puredit/node-utils",
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",
   "main": "./index.ts",
   "types": "./index.ts",
   "dependencies": {
+    "@puredit/language-config": "*",
     "@puredit/parser": "*"
-  },
-  "devDependencies": {
-    "typescript": "^4.5.3"
   }
 }

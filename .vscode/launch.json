@@ -5,9 +5,7 @@
       "name": "Run Extension",
       "type": "extensionHost",
       "request": "launch",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}/vscode-extension"
-      ],
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}/vscode-extension"],
       "outFiles": ["${workspaceFolder}/vscode-extension/out/**/*.js"],
       "preLaunchTask": "${defaultBuildTask}"
     },
@@ -21,6 +19,25 @@
       ],
       "outFiles": ["${workspaceFolder}/vscode-extension/out/test/**/*.js"],
       "preLaunchTask": "${defaultBuildTask}"
+    },
+    {
+      "name": "Run generator",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/apps/generator/src/index.ts",
+      "args": [
+        "projection",
+        "-n",
+        "\"Take Projection\"",
+        "-t",
+        "takeProjection",
+        "-d",
+        "\"Bla bla bla\"",
+        "-s",
+        "apps/generator/examples/py-take.txt"
+      ],
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }

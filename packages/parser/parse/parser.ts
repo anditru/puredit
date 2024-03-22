@@ -1,14 +1,15 @@
 import TemplateParameter from "../template/parameters/templateParameter";
 import Template from "../template/template";
-import type { TreeSitterParser } from "../treeSitterParser";
-import { createTreeSitterParser } from "../treeSitterParser";
+import type { TreeSitterParser } from "../tree-sitter/treeSitterParser";
+import { createTreeSitterParser } from "../tree-sitter/treeSitterParser";
 import { Language } from "@puredit/language-config";
 import { CompletePatternGeneration } from "./internal";
 import { isString } from "@puredit/utils";
+import WasmPathProvider from "../tree-sitter/wasmPathProvider";
 
 export default class Parser {
-  static async load(language: Language): Promise<Parser> {
-    const treeSitterParser = await createTreeSitterParser(language);
+  static async load(language: Language, wasmPathProvider: WasmPathProvider): Promise<Parser> {
+    const treeSitterParser = await createTreeSitterParser(language, wasmPathProvider);
     return new Parser(treeSitterParser, language);
   }
 

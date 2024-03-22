@@ -1,4 +1,6 @@
+import { BrowserWasmPathProvider } from "@puredit/browser-utils";
 import { Parser } from "@puredit/parser";
 import { Language } from "@puredit/language-config";
 
-export const parser = await Parser.load(Language.Python);
+const wasmPathProvider = new BrowserWasmPathProvider(Language.Python);
+export const parser = await Parser.load(Language.Python, wasmPathProvider);

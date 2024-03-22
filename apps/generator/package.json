@@ -1,0 +1,45 @@
+{
+  "name": "@puredit/generator",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npx tsx src/index.ts"
+  },
+  "dependencies": {
+    "@babel/traverse": "^7.23.6",
+    "@babel/types": "^7.23.9",
+    "@ljharb/through": "^2.3.13",
+    "@puredit/language-config": "*",
+    "@puredit/parser": "*",
+    "@puredit/utils": "*",
+    "@types/argparse": "^2.0.16",
+    "argparse": "^2.0.1",
+    "chalk": "^5.3.0",
+    "cross-env": "^7.0.3",
+    "inquirer": "^9.2.16",
+    "mdiff": "^1.4.2",
+    "mem-fs": "^4.1.0",
+    "mem-fs-editor": "^11.0.0",
+    "recast": "^0.23.6",
+    "teex": "^1.0.1",
+    "tsx": "^4.7.1",
+    "yargs": "^17.5.1"
+  },
+  "devDependencies": {
+    "@codemirror/language": "6",
+    "@codemirror/state": "6",
+    "@codemirror/view": "6",
+    "@lezer/highlight": "1",
+    "@puredit/projections": "*",
+    "@types/node": "^20.10.6",
+    "@types/yargs": "^17.0.32",
+    "svelte": "^3.48.0"
+  },
+  "bin": {
+    "puredit-generator": "src/index.ts"
+  },
+  "files": [
+    "src"
+  ]
+}

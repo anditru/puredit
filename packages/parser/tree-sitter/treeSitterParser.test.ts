@@ -1,4 +1,4 @@
-import { Language } from "./config/types";
+import { Language } from "@puredit/language-config";
 import { createTreeSitterParser } from "./treeSitterParser";
 
 describe("parser", () => {

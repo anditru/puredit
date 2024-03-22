@@ -12,19 +12,13 @@ export function connectVariables(
 ): number[] {
   const solutions: number[][] = [];
 
-  for (const [codeSample, projectionSample] of zip(
-    codeSamples,
-    projectionSamples
-  )) {
+  for (const [codeSample, projectionSample] of zip(codeSamples, projectionSamples)) {
     const diff = new Diff(projectionSample, projection);
     const projectionVariables: string[] = [];
     const projectionVariableIndices: number[] = [];
     diff.scanDiff((fromA, toA, fromB, toB) => {
       assert(fromB === toB - 1, "invalid projection");
-      assert(
-        (projection[fromB] as any).type === "variable",
-        "unknown projection segment"
-      );
+      assert((projection[fromB] as any).type === "variable", "unknown projection segment");
       projectionVariables.push(projectionSample.slice(fromA, toA).join(" "));
       projectionVariableIndices.push(fromB);
     });
@@ -72,19 +66,13 @@ function union(a: number[], b: number[]): number[] {
   return a.filter((x) => b.includes(x));
 }
 
-export function setVariableNames(
-  projection: ProjectionSegment[],
-  connections: number[]
-) {
+export function setVariableNames(projection: ProjectionSegment[], connections: number[]) {
   let i = 0;
   for (const connection of connections) {
     const name = `var${i++}`;
     if (connection >= 0) {
       const segment = projection[connection] as ProjectionVariable;
-      assert(
-        segment.type === "variable",
-        "projection segment is not a variable"
-      );
+      assert(segment.type === "variable", "projection segment is not a variable");
       segment.names.push(name);
     }
   }

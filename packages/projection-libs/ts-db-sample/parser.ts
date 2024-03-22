@@ -1,4 +1,6 @@
+import { BrowserWasmPathProvider } from "@puredit/browser-utils";
 import { Parser } from "@puredit/parser";
 import { Language } from "@puredit/language-config";
 
-export const parser = await Parser.load(Language.TypeScript);
+const wasmPathProvider = new BrowserWasmPathProvider(Language.TypeScript);
+export const parser = await Parser.load(Language.TypeScript, wasmPathProvider);

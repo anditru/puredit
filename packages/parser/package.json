@@ -4,7 +4,6 @@
   "license": "MIT",
   "type": "module",
   "main": "./index.ts",
-  "types": "./index.ts",
   "dependencies": {
     "@puredit/language-config": "*",
     "@puredit/utils": "*",

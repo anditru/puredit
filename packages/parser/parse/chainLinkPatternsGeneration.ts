@@ -1,4 +1,4 @@
-import { TreeSitterParser } from "../treeSitterParser";
+import { TreeSitterParser } from "../tree-sitter/treeSitterParser";
 import PatternNode from "../pattern/nodes/patternNode";
 import BasePattern from "../pattern/basePattern";
 import Pattern from "../pattern/pattern";

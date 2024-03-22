@@ -5,7 +5,7 @@ import Widget from "./Widget.svelte";
 
 const pattern = parser.statementPattern(
   "<%= technicalName %>Pattern"
-)`console.log("Hello World")`;
+)`<%- templateString %>`;
 
 const widget = svelteProjection(Widget);
 

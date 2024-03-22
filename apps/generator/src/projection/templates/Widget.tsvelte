@@ -27,5 +27,5 @@
 </script>
 
 <span class="inline-flex">
-  <span><%= displayName %></span>
+  <%- componentContent %>
 </span>

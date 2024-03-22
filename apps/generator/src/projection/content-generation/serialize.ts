@@ -14,21 +14,12 @@ export function serializePattern(
   let from = 0;
   for (let i = 0; i < variables.length; i++) {
     const sampleCursor = sampleTree.walk();
-    assert(
-      selectDeepChild(sampleCursor, variables[i]),
-      "variable path not found in sample tree"
-    );
+    assert(selectDeepChild(sampleCursor, variables[i]), "variable path not found in sample tree");
     const patternCursor = new PatternCursor(pattern);
-    assert(
-      selectDeepChild(patternCursor, variables[i]),
-      "variable path not found in pattern tree"
-    );
+    assert(selectDeepChild(patternCursor, variables[i]), "variable path not found in pattern tree");
     result += escapeTemplateCode(source.slice(from, sampleCursor.startIndex));
     const name = `var${i}`;
-    if (
-      patternCursor.nodeType === "block" ||
-      patternCursor.nodeType === "statement_block"
-    ) {
+    if (patternCursor.nodeType === "block" || patternCursor.nodeType === "statement_block") {
       result += "${block()}";
     } else {
       result += '${arg("' + name + '", ["' + patternCursor.nodeType + '"])}';
