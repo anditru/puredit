@@ -6,23 +6,19 @@ import { scanCode } from "./code";
 import { connectVariables, setVariableNames } from "./variables";
 import { serializePattern } from "./serialize";
 import { isString } from "@puredit/utils";
+import { Language, supportedLanguages } from "./common";
 
 export interface ProjectionContent {
   templateString: string;
   componentContent: string;
 }
 
-enum Language {
-  Python = "py",
-  TypeScript = "ts",
-}
-const supportedLanguages = ["py", "ts"];
-
 export async function generateProjectionContent(
   samplesFilePath: string,
-  language: string
+  language: string,
+  ignoreBlocks: boolean
 ): Promise<ProjectionContent> {
-  if (!supportedLanguages.includes(language) && samplesFilePath) {
+  if (!supportedLanguages.includes(language as Language) && samplesFilePath) {
     throw new Error(`Templates for language ${language} cannot be generated`);
   }
 
@@ -40,12 +36,12 @@ export async function generateProjectionContent(
   const projections = projectionsRaw.split(doubleNewline).map((sample) => sample.trim().split(" "));
 
   const projection = scanProjections(projections);
-  const { pattern, variables } = scanCode(code);
+  const { pattern, variables } = scanCode(code, language as Language, ignoreBlocks);
 
   const connections = connectVariables(code, projections, variables, projection);
   setVariableNames(projection, connections);
 
-  const templateString = serializePattern(code[0], pattern, variables);
+  const templateString = serializePattern(code[0], pattern, variables, language as Language);
   const componentContent = projection
     .reduce(reduceSegments, [])
     .map(projectionSegmentTemplate)

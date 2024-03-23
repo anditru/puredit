@@ -1,0 +1,16 @@
+with open("my_file.txt", "w") as file:
+    file.write("some text")
+
+with open("other_file.txt", "r") as file:
+    lines = file.readlines()
+
+with open("data.txt", "a") as file:
+    writable = file.writable()
+
+---
+
+read file my_file.txt in mode w :
+
+read file other_file.txt in mode r :
+
+read file data.txt in mode w :

@@ -50,7 +50,8 @@ const __dirname = dirname(__filename);
 export default class ProjectionGenerator extends BaseGenerator {
   private projectionAnswers: ProjectionAnswers = {};
   private samplesFilePath?: string;
-  packagePath = path.resolve("./");
+  private ignoreBlocks = false;
+  private packagePath = path.resolve("./");
 
   constructor() {
     super(path.resolve(__dirname, "templates"));
@@ -60,12 +61,14 @@ export default class ProjectionGenerator extends BaseGenerator {
     displayName?: string,
     technicalName?: string,
     description?: string,
-    samplesfilePath?: string
+    samplesfilePath?: string,
+    ignoreBlocks?: boolean
   ) {
     this.projectionAnswers.displayName = displayName;
     this.projectionAnswers.technicalName = technicalName;
     this.projectionAnswers.description = description;
     this.samplesFilePath = samplesfilePath;
+    this.ignoreBlocks = ignoreBlocks || false;
 
     await this.showPrompts();
     await this.writeFiles();
@@ -86,7 +89,11 @@ export default class ProjectionGenerator extends BaseGenerator {
     let templateString = `console.log("Hello World")`;
     let componentContent = this.projectionAnswers.displayName;
     if (this.samplesFilePath) {
-      const projectionContent = await generateProjectionContent(this.samplesFilePath, language);
+      const projectionContent = await generateProjectionContent(
+        this.samplesFilePath,
+        language,
+        this.ignoreBlocks
+      );
       templateString = projectionContent.templateString;
       componentContent = projectionContent.componentContent;
     }

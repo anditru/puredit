@@ -1,15 +1,17 @@
 import type { Tree, TreeCursor } from "web-tree-sitter";
 import { PatternCursor, PatternNode } from "./pattern";
+import { Language } from "./common";
+import { loadBlocksConfigFor } from "@puredit/language-config";
 
 type Path = number[];
 type Variables = Path[];
 
-export function scanCode(samples: Tree[]) {
+export function scanCode(samples: Tree[], language: Language, ignoreBlocks: boolean) {
   let variables: Variables = [];
   let nodes: PatternNode[] = [];
   let cursor = samples[0].walk();
   for (let i = 1; i < samples.length; i++) {
-    [nodes, variables] = compareNodes(cursor, samples[i].walk());
+    [nodes, variables] = compareNodes(cursor, samples[i].walk(), language, ignoreBlocks);
     cursor = new PatternCursor(nodes[0]);
   }
   return { pattern: nodes[0], variables };
@@ -18,8 +20,11 @@ export function scanCode(samples: Tree[]) {
 function compareNodes(
   a: TreeCursor,
   b: TreeCursor,
+  language: Language,
+  ignoreBlocks: boolean,
   path: Path = []
 ): [PatternNode[], Variables] | null {
+  const blockNodeType = loadBlocksConfigFor(language).blockNodeType;
   const nodes: PatternNode[] = [];
   let variables: Variables = [];
 
@@ -44,6 +49,13 @@ function compareNodes(
         type: "*",
         fieldName: fieldNameA,
       });
+    } else if (!ignoreBlocks && a.nodeType === blockNodeType && b.nodeType === blockNodeType) {
+      variables.push(path.concat(index));
+      nodes.push({
+        variable: true,
+        fieldName: fieldNameA,
+        type: a.nodeType,
+      });
     } else {
       const hasChildrenA = gotoFirstChild(a);
       const hasChildrenB = gotoFirstChild(b);
@@ -62,7 +74,7 @@ function compareNodes(
           type: a.nodeType,
         });
       } else if (hasChildrenA && hasChildrenB) {
-        const result = compareNodes(a, b, path.concat(index));
+        const result = compareNodes(a, b, language, ignoreBlocks, path.concat(index));
         a.gotoParent();
         b.gotoParent();
         if (result) {

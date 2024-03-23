@@ -21,20 +21,21 @@
       "preLaunchTask": "${defaultBuildTask}"
     },
     {
-      "name": "Run generator",
+      "name": "Run Generator",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/apps/generator/src/index.ts",
+      "cwd": "${workspaceFolder}/packages/projection-libs/py-my-package",
       "args": [
         "projection",
         "-n",
-        "\"Take Projection\"",
+        "Open file Projection",
         "-t",
-        "takeProjection",
+        "openFileProjection",
         "-d",
-        "\"Bla bla bla\"",
+        "Open and edit a file",
         "-s",
-        "apps/generator/examples/py-take.txt"
+        "../../../apps/generator/examples/py-open-file.txt"
       ],
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
       "skipFiles": ["<node_internals>/**"]

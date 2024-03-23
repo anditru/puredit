@@ -44,6 +44,13 @@ projectionParser.add_argument("--samples-file", "-s", {
   dest: "samplesFile",
   type: "str",
 });
+projectionParser.add_argument("--ignore-blocks", "-ib", {
+  required: false,
+  default: false,
+  help: "Ignore blocks in pattern generation",
+  dest: "ignoreBlocks",
+  action: "store_true",
+});
 
 subParsers.add_parser("subProjection", {
   help: "Generate a sub projection",
@@ -59,7 +66,8 @@ if (args.entity === "package") {
     args.displayName,
     args.technicalName,
     args.description,
-    args.samplesFile
+    args.samplesFile,
+    args.ignoreBlocks
   );
 } else if (args.entity === "subProjection") {
   const subProjectionGenerator = new SubProjectionGenerator();

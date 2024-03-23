@@ -1,0 +1,13 @@
+((table) => {
+  table["name"] = table["name"].trim("right");
+})(db["lectures"]);
+
+((table) => {
+  table["last_name"] = table["last_name"].trim("left");
+})(db["students"]);
+
+---
+
+change table lectures
+
+change table students
