@@ -1,17 +1,17 @@
-import PatternGeneration from "./patternGeneration";
-import AggregationStartPatternGeneration from "./aggregationStartPatternGeneration";
-import AggregationPartPatternsGeneration from "./aggregationPartPatternsGeneration";
-import ChainLinkPatternsGeneration from "./chainLinkPatternsGeneration";
-import CompletePatternGeneration from "./completePatternGeneration";
+import TemplateTransformation from "./templateTransformation";
+import AggStartTemplateTransformation from "./aggStartTemplateTransformation";
+import AggPartTemplateTransformation from "./aggPartTemplateTransformation";
+import ChainLinkTemplateTransformation from "./chainLinkTemplateTransformation";
+import CompleteTemplateTransformation from "./completeTemplateTransformation";
 import NodeTransformVisitor from "./nodeTransformVisitor";
 import Parser from "./parser";
 
 export {
-  AggregationStartPatternGeneration,
-  AggregationPartPatternsGeneration,
-  ChainLinkPatternsGeneration,
-  CompletePatternGeneration,
-  PatternGeneration,
+  AggStartTemplateTransformation,
+  AggPartTemplateTransformation,
+  ChainLinkTemplateTransformation,
+  CompleteTemplateTransformation,
+  TemplateTransformation,
   NodeTransformVisitor,
   Parser,
 };

@@ -4,17 +4,17 @@ import Pattern from "../pattern/pattern";
 import PatternCursor from "../pattern/cursor";
 import PatternNode from "../pattern/nodes/patternNode";
 import { AggregatableNodeTypeConfig, aggregationStartPlaceHolder } from "@puredit/language-config";
-import { PatternGeneration, NodeTransformVisitor } from "./internal";
+import { TemplateTransformation, NodeTransformVisitor } from "./internal";
 import CodeString from "../template/codeString";
 
-export default class AggregationStartPatternGeneration extends PatternGeneration {
+export default class AggStartTemplateTransformation extends TemplateTransformation {
   private nodeTypeConfig: AggregatableNodeTypeConfig | undefined;
 
   constructor(parser: TreeSitterParser) {
     super(parser);
   }
 
-  setNodeTypeConfig(nodeTypeConfig: AggregatableNodeTypeConfig): AggregationStartPatternGeneration {
+  setNodeTypeConfig(nodeTypeConfig: AggregatableNodeTypeConfig): AggStartTemplateTransformation {
     this.nodeTypeConfig = nodeTypeConfig;
     return this;
   }
@@ -24,7 +24,7 @@ export default class AggregationStartPatternGeneration extends PatternGeneration
 
     const codeString = this.buildCodeString();
     const rootNode = this.transformToPatternTree(codeString);
-    let pattern = this.extractAggregationPattern(rootNode) as Pattern;
+    let pattern = this.extractAggStartPattern(rootNode) as Pattern;
 
     if (this.template!.hasAggregations()) {
       pattern = this.buildAggregationSubPatterns(pattern);
@@ -42,7 +42,7 @@ export default class AggregationStartPatternGeneration extends PatternGeneration
     return contextTemplate.replace(aggregationStartPlaceHolder, startCodeString);
   }
 
-  private extractAggregationPattern(patternTreeRoot: PatternNode) {
+  private extractAggStartPattern(patternTreeRoot: PatternNode) {
     const patternTreeCursor = new PatternCursor(patternTreeRoot);
     const aggregationStartPath = this.getAggregationStartPath();
     patternTreeCursor.follow(aggregationStartPath);

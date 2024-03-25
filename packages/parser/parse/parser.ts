@@ -3,7 +3,7 @@ import Template from "../template/template";
 import type { TreeSitterParser } from "../tree-sitter/treeSitterParser";
 import { createTreeSitterParser } from "../tree-sitter/treeSitterParser";
 import { Language } from "@puredit/language-config";
-import { CompletePatternGeneration } from "./internal";
+import { CompleteTemplateTransformation } from "./internal";
 import { isString } from "@puredit/utils";
 import WasmPathProvider from "../tree-sitter/wasmPathProvider";
 
@@ -13,13 +13,13 @@ export default class Parser {
     return new Parser(treeSitterParser, language);
   }
 
-  patternGeneration: CompletePatternGeneration;
+  patternGeneration: CompleteTemplateTransformation;
 
   private constructor(
     private treeSitterParser: TreeSitterParser,
     public readonly language: Language
   ) {
-    this.patternGeneration = new CompletePatternGeneration(treeSitterParser);
+    this.patternGeneration = new CompleteTemplateTransformation(treeSitterParser);
   }
 
   parse(

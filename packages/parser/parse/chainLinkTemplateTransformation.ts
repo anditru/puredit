@@ -5,12 +5,12 @@ import Pattern from "../pattern/pattern";
 import PatternCursor from "../pattern/cursor";
 import { ChainsConfig } from "@puredit/language-config";
 import { loadChainableNodeTypeConfigFor, loadChainsConfigFor } from "@puredit/language-config";
-import { NodeTransformVisitor, PatternGeneration } from "./internal";
+import { NodeTransformVisitor, TemplateTransformation } from "./internal";
 import TemplateChain from "../template/parameters/templateChain";
 import ChainContinuationNode from "../pattern/nodes/chainContinuationNode";
 import CodeString from "../template/codeString";
 
-export default class ChainLinkPatternsGeneration extends PatternGeneration {
+export default class ChainLinkTemplateTransformation extends TemplateTransformation {
   private chainsConfig: ChainsConfig | undefined;
   private templateChain: TemplateChain | undefined;
   private startPatternRootNode: PatternNode | undefined;
@@ -19,12 +19,12 @@ export default class ChainLinkPatternsGeneration extends PatternGeneration {
     super(parser);
   }
 
-  setTemplateChain(templateChain: TemplateChain): ChainLinkPatternsGeneration {
+  setTemplateChain(templateChain: TemplateChain): ChainLinkTemplateTransformation {
     this.templateChain = templateChain;
     return this;
   }
 
-  setStartPatternRootNode(startPatternRootNode: PatternNode): ChainLinkPatternsGeneration {
+  setStartPatternRootNode(startPatternRootNode: PatternNode): ChainLinkTemplateTransformation {
     this.startPatternRootNode = startPatternRootNode;
     return this;
   }

@@ -68,14 +68,6 @@ export class RegularNodeBuilder {
     );
   }
 
-  buildsParentOfAggregationNode() {
-    const aggregatableNodeTypes = loadAggregatableNodeTypes();
-    return (
-      aggregatableNodeTypes.includes(this._type!) &&
-      this._children[0]?.type === "TemporaryAggregationNode"
-    );
-  }
-
   get fieldName() {
     return this._fieldName;
   }

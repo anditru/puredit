@@ -11,27 +11,27 @@ import { PatternMap, PatternsMap } from "../match/types";
 import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
 import {
   NodeTransformVisitor,
-  AggregationStartPatternGeneration,
-  AggregationPartPatternsGeneration,
-  ChainLinkPatternsGeneration,
-  CompletePatternGeneration,
+  AggStartTemplateTransformation,
+  AggPartTemplateTransformation,
+  ChainLinkTemplateTransformation,
+  CompleteTemplateTransformation,
 } from "./internal";
 import AggregationNode from "../pattern/nodes/aggregationNode";
 import CodeString from "../template/codeString";
 
-export default abstract class PatternGeneration {
+export default abstract class TemplateTransformation {
   protected template: Template | undefined;
   protected isExpression: boolean | undefined;
   protected nodeTransformVisitor: NodeTransformVisitor | undefined;
 
   constructor(protected readonly parser: TreeSitterParser) {}
 
-  setIsExpression(isExpression: boolean): PatternGeneration {
+  setIsExpression(isExpression: boolean): TemplateTransformation {
     this.isExpression = isExpression;
     return this;
   }
 
-  setTemplate(template: Template): PatternGeneration {
+  setTemplate(template: Template): TemplateTransformation {
     this.template = template;
     return this;
   }
@@ -62,7 +62,7 @@ export default abstract class PatternGeneration {
         aggregatedNodeType
       );
 
-      const aggregationPartPatternsGeneration = new AggregationPartPatternsGeneration(this.parser);
+      const aggregationPartPatternsGeneration = new AggPartTemplateTransformation(this.parser);
       if (aggregation.specialStartPattern) {
         aggregationPartPatternsGeneration.setStartTemplateCodeString(
           aggregation.specialStartPattern.toCodeString()
@@ -79,10 +79,10 @@ export default abstract class PatternGeneration {
       aggregationTypeMap[aggregation.name] = aggregatedNodeType;
 
       if (aggregation.specialStartPattern) {
-        const aggregationStartPatternGeneration = new AggregationStartPatternGeneration(
+        const aggregationStartTemplateTransformation = new AggStartTemplateTransformation(
           this.parser
         );
-        const aggregationStartPattern = aggregationStartPatternGeneration
+        const aggregationStartPattern = aggregationStartTemplateTransformation
           .setNodeTypeConfig(nodeTypeConfig)
           .setIsExpression(false)
           .setTemplate(aggregation.specialStartPattern)
@@ -112,15 +112,15 @@ export default abstract class PatternGeneration {
     const linkPatternMap: PatternsMap = {};
     const chains = this.template!.getChains();
     for (const chain of chains) {
-      const startPatternGeneration = new CompletePatternGeneration(this.parser);
-      const startPattern = startPatternGeneration
+      const startTemplateTransformation = new CompleteTemplateTransformation(this.parser);
+      const startPattern = startTemplateTransformation
         .setIsExpression(true)
         .setTemplate(chain.startPattern)
         .execute();
 
       const linkPatterns = chain.linkPatterns.map((linkTemplate) => {
-        const linkPatternGeneration = new ChainLinkPatternsGeneration(this.parser);
-        return linkPatternGeneration
+        const linkTemplateTransformation = new ChainLinkTemplateTransformation(this.parser);
+        return linkTemplateTransformation
           .setTemplateChain(chain)
           .setStartPatternRootNode(startPattern.rootNode)
           .setIsExpression(false)

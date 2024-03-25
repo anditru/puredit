@@ -1,9 +1,9 @@
 import { TreeSitterParser } from "../tree-sitter/treeSitterParser";
 import BasePattern from "../pattern/basePattern";
 import Pattern from "../pattern/pattern";
-import { NodeTransformVisitor, PatternGeneration } from "./internal";
+import { NodeTransformVisitor, TemplateTransformation } from "./internal";
 
-export default class CompletePatternGeneration extends PatternGeneration {
+export default class CompleteTemplateTransformation extends TemplateTransformation {
   constructor(parser: TreeSitterParser) {
     super(parser);
   }
