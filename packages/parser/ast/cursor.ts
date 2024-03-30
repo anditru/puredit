@@ -6,6 +6,7 @@ export default class AstCursor extends Cursor {
   private runningTransaction = false;
   private runningRollback = false;
   private operationLog: TransactionOperation[] = [];
+  private _currentPath: number[] = [0];
 
   constructor(private treeCursor: TreeCursor) {
     super();
@@ -41,6 +42,7 @@ export default class AstCursor extends Cursor {
       if (this.runningTransaction && !this.runningRollback) {
         this.operationLog.push(TransactionOperation.GOTO_PARENT);
       }
+      this._currentPath.pop();
       return true;
     } else {
       return false;
@@ -52,6 +54,7 @@ export default class AstCursor extends Cursor {
       if (this.runningTransaction && !this.runningRollback) {
         this.operationLog.push(TransactionOperation.GOTO_FIRST_CHILD);
       }
+      this._currentPath.push(0);
       return true;
     } else {
       return false;
@@ -78,7 +81,12 @@ export default class AstCursor extends Cursor {
     if (this.runningTransaction && this.operationLog.length === 0) {
       throw new Error("Transaction on AST Cursor cannot start with goToNextSibling");
     }
-    return this.treeCursor.gotoNextSibling();
+    if (this.treeCursor.gotoNextSibling()) {
+      this._currentPath.push(this._currentPath.pop()! + 1);
+      return true;
+    } else {
+      return false;
+    }
   }
 
   goToSiblingWithIndex(index: number): boolean {
@@ -120,6 +128,10 @@ export default class AstCursor extends Cursor {
       }
     }
     return [true, lastKeyword];
+  }
+
+  get currentPath() {
+    return [...this._currentPath];
   }
 
   get currentNode() {

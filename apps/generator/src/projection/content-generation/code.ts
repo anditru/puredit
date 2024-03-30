@@ -2,19 +2,19 @@ import type { Tree, TreeCursor } from "web-tree-sitter";
 import { PatternCursor, PatternNode } from "./pattern";
 import { Language } from "./common";
 import { loadBlocksConfigFor } from "@puredit/language-config";
-
-type Path = number[];
-type Variables = Path[];
+import { getUndeclaredVarSearchFor } from "./context-var-detection/factory";
+import AstNode from "@puredit/parser/ast/node";
+import { BlockVariableMap, Path } from "./context-var-detection/blockVariableMap";
 
 export function scanCode(samples: Tree[], language: Language, ignoreBlocks: boolean) {
-  let variables: Variables = [];
+  let variablePaths: Path[] = [];
   let nodes: PatternNode[] = [];
   let cursor = samples[0].walk();
   for (let i = 1; i < samples.length; i++) {
-    [nodes, variables] = compareNodes(cursor, samples[i].walk(), language, ignoreBlocks);
+    [nodes, variablePaths] = compareNodes(cursor, samples[i].walk(), language, ignoreBlocks);
     cursor = new PatternCursor(nodes[0]);
   }
-  return { pattern: nodes[0], variables };
+  return { pattern: nodes[0], variablePaths };
 }
 
 function compareNodes(
@@ -23,10 +23,10 @@ function compareNodes(
   language: Language,
   ignoreBlocks: boolean,
   path: Path = []
-): [PatternNode[], Variables] | null {
+): [PatternNode[], Path[]] | null {
   const blockNodeType = loadBlocksConfigFor(language).blockNodeType;
   const nodes: PatternNode[] = [];
-  let variables: Variables = [];
+  let variablePaths: Path[] = [];
 
   let hasSibling = true;
   for (let index = 0; hasSibling; index++) {
@@ -43,14 +43,14 @@ function compareNodes(
         return null;
       }
       // mismatch (current, wildcard)
-      variables.push(path.concat(index));
+      variablePaths.push(path.concat(index));
       nodes.push({
         variable: true,
         type: "*",
         fieldName: fieldNameA,
       });
     } else if (!ignoreBlocks && a.nodeType === blockNodeType && b.nodeType === blockNodeType) {
-      variables.push(path.concat(index));
+      variablePaths.push(path.concat(index));
       nodes.push({
         variable: true,
         fieldName: fieldNameA,
@@ -67,7 +67,7 @@ function compareNodes(
         if (hasChildrenB) {
           b.gotoParent();
         }
-        variables.push(path.concat(index));
+        variablePaths.push(path.concat(index));
         nodes.push({
           variable: true,
           fieldName: fieldNameA,
@@ -79,7 +79,7 @@ function compareNodes(
         b.gotoParent();
         if (result) {
           const [children, childVariables] = result;
-          variables = variables.concat(childVariables);
+          variablePaths = variablePaths.concat(childVariables);
           nodes.push({
             fieldName: fieldNameA,
             type: a.nodeType,
@@ -87,7 +87,7 @@ function compareNodes(
           });
         } else {
           // mismatch (current, same node type)
-          variables.push(path.concat(index));
+          variablePaths.push(path.concat(index));
           nodes.push({
             variable: true,
             fieldName: fieldNameA,
@@ -96,7 +96,7 @@ function compareNodes(
         }
       } else if (a.nodeText !== b.nodeText) {
         // mismatch (current, same node type)
-        variables.push(path.concat(index));
+        variablePaths.push(path.concat(index));
         nodes.push({
           variable: true,
           fieldName: fieldNameA,
@@ -119,7 +119,7 @@ function compareNodes(
     }
     hasSibling = hasSiblingA && hasSiblingB;
   }
-  return [nodes, variables];
+  return [nodes, variablePaths];
 }
 
 function gotoFirstChild(cursor: TreeCursor): boolean {
@@ -127,4 +127,22 @@ function gotoFirstChild(cursor: TreeCursor): boolean {
     return false;
   }
   return cursor.gotoFirstChild();
+}
+
+export function findUndeclaredVariables(
+  samples: Tree[],
+  language: Language,
+  ignoreBlocks: boolean
+): BlockVariableMap {
+  let undeclaredVariableSearch = getUndeclaredVarSearchFor(
+    language,
+    new AstNode(samples[0].rootNode)
+  );
+  const undeclaredVariableMap: BlockVariableMap = undeclaredVariableSearch.execute(ignoreBlocks);
+  samples.slice(1).forEach((sample) => {
+    undeclaredVariableSearch = getUndeclaredVarSearchFor(language, new AstNode(sample.rootNode));
+    const newUndeclaredVariableMap = undeclaredVariableSearch.execute(ignoreBlocks);
+    undeclaredVariableMap.setIntersections(newUndeclaredVariableMap);
+  });
+  return undeclaredVariableMap;
 }

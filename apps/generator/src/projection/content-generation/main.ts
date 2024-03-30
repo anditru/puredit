@@ -2,7 +2,7 @@ import fs from "fs";
 import { NodeWasmPathProvider } from "@puredit/node-utils";
 import { Parser } from "@puredit/parser";
 import { ProjectionSegment, scanProjections } from "./projections";
-import { scanCode } from "./code";
+import { findUndeclaredVariables, scanCode } from "./code";
 import { connectVariables, setVariableNames } from "./variables";
 import { serializePattern } from "./serialize";
 import { isString } from "@puredit/utils";
@@ -36,12 +36,20 @@ export async function generateProjectionContent(
   const projections = projectionsRaw.split(doubleNewline).map((sample) => sample.trim().split(" "));
 
   const projection = scanProjections(projections);
-  const { pattern, variables } = scanCode(code, language as Language, ignoreBlocks);
+  const { pattern, variablePaths } = scanCode(code, language as Language, ignoreBlocks);
+  const undeclaredVariables = findUndeclaredVariables(code, language as Language, ignoreBlocks);
 
-  const connections = connectVariables(code, projections, variables, projection);
+  const connections = connectVariables(code, projections, variablePaths, projection);
   setVariableNames(projection, connections);
 
-  const templateString = serializePattern(code[0], pattern, variables, language as Language);
+  const templateString = serializePattern(
+    code[0],
+    pattern,
+    variablePaths,
+    undeclaredVariables,
+    language as Language,
+    ignoreBlocks
+  );
   const componentContent = projection
     .reduce(reduceSegments, [])
     .map(projectionSegmentTemplate)

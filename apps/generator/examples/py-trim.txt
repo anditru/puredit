@@ -1,0 +1,9 @@
+table.column("first_name").trim("left")
+
+table.column("last_name").trim("right")
+
+---
+
+trim column first_name on left
+
+trim column last_name on right

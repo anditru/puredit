@@ -5,27 +5,49 @@ import { PatternCursor, PatternNode } from "./pattern";
 import { ProjectionSegment } from "./projections";
 import { Language } from "./common";
 import { loadBlocksConfigFor } from "@puredit/language-config";
+import { BlockVariableMap, Path, Variable } from "./context-var-detection/blockVariableMap";
 
 export function serializePattern(
   sampleTree: Tree,
   pattern: PatternNode,
-  variables: number[][],
-  language: Language
+  variablePaths: Path[],
+  undeclaredVariables: BlockVariableMap,
+  language: Language,
+  ignoreBlocks: boolean
 ): string {
   const source = sampleTree.rootNode.text;
   let result = "";
   let from = 0;
   const blockNodeType = loadBlocksConfigFor(language).blockNodeType;
+  let contextVariables: Variable[];
+  if (ignoreBlocks) {
+    contextVariables = undeclaredVariables.getAll();
+  } else {
+    contextVariables = undeclaredVariables.get([0]);
+  }
+  variablePaths = [...variablePaths].concat(
+    contextVariables.map((contextVariable: Variable) => contextVariable.path)
+  );
+  orderByAppearance(variablePaths);
 
-  for (let i = 0; i < variables.length; i++) {
+  for (let i = 0; i < variablePaths.length; i++) {
     const sampleCursor = sampleTree.walk();
-    assert(selectDeepChild(sampleCursor, variables[i]), "variable path not found in sample tree");
+    assert(
+      selectDeepChild(sampleCursor, variablePaths[i]),
+      "variable path not found in sample tree"
+    );
     const patternCursor = new PatternCursor(pattern);
-    assert(selectDeepChild(patternCursor, variables[i]), "variable path not found in pattern tree");
+    assert(
+      selectDeepChild(patternCursor, variablePaths[i]),
+      "variable path not found in pattern tree"
+    );
     result += escapeTemplateCode(source.slice(from, sampleCursor.startIndex));
     const name = `var${i}`;
     if (patternCursor.nodeType === blockNodeType) {
-      result += "${block()}";
+      const variablesForBlock = undeclaredVariables.get(variablePaths[i]);
+      result += "${block(" + serializeContextVariables(variablesForBlock) + ")}";
+    } else if (isContextVariable(variablePaths[i], contextVariables)) {
+      result += '${contextVariable("' + sampleCursor.currentNode().text + '")}';
     } else {
       result += '${arg("' + name + '", ["' + patternCursor.nodeType + '"])}';
     }
@@ -33,6 +55,40 @@ export function serializePattern(
   }
   result += escapeTemplateCode(source.slice(from));
   return result;
+}
+
+function orderByAppearance(paths: Path[]) {
+  return paths.sort((a: Path, b: Path) => {
+    const minLength = Math.min(a.length, b.length);
+    for (let i = 0; i <= minLength; i++) {
+      if (a[i] === undefined && b[i] !== undefined) {
+        return -1;
+      } else if (a[i] !== undefined && b[i] === undefined) {
+        return 1;
+      } else if (a[i] === undefined && b[i] === undefined) {
+        return 0;
+      }
+
+      if (a[i] < b[i]) {
+        return -1;
+      } else if (a[i] > b[i]) {
+        return 1;
+      }
+    }
+  });
+}
+
+function isContextVariable(path: Path, contextVariables: Variable[]): boolean {
+  return !!contextVariables.find((contextVariable) => contextVariable.path === path);
+}
+
+function serializeContextVariables(variables: Variable[]) {
+  if (variables && variables.length > 0) {
+    const assignments = variables.map((variable) => `"${variable.name}": undefined`).join(", ");
+    return `{ ${assignments} }`;
+  } else {
+    return "";
+  }
 }
 
 export function serializeProjection(projection: ProjectionSegment[]): string {

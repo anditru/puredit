@@ -4,6 +4,7 @@
 
 ((table) => {
   table["last_name"] = table["last_name"].trim("left");
+  table["lecturer"] = table["lecturer"].replace("Mister ", "Mr. ");
 })(db["students"]);
 
 ---

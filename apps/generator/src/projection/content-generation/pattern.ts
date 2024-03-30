@@ -8,6 +8,7 @@ export interface PatternNode {
   type: string;
   children?: PatternNode[];
   text?: string;
+  startIndex?: number;
 }
 
 export class PatternCursor implements TreeCursor {

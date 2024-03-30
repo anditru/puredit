@@ -7,7 +7,7 @@ import { ProjectionSegment, ProjectionVariable } from "./projections";
 export function connectVariables(
   codeSamples: Tree[],
   projectionSamples: string[][],
-  variables: number[][],
+  variablePaths: number[][],
   projection: ProjectionSegment[]
 ): number[] {
   const solutions: number[][] = [];
@@ -23,10 +23,10 @@ export function connectVariables(
       projectionVariableIndices.push(fromB);
     });
 
-    for (let i = 0; i < variables.length; i++) {
+    for (let i = 0; i < variablePaths.length; i++) {
       const cursor = codeSample.walk();
       assert(
-        selectDeepChild(cursor, variables[i]),
+        selectDeepChild(cursor, variablePaths[i]),
         "wrong combination of code samples and variable path"
       );
       let value = cursor.nodeText;
@@ -48,7 +48,7 @@ export function connectVariables(
   }
 
   const result: number[] = [];
-  for (let i = 0; i < variables.length; i++) {
+  for (let i = 0; i < variablePaths.length; i++) {
     assert(
       solutions[i].length <= 1,
       `no unique solution for variable at index ${i}, please provide more/better samples`
