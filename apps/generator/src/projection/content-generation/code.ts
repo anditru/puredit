@@ -39,101 +39,104 @@ class NodeComparison {
     this.path = path;
     let hasSibling = true;
     for (let index = 0; hasSibling; index++) {
-      const fieldNameA = this.a.currentFieldName() || undefined;
-      const fieldNameB = this.b.currentFieldName() || undefined;
-      if (fieldNameA !== fieldNameB) {
-        // mismatch (parent)
+      if (this.parentMissMatch()) {
         return null;
       }
-      if (this.a.nodeType !== this.b.nodeType) {
-        if (!this.a.nodeIsNamed || !this.b.nodeIsNamed) {
-          // keywords cannot be variable
-          // mismatch (parent)
-          return null;
+      if (this.typeMissMatch()) {
+        if (this.atLeastOneNodeIsKeyword()) {
+          return null; // keywords cannot be variable
         }
-        // mismatch (current, wildcard)
-        this.variablePaths.push(this.path.concat(index));
-        this.nodes.push({
-          variable: true,
-          type: "*",
-          fieldName: fieldNameA,
-        });
-      } else if (
-        !this.ignoreBlocks &&
-        this.a.nodeType === this.blockNodeType &&
-        this.b.nodeType === this.blockNodeType
-      ) {
-        this.variablePaths.push(this.path.concat(index));
-        this.nodes.push({
-          variable: true,
-          fieldName: fieldNameA,
-          type: this.a.nodeType,
-        });
+        this.recordMissMatchWithWildcard(index);
+      } else if (!this.ignoreBlocks && this.nodesAreBlock()) {
+        this.recordMissMatch(index);
       } else {
-        const hasChildrenA = gotoFirstChild(this.a);
-        const hasChildrenB = gotoFirstChild(this.b);
-        if (hasChildrenA !== hasChildrenB) {
-          // mismatch (current, same node type)
-          if (hasChildrenA) {
-            this.a.gotoParent();
-          }
-          if (hasChildrenB) {
-            this.b.gotoParent();
-          }
-          this.variablePaths.push(this.path.concat(index));
-          this.nodes.push({
-            variable: true,
-            fieldName: fieldNameA,
-            type: this.a.nodeType,
-          });
-        } else if (hasChildrenA && hasChildrenB) {
-          const childNodeComparison = new NodeComparison(this.a, this.b, this.language);
-          const result = childNodeComparison.execute(this.ignoreBlocks, this.path.concat(index));
-          this.a.gotoParent();
-          this.b.gotoParent();
-          if (result) {
-            const [children, childVariables] = result;
-            this.variablePaths = this.variablePaths.concat(childVariables);
-            this.nodes.push({
-              fieldName: fieldNameA,
-              type: this.a.nodeType,
-              children,
-            });
-          } else {
-            // mismatch (current, same node type)
-            this.variablePaths.push(this.path.concat(index));
-            this.nodes.push({
-              variable: true,
-              fieldName: fieldNameA,
-              type: this.a.nodeType,
-            });
-          }
-        } else if (this.a.nodeText !== this.b.nodeText) {
-          // mismatch (current, same node type)
-          this.variablePaths.push(this.path.concat(index));
-          this.nodes.push({
-            variable: true,
-            fieldName: fieldNameA,
-            type: this.a.nodeType,
-          });
-        } else {
-          this.nodes.push({
-            fieldName: fieldNameA,
-            type: this.a.nodeType,
-            text: this.a.nodeText,
-          });
-        }
+        this.compareChildren(index);
       }
 
       const hasSiblingA = this.a.gotoNextSibling();
       const hasSiblingB = this.b.gotoNextSibling();
       if (hasSiblingA !== hasSiblingB) {
-        // mismatch (parent)
-        return null;
+        return null; // mismatch (parent)
       }
       hasSibling = hasSiblingA && hasSiblingB;
     }
     return [this.nodes, this.variablePaths];
+  }
+
+  private parentMissMatch(): boolean {
+    return this.a.currentFieldName() !== this.b.currentFieldName();
+  }
+
+  private typeMissMatch(): boolean {
+    return this.a.nodeType !== this.b.nodeType;
+  }
+
+  private atLeastOneNodeIsKeyword(): boolean {
+    return !this.a.nodeIsNamed || !this.b.nodeIsNamed;
+  }
+
+  private recordMissMatchWithWildcard(index: number) {
+    this.variablePaths.push(this.path.concat(index));
+    this.nodes.push({
+      variable: true,
+      type: "*",
+      fieldName: this.a.currentFieldName() || undefined,
+    });
+  }
+
+  private nodesAreBlock(): boolean {
+    return this.a.nodeType === this.blockNodeType && this.b.nodeType === this.blockNodeType;
+  }
+
+  private recordMissMatch(index: number) {
+    this.variablePaths.push(this.path.concat(index));
+    this.nodes.push({
+      variable: true,
+      fieldName: this.a.currentFieldName() || undefined,
+      type: this.a.nodeType,
+    });
+  }
+
+  private compareChildren(index: number) {
+    const hasChildrenA = gotoFirstChild(this.a);
+    const hasChildrenB = gotoFirstChild(this.b);
+    if (hasChildrenA !== hasChildrenB) {
+      if (hasChildrenA) {
+        this.a.gotoParent();
+      }
+      if (hasChildrenB) {
+        this.b.gotoParent();
+      }
+      this.recordMissMatch(index);
+    } else if (hasChildrenA && hasChildrenB) {
+      this.executeChildNodeComparison(index);
+    } else if (this.a.nodeText !== this.b.nodeText) {
+      this.recordMissMatch(index);
+    } else {
+      this.nodes.push({
+        fieldName: this.a.currentFieldName() || undefined,
+        type: this.a.nodeType,
+        text: this.a.nodeText,
+      });
+    }
+  }
+
+  private executeChildNodeComparison(index: number) {
+    const childNodeComparison = new NodeComparison(this.a, this.b, this.language);
+    const result = childNodeComparison.execute(this.ignoreBlocks, this.path.concat(index));
+    this.a.gotoParent();
+    this.b.gotoParent();
+    if (result) {
+      const [children, childVariables] = result;
+      this.variablePaths = this.variablePaths.concat(childVariables);
+      this.nodes.push({
+        fieldName: this.a.currentFieldName() || undefined,
+        type: this.a.nodeType,
+        children,
+      });
+    } else {
+      this.recordMissMatch(index);
+    }
   }
 }
 
