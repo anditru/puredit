@@ -3,6 +3,7 @@ import { Diff } from "mdiff";
 import { assert, zip } from "@puredit/utils";
 import { selectDeepChild } from "./path";
 import { ProjectionSegment, ProjectionVariable } from "./projections";
+import AstCursor from "@puredit/parser/ast/cursor";
 
 export function connectVariables(
   codeSamples: Tree[],
@@ -24,13 +25,13 @@ export function connectVariables(
     });
 
     for (let i = 0; i < variablePaths.length; i++) {
-      const cursor = codeSample.walk();
+      const cursor = new AstCursor(codeSample.walk());
       assert(
         selectDeepChild(cursor, variablePaths[i]),
         "wrong combination of code samples and variable path"
       );
-      let value = cursor.nodeText;
-      if (cursor.nodeType === "string") {
+      let value = cursor.currentNode.text;
+      if (cursor.currentNode.type === "string") {
         value = value.slice(1, value.length - 1);
       }
       const candidates: number[] = [];

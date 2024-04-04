@@ -11,7 +11,7 @@ export interface PatternNode {
   startIndex?: number;
 }
 
-export class PatternCursor implements TreeCursor {
+export class PatternCursor implements Cursor {
   nodeTypeId = 0;
   nodeId = 0;
   nodeIsNamed = true;
@@ -25,34 +25,15 @@ export class PatternCursor implements TreeCursor {
   private childIndex: number[] = [];
   constructor(private node: PatternNode) {}
 
-  get nodeType(): string {
-    return this.node.type;
-  }
-  get nodeText(): string {
-    return this.node.text || "";
-  }
-
-  reset() {
-    return;
-  }
-
-  delete(): void {
-    return;
-  }
-
-  currentNode(): SyntaxNode {
+  get currentNode(): SyntaxNode {
     return this.node as any;
   }
 
-  currentFieldId(): number {
-    return 0;
-  }
-
-  currentFieldName(): string {
+  get currentFieldName(): string {
     return this.node.fieldName || "";
   }
 
-  gotoParent(): boolean {
+  goToParent(): boolean {
     if (this.parents.length) {
       this.node = this.parents.pop();
       this.childIndex.pop();
@@ -61,7 +42,10 @@ export class PatternCursor implements TreeCursor {
     return false;
   }
 
-  gotoFirstChild(): boolean {
+  goToFirstChild(): boolean {
+    if (this.currentNode.type === "string") {
+      return false;
+    }
     if (this.node.children?.length) {
       this.childIndex.push(0);
       this.parents.push(this.node);
@@ -71,11 +55,11 @@ export class PatternCursor implements TreeCursor {
     return false;
   }
 
-  gotoFirstChildForIndex(): boolean {
+  goToFirstChildForIndex(): boolean {
     return false;
   }
 
-  gotoNextSibling(): boolean {
+  goToNextSibling(): boolean {
     if (this.childIndex.length) {
       const index = this.childIndex[this.childIndex.length - 1] + 1;
       const parent = this.parents[this.parents.length - 1];
@@ -87,4 +71,14 @@ export class PatternCursor implements TreeCursor {
     }
     return false;
   }
+}
+
+export interface Cursor {
+  get currentNode(): SyntaxNode;
+  get currentFieldName(): string;
+
+  goToParent(): boolean;
+  goToFirstChild(): boolean;
+  goToFirstChildForIndex(): boolean;
+  goToNextSibling(): boolean;
 }

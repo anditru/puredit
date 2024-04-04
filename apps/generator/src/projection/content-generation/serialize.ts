@@ -6,6 +6,7 @@ import { ProjectionSegment } from "./projections";
 import { Language } from "./common";
 import { loadBlocksConfigFor } from "@puredit/language-config";
 import { BlockVariableMap, Path, Variable } from "./context-var-detection/blockVariableMap";
+import AstCursor from "@puredit/parser/ast/cursor";
 
 export function serializePattern(
   sampleTree: Tree,
@@ -31,7 +32,7 @@ export function serializePattern(
   orderByAppearance(variablePaths);
 
   for (let i = 0; i < variablePaths.length; i++) {
-    const sampleCursor = sampleTree.walk();
+    const sampleCursor = new AstCursor(sampleTree.walk());
     assert(
       selectDeepChild(sampleCursor, variablePaths[i]),
       "variable path not found in sample tree"
@@ -43,13 +44,13 @@ export function serializePattern(
     );
     result += escapeTemplateCode(source.slice(from, sampleCursor.startIndex));
     const name = `var${i}`;
-    if (patternCursor.nodeType === blockNodeType) {
+    if (patternCursor.currentNode.type === blockNodeType) {
       const variablesForBlock = undeclaredVariables.get(variablePaths[i]);
       result += "${block(" + serializeContextVariables(variablesForBlock) + ")}";
     } else if (isContextVariable(variablePaths[i], contextVariables)) {
-      result += '${contextVariable("' + sampleCursor.currentNode().text + '")}';
+      result += '${contextVariable("' + sampleCursor.currentNode.text + '")}';
     } else {
-      result += '${arg("' + name + '", ["' + patternCursor.nodeType + '"])}';
+      result += '${arg("' + name + '", ["' + patternCursor.currentNode.type + '"])}';
     }
     from = sampleCursor.endIndex;
   }

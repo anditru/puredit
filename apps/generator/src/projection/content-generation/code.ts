@@ -5,13 +5,14 @@ import { loadBlocksConfigFor } from "@puredit/language-config";
 import { getUndeclaredVarSearchFor } from "./context-var-detection/factory";
 import AstNode from "@puredit/parser/ast/node";
 import { BlockVariableMap, Path } from "./context-var-detection/blockVariableMap";
+import AstCursor from "@puredit/parser/ast/cursor";
 
 export function scanCode(samples: Tree[], language: Language, ignoreBlocks: boolean) {
   let variablePaths: Path[] = [];
   let nodes: PatternNode[] = [];
-  let cursor = samples[0].walk();
+  let cursor: AstCursor | PatternCursor = new AstCursor(samples[0].walk());
   for (let i = 1; i < samples.length; i++) {
-    const nodeComparison = new NodeComparison(cursor, samples[i].walk(), language);
+    const nodeComparison = new NodeComparison(cursor, new AstCursor(samples[i].walk()), language);
     [nodes, variablePaths] = nodeComparison.execute(ignoreBlocks);
     cursor = new PatternCursor(nodes[0]);
   }
@@ -30,7 +31,11 @@ class NodeComparison {
   private nodes: PatternNode[] = [];
   private variablePaths: Path[] = [];
 
-  constructor(private a: TreeCursor, private b: TreeCursor, private language: Language) {
+  constructor(
+    private a: AstCursor | PatternCursor,
+    private b: AstCursor | PatternCursor,
+    private language: Language
+  ) {
     this.blockNodeType = loadBlocksConfigFor(this.language).blockNodeType;
   }
 
@@ -53,8 +58,8 @@ class NodeComparison {
         this.compareChildren(index);
       }
 
-      const hasSiblingA = this.a.gotoNextSibling();
-      const hasSiblingB = this.b.gotoNextSibling();
+      const hasSiblingA = this.a.goToNextSibling();
+      const hasSiblingB = this.b.goToNextSibling();
       if (hasSiblingA !== hasSiblingB) {
         return null; // mismatch (parent)
       }
@@ -64,11 +69,11 @@ class NodeComparison {
   }
 
   private parentMissMatch(): boolean {
-    return this.a.currentFieldName() !== this.b.currentFieldName();
+    return this.a.currentFieldName !== this.b.currentFieldName;
   }
 
   private typeMissMatch(): boolean {
-    return this.a.nodeType !== this.b.nodeType;
+    return this.a.currentNode.type !== this.b.currentNode.type;
   }
 
   private atLeastOneNodeIsKeyword(): boolean {
@@ -80,43 +85,46 @@ class NodeComparison {
     this.nodes.push({
       variable: true,
       type: "*",
-      fieldName: this.a.currentFieldName() || undefined,
+      fieldName: this.a.currentFieldName || undefined,
     });
   }
 
   private nodesAreBlock(): boolean {
-    return this.a.nodeType === this.blockNodeType && this.b.nodeType === this.blockNodeType;
+    return (
+      this.a.currentNode.type === this.blockNodeType &&
+      this.b.currentNode.type === this.blockNodeType
+    );
   }
 
   private recordMissMatch(index: number) {
     this.variablePaths.push(this.path.concat(index));
     this.nodes.push({
       variable: true,
-      fieldName: this.a.currentFieldName() || undefined,
-      type: this.a.nodeType,
+      fieldName: this.a.currentFieldName || undefined,
+      type: this.a.currentNode.type,
     });
   }
 
   private compareChildren(index: number) {
-    const hasChildrenA = gotoFirstChild(this.a);
-    const hasChildrenB = gotoFirstChild(this.b);
+    const hasChildrenA = this.a.goToFirstChild();
+    const hasChildrenB = this.b.goToFirstChild();
     if (hasChildrenA !== hasChildrenB) {
       if (hasChildrenA) {
-        this.a.gotoParent();
+        this.a.goToParent();
       }
       if (hasChildrenB) {
-        this.b.gotoParent();
+        this.b.goToParent();
       }
       this.recordMissMatch(index);
     } else if (hasChildrenA && hasChildrenB) {
       this.executeChildNodeComparison(index);
-    } else if (this.a.nodeText !== this.b.nodeText) {
+    } else if (this.a.currentNode.text !== this.b.currentNode.text) {
       this.recordMissMatch(index);
     } else {
       this.nodes.push({
-        fieldName: this.a.currentFieldName() || undefined,
-        type: this.a.nodeType,
-        text: this.a.nodeText,
+        fieldName: this.a.currentFieldName || undefined,
+        type: this.a.currentNode.type,
+        text: this.a.currentNode.text,
       });
     }
   }
@@ -124,27 +132,20 @@ class NodeComparison {
   private executeChildNodeComparison(index: number) {
     const childNodeComparison = new NodeComparison(this.a, this.b, this.language);
     const result = childNodeComparison.execute(this.ignoreBlocks, this.path.concat(index));
-    this.a.gotoParent();
-    this.b.gotoParent();
+    this.a.goToParent();
+    this.b.goToParent();
     if (result) {
       const [children, childVariables] = result;
       this.variablePaths = this.variablePaths.concat(childVariables);
       this.nodes.push({
-        fieldName: this.a.currentFieldName() || undefined,
-        type: this.a.nodeType,
+        fieldName: this.a.currentFieldName || undefined,
+        type: this.a.currentNode.type,
         children,
       });
     } else {
       this.recordMissMatch(index);
     }
   }
-}
-
-function gotoFirstChild(cursor: TreeCursor): boolean {
-  if (cursor.nodeType === "string") {
-    return false;
-  }
-  return cursor.gotoFirstChild();
 }
 
 export function findUndeclaredVariables(

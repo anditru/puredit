@@ -25,7 +25,7 @@
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/apps/generator/src/index.ts",
-      "cwd": "${workspaceFolder}/packages/projection-libs/ts-my-package",
+      "cwd": "${workspaceFolder}/packages/projection-libs/py-my-package",
       "args": [
         "projection",
         "-n",
@@ -35,8 +35,7 @@
         "-d",
         "Open and edit a file",
         "-s",
-        "../../../apps/generator/examples/ts-change.txt",
-        "--ignore-blocks"
+        "../../../apps/generator/examples/py-trim.txt"
       ],
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
       "skipFiles": ["<node_internals>/**"]

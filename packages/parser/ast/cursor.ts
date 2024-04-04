@@ -50,6 +50,9 @@ export default class AstCursor extends Cursor {
   }
 
   goToFirstChild(): boolean {
+    if (this.currentNode.type === "string") {
+      return false;
+    }
     if (this.treeCursor.gotoFirstChild()) {
       if (this.runningTransaction && !this.runningRollback) {
         this.operationLog.push(TransactionOperation.GOTO_FIRST_CHILD);
@@ -128,6 +131,10 @@ export default class AstCursor extends Cursor {
       }
     }
     return [true, lastKeyword];
+  }
+
+  get nodeIsNamed() {
+    return !this.currentNode.isKeyword();
   }
 
   get currentPath() {
