@@ -6,7 +6,7 @@ export default class AstCursor extends Cursor {
   private runningTransaction = false;
   private runningRollback = false;
   private operationLog: TransactionOperation[] = [];
-  private _currentPath: number[] = [0];
+  private _currentPath: number[] = [];
 
   constructor(private treeCursor: TreeCursor) {
     super();

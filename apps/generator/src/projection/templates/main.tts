@@ -3,6 +3,7 @@ import { svelteProjection } from "@puredit/projections/svelte";
 import type { RootProjection } from "@puredit/projections/types";
 import Widget from "./Widget.svelte";
 
+<%- declarationString %>
 const pattern = parser.statementPattern(
   "<%= technicalName %>Pattern"
 )`<%- templateString %>`;

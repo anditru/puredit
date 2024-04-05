@@ -1,33 +1,32 @@
 import type { Tree } from "web-tree-sitter";
 import { Diff } from "mdiff";
 import { assert, zip } from "@puredit/utils";
-import { selectDeepChild } from "./path";
-import { ProjectionSegment, ProjectionVariable } from "./projections";
+import { ProjectionSegment, ProjectionVariable } from "./projection/scan";
 import AstCursor from "@puredit/parser/ast/cursor";
 
-export function connectVariables(
+export function connectParameters(
   codeSamples: Tree[],
   projectionSamples: string[][],
-  variablePaths: number[][],
+  argumentPaths: number[][],
   projection: ProjectionSegment[]
 ): number[] {
   const solutions: number[][] = [];
 
   for (const [codeSample, projectionSample] of zip(codeSamples, projectionSamples)) {
     const diff = new Diff(projectionSample, projection);
-    const projectionVariables: string[] = [];
+    const projectionParameters: string[] = [];
     const projectionVariableIndices: number[] = [];
     diff.scanDiff((fromA, toA, fromB, toB) => {
       assert(fromB === toB - 1, "invalid projection");
       assert((projection[fromB] as any).type === "variable", "unknown projection segment");
-      projectionVariables.push(projectionSample.slice(fromA, toA).join(" "));
+      projectionParameters.push(projectionSample.slice(fromA, toA).join(" "));
       projectionVariableIndices.push(fromB);
     });
 
-    for (let i = 0; i < variablePaths.length; i++) {
+    for (let i = 0; i < argumentPaths.length; i++) {
       const cursor = new AstCursor(codeSample.walk());
       assert(
-        selectDeepChild(cursor, variablePaths[i]),
+        cursor.follow(argumentPaths[i]),
         "wrong combination of code samples and variable path"
       );
       let value = cursor.currentNode.text;
@@ -35,8 +34,8 @@ export function connectVariables(
         value = value.slice(1, value.length - 1);
       }
       const candidates: number[] = [];
-      for (let j = 0; j < projectionVariables.length; j++) {
-        if (projectionVariables[j] === value) {
+      for (let j = 0; j < projectionParameters.length; j++) {
+        if (projectionParameters[j] === value) {
           candidates.push(projectionVariableIndices[j]);
         }
       }
@@ -49,7 +48,7 @@ export function connectVariables(
   }
 
   const result: number[] = [];
-  for (let i = 0; i < variablePaths.length; i++) {
+  for (let i = 0; i < argumentPaths.length; i++) {
     assert(
       solutions[i].length <= 1,
       `no unique solution for variable at index ${i}, please provide more/better samples`

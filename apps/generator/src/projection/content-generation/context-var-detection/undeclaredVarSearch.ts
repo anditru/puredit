@@ -16,7 +16,7 @@ export default abstract class UndeclaredVarSearch {
   protected readonly astCursor: AstCursor;
   protected readonly symbolTable = new SymbolTable();
   private ignoreBlocks = false;
-  private currentBlockPath: number[] = [0];
+  private currentBlockPath: number[] = [];
   private blockToVariablesMap = new BlockVariableMap();
 
   constructor(startNode: AstNode) {
@@ -25,7 +25,7 @@ export default abstract class UndeclaredVarSearch {
 
   execute(ignoreBlocks: boolean): BlockVariableMap {
     this.ignoreBlocks = ignoreBlocks;
-    this.blockToVariablesMap.set([0], []);
+    this.blockToVariablesMap.set([], []);
     this.recurse();
     return this.blockToVariablesMap;
   }

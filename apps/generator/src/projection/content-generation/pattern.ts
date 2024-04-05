@@ -1,4 +1,5 @@
-import type { TreeCursor, Point, SyntaxNode } from "web-tree-sitter";
+import Cursor from "@puredit/parser/cursor/cursor";
+import type { Point, SyntaxNode } from "web-tree-sitter";
 
 export interface PatternNode {
   variable?: true;
@@ -11,7 +12,7 @@ export interface PatternNode {
   startIndex?: number;
 }
 
-export class PatternCursor implements Cursor {
+export class PatternCursor extends Cursor {
   nodeTypeId = 0;
   nodeId = 0;
   nodeIsNamed = true;
@@ -23,7 +24,39 @@ export class PatternCursor implements Cursor {
 
   private parents: PatternNode[] = [];
   private childIndex: number[] = [];
-  constructor(private node: PatternNode) {}
+
+  private runningTransaction = false;
+  private runningRollback = false;
+  private operationLog: TransactionOperation[] = [];
+
+  constructor(private node: PatternNode) {
+    super();
+  }
+
+  protected beginTransaction() {
+    this.runningTransaction = true;
+    this.operationLog = [];
+  }
+
+  protected commitTransaction() {
+    this.operationLog = [];
+    this.runningTransaction = false;
+  }
+
+  protected rollbackTransaction() {
+    this.runningRollback = true;
+
+    while (this.operationLog.length > 0) {
+      const operation = this.operationLog.pop();
+      if (operation === TransactionOperation.GOTO_FIRST_CHILD) {
+        this.goToParent();
+      } else if (operation === TransactionOperation.GOTO_PARENT) {
+        this.goToFirstChild();
+      }
+    }
+    this.runningRollback = false;
+    this.runningTransaction = false;
+  }
 
   get currentNode(): SyntaxNode {
     return this.node as any;
@@ -37,6 +70,9 @@ export class PatternCursor implements Cursor {
     if (this.parents.length) {
       this.node = this.parents.pop();
       this.childIndex.pop();
+      if (this.runningTransaction && !this.runningRollback) {
+        this.operationLog.push(TransactionOperation.GOTO_PARENT);
+      }
       return true;
     }
     return false;
@@ -50,12 +86,11 @@ export class PatternCursor implements Cursor {
       this.childIndex.push(0);
       this.parents.push(this.node);
       this.node = this.node.children[0];
+      if (this.runningTransaction && !this.runningRollback) {
+        this.operationLog.push(TransactionOperation.GOTO_FIRST_CHILD);
+      }
       return true;
     }
-    return false;
-  }
-
-  goToFirstChildForIndex(): boolean {
     return false;
   }
 
@@ -71,14 +106,18 @@ export class PatternCursor implements Cursor {
     }
     return false;
   }
+
+  goToSiblingWithIndex(index: number): boolean {
+    for (let i = 0; i < index; i++) {
+      if (!this.goToNextSibling()) {
+        return false;
+      }
+    }
+    return true;
+  }
 }
 
-export interface Cursor {
-  get currentNode(): SyntaxNode;
-  get currentFieldName(): string;
-
-  goToParent(): boolean;
-  goToFirstChild(): boolean;
-  goToFirstChildForIndex(): boolean;
-  goToNextSibling(): boolean;
+enum TransactionOperation {
+  GOTO_PARENT,
+  GOTO_FIRST_CHILD,
 }

@@ -15,7 +15,8 @@ import chalk from "chalk";
 import { Question } from "inquirer";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { generateProjectionContent } from "./content-generation/main";
+import { generateProjectionContentFromFile } from "./content-generation";
+import { Language } from "./content-generation/common";
 
 interface ProjectionAnswers {
   displayName?: string;
@@ -86,20 +87,23 @@ export default class ProjectionGenerator extends BaseGenerator {
     this.destinationRoot = path.resolve(this.packagePath, this.projectionAnswers.technicalName);
     const language = this.parseLanguage();
 
+    let declarationString = "";
     let templateString = `console.log("Hello World")`;
     let componentContent = this.projectionAnswers.displayName;
     if (this.samplesFilePath) {
-      const projectionContent = await generateProjectionContent(
+      const projectionContent = await generateProjectionContentFromFile(
         this.samplesFilePath,
-        language,
+        language as Language,
         this.ignoreBlocks
       );
+      declarationString = projectionContent.declarationString;
       templateString = projectionContent.templateString;
       componentContent = projectionContent.componentContent;
     }
 
     this.fs.copyTpl(this.templatePath("main.tts"), this.destinationPath("main.ts"), {
       ...this.projectionAnswers,
+      declarationString,
       templateString,
     });
 
