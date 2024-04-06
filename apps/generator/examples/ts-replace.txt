@@ -6,8 +6,8 @@ table["address"] = table["address"].replace("Road", "Rd.");
 
 ---
 
-replace Mister with Mr. in column name
+replace Mister with Mr. in column name.
 
-replace Doctor with Dr. in column title
+replace Doctor with Dr. in column title.
 
-replace Road with Rd. in column address
+replace Road with Rd. in column address.

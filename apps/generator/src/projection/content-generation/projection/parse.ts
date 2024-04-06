@@ -1,3 +1,183 @@
+import { newline } from "../common";
+
 export function parseProjections(projections: string[]) {
-  return projections.map((projection) => projection.trim().split(" "));
+  return projections.map((projection) => {
+    const tokens = tokenize(projection);
+    const parser = new Parser();
+    return parser.parse(tokens)[0];
+  });
 }
+
+export class ProjectionSample {
+  constructor(
+    public readonly widgets: WidgetSample[],
+    public readonly subProjectionGroups: ProjectionSampleGroup[]
+  ) {}
+
+  getProjectionTokens(): string[] {
+    return this.widgets.flatMap((widget) => widget.tokens);
+  }
+}
+
+export class ProjectionSampleGroup {
+  constructor(public readonly projections: ProjectionSample[]) {}
+}
+
+export class WidgetSample {
+  constructor(public readonly tokens: string[]) {}
+
+  getText() {
+    return this.tokens.join(" ");
+  }
+}
+
+const indent = "    ";
+const indentToken = "<indent>";
+const dedentToken = "<dedent>";
+const newlineToken = "<newline>";
+
+function tokenize(projection: string) {
+  // eslint-disable-next-line no-useless-escape
+  const trailingSpacesPattern = `\.[\\s^${newline}]+${newline}`;
+  projection = projection.replaceAll(new RegExp(trailingSpacesPattern, "g"), `.${newline}`);
+  const lines = projection.split(newline);
+  const tokenizedLines = lines
+    .map((line) => line.replaceAll(indent, `${indentToken} `))
+    .map((line) => line.split(/\s+/))
+    .map((tokens) => {
+      const sanitizedTokens = [];
+      for (const token of tokens) {
+        if (token.endsWith(".") && token.length > 1) {
+          sanitizedTokens.push(token.slice(0, token.length - 1), ".");
+        } else if (token.endsWith(",") && token.length > 1) {
+          sanitizedTokens.push(token.slice(0, token.length - 1), ",");
+        } else {
+          sanitizedTokens.push(token);
+        }
+      }
+      sanitizedTokens.push(newlineToken);
+      return sanitizedTokens;
+    });
+
+  for (let i = tokenizedLines.length - 1; i > 0; i--) {
+    const prevIndents = countIndents(tokenizedLines[i - 1]);
+    const currentIndents = countIndents(tokenizedLines[i]);
+    if (currentIndents > prevIndents) {
+      tokenizedLines[i].splice(0, currentIndents, indentToken);
+    } else if (currentIndents < prevIndents) {
+      tokenizedLines[i].splice(0, currentIndents, dedentToken);
+    } else {
+      tokenizedLines[i].splice(0, currentIndents);
+    }
+  }
+
+  return tokenizedLines.flat();
+}
+
+function countIndents(tokens: string[]) {
+  return tokens.filter((token) => token === indentToken).length;
+}
+
+class Parser {
+  private tokens = [];
+  private tokenPointer = 0;
+  private projectionSamples: ProjectionSample[] = [];
+
+  parse(tokens: string[]) {
+    this.tokens = tokens;
+    this.projectionSamples.push(this.parseProjectionSample());
+    while (!this.eofReached()) {
+      this.advance();
+      this.projectionSamples.push(this.parseProjectionSample());
+    }
+    return this.projectionSamples;
+  }
+
+  private parseProjectionSample(): ProjectionSample {
+    const widgetSamples: WidgetSample[] = [];
+    const subProjectionSampleGroups: ProjectionSampleGroup[] = [];
+    while (this.currentToken !== ".") {
+      const nextWidgetTokens = this.getNextWidgetTokens();
+      widgetSamples.push(new WidgetSample(nextWidgetTokens));
+      if (this.currentToken === indentToken) {
+        const dedentIndex = this.getCorrespondingDedentIndex();
+        const subProjectionsTokens = this.tokens.slice(this.tokenPointer + 1, dedentIndex);
+        const subParser = new Parser();
+        const subProjectionSamples = subParser.parse(subProjectionsTokens);
+        subProjectionSampleGroups.push(new ProjectionSampleGroup(subProjectionSamples));
+        this.goTo(dedentIndex + 1);
+      }
+    }
+    return new ProjectionSample(widgetSamples, subProjectionSampleGroups);
+  }
+
+  private getNextWidgetTokens(): string[] {
+    const nextWidgetTokens = [];
+    while (![indentToken, "."].includes(this.currentToken)) {
+      nextWidgetTokens.push(this.currentToken);
+      this.advance();
+    }
+    return this.clean(nextWidgetTokens);
+  }
+
+  private getCorrespondingDedentIndex(): number {
+    let distance = 0;
+    let numOpenIndents = 0;
+    do {
+      if (this.currentToken === indentToken) {
+        numOpenIndents++;
+      } else if (this.currentToken === dedentToken) {
+        numOpenIndents--;
+      }
+      try {
+        this.advance();
+      } catch (error) {
+        throw new UnbalancedIndents();
+      }
+      distance++;
+    } while (this.currentToken !== dedentToken && numOpenIndents > 0);
+    this.goBack(distance);
+    return this.tokenPointer + distance;
+  }
+
+  private clean(tokens: string[]) {
+    return tokens.filter((token) => ![newlineToken, indentToken, dedentToken, "."].includes(token));
+  }
+
+  private advance() {
+    if (!this.tokens[this.tokenPointer + 1]) {
+      throw new OutOfBounds();
+    }
+    this.tokenPointer++;
+  }
+
+  private goTo(index: number) {
+    this.tokenPointer = index;
+  }
+
+  private goBack(steps: number) {
+    this.tokenPointer -= steps;
+  }
+
+  private eofReached(): boolean {
+    let distance = 0;
+    do {
+      try {
+        this.advance();
+      } catch (error) {
+        this.goBack(distance);
+        return true;
+      }
+      distance++;
+    } while ([dedentToken, newlineToken].includes(this.currentToken));
+    this.goBack(distance);
+    return false;
+  }
+
+  private get currentToken() {
+    return this.tokens[this.tokenPointer];
+  }
+}
+
+class OutOfBounds extends Error {}
+class UnbalancedIndents extends Error {}

@@ -9,6 +9,6 @@
 
 ---
 
-change table lectures
+change table lectures.
 
-change table students
+change table students.

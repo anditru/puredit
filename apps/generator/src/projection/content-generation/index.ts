@@ -1,10 +1,10 @@
 import fs from "fs";
 import { ProjectionSegment, scanProjections } from "./projection/scan";
 import { scanCode } from "./code/scan";
-import { connectParameters, setVariableNames } from "./variables";
+import { connectArguments, setArgumentNames } from "./variables";
 import { serializePattern } from "./serialize";
 import { isString } from "@puredit/utils";
-import { Language, supportedLanguages } from "./common";
+import { doubleNewline, Language, supportedLanguages } from "./common";
 import { parseCodeSamples } from "./code/parse";
 import { parseProjections } from "./projection/parse";
 
@@ -28,13 +28,14 @@ export function generateProjectionContentFromFile(
 
 export async function generateProjectionContent(
   codeSamples: string[],
-  projectionSamples: string[],
+  rawProjectionSamples: string[],
   language: Language,
   ignoreBlocks: boolean
 ): Promise<ProjectionContent> {
   const sampleAsts = await parseCodeSamples(codeSamples, language);
-  const projectionTokens = parseProjections(projectionSamples);
+  const projectionSamples = parseProjections(rawProjectionSamples);
 
+  const projectionTokens = projectionSamples.map((sample) => sample.getProjectionTokens());
   const projectionSegments = scanProjections(projectionTokens);
   const { pattern, templateParameters } = scanCode(sampleAsts, language, ignoreBlocks);
 
@@ -45,13 +46,13 @@ export async function generateProjectionContent(
   );
 
   const argumentPaths = templateParameters.getTemplateArguments().map((argument) => argument.path);
-  const connections = connectParameters(
+  const connections = connectArguments(
     sampleAsts,
     projectionTokens,
     argumentPaths,
     projectionSegments
   );
-  setVariableNames(projectionSegments, connections);
+  setArgumentNames(projectionSegments, connections);
 
   const componentContent = projectionSegments
     .reduce(reduceSegments, [])
@@ -66,10 +67,6 @@ export async function generateProjectionContent(
 }
 
 function extractCodeAndProjections(samplesFilePath: string) {
-  let doubleNewline = "\n\n";
-  if (process.platform === "win32") {
-    doubleNewline = "\r\n\r\n";
-  }
   const samplesRaw = fs.readFileSync(samplesFilePath, { encoding: "utf-8" });
   const [codeRaw, projectionsRaw] = samplesRaw.split(`${doubleNewline}---${doubleNewline}`);
   return {

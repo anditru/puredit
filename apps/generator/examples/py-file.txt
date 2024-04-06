@@ -6,6 +6,6 @@ with open("data.txt", "a") as file:
 
 ---
 
-read file my_file.txt in mode w :
+read file my_file.txt in mode w :.
 
-read file data.txt in mode a :
+read file data.txt in mode a :.

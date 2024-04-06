@@ -6,8 +6,8 @@ table["address"] = table["address"].remove("Rd.");
 
 ---
 
-remove Mr. from column name
+remove Mr. from column name.
 
-remove Dr. from column title
+remove Dr. from column title.
 
-remove Rd. from column address
+remove Rd. from column address.

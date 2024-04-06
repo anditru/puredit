@@ -6,6 +6,6 @@ with open("data.txt", "a") as file:
 
 ---
 
-write to file my_file.txt in mode w
+write to file my_file.txt in mode w.
 
-write to file data.txt in mode a
+write to file data.txt in mode a.

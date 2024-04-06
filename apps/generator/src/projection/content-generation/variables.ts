@@ -4,7 +4,7 @@ import { assert, zip } from "@puredit/utils";
 import { ProjectionSegment, ProjectionVariable } from "./projection/scan";
 import AstCursor from "@puredit/parser/ast/cursor";
 
-export function connectParameters(
+export function connectArguments(
   codeSamples: Tree[],
   projectionSamples: string[][],
   argumentPaths: number[][],
@@ -14,13 +14,13 @@ export function connectParameters(
 
   for (const [codeSample, projectionSample] of zip(codeSamples, projectionSamples)) {
     const diff = new Diff(projectionSample, projection);
-    const projectionParameters: string[] = [];
-    const projectionVariableIndices: number[] = [];
+    const projectionArguments: string[] = [];
+    const projectionArgumentIndices: number[] = [];
     diff.scanDiff((fromA, toA, fromB, toB) => {
       assert(fromB === toB - 1, "invalid projection");
       assert((projection[fromB] as any).type === "variable", "unknown projection segment");
-      projectionParameters.push(projectionSample.slice(fromA, toA).join(" "));
-      projectionVariableIndices.push(fromB);
+      projectionArguments.push(projectionSample.slice(fromA, toA).join(" "));
+      projectionArgumentIndices.push(fromB);
     });
 
     for (let i = 0; i < argumentPaths.length; i++) {
@@ -34,9 +34,9 @@ export function connectParameters(
         value = value.slice(1, value.length - 1);
       }
       const candidates: number[] = [];
-      for (let j = 0; j < projectionParameters.length; j++) {
-        if (projectionParameters[j] === value) {
-          candidates.push(projectionVariableIndices[j]);
+      for (let j = 0; j < projectionArguments.length; j++) {
+        if (projectionArguments[j] === value) {
+          candidates.push(projectionArgumentIndices[j]);
         }
       }
       if (solutions.length > i) {
@@ -66,7 +66,7 @@ function union(a: number[], b: number[]): number[] {
   return a.filter((x) => b.includes(x));
 }
 
-export function setVariableNames(projection: ProjectionSegment[], connections: number[]) {
+export function setArgumentNames(projection: ProjectionSegment[], connections: number[]) {
   let i = 0;
   for (const connection of connections) {
     const name = `var${i++}`;

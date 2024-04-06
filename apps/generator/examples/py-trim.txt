@@ -4,6 +4,6 @@ table.column("last_name").trim("right")
 
 ---
 
-trim column first_name on left
+trim column first_name on left.
 
-trim column last_name on right
+trim column last_name on right.
