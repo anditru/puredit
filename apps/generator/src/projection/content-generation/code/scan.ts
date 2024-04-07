@@ -15,6 +15,8 @@ import TemplateArgument from "../template/argument";
 import TemplateBlock from "../template/block";
 import TemplateChain from "../template/chain";
 import TemplateContextVariable from "../template/contextVariable";
+import { TreePath } from "@puredit/parser";
+import { Range } from "../common";
 
 export interface CodeScanResult {
   pattern: PatternNode;
@@ -93,10 +95,11 @@ class NodeComparison {
       if (this.parentMissmatch()) {
         return null;
       }
-      // if (!this.inChain && this.nodesAreChainable() && this.isChain()) {
-      //   this.recordChain(index);
-      //   this.inChain = true;
-      // }
+      if (!this.inChain && this.nodesAreChainable()) {
+        const templateChain = this.extractTemplateChain(index);
+        this.recordChain(templateChain);
+        this.inChain = true;
+      }
       if (this.typeMissmatch()) {
         if (this.atLeastOneNodeIsKeyword()) {
           return null; // keywords cannot be variable
@@ -197,66 +200,71 @@ class NodeComparison {
     );
   }
 
-  private isChain(): boolean {
-    const followedPathsA = [];
-    const followedPathsB = [];
+  private extractTemplateChain(index: number): TemplateChain | null {
+    const followedPaths = [];
     let chainDepth = -1;
+    let isChain: boolean;
     let chainableNodeTypeConfig: ChainableNodeTypeConfig;
-    let isChain = false;
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
+    let chainStartRange: Range;
+    const chainLinkRages: Range[] = [];
+    do {
       chainDepth++;
       if (this.a.currentNode.type !== this.b.currentNode.type) {
-        isChain = false;
-        break;
+        return null;
       }
       chainableNodeTypeConfig = loadChainableNodeTypeConfigFor(
         this.language,
         this.a.currentNode.type
       );
-      if (chainableNodeTypeConfig && chainDepth < 2) {
-        const pathToNextLink = chainableNodeTypeConfig.pathToNextLink;
-        if (this.a.follow(pathToNextLink)) {
-          followedPathsA.push(pathToNextLink);
-        } else {
-          isChain = false;
-          break;
-        }
-        if (this.b.follow(pathToNextLink)) {
-          followedPathsB.push(pathToNextLink);
-        } else {
-          isChain = false;
-          break;
-        }
-        continue;
+      if (chainableNodeTypeConfig) {
+        const pathToLinkBegin = chainableNodeTypeConfig.pathToLinkBegin;
+        this.followBothCursors(pathToLinkBegin);
+        const from = this.a.currentNode.startIndex + 1;
+        this.reverseFollowBothCursors(pathToLinkBegin);
+        chainLinkRages.push({ from, to: this.a.currentNode.endIndex });
+      } else if (!chainableNodeTypeConfig && chainDepth >= 2) {
+        chainStartRange = {
+          from: this.a.currentNode.startIndex,
+          to: this.a.currentNode.endIndex,
+        };
+        isChain = true;
+        break;
       } else if (!chainableNodeTypeConfig && chainDepth < 2) {
         isChain = false;
         break;
-      } else if (chainDepth >= 2) {
-        isChain = true;
-        break;
       }
-      const pathToNextLink = chainableNodeTypeConfig.pathToNextLink;
-      if (this.a.follow(pathToNextLink)) {
-        followedPathsA.push(pathToNextLink);
-      } else {
-        isChain = false;
-        break;
-      }
-      if (this.b.follow(pathToNextLink)) {
-        followedPathsB.push(pathToNextLink);
-      } else {
-        isChain = false;
-        break;
-      }
+    } while (
+      this.followBothCursors(chainableNodeTypeConfig.pathToNextLink) &&
+      followedPaths.push(chainableNodeTypeConfig.pathToNextLink)
+    );
+    if (isChain === undefined) {
+      throw new Error("Failed to determine if chain is present");
     }
-    for (const path of followedPathsA) {
+    for (const path of followedPaths) {
       this.a.reverseFollow(path);
-    }
-    for (const path of followedPathsB) {
       this.b.reverseFollow(path);
     }
-    return isChain;
+    return isChain
+      ? new TemplateChain(this.path.concat(index), chainStartRange, chainLinkRages)
+      : null;
+  }
+
+  private followBothCursors(path: TreePath): boolean {
+    if (this.a.follow(path)) {
+      if (this.b.follow(path)) {
+        return true;
+      } else {
+        this.a.reverseFollow(path);
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  private reverseFollowBothCursors(path: TreePath) {
+    this.a.reverseFollow(path);
+    this.b.reverseFollow(path);
   }
 
   private recordTemplate(index: number) {
@@ -290,8 +298,8 @@ class NodeComparison {
     });
   }
 
-  private recordChain(index: number) {
-    this.templateParameters.push(new TemplateChain(this.path.concat(index)));
+  private recordChain(chain: TemplateChain) {
+    this.templateParameters.push(chain);
     this.nodes.push({
       variable: true,
       fieldName: this.a.currentFieldName || undefined,

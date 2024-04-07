@@ -1,5 +1,6 @@
 import { Path } from "../context-var-detection/blockVariableMap";
 import TemplateParameter from "./parameter";
+import { Range } from "../common";
 
 export default class TemplateChain extends TemplateParameter {
   static lastId = -1;
@@ -8,7 +9,7 @@ export default class TemplateChain extends TemplateParameter {
     return TemplateChain.lastId;
   }
 
-  constructor(path: Path) {
+  constructor(path: Path, public readonly startRange: Range, public readonly linkRanges: Range[]) {
     super(TemplateChain.issueId(), path);
   }
 

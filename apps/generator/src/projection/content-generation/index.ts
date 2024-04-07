@@ -6,7 +6,9 @@ import { serializePattern } from "./serialize";
 import { isString } from "@puredit/utils";
 import { doubleNewline, Language, supportedLanguages } from "./common";
 import { parseCodeSamples } from "./code/parse";
-import { parseProjections } from "./projection/parse";
+import { parseProjections, ProjectionSample } from "./projection/parse";
+import TemplateParameterArray from "./template/parameterArray";
+import TemplateChain from "./template/chain";
 
 export interface ProjectionContent {
   declarationString: string;
@@ -37,13 +39,20 @@ export async function generateProjectionContent(
   const projectionSamples = parseProjections(rawProjectionSamples);
 
   // Generate Pattern
-  const { pattern, templateParameters } = scanCode(sampleAsts, language, ignoreBlocks);
+  const codeScanResult = scanCode(sampleAsts, language, ignoreBlocks);
+  const pattern = codeScanResult.pattern;
+  const templateParameters = resolveSubProjections(
+    codeScanResult.templateParameters,
+    projectionSamples
+  );
+
   const [declarationString, templateString] = serializePattern(
     sampleAsts[0],
     pattern,
     templateParameters
   );
 
+  // Generate Widgets
   const projectionTokens = projectionSamples.map((sample) => sample.getProjectionTokens());
   const projectionSegments = scanProjections(projectionTokens);
   const argumentPaths = templateParameters.getTemplateArguments().map((argument) => argument.path);
@@ -69,6 +78,42 @@ export async function generateProjectionContent(
     templateString,
     widgets,
   };
+}
+
+function resolveSubProjections(
+  templateParameters: TemplateParameterArray,
+  projectionSamples: ProjectionSample[]
+) {
+  const subProjections = templateParameters.filter(
+    (parameter) => parameter instanceof TemplateChain
+  );
+  const subProjectionGroups = projectionSamples[0].subProjectionGroups;
+  if (subProjections.length !== subProjectionGroups.length) {
+    throw Error("Provided subprojections do not fit code");
+  }
+  let filteredTemplateparameters = templateParameters;
+  subProjections.forEach((subProjection) => {
+    filteredTemplateparameters = filteredTemplateparameters.filter(
+      (parameter) =>
+        !(
+          isPrefixOf(subProjection.path, parameter.path) &&
+          parameter.path.length > subProjection.path.length
+        )
+    ) as TemplateParameterArray;
+  });
+  return filteredTemplateparameters;
+}
+
+function isPrefixOf(prefix: number[], target: number[]): boolean {
+  if (target.length < prefix.length) {
+    return false;
+  }
+  for (let i = 0; i < prefix.length; i++) {
+    if (prefix[i] === target[i]) {
+      return true;
+    }
+  }
+  return true;
 }
 
 function extractCodeAndProjections(samplesFilePath: string) {
