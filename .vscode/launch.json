@@ -35,7 +35,7 @@
         "-d",
         "Open and edit a file",
         "-s",
-        "../../../apps/generator/examples/py-file.txt"
+        "../../../apps/generator/examples/py-chain.txt"
       ],
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
       "skipFiles": ["<node_internals>/**"]

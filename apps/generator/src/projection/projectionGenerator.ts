@@ -87,30 +87,61 @@ export default class ProjectionGenerator extends BaseGenerator {
     this.destinationRoot = path.resolve(this.packagePath, this.projectionAnswers.technicalName);
     const language = this.parseLanguage();
 
+    let mainImports = `import Widget from "./Widget.svelte";`;
     let declarationString = "";
     let templateString = `console.log("Hello World")`;
-    let componentContent = this.projectionAnswers.displayName;
+    let widgetArray = `[ widget ]`;
+    let widgets = [];
+    let widgetImports = "";
+    let widgetTransformations = "const widget = svelteProjection(Widget);";
     if (this.samplesFilePath) {
       const projectionContent = await generateProjectionContentFromFile(
         this.samplesFilePath,
         language as Language,
         this.ignoreBlocks
       );
+      widgets = projectionContent.widgets;
+      widgetImports = `  import { highlightingFor } from "@codemirror/language";\n  import { tags } from "@lezer/highlight";\n  import TextInput from "@puredit/projections/TextInput.svelte";`;
+
+      mainImports = widgets
+        .map((_, index) => `import Widget${index} from "./Widget${index}.svelte";`)
+        .join("\n");
+      widgetTransformations = widgets
+        .map((_, index) => `const widget${index} = svelteProjection(Widget${index});`)
+        .join("\n");
       declarationString = projectionContent.declarationString;
       templateString = projectionContent.templateString;
-      componentContent = projectionContent.componentContent;
+      widgetArray = `[ ${widgets.map((_, index) => `widget${index}`).join(", ")} ]`;
     }
 
     this.fs.copyTpl(this.templatePath("main.tts"), this.destinationPath("main.ts"), {
       ...this.projectionAnswers,
       declarationString,
       templateString,
+      mainImports,
+      widgetTransformations,
+      widgetArray,
     });
 
-    this.fs.copyTpl(this.templatePath("Widget.tsvelte"), this.destinationPath("Widget.svelte"), {
-      ...this.projectionAnswers,
-      componentContent,
-    });
+    if (widgets.length) {
+      widgets.forEach((widget, index) =>
+        this.fs.copyTpl(
+          this.templatePath("Widget.tsvelte"),
+          this.destinationPath(`Widget${index}.svelte`),
+          {
+            ...this.projectionAnswers,
+            componentContent: widget,
+            widgetImports,
+          }
+        )
+      );
+    } else {
+      this.fs.copyTpl(this.templatePath("Widget.tsvelte"), this.destinationPath("Widget.svelte"), {
+        ...this.projectionAnswers,
+        componentContent: this.projectionAnswers.displayName,
+        widgetImports,
+      });
+    }
 
     const packageIndexPath = path.resolve(this.destinationRoot, "../index.ts");
     let packageIndexText: string;

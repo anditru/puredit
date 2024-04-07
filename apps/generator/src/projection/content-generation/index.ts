@@ -11,7 +11,7 @@ import { parseProjections } from "./projection/parse";
 export interface ProjectionContent {
   declarationString: string;
   templateString: string;
-  componentContent: string;
+  widgets: string[];
 }
 
 export function generateProjectionContentFromFile(
@@ -32,19 +32,20 @@ export async function generateProjectionContent(
   language: Language,
   ignoreBlocks: boolean
 ): Promise<ProjectionContent> {
+  // Parse
   const sampleAsts = await parseCodeSamples(codeSamples, language);
   const projectionSamples = parseProjections(rawProjectionSamples);
 
-  const projectionTokens = projectionSamples.map((sample) => sample.getProjectionTokens());
-  const projectionSegments = scanProjections(projectionTokens);
+  // Generate Pattern
   const { pattern, templateParameters } = scanCode(sampleAsts, language, ignoreBlocks);
-
   const [declarationString, templateString] = serializePattern(
     sampleAsts[0],
     pattern,
     templateParameters
   );
 
+  const projectionTokens = projectionSamples.map((sample) => sample.getProjectionTokens());
+  const projectionSegments = scanProjections(projectionTokens);
   const argumentPaths = templateParameters.getTemplateArguments().map((argument) => argument.path);
   const connections = connectArguments(
     sampleAsts,
@@ -54,15 +55,19 @@ export async function generateProjectionContent(
   );
   setArgumentNames(projectionSegments, connections);
 
-  const componentContent = projectionSegments
-    .reduce(reduceSegments, [])
-    .map(projectionSegmentTemplate)
-    .join("\n");
+  const widgetBoundries = projectionSamples[0].getWidgetBoundries();
+  const segmentsPerWidget = widgetBoundries.map((boundry, index) => {
+    const startIndex = index ? widgetBoundries[index - 1] + 1 : 0;
+    return projectionSegments.slice(startIndex, boundry + 1);
+  });
+  const widgets = segmentsPerWidget.map((widgetSegments) =>
+    widgetSegments.reduce(reduceSegments, []).map(projectionSegmentTemplate).join("\n")
+  );
 
   return {
     declarationString,
     templateString,
-    componentContent,
+    widgets,
   };
 }
 

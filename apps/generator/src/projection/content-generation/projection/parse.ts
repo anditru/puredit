@@ -17,6 +17,16 @@ export class ProjectionSample {
   getProjectionTokens(): string[] {
     return this.widgets.flatMap((widget) => widget.tokens);
   }
+
+  getWidgetBoundries(): number[] {
+    const widgetBoundries = [];
+    let currentBoundry = -1;
+    for (const widget of this.widgets) {
+      currentBoundry += widget.tokens.length;
+      widgetBoundries.push(currentBoundry);
+    }
+    return widgetBoundries;
+  }
 }
 
 export class ProjectionSampleGroup {
