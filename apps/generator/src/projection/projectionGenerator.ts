@@ -15,8 +15,8 @@ import chalk from "chalk";
 import { Question } from "inquirer";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { generateProjectionContentFromFile } from "./content-generation";
-import { Language } from "./content-generation/common";
+import { generateProjectionContentFromFile } from "../content-generation";
+import { Language } from "../content-generation/common";
 
 interface ProjectionAnswers {
   displayName?: string;
