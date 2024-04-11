@@ -1,15 +1,15 @@
 filtered_students = students.select("name", "age", "semester").filter(age=24)
 
-filtered_lectures = lectures.select("lecturer", "name", "credits").filter(credits=8)
+filtered_lectures = lectures.select("lecturer", "id", "credits").filter(credits=8)
 
 ---
 
-From students
+    From students.
     select columns name, age, semester.
     then filter rows where age is 24.
 into filtered_students.
 
-From lectures
-    select columns lecturer, name, credits.
+    From lectures.
+    select columns lecturer, id, credits.
     then filter rows where credits is 8.
 into filtered_lectures.

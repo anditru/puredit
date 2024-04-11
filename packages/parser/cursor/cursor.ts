@@ -19,7 +19,7 @@ export default abstract class Cursor {
     return true;
   }
 
-  reverseFollow(path: TreePath): boolean {
+  reverseFollow(path: TreePath | number[]): boolean {
     this.beginTransaction();
     const steps: number[] = path instanceof TreePath ? path.steps : path;
     for (const _ of steps) {

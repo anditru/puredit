@@ -13,10 +13,9 @@ import { findUndeclaredVariables } from "../context-var-detection";
 import TemplateParameterArray from "../template/parameterArray";
 import TemplateArgument from "../template/argument";
 import TemplateBlock from "../template/block";
-import TemplateChain from "../template/chain";
+import { TemplateChain, ChainStart, ChainLink } from "../template/chain";
 import TemplateContextVariable from "../template/contextVariable";
 import { TreePath } from "@puredit/parser";
-import { Range } from "../common";
 
 export interface CodeScanResult {
   pattern: PatternNode;
@@ -97,8 +96,10 @@ class NodeComparison {
       }
       if (!this.inChain && this.nodesAreChainable()) {
         const templateChain = this.extractTemplateChain(index);
-        this.recordChain(templateChain);
-        this.inChain = true;
+        if (templateChain) {
+          this.recordChain(templateChain);
+          this.inChain = true;
+        }
       }
       if (this.typeMissmatch()) {
         if (this.atLeastOneNodeIsKeyword()) {
@@ -205,8 +206,8 @@ class NodeComparison {
     let chainDepth = -1;
     let isChain: boolean;
     let chainableNodeTypeConfig: ChainableNodeTypeConfig;
-    let chainStartRange: Range;
-    const chainLinkRages: Range[] = [];
+    let chainStart: ChainStart;
+    const chainLinks: ChainLink[] = [];
     do {
       chainDepth++;
       if (this.a.currentNode.type !== this.b.currentNode.type) {
@@ -216,20 +217,19 @@ class NodeComparison {
         this.language,
         this.a.currentNode.type
       );
-      if (chainableNodeTypeConfig) {
-        const pathToLinkBegin = chainableNodeTypeConfig.pathToLinkBegin;
-        this.followBothCursors(pathToLinkBegin);
-        const from = this.a.currentNode.startIndex + 1;
+      const pathToLinkBegin = chainableNodeTypeConfig?.pathToLinkBegin;
+      if (chainableNodeTypeConfig && this.followBothCursors(pathToLinkBegin)) {
+        const fromPath = this.a.currentPath;
         this.reverseFollowBothCursors(pathToLinkBegin);
-        chainLinkRages.push({ from, to: this.a.currentNode.endIndex });
+        chainLinks.push(new ChainLink(fromPath, this.a.currentPath));
       } else if (!chainableNodeTypeConfig && chainDepth >= 2) {
-        chainStartRange = {
-          from: this.a.currentNode.startIndex,
-          to: this.a.currentNode.endIndex,
-        };
+        chainStart = new ChainStart(this.a.currentPath);
         isChain = true;
         break;
       } else if (!chainableNodeTypeConfig && chainDepth < 2) {
+        isChain = false;
+        break;
+      } else {
         isChain = false;
         break;
       }
@@ -244,9 +244,7 @@ class NodeComparison {
       this.a.reverseFollow(path);
       this.b.reverseFollow(path);
     }
-    return isChain
-      ? new TemplateChain(this.path.concat(index), chainStartRange, chainLinkRages)
-      : null;
+    return isChain ? new TemplateChain(this.path.concat(index), chainStart, chainLinks) : null;
   }
 
   private followBothCursors(path: TreePath): boolean {

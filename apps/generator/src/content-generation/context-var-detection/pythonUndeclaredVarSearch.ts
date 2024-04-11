@@ -17,6 +17,7 @@ export default class PythonUndeclaredVarSearch extends UndeclaredVarSearch {
   ];
 
   protected readonly DECLARATION_TERMINATING_CONDITIONS = [
+    { parentType: "expression_statement", fieldName: undefined },
     { parentType: "assignment", fieldName: "right" },
     { parentType: "augmented_assignment", fieldName: "right" },
     { parentType: "augmented_assignment", fieldName: "left" },

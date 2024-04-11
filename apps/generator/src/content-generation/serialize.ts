@@ -36,18 +36,42 @@ export function serializePattern(
   return [declarationsResult, patternResult];
 }
 
-export function serializeProjection(projection: ProjectionSegment[]): string {
-  const result: string[] = [];
-  for (const segment of projection) {
-    if (isString(segment)) {
-      result.push(segment);
-    } else {
-      result.push("{" + segment.names.join(", ") + "}");
-    }
-  }
-  return result.join(" ");
-}
-
 function escapeTemplateCode(input: string): string {
   return input.replaceAll("${", '${"${"}').replaceAll("`", '${"`"}');
 }
+
+export function serializeWidget(widgetSegments: ProjectionSegment[]) {
+  return widgetSegments.reduce(reduceSegments, []).map(projectionSegmentTemplate).join("\n");
+}
+
+const reduceSegments = (
+  segments: ProjectionSegment[],
+  segment: ProjectionSegment
+): ProjectionSegment[] => {
+  const previous = segments.length - 1;
+  if (previous >= 0 && isString(segment) && isString(segments[previous])) {
+    segments[previous] += " " + segment;
+  } else {
+    segments.push(segment);
+  }
+  return segments;
+};
+
+const projectionSegmentTemplate = (segment: ProjectionSegment) => {
+  if (isString(segment)) {
+    return `  <span>${segment}</span>`;
+  }
+  const targetNodes = segment.names.map((name) => `match.argsToAstNodeMap.${name}`);
+  let targetNodesAttr = "";
+  if (segment.names.length > 1) {
+    targetNodesAttr = `\n    targetNodes={[${targetNodes.join(", ")}]}`;
+  }
+  return `  <TextInput
+    className={highlightingFor(state, [tags.string])}
+    node={${targetNodes[0]}}${targetNodesAttr}
+    placeholder="${segment.names.join(", ")}"
+    {state}
+    {view}
+    {focusGroup}
+  />`;
+};

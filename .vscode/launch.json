@@ -26,6 +26,9 @@
       "request": "launch",
       "program": "${workspaceFolder}/apps/generator/src/index.ts",
       "cwd": "${workspaceFolder}/packages/projection-libs/py-my-package",
+      "env": {
+        "DEBUG": "true"
+      },
       "args": [
         "projection",
         "-n",
@@ -35,7 +38,9 @@
         "-d",
         "Open and edit a file",
         "-s",
-        "../../../apps/generator/examples/py-chain.txt"
+        "../../../apps/generator/examples/py-chain.txt",
+        "-l",
+        "py"
       ],
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
       "skipFiles": ["<node_internals>/**"]

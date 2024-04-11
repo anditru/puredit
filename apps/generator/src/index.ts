@@ -3,6 +3,8 @@ import { ArgumentParser } from "argparse";
 import PackageGenerator from "./package/packageGenerator";
 import ProjectionGenerator from "./projection/projectionGenerator";
 import SubProjectionGenerator from "./subProjection/subProjectionGenerator";
+import GeneratorWithContent from "./content-generation/contentGenerator";
+import ProjectionContentGenerator from "./content-generation/ProjectionContentGenerator";
 
 const parser = new ArgumentParser({
   description:
@@ -20,6 +22,12 @@ subParsers.add_parser("package", {
 const projectionParser = subParsers.add_parser("projection", {
   help: "Generate a projection",
 });
+projectionParser.add_argument("--language", "-l", {
+  required: false,
+  help: "Language for the projection",
+  dest: "language",
+  type: "str",
+});
 projectionParser.add_argument("--display-name", "-n", {
   required: false,
   help: "Display name for the projection",
@@ -28,7 +36,7 @@ projectionParser.add_argument("--display-name", "-n", {
 });
 projectionParser.add_argument("--technical-name", "-t", {
   required: false,
-  help: "Technical name fpr the projection",
+  help: "Technical name for the projection",
   dest: "technicalName",
   type: "str",
 });
@@ -60,14 +68,24 @@ const args = parser.parse_args();
 if (args.entity === "package") {
   const packageGenerator = new PackageGenerator();
   packageGenerator.execute();
-} else if (args.entity === "projection") {
+} else if (args.entity === "projection" && !args.samplesFile) {
   const projectionGenerator = new ProjectionGenerator();
-  projectionGenerator.execute(
+  projectionGenerator
+    .setLanguage(args.language)
+    .setDisplayName(args.displayName)
+    .setTechnicalName(args.technicalName)
+    .setDescription(args.description)
+    .execute();
+} else if (args.entity === "projection" && args.samplesFile) {
+  const projectionGenerator = new ProjectionGenerator();
+  const contentGenerator = new ProjectionContentGenerator(projectionGenerator);
+  contentGenerator.execute(
+    args.samplesFile,
+    args.ignoreBlocks,
     args.displayName,
     args.technicalName,
     args.description,
-    args.samplesFile,
-    args.ignoreBlocks
+    args.language
   );
 } else if (args.entity === "subProjection") {
   const subProjectionGenerator = new SubProjectionGenerator();

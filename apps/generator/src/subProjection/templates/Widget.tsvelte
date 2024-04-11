@@ -5,6 +5,7 @@
   import type { Match } from "@puredit/parser";
   import type { FocusGroup } from "@puredit/projections/focus";
   import { ContextInformation } from "@puredit/projections";
+<%- widgetImports %>
 
   export let isNew: boolean;
   export let focusGroup: FocusGroup;
@@ -27,5 +28,5 @@
 </script>
 
 <span class="inline-flex">
-  <span><%= displayName %></span>
+<%- widgetContent %>
 </span>

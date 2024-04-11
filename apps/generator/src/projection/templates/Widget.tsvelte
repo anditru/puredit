@@ -28,5 +28,5 @@
 </script>
 
 <span class="inline-flex">
-<%- componentContent %>
+<%- widgetContent %>
 </span>

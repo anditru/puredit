@@ -24,6 +24,7 @@ export class PatternCursor extends Cursor {
 
   private parents: PatternNode[] = [];
   private childIndex: number[] = [];
+  private _currentPath: number[] = [];
 
   private runningTransaction = false;
   private runningRollback = false;
@@ -70,6 +71,7 @@ export class PatternCursor extends Cursor {
     if (this.parents.length) {
       this.node = this.parents.pop();
       this.childIndex.pop();
+      this._currentPath.pop();
       if (this.runningTransaction && !this.runningRollback) {
         this.operationLog.push(TransactionOperation.GOTO_PARENT);
       }
@@ -86,6 +88,7 @@ export class PatternCursor extends Cursor {
       this.childIndex.push(0);
       this.parents.push(this.node);
       this.node = this.node.children[0];
+      this._currentPath.push(0);
       if (this.runningTransaction && !this.runningRollback) {
         this.operationLog.push(TransactionOperation.GOTO_FIRST_CHILD);
       }
@@ -101,6 +104,7 @@ export class PatternCursor extends Cursor {
       if (index < parent.children.length) {
         this.node = parent.children[index];
         this.childIndex[this.childIndex.length - 1] = index;
+        this._currentPath.push(this._currentPath.pop() + 1);
         return true;
       }
     }
@@ -114,6 +118,10 @@ export class PatternCursor extends Cursor {
       }
     }
     return true;
+  }
+
+  get currentPath() {
+    return this._currentPath;
   }
 }
 

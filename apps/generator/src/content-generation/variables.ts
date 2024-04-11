@@ -3,6 +3,7 @@ import { Diff } from "mdiff";
 import { assert, zip } from "@puredit/utils";
 import { ProjectionSegment, ProjectionVariable } from "./projection/scan";
 import AstCursor from "@puredit/parser/ast/cursor";
+import TemplateArgument from "./template/argument";
 
 export function connectArguments(
   codeSamples: Tree[],
@@ -66,10 +67,14 @@ function union(a: number[], b: number[]): number[] {
   return a.filter((x) => b.includes(x));
 }
 
-export function setArgumentNames(projection: ProjectionSegment[], connections: number[]) {
+export function setArgumentNames(
+  projection: ProjectionSegment[],
+  connections: number[],
+  templateArguments: TemplateArgument[]
+) {
   let i = 0;
   for (const connection of connections) {
-    const name = `var${i++}`;
+    const name = templateArguments[i++].toVariableName();
     if (connection >= 0) {
       const segment = projection[connection] as ProjectionVariable;
       assert(segment.type === "variable", "projection segment is not a variable");

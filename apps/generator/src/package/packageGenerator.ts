@@ -27,7 +27,7 @@ export default class PackageGenerator extends BaseGenerator {
     await this.writeFiles();
   }
 
-  private async showPrompts() {
+  async showPrompts() {
     const packageAnswersPrompts: Question[] = [
       {
         type: "list",
@@ -52,10 +52,12 @@ export default class PackageGenerator extends BaseGenerator {
       },
     ];
     this.packageAnswers = await this.prompt<PackageAnswers>(packageAnswersPrompts);
+    this.language = this.packageAnswers.language;
     this.fullPackageName = `${this.packageAnswers.language}-${this.packageAnswers.name}`;
+    return this.fullPackageName;
   }
 
-  private async writeFiles() {
+  async writeFiles() {
     const destinationRoot = path.resolve(
       __dirname,
       "../../../..",

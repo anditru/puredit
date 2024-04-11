@@ -69,6 +69,7 @@ export default abstract class UndeclaredVarSearch {
     if (occurenceInfo.isVariable == null) {
       throw new Error(`Cloud not determine if identifier ${identifierName} is variable`);
     } else if (occurenceInfo.isVariable && !occurenceInfo.type) {
+      console.log(this.astCursor.currentNode.parent.text);
       throw new Error(
         `Could not determine if occurence of variable identifier ${identifierName} is declaring or applied`
       );

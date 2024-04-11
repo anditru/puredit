@@ -15,16 +15,25 @@ import chalk from "chalk";
 import { Question } from "inquirer";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { generateProjectionContentFromFile } from "../content-generation";
-import { Language } from "../content-generation/common";
+import { Language, ProjectionContent } from "../content-generation/common";
 
 interface ProjectionAnswers {
+  language?: Language;
   displayName?: string;
   technicalName?: string;
   description?: string;
 }
 
 const projectionQuestions: Record<string, Question> = {
+  language: {
+    type: "list",
+    name: "language",
+    message: "For which language will your projection be?",
+    choices: [
+      { name: "TypeScript", value: "ts" },
+      { name: "Python", value: "py" },
+    ],
+  },
   displayName: {
     type: "input",
     name: "displayName",
@@ -49,89 +58,93 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default class ProjectionGenerator extends BaseGenerator {
+  public readonly packagePath = path.resolve("./");
   private projectionAnswers: ProjectionAnswers = {};
-  private samplesFilePath?: string;
-  private ignoreBlocks = false;
-  private packagePath = path.resolve("./");
+  private projectionContent = {
+    widgetContents: [],
+    widgetImports: "",
+    importedWidgets: `import Widget from "./Widget.svelte";`,
+    importedSubProjections: "",
+    parameterDeclarations: "",
+    templateString: `console.log("Hello World")`,
+    widgetTransformations: "const widget = svelteProjection(Widget);",
+    segmentWidgetArray: `[ widget ]`,
+    postfixWidgetName: "undefined",
+    subProjectionArray: "[]",
+  };
 
   constructor() {
-    super(path.resolve(__dirname, "templates"));
+    const templateRoot = path.resolve(__dirname, "templates");
+    super(templateRoot);
   }
 
-  async execute(
-    displayName?: string,
-    technicalName?: string,
-    description?: string,
-    samplesfilePath?: string,
-    ignoreBlocks?: boolean
-  ) {
-    this.projectionAnswers.displayName = displayName;
-    this.projectionAnswers.technicalName = technicalName;
-    this.projectionAnswers.description = description;
-    this.samplesFilePath = samplesfilePath;
-    this.ignoreBlocks = ignoreBlocks || false;
+  setLanguage(language: Language) {
+    this.language = language;
+    this.projectionAnswers.language = language;
+    return this;
+  }
 
+  setDisplayName(displayName: string) {
+    this.projectionAnswers.displayName = displayName;
+    return this;
+  }
+
+  setTechnicalName(technicalName: string) {
+    this.projectionAnswers.technicalName = technicalName;
+    return this;
+  }
+
+  setDescription(description: string) {
+    this.projectionAnswers.description = description;
+    return this;
+  }
+
+  async execute() {
     await this.showPrompts();
     await this.writeFiles();
   }
 
-  private async showPrompts() {
-    const questionsToAsk = Object.keys(this.projectionAnswers)
+  async showPrompts(): Promise<string> {
+    const questionsToAsk = Object.keys(projectionQuestions)
       .filter((field) => !this.projectionAnswers[field])
       .map((field) => projectionQuestions[field]);
     const projectionAnswers = await this.prompt<ProjectionAnswers>(questionsToAsk);
     Object.assign(this.projectionAnswers, projectionAnswers);
+    this.language = this.projectionAnswers.language;
+    return this.projectionAnswers.technicalName;
   }
 
-  private async writeFiles() {
-    this.destinationRoot = path.resolve(this.packagePath, this.projectionAnswers.technicalName);
-    const language = this.parseLanguage();
-
-    let mainImports = `import Widget from "./Widget.svelte";`;
-    let declarationString = "";
-    let templateString = `console.log("Hello World")`;
-    let widgetArray = `[ widget ]`;
-    let widgets = [];
-    let widgetImports = "";
-    let widgetTransformations = "const widget = svelteProjection(Widget);";
-    if (this.samplesFilePath) {
-      const projectionContent = await generateProjectionContentFromFile(
-        this.samplesFilePath,
-        language as Language,
-        this.ignoreBlocks
-      );
-      widgets = projectionContent.widgets;
-      widgetImports = `  import { highlightingFor } from "@codemirror/language";\n  import { tags } from "@lezer/highlight";\n  import TextInput from "@puredit/projections/TextInput.svelte";`;
-
-      mainImports = widgets
-        .map((_, index) => `import Widget${index} from "./Widget${index}.svelte";`)
-        .join("\n");
-      widgetTransformations = widgets
-        .map((_, index) => `const widget${index} = svelteProjection(Widget${index});`)
-        .join("\n");
-      declarationString = projectionContent.declarationString;
-      templateString = projectionContent.templateString;
-      widgetArray = `[ ${widgets.map((_, index) => `widget${index}`).join(", ")} ]`;
+  async writeFiles(projectionContent?: ProjectionContent): Promise<void> {
+    if (projectionContent) {
+      this.projectionContent = {
+        widgetContents: projectionContent.widgetContents,
+        widgetImports: projectionContent.widgetImports,
+        importedWidgets: projectionContent.importedWidgets,
+        importedSubProjections: projectionContent.importedSubProjections,
+        parameterDeclarations: projectionContent.parameterDeclarations,
+        templateString: projectionContent.templateString,
+        widgetTransformations: projectionContent.widgetTransformations,
+        segmentWidgetArray: projectionContent.segmentWidgetArray,
+        postfixWidgetName: projectionContent.postfixWidgetName,
+        subProjectionArray: projectionContent.subProjectionArray,
+      };
     }
 
+    this.destinationRoot = path.resolve(this.packagePath, this.projectionAnswers.technicalName);
     this.fs.copyTpl(this.templatePath("main.tts"), this.destinationPath("main.ts"), {
       ...this.projectionAnswers,
-      declarationString,
-      templateString,
-      mainImports,
-      widgetTransformations,
-      widgetArray,
+      ...this.projectionContent,
     });
 
-    if (widgets.length) {
-      widgets.forEach((widget, index) =>
+    if (this.projectionContent.widgetContents.length) {
+      this.projectionContent.widgetContents.forEach((widgetContent, index) =>
         this.fs.copyTpl(
           this.templatePath("Widget.tsvelte"),
           this.destinationPath(`Widget${index}.svelte`),
           {
             ...this.projectionAnswers,
-            componentContent: widget,
-            widgetImports,
+            widgetImports: this.projectionContent.widgetImports,
+            widgetContent,
           }
         )
       );
@@ -139,35 +152,27 @@ export default class ProjectionGenerator extends BaseGenerator {
       this.fs.copyTpl(this.templatePath("Widget.tsvelte"), this.destinationPath("Widget.svelte"), {
         ...this.projectionAnswers,
         componentContent: this.projectionAnswers.displayName,
-        widgetImports,
+        widgetImports: this.projectionContent.widgetImports,
+        widgetContent: this.projectionAnswers.displayName,
       });
     }
 
     const packageIndexPath = path.resolve(this.destinationRoot, "../index.ts");
-    let packageIndexText: string;
     try {
-      packageIndexText = this.fs.read(packageIndexPath);
+      const packageIndexText = this.fs.read(packageIndexPath);
+      const packageIndexAst = this.parsePackageIndexAst(packageIndexText);
+      this.registerInPackage(packageIndexPath, packageIndexAst);
     } catch (error) {
-      console.log(
-        `${chalk.bold.yellow("Warning:")} Failed to read package index. ` +
-          "Skipping registration of projection."
-      );
-      return;
+      console.log(`${chalk.bold.yellow("Warning:")} Failed to register projection in package`);
     }
-
-    const packageIndexAst = this.parsePackageIndexAst(packageIndexText);
-    this.addImportStatementTo(packageIndexAst);
-    this.addExportStatementTo(packageIndexAst);
-    const transformedPackageIndexText = recast.print(packageIndexAst).code;
-
-    this.fs.write(packageIndexPath, transformedPackageIndexText);
     await this.fs.commit();
   }
 
-  private parseLanguage() {
-    const packagePathParts = this.packagePath.split("/");
-    const packageName = packagePathParts[packagePathParts.length - 1];
-    return packageName.split("-")[0];
+  private registerInPackage(packageIndexPath: string, packageIndexAst: any) {
+    this.addImportStatementTo(packageIndexAst);
+    this.addExportStatementTo(packageIndexAst);
+    const transformedPackageIndexText = recast.print(packageIndexAst).code;
+    this.fs.write(packageIndexPath, transformedPackageIndexText);
   }
 
   private parsePackageIndexAst(packageIndexText: string): any {

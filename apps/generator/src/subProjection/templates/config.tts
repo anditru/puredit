@@ -1,18 +1,20 @@
 import { svelteProjection } from "@puredit/projections/svelte";
 import type { SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
-import Widget from "./Widget.svelte";
-
+<%- importedWidgets %>
+<%- importedSubProjections %>
+<%- parameterDeclarations %>
 const pattern = parser.subPattern(
   "<%= technicalName %>Pattern"
-)`console.log("Hello World")`;
+)`<%- templateString %>`;
 
-const widget = svelteProjection(Widget);
+<%- widgetTransformations %>
 
 export const <%= technicalName %>: SubProjection = {
   name: "<%= displayName %>",
   description: "<%= description %>",
   pattern,
   requiredContextVariables: [],
-  segmentWidgets: [widget],
+  segmentWidgets: <%- segmentWidgetArray %>,
+  postfixWidget: <%= postfixWidgetName %>
 };
