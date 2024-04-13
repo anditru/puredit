@@ -27,13 +27,13 @@ export class TemplateAggregation extends TemplateParameterWithSubProjections {
       .map((name) => `  ${name}.pattern,`)
       .join("\n");
     if (this.start) {
-      return `const ${variableName} = agg("${variableName}", [
-${subProjectionsString}
-]);\n`;
-    } else {
-      return `const ${variableName} = agg("${variableName}", [
+      return `const ${variableName} = agg("${variableName}", "${this.type}", [
 ${subProjectionsString}
 ], ${this.startSubProjectionName}.pattern);\n`;
+    } else {
+      return `const ${variableName} = agg("${variableName}", "${this.type}", [
+${subProjectionsString}
+]);\n`;
     }
   }
 

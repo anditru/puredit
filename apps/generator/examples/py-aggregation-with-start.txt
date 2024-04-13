@@ -1,0 +1,15 @@
+data_sliced = data[1::2,:3:4]
+
+other_data_sliced = other_data[11::12,:13:14]
+
+---
+
+    Slice tensor data.
+    from index 1 until end with stepsize 2.
+    images from start to index 3 with stepsize 4.
+into data_sliced.
+
+    Slice tensor other_data.
+    from index 11 until end with stepsize 12.
+    images from start to index 13 with stepsize 14.
+into other_data_sliced.
