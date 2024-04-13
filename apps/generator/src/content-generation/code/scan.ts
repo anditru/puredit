@@ -3,6 +3,8 @@ import { PatternCursor, PatternNode } from "../pattern";
 import { Language } from "../common";
 import {
   ChainableNodeTypeConfig,
+  loadAggregatableNodeTypeConfigFor,
+  loadAggregatableNodeTypesFor,
   loadBlocksConfigFor,
   loadChainableNodeTypeConfigFor,
   loadChainableNodeTypesFor,
@@ -16,6 +18,7 @@ import TemplateBlock from "../template/block";
 import { TemplateChain, ChainStart, ChainLink } from "../template/chain";
 import TemplateContextVariable from "../template/contextVariable";
 import { TreePath } from "@puredit/parser";
+import { AggregationPart, TemplateAggregation } from "../template/aggregation";
 
 export interface CodeScanResult {
   pattern: PatternNode;
@@ -60,10 +63,11 @@ class NodeComparison {
   private ignoreBlocks = false;
   private blockNodeType: string;
   private chainableNodeTypes: string[];
+  private aggregatableNodeTypes: string[];
 
   // State
   private path: Path;
-  private inChain = false;
+  private inSubProjection = false;
 
   // Output
   private nodes: PatternNode[] = [];
@@ -78,27 +82,34 @@ class NodeComparison {
   ) {
     this.blockNodeType = loadBlocksConfigFor(this.language).blockNodeType;
     this.chainableNodeTypes = loadChainableNodeTypesFor(this.language);
+    this.aggregatableNodeTypes = loadAggregatableNodeTypesFor(this.language);
   }
 
   execute(
     ignoreBlocks: boolean,
     path: Path = [],
-    inChain = false
+    inSubProjection = false
   ): [PatternNode[], TemplateParameterArray] | null {
     this.ignoreBlocks = ignoreBlocks;
     this.path = path;
-    this.inChain = inChain;
+    this.inSubProjection = inSubProjection;
     let hasSibling = true;
 
     for (let index = 0; hasSibling; index++) {
       if (this.parentMissmatch()) {
         return null;
       }
-      if (!this.inChain && this.nodesAreChainable()) {
+      if (!this.inSubProjection && this.nodesAreChainable()) {
         const templateChain = this.extractTemplateChain(index);
         if (templateChain) {
           this.recordChain(templateChain);
-          this.inChain = true;
+          this.inSubProjection = true;
+        }
+      }
+      if (this.nodesAreAggregatable()) {
+        const templateAggregation = this.extractTemplateAggregation(index);
+        if (templateAggregation) {
+          this.recordAggregation(templateAggregation);
         }
       }
       if (this.typeMissmatch()) {
@@ -155,7 +166,7 @@ class NodeComparison {
       this.undeclaredVariables
     );
     const path = this.initial ? [] : this.path.concat(index);
-    const result = childNodeComparison.execute(this.ignoreBlocks, path, this.inChain);
+    const result = childNodeComparison.execute(this.ignoreBlocks, path, this.inSubProjection);
     this.a.goToParent();
     this.b.goToParent();
     if (result) {
@@ -198,6 +209,13 @@ class NodeComparison {
     return (
       this.chainableNodeTypes.includes(this.a.currentNode.type) &&
       this.chainableNodeTypes.includes(this.b.currentNode.type)
+    );
+  }
+
+  private nodesAreAggregatable(): boolean {
+    return (
+      this.aggregatableNodeTypes.includes(this.a.currentNode.type) &&
+      this.aggregatableNodeTypes.includes(this.b.currentNode.type)
     );
   }
 
@@ -245,6 +263,35 @@ class NodeComparison {
       this.b.reverseFollow(path);
     }
     return isChain ? new TemplateChain(this.path.concat(index), chainStart, chainLinks) : null;
+  }
+
+  extractTemplateAggregation(index: number) {
+    const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(
+      this.language,
+      this.a.currentNode.type
+    );
+    let aggregationStart: AggregationPart | undefined;
+    const limitingTokens = [
+      nodeTypeConfig.startToken,
+      nodeTypeConfig.delimiterToken,
+      nodeTypeConfig.endToken,
+    ];
+    let aggregationParts = this.a.currentNode.children.map(
+      (_, childIndex: number) => new AggregationPart(this.path.concat(index, childIndex))
+    );
+    aggregationParts = aggregationParts.filter(
+      (_, i) => !limitingTokens.includes(this.a.currentNode.children[i].type)
+    );
+    if (nodeTypeConfig.specialStartPattern) {
+      aggregationStart = aggregationParts[0];
+      aggregationParts = aggregationParts.slice(1);
+    }
+    return new TemplateAggregation(
+      this.path.concat(index),
+      this.a.currentNode.type,
+      aggregationParts,
+      aggregationStart
+    );
   }
 
   private followBothCursors(path: TreePath): boolean {
@@ -298,6 +345,15 @@ class NodeComparison {
 
   private recordChain(chain: TemplateChain) {
     this.templateParameters.push(chain);
+    this.nodes.push({
+      variable: true,
+      fieldName: this.a.currentFieldName || undefined,
+      type: this.a.currentNode.type,
+    });
+  }
+
+  private recordAggregation(aggregation: TemplateAggregation) {
+    this.templateParameters.push(aggregation);
     this.nodes.push({
       variable: true,
       fieldName: this.a.currentFieldName || undefined,

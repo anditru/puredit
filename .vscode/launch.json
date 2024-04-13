@@ -32,13 +32,13 @@
       "args": [
         "projection",
         "-n",
-        "Open file Projection",
+        "My Test Projection",
         "-t",
-        "openFileProjection",
+        "myTestProjection",
         "-d",
         "Open and edit a file",
         "-s",
-        "../../../apps/generator/examples/py-chain.txt",
+        "../../../apps/generator/examples/py-aggregation.txt",
         "-l",
         "py"
       ],

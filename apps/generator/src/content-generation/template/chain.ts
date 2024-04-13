@@ -1,9 +1,8 @@
 import { Path } from "../context-var-detection/blockVariableMap";
-import TemplateParameter from "./parameter";
-import { Range } from "../common";
 import AstCursor from "@puredit/parser/ast/cursor";
+import TemplateParameterWithSubProjections from "./parameterWithSubProjections";
 
-export class TemplateChain extends TemplateParameter {
+export class TemplateChain extends TemplateParameterWithSubProjections {
   static lastId = -1;
   static issueId() {
     TemplateChain.lastId++;

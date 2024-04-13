@@ -1,0 +1,15 @@
+filtered_students = students.select(first_name="name", "age")
+
+filtered_lectures = lectures.select(professor="lecturer", "credits")
+
+---
+
+From students select columns
+    name as first_name.
+    age.
+into filtered_students.
+
+From lectures select columns
+    lecturer as professor.
+    credits.
+into filtered_lectures.

@@ -55,15 +55,16 @@ function tokenize(projection: string) {
     .map((line) => line.replaceAll(indent, `${indentToken} `))
     .map((line) => line.split(/\s+/))
     .map((tokens) => {
-      const sanitizedTokens = [];
-      for (const token of tokens) {
-        if (token.endsWith(".") && token.length > 1) {
-          sanitizedTokens.push(token.slice(0, token.length - 1), ".");
-        } else if (token.endsWith(",") && token.length > 1) {
-          sanitizedTokens.push(token.slice(0, token.length - 1), ",");
-        } else {
-          sanitizedTokens.push(token);
+      let sanitizedTokens = [];
+      for (let token of tokens) {
+        const extractedTokens = [];
+        while ([",", "."].includes(getLastChar(token))) {
+          extractedTokens.push(getLastChar(token));
+          token = token.slice(0, token.length - 1);
         }
+        sanitizedTokens.push(token);
+        extractedTokens.reverse();
+        sanitizedTokens = sanitizedTokens.concat(extractedTokens);
       }
       sanitizedTokens.push(newlineToken);
       return sanitizedTokens;
@@ -82,6 +83,10 @@ function tokenize(projection: string) {
   }
 
   return tokenizedLines.flat();
+}
+
+function getLastChar(token: string) {
+  return token.charAt(token.length - 1);
 }
 
 function countIndents(tokens: string[]) {
