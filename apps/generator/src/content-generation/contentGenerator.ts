@@ -5,9 +5,7 @@ import { connectArguments, setArgumentNames } from "./variables";
 import { serializePattern, serializeWidget } from "./serialize";
 import { doubleNewline, supportedLanguages } from "./common";
 import { ProjectionSample } from "./projection/parse";
-import TemplateParameterArray from "./template/parameterArray";
 import { TemplateChain } from "./template/chain";
-import TemplateParameter from "./template/parameter";
 import { ProjectionContent } from "./common";
 import { TreeSitterParser } from "@puredit/parser/tree-sitter/treeSitterParser";
 import SubProjectionGenerator from "../subProjection/subProjectionGenerator";
@@ -34,16 +32,13 @@ export default abstract class ContentGenerator {
 
   protected async generateContent(): Promise<ProjectionContent> {
     // Generate Pattern
-    const codeScanResult = scanCode(this.sampleAsts, this.generator.language, this.ignoreBlocks);
-    const pattern = codeScanResult.pattern;
-    const paramsWithSubprojections = findParamsWithSubProjections(
-      codeScanResult.templateParameters
+    const { pattern, templateParameters } = scanCode(
+      this.sampleAsts,
+      this.generator.language,
+      this.ignoreBlocks
     );
-    const templateParameters = removeUnusedParameters(
-      codeScanResult.templateParameters,
-      paramsWithSubprojections,
-      this.parsedProjectionSamples
-    );
+    templateParameters.removeUnusedParameters(this.parsedProjectionSamples);
+    const paramsWithSubprojections = templateParameters.getParamsWithSubProjections();
 
     const paramToSubProjectionsMap: Record<string, string[]> = {};
     let reallyAllSubProjections = [];
@@ -155,18 +150,26 @@ export default abstract class ContentGenerator {
       let codeSampleParts: string[];
       if (subProjIndex === 0) {
         // Chain start
-        console.log("Generating subprojection for chain start...");
         codeSampleParts = this.codeSamples.map((sample, index) =>
           templateParam.start.extractText(new AstCursor(this.sampleAsts[index].walk()), sample)
         );
+        console.log(
+          `\nGenerating subprojection for chain start with code samples\n${codeSampleParts.join(
+            "\n"
+          )}`
+        );
       } else {
         // Chain links
-        console.log("Generating subprojection for chain link...");
         codeSampleParts = this.codeSamples.map((sample, index) =>
           templateParam.links[numSubProj - subProjIndex - 1].extractText(
             new AstCursor(this.sampleAsts[index].walk()),
             sample
           )
+        );
+        console.log(
+          `\nGenerating subprojection for chain link with code samples\n${codeSampleParts.join(
+            "\n"
+          )}`
         );
       }
       const subProjectionGenerator = new SubProjectionGenerator(this.generator.fs);
@@ -201,19 +204,27 @@ export default abstract class ContentGenerator {
       let codeSampleParts: string[];
       if (subProjIndex === 0 && templateParam.start) {
         // Special start pattern start
-        console.log("Generating subprojection for special start pattern...");
         codeSampleParts = this.codeSamples.map((sample, index) =>
           templateParam.start.extractText(new AstCursor(this.sampleAsts[index].walk()), sample)
+        );
+        console.log(
+          `\nGenerating subprojection for special start pattern with code samples\n${codeSampleParts.join(
+            "\n"
+          )}`
         );
       } else {
         // Aggregation parts
         const partIndex = templateParam.start ? subProjIndex - 1 : subProjIndex;
-        console.log("Generating subprojection for aggregation part...");
         codeSampleParts = this.codeSamples.map((sample, index) =>
           templateParam.parts[partIndex].extractText(
             new AstCursor(this.sampleAsts[index].walk()),
             sample
           )
+        );
+        console.log(
+          `\nGenerating subprojection for aggregation part with code samples\n${codeSampleParts.join(
+            "\n"
+          )}`
         );
       }
       const subProjectionGenerator = new SubProjectionGenerator(this.generator.fs);
@@ -229,47 +240,7 @@ export default abstract class ContentGenerator {
       allSubProjections = allSubProjections.concat(subProjectionsBelow);
     }
     templateParam.startSubProjectionName = newSubProjections[0];
-    templateParam.partSubProjectionNames = newSubProjections.slice(1);
+    templateParam.partSubProjectionNames = newSubProjections;
     return [allSubProjections, newSubProjections];
   }
-}
-
-function findParamsWithSubProjections(templateParameters: TemplateParameterArray) {
-  return templateParameters.filter(
-    (parameter) => parameter instanceof TemplateParameterWithSubProjections
-  );
-}
-
-function removeUnusedParameters(
-  templateParams: TemplateParameterArray,
-  templateParamsWithSubProjections: TemplateParameter[],
-  projectionSamples: ProjectionSample[]
-) {
-  const subProjectionGroups = projectionSamples[0].subProjectionGroups;
-  if (templateParamsWithSubProjections.length !== subProjectionGroups.length) {
-    throw Error("Provided subprojections do not fit code");
-  }
-  let filteredTemplateparameters = templateParams;
-  templateParamsWithSubProjections.forEach((templateParam) => {
-    filteredTemplateparameters = filteredTemplateparameters.filter(
-      (parameter) =>
-        !(
-          isPrefixOf(templateParam.path, parameter.path) &&
-          parameter.path.length > templateParam.path.length
-        )
-    ) as TemplateParameterArray;
-  });
-  return filteredTemplateparameters;
-}
-
-function isPrefixOf(prefix: number[], target: number[]): boolean {
-  if (target.length < prefix.length) {
-    return false;
-  }
-  for (let i = 0; i < prefix.length; i++) {
-    if (prefix[i] !== target[i]) {
-      return false;
-    }
-  }
-  return true;
 }

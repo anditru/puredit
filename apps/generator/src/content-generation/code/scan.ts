@@ -67,7 +67,7 @@ class NodeComparison {
 
   // State
   private path: Path;
-  private inSubProjection = false;
+  private inChain = false;
 
   // Output
   private nodes: PatternNode[] = [];
@@ -88,22 +88,22 @@ class NodeComparison {
   execute(
     ignoreBlocks: boolean,
     path: Path = [],
-    inSubProjection = false
+    inChain = false
   ): [PatternNode[], TemplateParameterArray] | null {
     this.ignoreBlocks = ignoreBlocks;
     this.path = path;
-    this.inSubProjection = inSubProjection;
+    this.inChain = inChain;
     let hasSibling = true;
 
     for (let index = 0; hasSibling; index++) {
       if (this.parentMissmatch()) {
         return null;
       }
-      if (!this.inSubProjection && this.nodesAreChainable()) {
+      if (!this.inChain && this.nodesAreChainable()) {
         const templateChain = this.extractTemplateChain(index);
         if (templateChain) {
           this.recordChain(templateChain);
-          this.inSubProjection = true;
+          this.inChain = true;
         }
       }
       if (this.nodesAreAggregatable()) {
@@ -166,7 +166,7 @@ class NodeComparison {
       this.undeclaredVariables
     );
     const path = this.initial ? [] : this.path.concat(index);
-    const result = childNodeComparison.execute(this.ignoreBlocks, path, this.inSubProjection);
+    const result = childNodeComparison.execute(this.ignoreBlocks, path, this.inChain);
     this.a.goToParent();
     this.b.goToParent();
     if (result) {
@@ -354,10 +354,5 @@ class NodeComparison {
 
   private recordAggregation(aggregation: TemplateAggregation) {
     this.templateParameters.push(aggregation);
-    this.nodes.push({
-      variable: true,
-      fieldName: this.a.currentFieldName || undefined,
-      type: this.a.currentNode.type,
-    });
   }
 }

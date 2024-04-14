@@ -62,7 +62,9 @@ function tokenize(projection: string) {
           extractedTokens.push(getLastChar(token));
           token = token.slice(0, token.length - 1);
         }
-        sanitizedTokens.push(token);
+        if (token !== "") {
+          sanitizedTokens.push(token);
+        }
         extractedTokens.reverse();
         sanitizedTokens = sanitizedTokens.concat(extractedTokens);
       }
@@ -137,20 +139,20 @@ class Parser {
 
   private getCorrespondingDedentIndex(): number {
     let distance = 0;
-    let numOpenIndents = 0;
-    do {
-      if (this.currentToken === indentToken) {
-        numOpenIndents++;
-      } else if (this.currentToken === dedentToken) {
-        numOpenIndents--;
-      }
+    let numOpenIndents = 1;
+    while (this.currentToken !== dedentToken || numOpenIndents > 0) {
       try {
         this.advance();
       } catch (error) {
         throw new UnbalancedIndents();
       }
       distance++;
-    } while (this.currentToken !== dedentToken && numOpenIndents > 0);
+      if (this.currentToken === indentToken) {
+        numOpenIndents++;
+      } else if (this.currentToken === dedentToken) {
+        numOpenIndents--;
+      }
+    }
     this.goBack(distance);
     return this.tokenPointer + distance;
   }

@@ -38,7 +38,7 @@
         "-d",
         "Open and edit a file",
         "-s",
-        "../../../apps/generator/examples/py-aggregation-with-start.txt",
+        "../../../apps/generator/examples/py-chain-with-aggregation.txt",
         "-l",
         "py"
       ],
