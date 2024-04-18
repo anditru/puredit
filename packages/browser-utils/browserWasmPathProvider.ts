@@ -1,16 +1,21 @@
 import { Language } from "@puredit/language-config";
 import { WasmPathProvider } from "@puredit/parser";
+const VSCODE_BASE_PATH = "https://file+.vscode-resource.vscode-cdn.net";
 
 export default class BrowserWasmPathProvider implements WasmPathProvider {
   constructor(private readonly language: Language) {}
 
   getTreeSitterPath(): string {
-    const url = new URL("../parser/wasm/tree-sitter.wasm", import.meta.url);
-    return this.stripFileProtocol(url.href);
+    if (this.runningInVsCode()) {
+      return "./wasm/tree-sitter.wasm";
+    } else {
+      const url = new URL("../parser/wasm/tree-sitter.wasm", import.meta.url);
+      return this.stripFileProtocol(url.href);
+    }
   }
 
   getLanguagePath(): string {
-    const languagePath = this.parserUrl(this.language).href;
+    const languagePath = this.parserUrl(this.language);
     const strippedLanguagePath = this.stripFileProtocol(languagePath);
     return strippedLanguagePath;
   }
@@ -26,7 +31,15 @@ export default class BrowserWasmPathProvider implements WasmPathProvider {
     return href.replace(/^file:\/\//, "");
   }
 
-  private parserUrl(target: Language): URL {
-    return new URL(`../parser/wasm/tree-sitter-${target}.wasm`, import.meta.url);
+  private parserUrl(target: Language): string {
+    if (this.runningInVsCode()) {
+      return `./wasm/tree-sitter-${target}.wasm`;
+    } else {
+      return new URL(`../parser/wasm/tree-sitter-${target}.wasm`, import.meta.url).href;
+    }
+  }
+
+  private runningInVsCode(): boolean {
+    return import.meta.url.startsWith(VSCODE_BASE_PATH);
   }
 }

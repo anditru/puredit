@@ -23,19 +23,13 @@
     },
     "customEditors": [
       {
-        "viewType": "pureditcode.dbSampleEditor",
-        "displayName": "DB Sample",
+        "viewType": "pureditcode.PythonEditor",
+        "displayName": "Projectional Python Editor",
         "selector": [
           {
-            "filenamePattern": "*.ts"
+            "filenamePattern": "*.py"
           }
         ]
-      }
-    ],
-    "commands": [
-      {
-        "command": "pureditcode.helloWorld",
-        "title": "Hello World"
       }
     ]
   },

@@ -10,17 +10,6 @@
       "preLaunchTask": "${defaultBuildTask}"
     },
     {
-      "name": "Extension Tests",
-      "type": "extensionHost",
-      "request": "launch",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}/vscode-extension",
-        "--extensionTestsPath=${workspaceFolder}/vscode-extension/out/test/suite/index"
-      ],
-      "outFiles": ["${workspaceFolder}/vscode-extension/out/test/**/*.js"],
-      "preLaunchTask": "${defaultBuildTask}"
-    },
-    {
       "name": "Run Generator",
       "type": "node",
       "request": "launch",

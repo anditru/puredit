@@ -1,9 +1,9 @@
 export interface Message {
   type: MessageType;
-  payload?: ChangePayload | string;
+  payload?: ChangeDocumentPayload | ChangeEditorPayload | string;
 }
 
-export interface ChangePayload {
+export interface ChangeDocumentPayload {
   type: ChangeType;
   fromBefore: number;
   toBefore: number;
@@ -14,6 +14,12 @@ export interface ChangePayload {
   characterFrom: number;
   lineTo: number;
   characterTo: number;
+}
+
+export interface ChangeEditorPayload {
+  from: number;
+  to: number;
+  insert: string;
 }
 
 export const enum ChangeType {

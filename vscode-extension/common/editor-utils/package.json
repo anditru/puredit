@@ -1,0 +1,24 @@
+{
+  "name": "@puredit/editor-utils",
+  "version": "0.0.0",
+  "license": "MIT",
+  "author": "Andre Trump",
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "dependencies": {
+    "@codemirror/autocomplete": "6",
+    "@codemirror/commands": "6",
+    "@codemirror/language": "6",
+    "@codemirror/state": "6",
+    "@codemirror/view": "6",
+    "@puredit/editor-interface": "*",
+    "@puredit/codemirror-typescript": "*",
+    "@puredit/projections": "*",
+    "@replit/codemirror-indentation-markers": "6",
+    "codemirror": "6"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.3"
+  }
+}

@@ -1,23 +1,11 @@
 import type { ChangeSet, Text, Line } from "@codemirror/state";
-import { ChangePayload, ChangeType } from ".";
+import { ChangeDocumentPayload, ChangeType } from ".";
 
 export function mapChangeSetToChanges(changeSet: ChangeSet): Change[] {
   const changes: Change[] = [];
   changeSet.iterChanges(
-    (
-      fromBefore: number,
-      toBefore: number,
-      fromAfter: number,
-      toAfter: number,
-      inserted: Text
-    ) => {
-      const change = new Change(
-        fromBefore,
-        toBefore,
-        fromAfter,
-        toAfter,
-        inserted
-      );
+    (fromBefore: number, toBefore: number, fromAfter: number, toAfter: number, inserted: Text) => {
+      const change = new Change(fromBefore, toBefore, fromAfter, toAfter, inserted);
       changes.push(change);
     }
   );
@@ -91,7 +79,7 @@ export class Change {
     return this.inserted.text.length === 1 && this.inserted.text[0] === "";
   }
 
-  toChangePayload(): ChangePayload {
+  toChangeDocumentPayload(): ChangeDocumentPayload {
     return {
       type: this.getChangeType(),
       fromBefore: this.fromBefore,

@@ -2,6 +2,26 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Build editor and watch extension",
+      "dependsOn": ["Build Python editor", "Watch extension"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Build Python editor",
+      "type": "npm",
+      "path": "vscode-extension/editors/python",
+      "script": "build",
+      "isBackground": false,
+      "presentation": {
+        "revealProblems": "always",
+        "close": true
+      }
+    },
+    {
+      "label": "Watch extension",
       "type": "npm",
       "path": "vscode-extension",
       "script": "watch",
@@ -9,10 +29,6 @@
       "isBackground": true,
       "presentation": {
         "reveal": "never"
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": true
       }
     }
   ]
