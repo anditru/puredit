@@ -18,6 +18,7 @@ import { dropColumnsSubProjection } from "./dropColumnsSubProjection/config";
 import { renameColumnsSubProjection } from "./renameColumnsSubProjection/config";
 import { columnMappingSubProjection } from "./columnMappingSubProjection/config";
 import { columnChainSubProjection } from "./columnChainSubProjection/config";
+import { joinSubProjection } from "./joinSubProjection/config";
 
 const processingChain = chain("processingChain", selectStartSubProjection.pattern, [
   selectSubProjection.pattern,
@@ -28,6 +29,7 @@ const processingChain = chain("processingChain", selectStartSubProjection.patter
   aggSubProjection.pattern,
   dropColumnsSubProjection.pattern,
   renameColumnsSubProjection.pattern,
+  joinSubProjection.pattern,
 ]);
 
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
@@ -59,5 +61,6 @@ export const selectChainProjection: RootProjection = {
     renameColumnsSubProjection,
     columnMappingSubProjection,
     columnChainSubProjection,
+    joinSubProjection,
   ],
 };
