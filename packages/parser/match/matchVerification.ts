@@ -297,7 +297,14 @@ export default class MatchVerification {
   ) {
     const chainName = chainNode.templateChain.name;
 
-    this.astCursor.follow(chainableNodeTypeConfig.pathToLinkBegin);
+    const succeded = this.astCursor.follow(chainableNodeTypeConfig.pathToLinkBegin);
+    if (!succeded) {
+      logger.debug(
+        `AST node of type ${this.astCursor.currentNode.type} with text ${this.astCursor.currentNode.text} ` +
+          `is not a valid chain node`
+      );
+      throw new DoesNotMatch();
+    }
     const from = this.astCursor.currentNode.startIndex;
     this.astCursor.reverseFollow(chainableNodeTypeConfig.pathToLinkBegin);
 

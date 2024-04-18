@@ -8,8 +8,8 @@ const pattern = parser.subPattern("dropNullsPattern")`drop_nulls()`;
 const widget = svelteProjection(Widget);
 
 export const dropNullsSubProjection: SubProjection = {
-  name: "Drop nulls",
-  description: "Drop nulls in dataframe",
+  name: "Drop all nulls",
+  description: "Drop all nulls in dataframe",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],

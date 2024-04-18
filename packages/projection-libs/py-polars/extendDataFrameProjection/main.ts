@@ -5,11 +5,13 @@ import BeginWidget from "./BeginWidget.svelte";
 import EndWidget from "./EndWidget.svelte";
 import { agg, arg } from "@puredit/parser";
 import { binColumnCompositionSubProjection } from "./binColumnCompositionSubProjection/config";
+import { columnChainSubProjection } from "./columnChainSubProjection/config";
 
 const extendedDataFrame = arg("extendedDataFrame", ["identifier"]);
 const baseDataFrame = arg("baseDataFrame", ["identifier"]);
 const columnCombinations = agg("columnCombinations", "argument_list", [
   binColumnCompositionSubProjection.pattern,
+  columnChainSubProjection.pattern,
 ]);
 const pattern = parser.statementPattern(
   "extendDataFrameProjectionPattern"
@@ -24,5 +26,5 @@ export const extendDataFrameProjection: RootProjection = {
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [beginWidget, endWidget],
-  subProjections: [binColumnCompositionSubProjection],
+  subProjections: [binColumnCompositionSubProjection, columnChainSubProjection],
 };

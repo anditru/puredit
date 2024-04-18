@@ -4,8 +4,8 @@ import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 import { arg } from "@puredit/parser";
 
-const columnName = arg("columnName", ["string"]);
-const alias = arg("alias", ["string"]);
+const columnName = arg("columnName", ["string", "identifier", "attribute"]);
+const alias = arg("alias", ["string", "identifier", "attribute"]);
 
 export const columnMapping = parser.subPattern(
   "columnMappingSubProjectionPattern"

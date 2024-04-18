@@ -11,6 +11,7 @@ import { columnSubProjection } from "./columnSubProjection/config";
 import { columnWithAliasSubProjection } from "./columnWithAliasSubProjection/config";
 import { filterSubProjection } from "./filterSubProjection/config";
 import { dropNullsSubProjection } from "./dropNullsSubProjection/config";
+import { dropNullsColumnsSubProjection } from "./dropNullsColumnsSubProjection/config";
 import { groupBySubProjection } from "./groupBySubProjection/config";
 import { aggSubProjection } from "./aggSubProjection/config";
 import { dropColumnsSubProjection } from "./dropColumnsSubProjection/config";
@@ -22,6 +23,7 @@ const processingChain = chain("processingChain", selectStartSubProjection.patter
   selectSubProjection.pattern,
   filterSubProjection.pattern,
   dropNullsSubProjection.pattern,
+  dropNullsColumnsSubProjection.pattern,
   groupBySubProjection.pattern,
   aggSubProjection.pattern,
   dropColumnsSubProjection.pattern,
@@ -50,6 +52,7 @@ export const selectChainProjection: RootProjection = {
     columnWithAliasSubProjection,
     filterSubProjection,
     dropNullsSubProjection,
+    dropNullsColumnsSubProjection,
     groupBySubProjection,
     aggSubProjection,
     dropColumnsSubProjection,

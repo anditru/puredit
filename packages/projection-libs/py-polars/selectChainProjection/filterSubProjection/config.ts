@@ -4,11 +4,8 @@ import type { SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 
-const filterColumn = arg("filterColumn", ["identifier"]);
-const compareValue = arg("compareValue", ["integer"]);
-export const filterFunction = parser.subPattern(
-  "filterFunction"
-)`filter(${filterColumn}=${compareValue})`;
+const condition = arg("condition", ["comparison_operator"]);
+export const filterFunction = parser.subPattern("filterFunction")`filter(${condition})`;
 
 const widget = svelteProjection(Widget);
 

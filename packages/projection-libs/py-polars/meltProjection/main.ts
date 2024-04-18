@@ -11,8 +11,8 @@ const baseDataFrame = arg("baseDataFrame", ["identifier"]);
 const moltenDataFrame = arg("moltenDataFrame", ["identifier"]);
 const idVars = agg("idVars", "list", [columnSubProjection.pattern]);
 const valueVars = agg("valueVars", "list", [columnSubProjection.pattern]);
-const variableColumnName = arg("variableColumnName", ["string"]);
-const valueColumnName = arg("valueColumnName", ["string"]);
+const variableColumnName = arg("variableColumnName", ["string", "attribute", "identifier"]);
+const valueColumnName = arg("valueColumnName", ["string", "attribute", "identifier"]);
 
 const pattern = parser.statementPattern(
   "meltProjectionPattern"

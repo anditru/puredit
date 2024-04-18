@@ -12,6 +12,7 @@ import { aliasSubProjection } from "./aliasSubProjection/config";
 import { attributeSubProjection } from "./attributeSubProjection/config";
 import { sumAggregationSubProjection } from "./sumAggregationSubProjection/config";
 import { avgAggregationSubProjection } from "./avgAggregationSubProjection/config";
+import { castSubProjection } from "./castSubProjection/config";
 
 export const columnChain = chain("columnChain", columnStartSubProjection.pattern, [
   colSubProjection.pattern,
@@ -21,6 +22,7 @@ export const columnChain = chain("columnChain", columnStartSubProjection.pattern
   attributeSubProjection.pattern,
   sumAggregationSubProjection.pattern,
   avgAggregationSubProjection.pattern,
+  castSubProjection.pattern,
 ]);
 
 const pattern = parser.statementPattern("columnChain")`${columnChain}`;
@@ -41,5 +43,6 @@ export const columnChainProjection: RootProjection = {
     attributeSubProjection,
     sumAggregationSubProjection,
     avgAggregationSubProjection,
+    castSubProjection,
   ],
 };

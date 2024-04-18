@@ -4,7 +4,7 @@ import type { SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 
-const columnName = arg("columnName", ["string"]);
+const columnName = arg("columnName", ["string", "identifier", "attribute"]);
 const pattern = parser.subPattern("aliasFunction")`alias(${columnName})`;
 
 const widget = svelteProjection(Widget);
