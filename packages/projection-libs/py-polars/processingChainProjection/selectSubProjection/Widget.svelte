@@ -7,13 +7,13 @@
   import { ContextInformation } from "@puredit/projections";
 
   export let isNew: boolean;
-  // svelte-ignore unused-export-let
+  //svelte-ignore unused-export-let
   export let view: EditorView | null;
-  // svelte-ignore unused-export-let
+  //svelte-ignore unused-export-let
   export let match: Match;
-  // svelte-ignore unused-export-let
+  //svelte-ignore unused-export-let
   export let context: ContextInformation;
-  // svelte-ignore unused-export-let
+  //svelte-ignore unused-export-let
   export let state: EditorState;
   export let focusGroup: FocusGroup;
 
@@ -26,6 +26,4 @@
   });
 </script>
 
-<span class="inline-flex">
-  <span>then rename column(s)</span>
-</span>
+<span class="inline-flex">Read column(s)</span>

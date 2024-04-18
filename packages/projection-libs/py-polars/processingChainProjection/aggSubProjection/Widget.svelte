@@ -26,6 +26,6 @@
   });
 </script>
 
-<span class="inline-flex" style="margin-right: 10px;">
-  <span>then remove nulls in all columns</span>
+<span class="inline-flex">
+  <span>Aggregate column(s)</span>
 </span>

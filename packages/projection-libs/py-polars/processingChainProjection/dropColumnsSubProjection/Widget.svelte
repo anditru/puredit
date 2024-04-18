@@ -27,5 +27,5 @@
 </script>
 
 <span class="inline-flex">
-  <span>then aggregate column(s)</span>
+  <span>Remove column(s)</span>
 </span>

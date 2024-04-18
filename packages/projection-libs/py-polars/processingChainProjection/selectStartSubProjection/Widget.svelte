@@ -27,7 +27,7 @@
 </script>
 
 <span class="inline-flex">
-  <span>From</span>
+  <span>Transform dataframe</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
     node={match.argsToAstNodeMap.sourceDataFrame}

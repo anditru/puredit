@@ -39,8 +39,8 @@ const widget = svelteProjection(EmptyWidget);
 const intoWidget = svelteProjection(IntoWidget);
 
 export const selectChainProjection: RootProjection = {
-  name: "Select Chain",
-  description: "selelct columns and apply transformations",
+  name: "Processing Chain",
+  description: "Transform a dataset",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget, widget],

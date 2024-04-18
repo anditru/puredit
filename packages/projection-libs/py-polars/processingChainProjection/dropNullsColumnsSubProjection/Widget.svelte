@@ -26,6 +26,6 @@
   });
 </script>
 
-<span class="inline-flex">
-  <span>then group by columns</span>
+<span class="inline-flex" style="margin-right: 10px;">
+  <span>Remove nulls in column(s)</span>
 </span>

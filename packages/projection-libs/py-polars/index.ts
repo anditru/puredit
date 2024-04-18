@@ -1,19 +1,19 @@
 import { columnChainProjection } from "./columnChainProjection/main";
-import { selectChainProjection } from "./selectChainProjection/main";
+import { selectChainProjection as processingChainProjection } from "./processingChainProjection/main";
 import { extendDataFrameProjection } from "./extendDataFrameProjection/main";
 import { pivotProjection } from "./pivotProjection/main";
 import { meltProjection } from "./meltProjection/main";
 
 export const projections = [
   columnChainProjection,
-  selectChainProjection,
+  processingChainProjection,
   extendDataFrameProjection,
   pivotProjection,
   meltProjection,
 ];
 export {
   columnChainProjection,
-  selectChainProjection,
+  processingChainProjection,
   extendDataFrameProjection,
   pivotProjection,
   meltProjection,

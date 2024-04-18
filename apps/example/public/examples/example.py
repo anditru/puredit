@@ -74,7 +74,7 @@ filtered_students = (students.select(
         "age",
         "semester",
         name="last_name"
-    ).filter(age=24)
+    ).filter(age == 24)
     .drop_nulls()
     .group_by("age")
     .agg(
