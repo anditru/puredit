@@ -1,4 +1,5 @@
 ## Project Overview
+
 This repository contains the accompanying source code and examples of the following paper:
 
 [Niklas Korz](https://2023.splashcon.org/profile/niklaskorz), [Artur Andrzejak](https://aip.ifi.uni-heidelberg.de/team/aa)
@@ -7,8 +8,8 @@ This repository contains the accompanying source code and examples of the follow
 
 Published at 22nd International Conference on Generative Programming: Concepts & Experiences ([GPCE 2023](https://2023.splashcon.org/program/program-splash-2023/)), in conjunction with ACM SPLASH 2023, 22-27 October 2023, Cascais, Portugal.
 
-
 ### Summary
+
 We propose here an approach which represents a subset of a General-Purpose Programming Language (GPL) as GUI widgets in a hybrid editor. It relies on matching parametrized patterns against the GPL program, and displaying the matched parts as dynamically rendered widgets. Such widgets can be interpreted as components of an external DSL. Since the source code is serialized as GPL text without annotations, there is no DSL outside the editor - hence the term ‘virtual’ DSL.
 
 The underlying GPL and the virtual DSL can be mixed in a compositional way, with zero cost of their integration. The project infrastructure does not need to be adapted. Furthermore, our approach works with mainstream GPLs like Python or JavaScript.
@@ -189,3 +190,17 @@ There, a new CodeMirror editor is created and mounted that is making use of our 
 For a more specialized example, see `apps/jupyter`.
 In `apps/jupyter/src/editor.ts`, a wrapper for CodeMirror 6 is provided that makes it compatible to JupyterLab's own editor.
 On top of this, `apps/jupyter/src/index.ts` provides a Jupyter [frontend extension](https://jupyter-notebook.readthedocs.io/en/stable/extending/frontend_extensions.html) that replaces Jupyter's own editor with our projectional editor.
+
+## Visual Studio Code Extension
+
+To test the Visual Studio Code extension execute the following steps:
+
+1. Clone the repository.
+2. Install the dependencies with `npm i`.
+3. Open the cloned repository folder in Visual Studio Code.
+4. Select the "Run and Debug" view on the left.
+5. Select the debug configuration "Run Extension" and click the play button.
+6. Wait until the editor build completed and an additional Visual Studio Code window opens. <br> NOTE: The extension will **only** be available in this window!
+7. In the additional Visual Studio Code window open a folder of your choice. e.g. `vscode-extension/test-files`.
+8. Right-click a `.py` file and select "Open with".
+9. Select the "Projectional Python Editor" from the list.

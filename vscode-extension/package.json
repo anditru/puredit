@@ -25,6 +25,7 @@
       {
         "viewType": "pureditcode.PythonEditor",
         "displayName": "Projectional Python Editor",
+        "priority": "option",
         "selector": [
           {
             "filenamePattern": "*.py"
