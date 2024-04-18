@@ -27,7 +27,7 @@
 </script>
 
 <span class="inline-flex">
-  <span>Filter by</span>
+  <span>filtering by</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
     node={match.argsToAstNodeMap.condition}

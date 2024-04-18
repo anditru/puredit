@@ -27,5 +27,5 @@
 </script>
 
 <span class="inline-flex">
-  <span>Remove column(s)</span>
+  <span>removing column(s)</span>
 </span>

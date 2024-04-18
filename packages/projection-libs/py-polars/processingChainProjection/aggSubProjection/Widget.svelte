@@ -27,5 +27,5 @@
 </script>
 
 <span class="inline-flex">
-  <span>Aggregate column(s)</span>
+  <span>aggregating column(s)</span>
 </span>

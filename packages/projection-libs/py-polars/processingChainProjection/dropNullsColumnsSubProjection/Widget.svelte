@@ -27,5 +27,5 @@
 </script>
 
 <span class="inline-flex" style="margin-right: 10px;">
-  <span>Remove nulls in column(s)</span>
+  <span>removing nulls in column(s)</span>
 </span>

@@ -27,5 +27,5 @@
 </script>
 
 <span class="inline-flex">
-  <span>Group by columns</span>
+  <span>grouping by columns</span>
 </span>

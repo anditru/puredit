@@ -26,4 +26,4 @@
   });
 </script>
 
-<span class="inline-flex">Read column(s)</span>
+<span class="inline-flex">reading column(s)</span>

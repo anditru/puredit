@@ -27,5 +27,5 @@
 </script>
 
 <span class="inline-flex">
-  <span>Rename column(s)</span>
+  <span>renaming column(s)</span>
 </span>
