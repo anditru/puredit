@@ -13,6 +13,7 @@ export default class ChainNode extends PatternNode {
     language: Language,
     text: string,
     fieldName: string | undefined,
+    public readonly minumumLength: number,
     public readonly templateChain: TemplateChain
   ) {
     super(ChainNode.TYPE, text, fieldName);

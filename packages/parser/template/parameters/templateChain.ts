@@ -12,6 +12,7 @@ export default class TemplateChain extends TemplateParameter {
     public readonly name: string,
     public readonly startPattern: Template,
     public readonly linkPatterns: Template[],
+    public readonly minimumLength: number,
     public readonly contextVariables: ContextVariableMap
   ) {
     super();
@@ -27,6 +28,7 @@ export default class TemplateChain extends TemplateParameter {
       this.template!.language,
       cursor.currentNode.text,
       cursor.currentFieldName,
+      this.minimumLength,
       this
     );
   }
@@ -44,6 +46,7 @@ export default class TemplateChain extends TemplateParameter {
       this.name,
       this.startPattern,
       this.linkPatterns,
+      this.minimumLength,
       this.contextVariables
     );
   }

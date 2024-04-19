@@ -260,6 +260,7 @@ export default class MatchVerification {
 
     const followedPaths = [];
     let chainDepth = -1;
+    let oneLinkMatched = false;
     let chainableNodeTypeConfig;
     do {
       chainDepth++;
@@ -271,7 +272,10 @@ export default class MatchVerification {
       if (chainableNodeTypeConfig) {
         logger.debug(`Found ${chainDepth + 1}. chain link`);
         this.extractChainLinkRangeFor(chainNode, chainableNodeTypeConfig);
-      } else if (this.chainStartReachedFor(chainNode)) {
+        if (this.linkPatternMatches(chainNode)) {
+          oneLinkMatched = true;
+        }
+      } else if (oneLinkMatched && this.chainStartReachedFor(chainNode)) {
         logger.debug(`Reached chain start at depth ${chainDepth}`);
         this.extractChainStartRangeFor(chainNode);
         break;
@@ -287,7 +291,7 @@ export default class MatchVerification {
       followedPaths.push(chainableNodeTypeConfig.pathToNextLink)
     );
 
-    if (chainDepth < 2) {
+    if (chainDepth < chainNode.minumumLength) {
       // We only match if at least two functions are called in a row
       logger.debug(
         `ChainNode does not match since only ${
@@ -305,6 +309,21 @@ export default class MatchVerification {
   private initializeChainToLinkRangesMapFor(chainNode: ChainNode) {
     const chainName = chainNode.templateChain.name;
     this.chainToLinkRangesMap[chainName] = [];
+  }
+
+  private linkPatternMatches(chainNode: ChainNode) {
+    const chainName = chainNode.templateChain.name;
+    const pattern = this.pattern as ChainDecorator;
+    const chainLinkPatternMap = pattern.getLinkPatternMapFor(chainName);
+
+    logger.debug("Checking if chain link matches a pattern");
+    const chainLinkPatternMatching = new PatternMatching(
+      chainLinkPatternMap,
+      this.astCursor,
+      this.contextVariables
+    );
+    const result = chainLinkPatternMatching.executeOnlySpanningEntireRange();
+    return result.matches.length > 0;
   }
 
   private extractChainLinkRangeFor(

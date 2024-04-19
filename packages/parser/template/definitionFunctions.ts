@@ -50,9 +50,10 @@ export function chain(
   name: string,
   startPattern: Template,
   linkPatterns: Template[],
+  minimumLength = 2,
   contextVariables: ContextVariableMap = {}
 ): TemplateChain {
-  return new TemplateChain(name, startPattern, linkPatterns, contextVariables);
+  return new TemplateChain(name, startPattern, linkPatterns, minimumLength, contextVariables);
 }
 
 /**

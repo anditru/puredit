@@ -32,7 +32,7 @@
 </script>
 
 <span class="inline-flex">
-  <span>join dataframe</span>
+  <span>joining dataframe</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
     node={match.argsToAstNodeMap.otherDataframe}

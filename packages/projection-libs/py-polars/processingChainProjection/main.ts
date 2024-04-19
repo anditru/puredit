@@ -20,17 +20,22 @@ import { columnMappingSubProjection } from "./columnMappingSubProjection/config"
 import { columnChainSubProjection } from "./columnChainSubProjection/config";
 import { joinSubProjection } from "./joinSubProjection/config";
 
-const processingChain = chain("processingChain", selectStartSubProjection.pattern, [
-  selectSubProjection.pattern,
-  filterSubProjection.pattern,
-  dropNullsSubProjection.pattern,
-  dropNullsColumnsSubProjection.pattern,
-  groupBySubProjection.pattern,
-  aggSubProjection.pattern,
-  dropColumnsSubProjection.pattern,
-  renameColumnsSubProjection.pattern,
-  joinSubProjection.pattern,
-]);
+const processingChain = chain(
+  "processingChain",
+  selectStartSubProjection.pattern,
+  [
+    selectSubProjection.pattern,
+    filterSubProjection.pattern,
+    dropNullsSubProjection.pattern,
+    dropNullsColumnsSubProjection.pattern,
+    groupBySubProjection.pattern,
+    aggSubProjection.pattern,
+    dropColumnsSubProjection.pattern,
+    renameColumnsSubProjection.pattern,
+    joinSubProjection.pattern,
+  ],
+  1
+);
 
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
 const pattern = parser.statementPattern(
