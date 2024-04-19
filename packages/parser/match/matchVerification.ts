@@ -23,6 +23,8 @@ import {
   loadChainableNodeTypeConfigFor,
   ChainableNodeTypeConfig,
 } from "@puredit/language-config";
+import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
+import AstNode from "../ast/node";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.MatchVerification");
@@ -227,6 +229,13 @@ export default class MatchVerification {
       );
     });
 
+    if (!this.atLeastOnePartMatches(aggregationPartRoots, aggregationNode)) {
+      logger.debug(
+        `AST does not match aggregation since no part of the aggregation matches a pattern`
+      );
+      throw new DoesNotMatch();
+    }
+
     return aggregationPartRoots.map((aggregationPartRoot) => ({
       node: aggregationPartRoot,
       contextVariables: aggregationNode.templateAggregation.contextVariables,
@@ -234,6 +243,28 @@ export default class MatchVerification {
       to: aggregationPartRoot.endIndex,
       language: this.pattern.language,
     }));
+  }
+
+  private atLeastOnePartMatches(
+    aggregationPartRoots: AstNode[],
+    aggregationNode: AggregationNode
+  ): boolean {
+    const aggregationName = aggregationNode.templateAggregation.name;
+    const pattern = this.pattern as AggregationDecorator;
+    const partPatternMap = pattern.getPartPatternsMapFor(aggregationName);
+
+    for (const partRoot of aggregationPartRoots) {
+      const partPatternMatching = new PatternMatching(
+        partPatternMap,
+        partRoot.walk(),
+        this.contextVariables
+      );
+      const result = partPatternMatching.executeOnlySpanningEntireRange();
+      if (result.matches.length > 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private visitChainNode() {
