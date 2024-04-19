@@ -1,21 +1,15 @@
-import polars as pl
-import torch
-
 # CONTEXT: { "city": "string", "date": "string", "temperature": "number" }
 aggregated_weather = weather.pivot(
     index=[
         "date"
-    ],
-    columns=[
+    ], columns=[
         "city"
-    ], 
-    values=[
+    ], values=[
         "temperature"
-    ],
-    aggregate_function="mean"
+    ], aggregate_function="mean"
 )
 
-unpivoted_weather = aggregated_weather.melt(
+unpivoted_weather = (aggregated_weather.melt(
     id_vars=[
         "date"
     ], value_vars=[
@@ -23,6 +17,7 @@ unpivoted_weather = aggregated_weather.melt(
     ], variable_name="city",
     value_name="average_temperature"
 )
+.drop_nulls())
 
 # CONTEXT: { "first_name": "string", "last_name": "string", "age": "number", "semester": "number" }
 filtered_students = (students.select(
@@ -30,7 +25,7 @@ filtered_students = (students.select(
         "age",
         "semester",
         name="last_name"
-    ).filter(age=24)
+    ).filter(age == 24)
     .drop_nulls()
     .group_by("age")
     .agg(

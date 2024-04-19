@@ -11,7 +11,9 @@ const parser = await Parser.load(Language.Python, wasmPathProvider);
 
 export const projectionPluginConfig: ProjectionPluginConfig = {
   parser,
-  globalContextVariables: {},
+  globalContextVariables: {
+    pl: undefined,
+  },
   globalContextInformation: {},
   projections: [...polarsProjections, ...latexMathProjections, ...pytorchProjections],
 };
