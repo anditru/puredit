@@ -10,12 +10,12 @@
   import { ContextInformation } from "@puredit/projections";
 
   export let isNew: boolean;
+  export let focusGroup: FocusGroup;
+  export let state: EditorState;
   export let view: EditorView | null;
   export let match: Match;
   // svelte-ignore unused-export-let
   export let context: ContextInformation;
-  export let state: EditorState;
-  export let focusGroup: FocusGroup;
 
   onMount(() => {
     if (isNew) {
@@ -26,15 +26,27 @@
   });
 </script>
 
-<span class="inline-flex">
-  <span>Extend dataframe</span>
-  <TextInput
-    className={highlightingFor(state, [tags.atom])}
-    node={match.argsToAstNodeMap.baseDataFrame}
-    {state}
-    {view}
-    {focusGroup}
-    placeholder="base data frame"
-  />
-  <span>with column(s)</span>
-</span>
+<div style="display: flex; flex-direction: column;">
+  <span class="inline-flex">
+    <span>name the variable column</span>
+    <TextInput
+      className={highlightingFor(state, [tags.atom])}
+      node={match.argsToAstNodeMap.variableColumnName}
+      {state}
+      {view}
+      {focusGroup}
+      placeholder="valiable column name"
+    />
+  </span>
+  <span class="inline-flex">
+    <span>name the value column</span>
+    <TextInput
+      className={highlightingFor(state, [tags.atom])}
+      node={match.argsToAstNodeMap.valueColumnName}
+      {state}
+      {view}
+      {focusGroup}
+      placeholder="value column name"
+    />
+  </span>
+</div>

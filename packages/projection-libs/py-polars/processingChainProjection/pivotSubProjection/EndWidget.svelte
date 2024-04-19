@@ -7,6 +7,7 @@
   import TextInput from "@puredit/projections/TextInput.svelte";
   import { highlightingFor } from "@codemirror/language";
   import { tags } from "@lezer/highlight";
+  import { validateFromList } from "@puredit/projections/shared";
   import { ContextInformation } from "@puredit/projections";
 
   export let isNew: boolean;
@@ -16,6 +17,8 @@
   export let context: ContextInformation;
   export let state: EditorState;
   export let focusGroup: FocusGroup;
+
+  const aggregationFunctions = ["min", "max", "first", "last", "sum", "mean", "median", "len"];
 
   onMount(() => {
     if (isNew) {
@@ -27,14 +30,15 @@
 </script>
 
 <span class="inline-flex">
-  <span>Create pivot dataframe from</span>
+  <span>using aggregation function</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
-    node={match.argsToAstNodeMap.baseDataFrame}
+    node={match.argsToAstNodeMap.aggFunction}
     {state}
     {view}
     {focusGroup}
-    placeholder="base data frame"
+    placeholder="aggregation function"
+    completions={aggregationFunctions}
+    validate={validateFromList(aggregationFunctions)}
   />
-  <span>grouping by column(s)</span>
 </span>

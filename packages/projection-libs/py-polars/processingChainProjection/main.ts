@@ -19,6 +19,10 @@ import { renameColumnsSubProjection } from "./renameColumnsSubProjection/config"
 import { columnMappingSubProjection } from "./columnMappingSubProjection/config";
 import { columnChainSubProjection } from "./columnChainSubProjection/config";
 import { joinSubProjection } from "./joinSubProjection/config";
+import { binColumnCompositionSubProjection } from "./binColumnCompositionSubProjection/config";
+import { extendDataFrameSubProjection } from "./extendDataFrameSubProjection/config";
+import { meltSubProjection } from "./meltSubProjection/config";
+import { pivotSubProjection } from "./pivotSubProjection/config";
 
 const processingChain = chain(
   "processingChain",
@@ -33,6 +37,9 @@ const processingChain = chain(
     dropColumnsSubProjection.pattern,
     renameColumnsSubProjection.pattern,
     joinSubProjection.pattern,
+    extendDataFrameSubProjection.pattern,
+    meltSubProjection.pattern,
+    pivotSubProjection.pattern,
   ],
   1
 );
@@ -67,5 +74,9 @@ export const selectChainProjection: RootProjection = {
     columnMappingSubProjection,
     columnChainSubProjection,
     joinSubProjection,
+    binColumnCompositionSubProjection,
+    extendDataFrameSubProjection,
+    meltSubProjection,
+    pivotSubProjection,
   ],
 };

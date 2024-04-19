@@ -59,7 +59,7 @@ aggregated_weather = weather.pivot(
     ], aggregate_function="mean"
 )
 
-unpivoted_weather = aggregated_weather.melt(
+unpivoted_weather = (aggregated_weather.melt(
     id_vars=[
         "date"
     ], value_vars=[
@@ -67,6 +67,7 @@ unpivoted_weather = aggregated_weather.melt(
     ], variable_name="city",
     value_name="average_temperature"
 )
+.drop_nulls())
 
 # CONTEXT: { "first_name": "string", "last_name": "string", "age": "number", "semester": "number" }
 filtered_students = (students.select(
