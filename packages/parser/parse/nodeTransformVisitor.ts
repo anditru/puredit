@@ -4,11 +4,11 @@ import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
 import ParameterTable from "../template/codeString";
 
 export default class NodeTransformVisitor {
-  private cursor: AstCursor | undefined;
+  private astCursor: AstCursor | undefined;
   private codeString: ParameterTable | undefined;
 
   visit(cursor: AstCursor, codeString: ParameterTable): PatternNode[] {
-    this.cursor = cursor;
+    this.astCursor = cursor;
     this.codeString = codeString;
     return this.recurse();
   }
@@ -16,50 +16,64 @@ export default class NodeTransformVisitor {
   recurse(): PatternNode[] {
     const nodes: PatternNode[] = [];
     do {
-      this.checkNoErrorToken();
+      const ignoredNode = false;
+      if (
+        this.astCursor!.currentNode.type === "parenthesized_expression" &&
+        this.astCursor!.currentNode.children[1].type === "call"
+      ) {
+        const fieldName = this.astCursor!.currentFieldName;
+        this.astCursor!.goToFirstChild();
+        this.astCursor!.goToNextSibling();
+        this.astCursor!.currentFieldName = fieldName;
+      }
 
+      this.checkNoErrorToken();
       nodes.push(this.transformCurrentNode());
-    } while (this.cursor!.goToNextSibling());
+
+      if (ignoredNode) {
+        this.astCursor!.goToParent();
+      }
+    } while (this.astCursor!.goToNextSibling());
+
     return nodes;
   }
 
   private checkNoErrorToken() {
-    if (this.cursor!.currentNode.isErrorToken()) {
+    if (this.astCursor!.currentNode.isErrorToken()) {
       throw new Error(
-        `error in pattern ast at position ${this.cursor!.startIndex}: ` +
-          `${this.cursor!.currentNode.text}`
+        `error in pattern ast at position ${this.astCursor!.startIndex}: ` +
+          `${this.astCursor!.currentNode.text}`
       );
     }
   }
 
-  private transformCurrentNode(): PatternNode {
+  private transformCurrentNode(changedFieldName?: string): PatternNode {
     let transformedNode;
-    if (!this.mustTreatNodeAsAtomic() && this.cursor!.currentNode.hasChildren()) {
-      transformedNode = this.transformNonAtomicNode();
-      this.cursor!.goToParent();
+    if (!this.mustTreatNodeAsAtomic() && this.astCursor!.currentNode.hasChildren()) {
+      transformedNode = this.transformNonAtomicNode(changedFieldName);
     } else {
-      transformedNode = this.transformAtomicNode();
+      transformedNode = this.transformAtomicNode(changedFieldName);
     }
     return transformedNode;
   }
 
   private mustTreatNodeAsAtomic() {
-    const currentNode = this.cursor!.currentNode;
+    const currentNode = this.astCursor!.currentNode;
     const templateParameter = this.codeString!.resolveParameter(
-      this.cursor!.currentNode.startIndex,
-      this.cursor!.currentNode.endIndex
+      this.astCursor!.currentNode.startIndex,
+      this.astCursor!.currentNode.endIndex
     );
     return currentNode.type === "string" || templateParameter;
   }
 
-  private transformNonAtomicNode(): PatternNode {
+  private transformNonAtomicNode(changedFieldName?: string): PatternNode {
     const patternNodeBuilder = new RegularNodeBuilder();
     patternNodeBuilder
-      .setType(this.cursor!.currentNode.type)
-      .setText(this.cursor!.currentNode.text)
-      .setFieldName(this.cursor!.currentFieldName);
+      .setType(this.astCursor!.currentNode.type)
+      .setText(this.astCursor!.currentNode.text)
+      .setFieldName(changedFieldName || this.astCursor!.currentFieldName);
 
-    this.cursor!.goToFirstChild();
+    this.astCursor!.goToFirstChild();
     patternNodeBuilder.setChildren(this.recurse());
 
     /* To make the BlockNode actually replace the AST node representing the code block
@@ -70,26 +84,27 @@ export default class NodeTransformVisitor {
       return firstChild;
     }
 
+    this.astCursor!.goToParent();
     return patternNodeBuilder.buildAndSetParentOnChildren();
   }
 
-  private transformAtomicNode(): PatternNode {
+  private transformAtomicNode(changedFieldName?: string): PatternNode {
     const templateParameter = this.codeString!.resolveParameter(
-      this.cursor!.currentNode.startIndex,
-      this.cursor!.currentNode.endIndex
+      this.astCursor!.currentNode.startIndex,
+      this.astCursor!.currentNode.endIndex
     );
     if (templateParameter) {
-      return templateParameter.toPatternNode(this.cursor!);
+      return templateParameter.toPatternNode(this.astCursor!);
     } else {
-      return this.transformRegularNode();
+      return this.transformRegularNode(changedFieldName);
     }
   }
 
-  private transformRegularNode() {
+  private transformRegularNode(changedFieldName?: string) {
     return new RegularNode(
-      this.cursor!.currentNode.type,
-      this.cursor!.currentNode.text,
-      this.cursor!.currentFieldName
+      this.astCursor!.currentNode.type,
+      this.astCursor!.currentNode.text,
+      changedFieldName || this.astCursor!.currentFieldName
     );
   }
 }

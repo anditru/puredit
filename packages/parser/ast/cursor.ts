@@ -6,6 +6,7 @@ export default class AstCursor extends Cursor {
   private runningTransaction = false;
   private runningRollback = false;
   private operationLog: TransactionOperation[] = [];
+  private _changedFieldName: string | undefined;
   private _currentPath: number[] = [];
 
   constructor(private treeCursor: TreeCursor) {
@@ -43,6 +44,7 @@ export default class AstCursor extends Cursor {
         this.operationLog.push(TransactionOperation.GOTO_PARENT);
       }
       this._currentPath.pop();
+      this._changedFieldName = undefined;
       return true;
     } else {
       return false;
@@ -58,6 +60,7 @@ export default class AstCursor extends Cursor {
         this.operationLog.push(TransactionOperation.GOTO_FIRST_CHILD);
       }
       this._currentPath.push(0);
+      this._changedFieldName = undefined;
       return true;
     } else {
       return false;
@@ -86,6 +89,7 @@ export default class AstCursor extends Cursor {
     }
     if (this.treeCursor.gotoNextSibling()) {
       this._currentPath.push(this._currentPath.pop()! + 1);
+      this._changedFieldName = undefined;
       return true;
     } else {
       return false;
@@ -145,8 +149,12 @@ export default class AstCursor extends Cursor {
     return new AstNode(this.treeCursor.currentNode());
   }
 
-  get currentFieldName() {
-    return this.treeCursor.currentFieldName() || undefined;
+  get currentFieldName(): string | undefined {
+    return this._changedFieldName || this.treeCursor.currentFieldName() || undefined;
+  }
+
+  set currentFieldName(fieldName: string | undefined) {
+    this._changedFieldName = fieldName;
   }
 
   get startIndex() {

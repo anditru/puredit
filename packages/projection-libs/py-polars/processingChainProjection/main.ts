@@ -35,7 +35,7 @@ const processingChain = chain("processingChain", selectStartSubProjection.patter
 const targetDataFrame = arg("targetDataFrame", ["identifier"]);
 const pattern = parser.statementPattern(
   "selectChainPattern"
-)`${targetDataFrame} = (${processingChain})`;
+)`${targetDataFrame} = ${processingChain}`;
 
 const widget = svelteProjection(EmptyWidget);
 const intoWidget = svelteProjection(IntoWidget);

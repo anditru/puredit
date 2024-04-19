@@ -76,7 +76,6 @@ filtered_students = (students.select(
         name="last_name"
     ).filter(age == 24)
     .drop_nulls()
-    .join(other, on="someColumn", how="outer")
     .group_by("age")
     .agg(
         "last_name",

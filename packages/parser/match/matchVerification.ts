@@ -78,6 +78,18 @@ export default class MatchVerification {
     const currentAstNode = this.astCursor.currentNode;
     const currentPatternNode = this.patternCursor.currentNode;
 
+    let ignoredNode = false;
+    if (
+      currentAstNode.type === "parenthesized_expression" &&
+      currentAstNode.children[1]?.type === "call"
+    ) {
+      const fieldName = this.astCursor.currentFieldName;
+      this.astCursor.goToFirstChild();
+      this.astCursor.goToNextSibling();
+      this.astCursor.currentFieldName = fieldName;
+      ignoredNode = true;
+    }
+
     this.checkNoErrorToken();
     this.skipLeadingCommentsInBodies();
 
@@ -98,6 +110,10 @@ export default class MatchVerification {
     } else {
       logger.debug(`Unsupported node type ${currentPatternNode.type} encountered`);
       throw new DoesNotMatch();
+    }
+
+    if (ignoredNode) {
+      this.astCursor.goToParent();
     }
   }
 
