@@ -3,7 +3,7 @@ import { Annotation, ChangeSpec, EditorState, Extension, Transaction } from "@co
 import { Message, MessageType, mapChangeSetToChanges } from "@puredit/editor-interface";
 
 export default class ProjectionalEditor {
-  readonly syncChangeAnnotation = Annotation.define<boolean>();
+  readonly doNotSyncAnnotation = Annotation.define<boolean>();
   readonly editorView: EditorView;
 
   constructor(extensions: Extension[], parent: Element | DocumentFragment) {
@@ -15,7 +15,7 @@ export default class ProjectionalEditor {
   }
 
   dispatchTransction(transaction: Transaction, projectionalEditor: EditorView) {
-    if (!transaction.changes.empty && !transaction.annotation(this.syncChangeAnnotation)) {
+    if (!transaction.changes.empty && !transaction.annotation(this.doNotSyncAnnotation)) {
       const changes = mapChangeSetToChanges(transaction.changes);
       changes.forEach((change) => {
         const lineFromBefore = projectionalEditor.state.doc.lineAt(change.fromBefore);
@@ -52,13 +52,13 @@ export default class ProjectionalEditor {
       const text = message.payload;
       this.editorView.dispatch({
         changes: { from: 0, insert: text as string },
-        annotations: this.syncChangeAnnotation.of(true),
+        annotations: this.doNotSyncAnnotation.of(true),
         filter: false,
       });
     } else if (message.type === MessageType.UPDATE_EDITOR) {
       this.editorView.dispatch({
         changes: message.payload as ChangeSpec,
-        annotations: this.syncChangeAnnotation.of(true),
+        annotations: this.doNotSyncAnnotation.of(true),
         filter: false,
       });
     }

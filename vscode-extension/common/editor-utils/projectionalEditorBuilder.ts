@@ -1,8 +1,19 @@
-import { basicSetup } from "codemirror";
+import { defaultKeymap } from "@codemirror/commands";
+import {
+  lineNumbers,
+  highlightSpecialChars,
+  drawSelection,
+  dropCursor,
+  rectangularSelection,
+  highlightActiveLine,
+  highlightActiveLineGutter,
+} from "@codemirror/view";
+import { foldGutter, indentOnInput, bracketMatching } from "@codemirror/language";
+import { closeBrackets, autocompletion } from "@codemirror/autocomplete";
+import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
 import type { Extension } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
-import { autocompletion } from "@codemirror/autocomplete";
 import { projectionPlugin, completions, type ProjectionPluginConfig } from "@puredit/projections";
 import { oneDark } from "@codemirror/theme-one-dark";
 import {
@@ -29,7 +40,21 @@ export default class ProjectionalEditorBuilder {
   }
 
   private addBasicExtensions(): ProjectionalEditorBuilder {
-    this.addExtensions(basicSetup, keymap.of([indentWithTab]));
+    this.addExtensions(
+      lineNumbers(),
+      highlightSpecialChars(),
+      drawSelection(),
+      dropCursor(),
+      rectangularSelection(),
+      highlightActiveLine(),
+      highlightActiveLineGutter(),
+      foldGutter(),
+      indentOnInput(),
+      closeBrackets(),
+      bracketMatching(),
+      highlightSelectionMatches(),
+      keymap.of([indentWithTab, ...searchKeymap, ...defaultKeymap])
+    );
     return this;
   }
 
