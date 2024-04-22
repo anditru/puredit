@@ -56,6 +56,7 @@ export default class PythonUndeclaredVarSearch extends UndeclaredVarSearch {
     { parentType: "as_pattern_target", fieldName: undefined },
     { parentType: "parameters", fieldName: undefined },
     { parentType: "default_parameter", fieldName: "name" },
+    { parentType: "pattern_list", fieldName: undefined },
   ];
 
   protected readonly IDENTIFIER_NODE_TYPES = ["identifier"];

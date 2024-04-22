@@ -27,7 +27,7 @@
         "-d",
         "Open and edit a file",
         "-s",
-        "../../../apps/generator/examples/py-chain-with-aggregation.txt",
+        "../../../apps/generator/examples/py-take.txt",
         "-l",
         "py"
       ],

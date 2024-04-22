@@ -3,7 +3,7 @@ import UndeclaredVarSearch from "./undeclaredVarSearch";
 
 export default class PythonUndeclaredVarSearch extends UndeclaredVarSearch {
   protected readonly NON_VARIABLE_CONDITIONS = [
-    { parentType: "function_declaration", fieldName: "nameh" },
+    { parentType: "function_declaration", fieldName: "name" },
     { parentType: "method_definition", fieldName: "name" },
     { parentType: "member_expression", fieldName: "property" },
   ];
