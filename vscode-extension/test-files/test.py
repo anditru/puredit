@@ -28,6 +28,7 @@ filtered_students = (students.select(
     ).filter(age == 24)
     .drop_nulls()
     .group_by("age")
+    .fill_null(9)
     .agg(
         "last_name",
         pl.col("semster").avg()

@@ -16,7 +16,7 @@ export default class Parser {
   patternGeneration: CompleteTemplateTransformation;
 
   private constructor(
-    private treeSitterParser: TreeSitterParser,
+    public readonly treeSitterParser: TreeSitterParser,
     public readonly language: Language
   ) {
     this.patternGeneration = new CompleteTemplateTransformation(treeSitterParser);

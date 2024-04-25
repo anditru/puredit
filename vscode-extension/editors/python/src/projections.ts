@@ -5,9 +5,18 @@ import { projections as latexMathProjections } from "@puredit/py-latex-math";
 import { projections as pytorchProjections } from "@puredit/py-pytorch";
 import { Parser } from "@puredit/parser";
 import { BrowserWasmPathProvider } from "@puredit/browser-utils";
+import { PackageExtender } from "@puredit/package-extension";
+import { parseExtensions } from "@puredit/editor-utils";
 
 const wasmPathProvider = new BrowserWasmPathProvider(Language.Python);
 const parser = await Parser.load(Language.Python, wasmPathProvider);
+const packageExtender = new PackageExtender(parser);
+
+const polarsExtensions = await parseExtensions("../editors/python/src/polars-extension.json");
+const extendedPolarsProjections = packageExtender.extendPackage(
+  polarsProjections,
+  polarsExtensions
+);
 
 export const projectionPluginConfig: ProjectionPluginConfig = {
   parser,
@@ -15,5 +24,5 @@ export const projectionPluginConfig: ProjectionPluginConfig = {
     pl: undefined,
   },
   globalContextInformation: {},
-  projections: [...polarsProjections, ...latexMathProjections, ...pytorchProjections],
+  projections: [...extendedPolarsProjections, ...latexMathProjections, ...pytorchProjections],
 };

@@ -1,0 +1,83 @@
+[
+  {
+    "type": "projectionExtension",
+    "package": "py-polars",
+    "projection": "Processing Chain",
+    "parentParameter": "processingChain",
+    "subProjections": [
+      {
+        "type": "chainLink",
+        "name": "Extend",
+        "description": "Extend the memory backed by this DataFrame with the values from other.",
+        "arguments": [
+          {
+            "name": "otherDataFrame",
+            "types": ["identifier"]
+          }
+        ],
+        "template": "extend(<%otherDataFrame%>)",
+        "projection": "extending with dataframe <%otherDataFrame%>"
+      },
+      {
+        "type": "chainLink",
+        "name": "Clear",
+        "description": "Create an n-row null-filled (n%>0) copy of the DataFrame.",
+        "arguments": [
+          {
+            "name": "numRows",
+            "types": ["integer"]
+          }
+        ],
+        "template": "clear(n=<%numRows%>)",
+        "projection": "creating a null-filled copy with <%numRows%> rows"
+      },
+      {
+        "type": "chainLink",
+        "name": "Clone",
+        "description": "Create a copy of this DataFrame.",
+        "arguments": [],
+        "template": "clone()",
+        "projection": "copying the dataframe"
+      },
+      {
+        "type": "chainLink",
+        "name": "Fill null with value",
+        "description": "Fill replace null with a specified value.",
+        "arguments": [
+          {
+            "name": "value",
+            "types": ["string", "integer", "identifier"]
+          }
+        ],
+        "template": "fill_null(<%value%>)",
+        "projection": "replacing nulls with <%value%>"
+      },
+      {
+        "type": "chainLink",
+        "name": "Fill null with value",
+        "description": "Replace nulls with a specified value.",
+        "arguments": [
+          {
+            "name": "value",
+            "types": ["string", "integer", "identifier"]
+          }
+        ],
+        "template": "fill_null(<%value%>)",
+        "projection": "replacing nulls with <%value%>"
+      },
+      {
+        "type": "chainLink",
+        "name": "Fill null with strategy",
+        "description": "Replace null based on a strategy.",
+        "arguments": [
+          {
+            "name": "strategy",
+            "types": ["string", "identifier"]
+          }
+        ],
+        "template": "fill_null(strategy=<%strategy%>)",
+        "projection": "replacing nulls with strategy <%strategy%>"
+      }
+    ]
+  }
+]
