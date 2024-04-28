@@ -34,6 +34,15 @@ ${subProjectionsString}
     astCursor.follow(this.links[this.links.length - 1].endNodepath);
     return astCursor.currentNode.endIndex;
   }
+
+  getSubprojectionsCode(astCursor: AstCursor, sample: string): string {
+    let subProjectionsCodes = [];
+    subProjectionsCodes.push(this.start.extractText(astCursor, sample));
+    subProjectionsCodes = subProjectionsCodes.concat(
+      this.links.map((link) => link.extractText(astCursor, sample))
+    );
+    return subProjectionsCodes.join(" | ");
+  }
 }
 
 export class ChainLink {

@@ -27,10 +27,21 @@ export class ProjectionSample {
     }
     return widgetBoundries;
   }
+
+  getProjectionSampleGroups(): ProjectionSampleGroup[] {
+    return this.subProjectionGroups.flatMap((group) => group.getProjectionSampleGroups());
+  }
 }
 
 export class ProjectionSampleGroup {
   constructor(public readonly projections: ProjectionSample[]) {}
+
+  getProjectionSampleGroups() {
+    return [
+      this,
+      ...this.projections.flatMap((projection) => projection.getProjectionSampleGroups()),
+    ];
+  }
 }
 
 export class WidgetSample {

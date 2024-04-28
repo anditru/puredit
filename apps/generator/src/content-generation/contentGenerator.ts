@@ -4,7 +4,7 @@ import { scanCode } from "./code/scan";
 import { connectArguments, setArgumentNames } from "./variables";
 import { serializePattern, serializeWidget } from "./serialize";
 import { doubleNewline, supportedLanguages } from "./common";
-import { ProjectionSample } from "./projection/parse";
+import { ProjectionSample, ProjectionSampleGroup } from "./projection/parse";
 import { TemplateChain } from "./template/chain";
 import { ProjectionContent } from "./common";
 import { TreeSitterParser } from "@puredit/parser/tree-sitter/treeSitterParser";
@@ -14,6 +14,8 @@ import { SubProjectionContentGenerator } from "./internal";
 import AstCursor from "@puredit/parser/ast/cursor";
 import TemplateParameterWithSubProjections from "./template/parameterWithSubProjections";
 import { TemplateAggregation } from "./template/aggregation";
+import { zip } from "@puredit/utils";
+import inquirer from "inquirer";
 
 export default abstract class ContentGenerator {
   protected projectionPath: string;
@@ -21,6 +23,9 @@ export default abstract class ContentGenerator {
   protected codeSamples: string[] = [];
   protected sampleAsts: TreeSitterParser.Tree[];
   protected parsedProjectionSamples: ProjectionSample[];
+  protected subProjectionMapping:
+    | Map<TemplateParameterWithSubProjections, ProjectionSampleGroup[]>
+    | undefined;
 
   constructor(protected readonly generator: ProjectionGenerator | SubProjectionGenerator) {}
 
@@ -37,23 +42,23 @@ export default abstract class ContentGenerator {
       this.generator.language,
       this.ignoreBlocks
     );
-    templateParameters.removeUnusedParameters(this.parsedProjectionSamples);
-    const paramsWithSubprojections = templateParameters.getParamsWithSubProjections();
+    let paramsWithSubprojections = templateParameters.getParamsWithSubProjections();
+    if (!this.subProjectionMapping) {
+      await this.getSubProjectionMapping(paramsWithSubprojections);
+    }
+    templateParameters.removeUnusedParameters(Array.from(this.subProjectionMapping.keys()));
+    paramsWithSubprojections = templateParameters.getParamsWithSubProjections();
 
     const paramToSubProjectionsMap: Record<string, string[]> = {};
     let reallyAllSubProjections = [];
     for (let paramIndex = 0; paramIndex < paramsWithSubprojections.length; paramIndex++) {
       const param = paramsWithSubprojections[paramIndex];
-      let allSubProjections, newSubProjections;
+      let allSubProjections: any, newSubProjections: string[];
       if (param instanceof TemplateChain) {
-        [allSubProjections, newSubProjections] = await this.generateSubProjectionsForChain(
-          param,
-          paramIndex
-        );
+        [allSubProjections, newSubProjections] = await this.generateSubProjectionsForChain(param);
       } else if (param instanceof TemplateAggregation) {
         [allSubProjections, newSubProjections] = await this.generateSubProjectionsForAggregation(
-          param,
-          paramIndex
+          param
         );
       } else {
         throw new Error("Unsupported template argument for subprojection generation");
@@ -117,6 +122,63 @@ export default abstract class ContentGenerator {
     );
   }
 
+  protected async getSubProjectionMapping(
+    paramsWithSubprojections: TemplateParameterWithSubProjections[]
+  ) {
+    this.subProjectionMapping = new Map();
+    const samplesPerParam = this.getSamplesPerParam();
+    if (paramsWithSubprojections.length === samplesPerParam.length) {
+      for (const [param, samplesForOne] of zip(paramsWithSubprojections, samplesPerParam)) {
+        this.subProjectionMapping.set(param, samplesForOne);
+      }
+    } else {
+      console.log("Cannot automatically resolve chains and aggregations. Please provide input.");
+      const unassignedParams = [...paramsWithSubprojections];
+      for (const samplesForOne of samplesPerParam) {
+        const choices = unassignedParams.map((param) => ({
+          name: param.getSubprojectionsCode(
+            new AstCursor(this.sampleAsts[0].walk()),
+            this.codeSamples[0]
+          ),
+          value: paramsWithSubprojections.indexOf(param),
+        }));
+        const dislpayedSamples = samplesForOne[0].projections
+          .map((projection) =>
+            projection.widgets.map((widget) => `    ${widget.getText()}`).join(" [...] ")
+          )
+          .join("\n");
+        const message = `Select the code samples for the following projection samples:\n${dislpayedSamples}\n`;
+
+        const answers = await inquirer.prompt([
+          {
+            type: "list",
+            name: "index",
+            message,
+            choices,
+          },
+        ]);
+        this.subProjectionMapping.set(paramsWithSubprojections[answers.index], samplesForOne);
+        unassignedParams.splice(0, 1);
+      }
+    }
+  }
+
+  protected getSamplesPerParam(): ProjectionSampleGroup[][] {
+    const subProjectionsPerSample = this.parsedProjectionSamples.map((sample) =>
+      sample.getProjectionSampleGroups()
+    );
+    const samplesPerParam = [];
+    const numSamples = subProjectionsPerSample[0].length;
+    for (let i = 0; i < numSamples; i++) {
+      const samplesForOneParam = [];
+      subProjectionsPerSample.forEach((subProjections) =>
+        samplesForOneParam.push(subProjections[i])
+      );
+      samplesPerParam.push(samplesForOneParam);
+    }
+    return samplesPerParam;
+  }
+
   protected hasPostfixWidget(lastParamWithSubProj: TemplateParameterWithSubProjections) {
     const lastSubProjRangeEnd = lastParamWithSubProj.getEndIndex(
       new AstCursor(this.sampleAsts[0].walk())
@@ -136,17 +198,14 @@ export default abstract class ContentGenerator {
   }
 
   async generateSubProjectionsForChain(
-    templateParam: TemplateChain,
-    paramIndex: number
+    templateParam: TemplateChain
   ): Promise<[string[], string[]]> {
-    const groupFromEachSample = this.parsedProjectionSamples.map(
-      (projSample) => projSample.subProjectionGroups[paramIndex]
-    );
-    const numSubProj = groupFromEachSample[0].projections.length;
+    const samplesForParam = this.subProjectionMapping.get(templateParam);
+    const numSubProj = samplesForParam[0].projections.length;
     let allSubProjections = [];
     const newSubProjections = [];
     for (let subProjIndex = 0; subProjIndex < numSubProj; subProjIndex++) {
-      const projectionSamples = groupFromEachSample.map((group) => group.projections[subProjIndex]);
+      const projectionSamples = samplesForParam.map((group) => group.projections[subProjIndex]);
       let codeSampleParts: string[];
       if (subProjIndex === 0) {
         // Chain start
@@ -154,9 +213,8 @@ export default abstract class ContentGenerator {
           templateParam.start.extractText(new AstCursor(this.sampleAsts[index].walk()), sample)
         );
         console.log(
-          `\nGenerating subprojection for chain start with code samples\n${codeSampleParts.join(
-            "\n"
-          )}`
+          `\nGenerating subprojection for chain start ` +
+            `with code samples\n${codeSampleParts.join("\n")}`
         );
       } else {
         // Chain links
@@ -167,9 +225,8 @@ export default abstract class ContentGenerator {
           )
         );
         console.log(
-          `\nGenerating subprojection for chain link with code samples\n${codeSampleParts.join(
-            "\n"
-          )}`
+          `\nGenerating subprojection for chain link ` +
+            `with code samples\n${codeSampleParts.join("\n")}`
         );
       }
       const subProjectionGenerator = new SubProjectionGenerator(this.generator.fs);
@@ -190,17 +247,14 @@ export default abstract class ContentGenerator {
   }
 
   async generateSubProjectionsForAggregation(
-    templateParam: TemplateAggregation,
-    paramIndex: number
+    templateParam: TemplateAggregation
   ): Promise<[string[], string[]]> {
-    const groupFromEachSample = this.parsedProjectionSamples.map(
-      (projSample) => projSample.subProjectionGroups[paramIndex]
-    );
-    const numSubProj = groupFromEachSample[0].projections.length;
+    const samplesForParam = this.subProjectionMapping.get(templateParam);
+    const numSubProj = samplesForParam[0].projections.length;
     let allSubProjections = [];
     const newSubProjections = [];
     for (let subProjIndex = 0; subProjIndex < numSubProj; subProjIndex++) {
-      const projectionSamples = groupFromEachSample.map((group) => group.projections[subProjIndex]);
+      const projectionSamples = samplesForParam.map((group) => group.projections[subProjIndex]);
       let codeSampleParts: string[];
       if (subProjIndex === 0 && templateParam.start) {
         // Special start pattern start

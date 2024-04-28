@@ -27,7 +27,7 @@
         "-d",
         "Open and edit a file",
         "-s",
-        "../../../apps/generator/examples/py-take.txt",
+        "../../../apps/generator/examples/py-resolve.txt",
         "-l",
         "py"
       ],

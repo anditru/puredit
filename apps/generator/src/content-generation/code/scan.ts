@@ -106,7 +106,7 @@ class NodeComparison {
           this.inChain = true;
         }
       }
-      if (this.nodesAreAggregatable()) {
+      if (this.nodesAreAggregatable() && this.atLeastOneAggPart()) {
         const templateAggregation = this.extractTemplateAggregation(index);
         if (templateAggregation) {
           this.recordAggregation(templateAggregation);
@@ -217,6 +217,10 @@ class NodeComparison {
       this.aggregatableNodeTypes.includes(this.a.currentNode.type) &&
       this.aggregatableNodeTypes.includes(this.b.currentNode.type)
     );
+  }
+
+  private atLeastOneAggPart(): boolean {
+    return this.a.currentNode.children.length > 2 && this.b.currentNode.children.length > 2;
   }
 
   private extractTemplateChain(index: number): TemplateChain | null {
@@ -345,11 +349,6 @@ class NodeComparison {
 
   private recordChain(chain: TemplateChain) {
     this.templateParameters.push(chain);
-    this.nodes.push({
-      variable: true,
-      fieldName: this.a.currentFieldName || undefined,
-      type: this.a.currentNode.type,
-    });
   }
 
   private recordAggregation(aggregation: TemplateAggregation) {

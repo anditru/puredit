@@ -3,8 +3,7 @@ import { ArgumentParser } from "argparse";
 import PackageGenerator from "./package/packageGenerator";
 import ProjectionGenerator from "./projection/projectionGenerator";
 import SubProjectionGenerator from "./subProjection/subProjectionGenerator";
-import GeneratorWithContent from "./content-generation/contentGenerator";
-import ProjectionContentGenerator from "./content-generation/ProjectionContentGenerator";
+import ProjectionContentGenerator from "./content-generation/projectionContentGenerator";
 
 const parser = new ArgumentParser({
   description:

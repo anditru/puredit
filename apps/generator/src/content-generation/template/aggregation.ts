@@ -45,6 +45,17 @@ ${subProjectionsString}
     astCursor.follow(this.path);
     return astCursor.currentNode.endIndex;
   }
+
+  getSubprojectionsCode(astCursor: AstCursor, sample: string): string {
+    let subProjectionsCodes = [];
+    if (this.start) {
+      subProjectionsCodes.push(this.start.extractText(astCursor, sample));
+    }
+    subProjectionsCodes = subProjectionsCodes.concat(
+      this.parts.map((part) => part.extractText(astCursor, sample))
+    );
+    return subProjectionsCodes.join(" | ");
+  }
 }
 
 export class AggregationPart {

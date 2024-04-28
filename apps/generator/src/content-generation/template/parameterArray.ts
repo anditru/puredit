@@ -27,29 +27,13 @@ export default class TemplateParameterArray extends Array<TemplateParameter> {
     });
   }
 
-  removeUnusedParameters(projectionSamples: ProjectionSample[]) {
-    let paramsWithSubProjections = this.getParamsWithSubProjections();
-    const subProjectionGroups = projectionSamples[0].subProjectionGroups;
-    if (subProjectionGroups.length === 0) {
-      this.removeParamsWithSubProjections();
-      return this;
-    }
-    this.removeParamsBelowOthers();
-    paramsWithSubProjections = this.getParamsWithSubProjections();
-    if (paramsWithSubProjections.length !== subProjectionGroups.length) {
-      throw Error("Provided subprojections do not fit code");
-    }
-    return this;
-  }
-
-  removeParamsWithSubProjections() {
-    this.filterInPlace((param) => !(param instanceof TemplateParameterWithSubProjections));
-    return this;
-  }
-
-  removeParamsBelowOthers() {
-    const paramsWithSubProjections = this.getParamsWithSubProjections();
-    paramsWithSubProjections.forEach((templateParam) => {
+  removeUnusedParameters(usedParamsWithSubProjections: TemplateParameterWithSubProjections[]) {
+    this.filterInPlace(
+      (templateParam) =>
+        !(templateParam instanceof TemplateParameterWithSubProjections) ||
+        usedParamsWithSubProjections.includes(templateParam)
+    );
+    usedParamsWithSubProjections.forEach((templateParam) => {
       this.filterInPlace(
         (parameter) =>
           !(
@@ -58,6 +42,12 @@ export default class TemplateParameterArray extends Array<TemplateParameter> {
           )
       );
     });
+    return this;
+  }
+
+  removeParamsWithSubProjections() {
+    this.filterInPlace((param) => !(param instanceof TemplateParameterWithSubProjections));
+    return this;
   }
 
   filterInPlace(condition: (a: TemplateParameter) => boolean) {
