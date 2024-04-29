@@ -68,3 +68,15 @@ ${nameList}
   ]`;
   }
 }
+
+export function isPrefixOf(prefix: number[], target: number[]): boolean {
+  if (target.length < prefix.length) {
+    return false;
+  }
+  for (let i = 0; i < prefix.length; i++) {
+    if (prefix[i] !== target[i]) {
+      return false;
+    }
+  }
+  return true;
+}

@@ -5,6 +5,8 @@ import ProjectionGenerator from "../projection/projectionGenerator";
 import { ContentGenerator } from "./internal";
 import path from "path";
 import fs from "fs";
+import { handleUndeclaredVariables } from "./context-var-detection";
+import TemplateParameterArray from "./template/parameterArray";
 
 export default class ProjectionContentGenerator extends ContentGenerator {
   constructor(generator: ProjectionGenerator) {
@@ -37,9 +39,20 @@ export default class ProjectionContentGenerator extends ContentGenerator {
     this.assertLanguageAvailable();
     this.codeAsts = await parseCodeSamples(this.codeSamples, this.generator.language);
     this.projectionTrees = parseProjections(projectionSamples);
+    await this.extractGlobalTemplateParams();
 
     const projectionContent = await this.generateContent();
     await this.generator.writeFiles(projectionContent);
+  }
+
+  private async extractGlobalTemplateParams() {
+    const { undeclaredVariableMap, templateParameters } = await handleUndeclaredVariables(
+      this.codeAsts,
+      this.generator.language,
+      this.ignoreBlocks
+    );
+    this.undeclaredVariableMap = undeclaredVariableMap;
+    this.globalTemplateParameters = new TemplateParameterArray(...templateParameters);
   }
 }
 

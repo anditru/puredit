@@ -15,6 +15,7 @@ import { SubProjectionResolver, SubProjectionSolution } from "./subProjectionRes
 import { PatternNode } from "./pattern";
 import TemplateParameterArray from "./template/parameterArray";
 import AstNode from "@puredit/parser/ast/node";
+import { BlockVariableMap } from "./context-var-detection/blockVariableMap";
 
 export default abstract class ContentGenerator {
   // Input
@@ -25,6 +26,8 @@ export default abstract class ContentGenerator {
   protected projectionTrees: ProjectionTree[];
 
   // State
+  protected undeclaredVariableMap: BlockVariableMap;
+  protected globalTemplateParameters: TemplateParameterArray;
   private subProjectionSolution: SubProjectionSolution;
   private pattern: PatternNode;
   private templateParameters: TemplateParameterArray;
@@ -68,6 +71,7 @@ export default abstract class ContentGenerator {
     const { pattern, templateParameters } = await scanCode(
       this.codeAsts,
       this.generator.language,
+      this.undeclaredVariableMap,
       this.ignoreBlocks
     );
     this.pattern = pattern;
@@ -176,11 +180,13 @@ export default abstract class ContentGenerator {
     for (let subProjIndex = 0; subProjIndex < numSubProj; subProjIndex++) {
       const projectionSamples = samplesForParam.map((group) => group.projections[subProjIndex]);
       let codeSampleParts: string[];
+      let relevantGlobalTemplateParams: TemplateParameterArray;
       if (subProjIndex === 0) {
         // Chain start
         codeSampleParts = this.codeSamples.map(
           (sample, index) => templateParam.start.extractText(this.codeAsts[index].walk(), sample)
         );
+        relevantGlobalTemplateParams = this.globalTemplateParameters.getParamsBelow(templateParam.start.nodePath);
         console.log(
           `\nGenerating subprojection for chain start ` +
             `with code samples\n${codeSampleParts.join("\n")}`
@@ -193,6 +199,7 @@ export default abstract class ContentGenerator {
             sample
           )
         );
+        relevantGlobalTemplateParams = this.globalTemplateParameters.getParamsBelow(templateParam.links[numSubProj - subProjIndex - 1].startNodePath);
         console.log(
           `\nGenerating subprojection for chain link ` +
             `with code samples\n${codeSampleParts.join("\n")}`
@@ -205,6 +212,8 @@ export default abstract class ContentGenerator {
         this.projectionPath,
         codeSampleParts,
         projectionSamples,
+        this.undeclaredVariableMap,
+        relevantGlobalTemplateParams,
         this.ignoreBlocks
       );
       newSubProjections.push(subProjectionsBelow[subProjectionsBelow.length - 1]);
@@ -225,11 +234,13 @@ export default abstract class ContentGenerator {
     for (let subProjIndex = 0; subProjIndex < numSubProj; subProjIndex++) {
       const projectionSamples = samplesForParam.map((group) => group.projections[subProjIndex]);
       let codeSampleParts: string[];
+      let relevantGlobalTemplateParams: TemplateParameterArray;
       if (subProjIndex === 0 && templateParam.start) {
         // Special start pattern
         codeSampleParts = this.codeSamples.map(
           (sample, index) => templateParam.start.extractText(this.codeAsts[index].walk(), sample)
         );
+        relevantGlobalTemplateParams = this.globalTemplateParameters.getParamsBelow(templateParam.start.path);
         console.log(
           `\nGenerating subprojection for special start pattern ` +
             `with code samples\n${codeSampleParts.join("\n")}`
@@ -243,6 +254,7 @@ export default abstract class ContentGenerator {
             sample
           )
         );
+        relevantGlobalTemplateParams = this.globalTemplateParameters.getParamsBelow(templateParam.parts[partIndex].path);
         console.log(
           `\nGenerating subprojection for aggregation part ` +
             `with code samples\n${codeSampleParts.join("\n")}`
@@ -255,6 +267,8 @@ export default abstract class ContentGenerator {
         this.projectionPath,
         codeSampleParts,
         projectionSamples,
+        this.undeclaredVariableMap,
+        relevantGlobalTemplateParams,
         this.ignoreBlocks
       );
       newSubProjections.push(subProjectionsBelow[subProjectionsBelow.length - 1]);

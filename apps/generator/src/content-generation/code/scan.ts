@@ -10,16 +10,13 @@ import {
 } from "@puredit/language-config";
 import { BlockVariableMap, Path } from "../context-var-detection/blockVariableMap";
 import AstCursor from "@puredit/parser/ast/cursor";
-import { findUndeclaredVariables } from "../context-var-detection";
 import TemplateParameterArray from "../template/parameterArray";
 import TemplateArgument from "../template/argument";
 import TemplateBlock from "../template/block";
 import { TemplateChain, ChainStart, ChainLink } from "../template/chain";
-import TemplateContextVariable from "../template/contextVariable";
 import { TreePath } from "@puredit/parser";
 import { AggregationPart, TemplateAggregation } from "../template/aggregation";
 import AstNode from "@puredit/parser/ast/node";
-import inquirer from "inquirer";
 
 export interface CodeScanResult {
   pattern: PatternNode;
@@ -29,16 +26,13 @@ export interface CodeScanResult {
 export async function scanCode(
   samples: AstNode[],
   language: Language,
+  undeclaredVariableMap: BlockVariableMap,
   ignoreBlocks: boolean
 ): Promise<CodeScanResult> {
   let nodes: PatternNode[] = [];
   let templateParameters = new TemplateParameterArray();
   let cursor: AstCursor | PatternCursor = samples[0].walk();
-  const { undeclaredVariableMap, templateArguments } = await findContextVariables(
-    samples,
-    language,
-    ignoreBlocks
-  );
+
   for (let i = 1; i < samples.length; i++) {
     const nodeComparison = new NodeComparison(
       cursor,
@@ -51,66 +45,7 @@ export async function scanCode(
     cursor = new PatternCursor(nodes[0]);
   }
 
-  const undeclaredVariables = undeclaredVariableMap.getAll();
-  const templateContextVariables = undeclaredVariables.map(
-    (contextVariable) => new TemplateContextVariable(contextVariable.path, contextVariable.name)
-  );
-  templateParameters = templateParameters.concat(
-    templateContextVariables,
-    templateArguments
-  ) as TemplateParameterArray;
   return { pattern: nodes[0], templateParameters };
-}
-
-async function findContextVariables(samples: AstNode[], language: Language, ignoreBlocks: boolean) {
-  const undeclaredVariableMap = findUndeclaredVariables(
-    samples,
-    language as Language,
-    ignoreBlocks
-  );
-  const undeclaredVariables = undeclaredVariableMap.getAll();
-  let usages: string[] = [];
-
-  if (process.env.DEBUG && undeclaredVariables.length) {
-    if (!process.env.UNDECLARED_VAR_USAGES) {
-      throw new Error("Please provide undeclared variable usages");
-    }
-    usages = JSON.parse(process.env.UNDECLARED_VAR_USAGES);
-  } else if (!process.env.DEBUG && undeclaredVariables.length) {
-    const questions = undeclaredVariables.map((variable) => ({
-      type: "list",
-      name: "usage",
-      message: `Found potential context variable ${variable.name} how to you want to use it?`,
-      choices: [
-        { name: "Context Variable", value: "c" },
-        { name: "Template Argument", value: "a" },
-        { name: "Ignore", value: "i" },
-      ],
-    }));
-    const answers = await inquirer.prompt(questions);
-    usages = Array.isArray(answers)
-      ? answers.map((answer: { usage: any }) => answer.usage)
-      : [answers.usage];
-  }
-
-  const templateArguments: TemplateArgument[] = [];
-  usages.forEach((usage: string, index: number) => {
-    const variable = undeclaredVariables[index];
-    switch (usage) {
-      case "a":
-        undeclaredVariableMap.deleteVariable(variable.path);
-        templateArguments.push(new TemplateArgument(variable.path, ["identifier"]));
-        break;
-      case "i":
-        undeclaredVariableMap.deleteVariable(variable.path);
-        break;
-      case "c":
-        break;
-      default:
-        throw new Error(`Invalid usage ${usage} for undeclared variable`);
-    }
-  });
-  return { undeclaredVariableMap, templateArguments };
 }
 
 class NodeComparison {

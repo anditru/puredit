@@ -1,6 +1,7 @@
 import TemplateArgument from "./argument";
 import TemplateParameter from "./parameter";
 import ComplexTemplateParameter from "./complexParameter";
+import { isPrefixOf } from "../common";
 
 export default class TemplateParameterArray extends Array<TemplateParameter> {
   sortByAppearance() {
@@ -68,16 +69,12 @@ export default class TemplateParameterArray extends Array<TemplateParameter> {
   getTemplateArguments(): TemplateArgument[] {
     return this.filter((parameter) => parameter instanceof TemplateArgument);
   }
-}
 
-function isPrefixOf(prefix: number[], target: number[]): boolean {
-  if (target.length < prefix.length) {
-    return false;
+  getParamsBelow(path: number[]): TemplateParameterArray {
+    return new TemplateParameterArray(
+      ...this.filter(
+        (parameter) => isPrefixOf(path, parameter.path) && parameter.path.length > path.length
+      )
+    );
   }
-  for (let i = 0; i < prefix.length; i++) {
-    if (prefix[i] !== target[i]) {
-      return false;
-    }
-  }
-  return true;
 }

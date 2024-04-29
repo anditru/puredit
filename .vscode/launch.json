@@ -17,7 +17,7 @@
       "cwd": "${workspaceFolder}/packages/projection-libs/py-my-package",
       "env": {
         "DEBUG": "true",
-        "SUBPROJECTION_RESOLUTION": "[[1, 2], [0]]"
+        "SUBPROJECTION_RESOLUTION": "[[0]]"
       },
       "args": [
         "projection",

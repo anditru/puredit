@@ -39,9 +39,8 @@ ${subProjectionsString}
     let subProjectionsCodes = [];
     subProjectionsCodes.push(this.start.extractText(astCursor, sample));
     subProjectionsCodes = subProjectionsCodes.concat(
-      this.links.reverse().map((link) => link.extractText(astCursor, sample))
+      this.links.map((link) => link.extractText(astCursor, sample))
     );
-    this.linkSubProjectionNames.reverse();
     return subProjectionsCodes.join(" | ");
   }
 }
