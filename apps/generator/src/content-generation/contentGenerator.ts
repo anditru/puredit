@@ -104,12 +104,15 @@ export default abstract class ContentGenerator {
       const param = complexParams[paramIndex];
       let allSubProjectionsBelow: any, newSubProjections: string[];
       if (param instanceof TemplateChain) {
-        [allSubProjectionsBelow, newSubProjections] = await this.generateSubProjectionsForChain(
-          param
-        );
+        [
+          allSubProjectionsBelow,
+          newSubProjections
+        ] = await this.generateSubProjectionsForChain(param);
       } else if (param instanceof TemplateAggregation) {
-        [allSubProjectionsBelow, newSubProjections] =
-          await this.generateSubProjectionsForAggregation(param);
+        [
+          allSubProjectionsBelow,
+          newSubProjections
+        ] = await this.generateSubProjectionsForAggregation(param);
       } else {
         throw new Error("Unsupported template argument for subprojection generation");
       }
@@ -143,14 +146,14 @@ export default abstract class ContentGenerator {
   private serializeWidgets() {
     const complexParams = this.templateParameters.getComplexParams();
     if (complexParams.length && this.hasPostfixWidget(complexParams[complexParams.length - 1])) {
-      const widgetContents = this.segmentsPerWidget.map((widgetSegments) =>
-        serializeWidget(widgetSegments)
+      const widgetContents = this.segmentsPerWidget.map(
+        (widgetSegments) => serializeWidget(widgetSegments)
       );
       this.segmentWidgetContents = widgetContents.slice(0, widgetContents.length - 1);
       this.postfixWidgetContent = widgetContents[widgetContents.length - 1];
     } else {
-      this.segmentWidgetContents = this.segmentsPerWidget.map((widgetSegments) =>
-        serializeWidget(widgetSegments)
+      this.segmentWidgetContents = this.segmentsPerWidget.map(
+        (widgetSegments) => serializeWidget(widgetSegments)
       );
     }
   }
@@ -176,8 +179,8 @@ export default abstract class ContentGenerator {
       let codeSampleParts: string[];
       if (subProjIndex === 0) {
         // Chain start
-        codeSampleParts = this.codeSamples.map((sample, index) =>
-          templateParam.start.extractText(new AstCursor(this.codeAsts[index].walk()), sample)
+        codeSampleParts = this.codeSamples.map(
+          (sample, index) => templateParam.start.extractText(new AstCursor(this.codeAsts[index].walk()), sample)
         );
         console.log(
           `\nGenerating subprojection for chain start ` +
@@ -225,8 +228,8 @@ export default abstract class ContentGenerator {
       let codeSampleParts: string[];
       if (subProjIndex === 0 && templateParam.start) {
         // Special start pattern
-        codeSampleParts = this.codeSamples.map((sample, index) =>
-          templateParam.start.extractText(new AstCursor(this.codeAsts[index].walk()), sample)
+        codeSampleParts = this.codeSamples.map(
+          (sample, index) => templateParam.start.extractText(new AstCursor(this.codeAsts[index].walk()), sample)
         );
         console.log(
           `\nGenerating subprojection for special start pattern ` +
