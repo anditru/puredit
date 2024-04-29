@@ -1,12 +1,11 @@
-import type { Tree } from "web-tree-sitter";
 import { Diff } from "mdiff";
 import { assert, zip } from "@puredit/utils";
 import { ProjectionSegment, ProjectionVariable } from "./projection/scan";
-import AstCursor from "@puredit/parser/ast/cursor";
 import TemplateArgument from "./template/argument";
+import AstNode from "@puredit/parser/ast/node";
 
 export function connectArguments(
-  codeSamples: Tree[],
+  codeSamples: AstNode[],
   projectionSamples: string[][],
   argumentPaths: number[][],
   projection: ProjectionSegment[]
@@ -25,7 +24,7 @@ export function connectArguments(
     });
 
     for (let i = 0; i < argumentPaths.length; i++) {
-      const cursor = new AstCursor(codeSample.walk());
+      const cursor = codeSample.walk();
       assert(
         cursor.follow(argumentPaths[i]),
         "wrong combination of code samples and variable path"

@@ -1,22 +1,18 @@
 import AstNode from "@puredit/parser/ast/node";
-import type { Tree } from "web-tree-sitter";
 import { Language } from "../common";
 import PythonUndeclaredVarSearch from "./pythonUndeclaredVarSearch";
 import TypeScriptUndeclaredVarSearch from "./typeScriptUndeclaredVarSearch";
 import { BlockVariableMap } from "./blockVariableMap";
 
 export function findUndeclaredVariables(
-  samples: Tree[],
+  samples: AstNode[],
   language: Language,
   ignoreBlocks: boolean
 ): BlockVariableMap {
-  let undeclaredVariableSearch = getUndeclaredVarSearchFor(
-    language,
-    new AstNode(samples[0].rootNode)
-  );
+  let undeclaredVariableSearch = getUndeclaredVarSearchFor(language, samples[0]);
   const undeclaredVariableMap: BlockVariableMap = undeclaredVariableSearch.execute(ignoreBlocks);
   samples.slice(1).forEach((sample) => {
-    undeclaredVariableSearch = getUndeclaredVarSearchFor(language, new AstNode(sample.rootNode));
+    undeclaredVariableSearch = getUndeclaredVarSearchFor(language, sample);
     const newUndeclaredVariableMap = undeclaredVariableSearch.execute(ignoreBlocks);
     undeclaredVariableMap.setIntersections(newUndeclaredVariableMap);
   });

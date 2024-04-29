@@ -1,4 +1,3 @@
-import type { Tree } from "web-tree-sitter";
 import { PatternCursor, PatternNode } from "../pattern";
 import { Language } from "../common";
 import {
@@ -19,6 +18,7 @@ import { TemplateChain, ChainStart, ChainLink } from "../template/chain";
 import TemplateContextVariable from "../template/contextVariable";
 import { TreePath } from "@puredit/parser";
 import { AggregationPart, TemplateAggregation } from "../template/aggregation";
+import AstNode from "@puredit/parser/ast/node";
 
 export interface CodeScanResult {
   pattern: PatternNode;
@@ -26,18 +26,18 @@ export interface CodeScanResult {
 }
 
 export function scanCode(
-  samples: Tree[],
+  samples: AstNode[],
   language: Language,
   ignoreBlocks: boolean
 ): CodeScanResult {
   const undeclaredVariables = findUndeclaredVariables(samples, language as Language, ignoreBlocks);
   let nodes: PatternNode[] = [];
   let templateParameters = new TemplateParameterArray();
-  let cursor: AstCursor | PatternCursor = new AstCursor(samples[0].walk());
+  let cursor: AstCursor | PatternCursor = samples[0].walk();
   for (let i = 1; i < samples.length; i++) {
     const nodeComparison = new NodeComparison(
       cursor,
-      new AstCursor(samples[i].walk()),
+      samples[i].walk(),
       language,
       undeclaredVariables,
       true

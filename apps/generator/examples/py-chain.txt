@@ -1,6 +1,6 @@
-filtered_students = students.select("name", "age", "semester").filter(age=24)
+filtered_students = students.select("name", "age", "semester").filter(age==24)
 
-filtered_lectures = lectures.select("lecturer", "id", "credits").filter(credits=8)
+filtered_lectures = lectures.select("lecturer", "id", "credits").filter(credits==8)
 
 ---
 

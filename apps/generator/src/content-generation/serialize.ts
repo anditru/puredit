@@ -1,23 +1,22 @@
 import { assert, isString } from "@puredit/utils";
-import type { Tree } from "web-tree-sitter";
 import { PatternCursor, PatternNode } from "./pattern";
 import { ProjectionSegment } from "./projection/scan";
-import AstCursor from "@puredit/parser/ast/cursor";
 import TemplateParameterArray from "./template/parameterArray";
+import AstNode from "@puredit/parser/ast/node";
 
 export function serializePattern(
-  sampleTree: Tree,
+  sampleRootNode: AstNode,
   pattern: PatternNode,
   templateParameters: TemplateParameterArray
 ): [string, string] {
-  const source = sampleTree.rootNode.text;
+  const source = sampleRootNode.text;
   let declarationsResult = "";
   let patternResult = "";
   let from = 0;
   templateParameters.sortByAppearance();
 
   for (let i = 0; i < templateParameters.length; i++) {
-    const sampleCursor = new AstCursor(sampleTree.walk());
+    const sampleCursor = sampleRootNode.walk();
     assert(
       sampleCursor.follow(templateParameters[i].path),
       "variable path not found in sample tree"

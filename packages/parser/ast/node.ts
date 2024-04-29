@@ -2,7 +2,13 @@ import type { SyntaxNode } from "web-tree-sitter";
 import AstCursor from "./cursor";
 
 export default class AstNode {
-  constructor(private readonly syntaxNode: SyntaxNode) {}
+  private _parent: AstNode | null = null;
+
+  constructor(private readonly syntaxNode: SyntaxNode) {
+    if (syntaxNode.parent) {
+      this._parent = new AstNode(syntaxNode.parent);
+    }
+  }
 
   isKeyword(): boolean {
     return !this.syntaxNode.isNamed();
@@ -29,12 +35,13 @@ export default class AstNode {
     return new AstCursor(this.syntaxNode.walk());
   }
 
+  cutOff(): AstNode {
+    this._parent = null;
+    return this;
+  }
+
   get parent(): AstNode | null {
-    if (this.syntaxNode.parent) {
-      return new AstNode(this.syntaxNode.parent);
-    } else {
-      return null;
-    }
+    return this._parent;
   }
 
   get children() {

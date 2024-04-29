@@ -1,9 +1,8 @@
 import { zip } from "@puredit/utils";
 import ComplexTemplateParameter from "./template/complexParameter";
-import AstCursor from "@puredit/parser/ast/cursor";
 import inquirer from "inquirer";
 import { ProjectionTree, ProjectionTreeGroup } from "./projection/parse";
-import { TreeSitterParser } from "@puredit/parser/tree-sitter/treeSitterParser";
+import AstNode from "@puredit/parser/ast/node";
 
 export class SubProjectionResolver {
   private static runIndex = 0;
@@ -12,7 +11,7 @@ export class SubProjectionResolver {
 
   constructor(
     private readonly codeSamples: string[],
-    private readonly codeAsts: TreeSitterParser.Tree[],
+    private readonly codeAsts: AstNode[],
     private readonly projectionTrees: ProjectionTree[],
     private readonly complexTemplateParams: ComplexTemplateParameter[]
   ) {}
@@ -85,7 +84,7 @@ export class SubProjectionResolver {
       const choices = unassignedParams.map((param) => {
         const paramIndex = this.complexTemplateParams.indexOf(param);
         const subProjectionsCode = param.getSubProjectionsCode(
-          new AstCursor(this.codeAsts[0].walk()),
+          this.codeAsts[0].walk(),
           this.codeSamples[0]
         );
         return {

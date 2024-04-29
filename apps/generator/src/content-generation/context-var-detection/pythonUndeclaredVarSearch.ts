@@ -46,8 +46,7 @@ export default class PythonUndeclaredVarSearch extends UndeclaredVarSearch {
     { parentType: "not_operator", fieldName: "argument" },
     { parentType: "boolean_operator", fieldName: "left" },
     { parentType: "boolean_operator", fieldName: "right" },
-    { parentType: "comparison_operator", fieldName: "left" },
-    { parentType: "comparison_operator", fieldName: "right" },
+    { parentType: "comparison_operator", fieldName: undefined },
   ];
 
   protected readonly DECLARATION_INDUCING_CONDITIONS = [

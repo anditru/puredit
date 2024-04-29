@@ -6,23 +6,22 @@ import { supportedLanguages } from "./common";
 import { ProjectionTree } from "./projection/parse";
 import { TemplateChain } from "./template/chain";
 import { ProjectionContent } from "./common";
-import { TreeSitterParser } from "@puredit/parser/tree-sitter/treeSitterParser";
 import SubProjectionGenerator from "../subProjection/subProjectionGenerator";
 import ProjectionGenerator from "../projection/projectionGenerator";
 import { SubProjectionContentGenerator } from "./internal";
-import AstCursor from "@puredit/parser/ast/cursor";
 import ComplexTemplateParameter from "./template/complexParameter";
 import { TemplateAggregation } from "./template/aggregation";
 import { SubProjectionResolver, SubProjectionSolution } from "./subProjectionResolution";
 import { PatternNode } from "./pattern";
 import TemplateParameterArray from "./template/parameterArray";
+import AstNode from "@puredit/parser/ast/node";
 
 export default abstract class ContentGenerator {
   // Input
   protected projectionPath: string;
   protected ignoreBlocks = true;
   protected codeSamples: string[];
-  protected codeAsts: TreeSitterParser.Tree[];
+  protected codeAsts: AstNode[];
   protected projectionTrees: ProjectionTree[];
 
   // State
@@ -160,7 +159,7 @@ export default abstract class ContentGenerator {
 
   private hasPostfixWidget(lastParamWithSubProj: ComplexTemplateParameter) {
     const lastSubProjRangeEnd = lastParamWithSubProj.getEndIndex(
-      new AstCursor(this.codeAsts[0].walk())
+      this.codeAsts[0].walk()
     );
     const widgets = this.projectionTrees[0].widgets;
     const lastWidget = widgets[widgets.length - 1];
@@ -180,7 +179,7 @@ export default abstract class ContentGenerator {
       if (subProjIndex === 0) {
         // Chain start
         codeSampleParts = this.codeSamples.map(
-          (sample, index) => templateParam.start.extractText(new AstCursor(this.codeAsts[index].walk()), sample)
+          (sample, index) => templateParam.start.extractText(this.codeAsts[index].walk(), sample)
         );
         console.log(
           `\nGenerating subprojection for chain start ` +
@@ -190,7 +189,7 @@ export default abstract class ContentGenerator {
         // Chain links
         codeSampleParts = this.codeSamples.map((sample, index) =>
           templateParam.links[numSubProj - subProjIndex - 1].extractText(
-            new AstCursor(this.codeAsts[index].walk()),
+            this.codeAsts[index].walk(),
             sample
           )
         );
@@ -229,7 +228,7 @@ export default abstract class ContentGenerator {
       if (subProjIndex === 0 && templateParam.start) {
         // Special start pattern
         codeSampleParts = this.codeSamples.map(
-          (sample, index) => templateParam.start.extractText(new AstCursor(this.codeAsts[index].walk()), sample)
+          (sample, index) => templateParam.start.extractText(this.codeAsts[index].walk(), sample)
         );
         console.log(
           `\nGenerating subprojection for special start pattern ` +
@@ -240,7 +239,7 @@ export default abstract class ContentGenerator {
         const partIndex = templateParam.start ? subProjIndex - 1 : subProjIndex;
         codeSampleParts = this.codeSamples.map((sample, index) =>
           templateParam.parts[partIndex].extractText(
-            new AstCursor(this.codeAsts[index].walk()),
+            this.codeAsts[index].walk(),
             sample
           )
         );
