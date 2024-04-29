@@ -153,7 +153,7 @@ export default class SubProjectionGenerator extends BaseGenerator {
       ...this.projectionContent,
     });
 
-    if (this.projectionContent.widgetContents.length) {
+    if (projectionContent && this.projectionContent.widgetContents.length) {
       this.projectionContent.widgetContents.forEach((widgetContent, index) =>
         this.fs.copyTpl(
           this.templatePath("Widget.tsvelte"),
@@ -165,6 +165,13 @@ export default class SubProjectionGenerator extends BaseGenerator {
           }
         )
       );
+    } else if (projectionContent && !this.projectionContent.widgetContents.length) {
+      this.fs.copyTpl(this.templatePath("Widget.tsvelte"), this.destinationPath("Widget.svelte"), {
+        ...this.subProjectionAnswers,
+        componentContent: this.subProjectionAnswers.displayName,
+        widgetImports: this.projectionContent.widgetImports,
+        widgetContent: "",
+      });
     } else {
       this.fs.copyTpl(this.templatePath("Widget.tsvelte"), this.destinationPath("Widget.svelte"), {
         ...this.subProjectionAnswers,

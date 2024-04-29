@@ -122,7 +122,7 @@ export default abstract class ContentGenerator {
     );
   }
 
-  protected async getSubProjectionMapping(
+  private async getSubProjectionMapping(
     paramsWithSubprojections: TemplateParameterWithSubProjections[]
   ) {
     this.subProjectionMapping = new Map();
@@ -144,12 +144,12 @@ export default abstract class ContentGenerator {
         }));
         const dislpayedSamples = samplesForOne[0].projections
           .map((projection) =>
-            projection.widgets.map((widget) => `    ${widget.getText()}`).join(" [...] ")
+            projection.widgets.map((widget) => `  ${widget.getText() || "<empty>"}`).join(" [...] ")
           )
           .join("\n");
         const message = `Select the code samples for the following projection samples:\n${dislpayedSamples}\n`;
 
-        const answers = await inquirer.prompt([
+        const answer = await inquirer.prompt([
           {
             type: "list",
             name: "index",
@@ -157,13 +157,14 @@ export default abstract class ContentGenerator {
             choices,
           },
         ]);
-        this.subProjectionMapping.set(paramsWithSubprojections[answers.index], samplesForOne);
-        unassignedParams.splice(0, 1);
+        const assignedParam = paramsWithSubprojections[answer.index];
+        this.subProjectionMapping.set(assignedParam, samplesForOne);
+        unassignedParams.splice(unassignedParams.indexOf(assignedParam), 1);
       }
     }
   }
 
-  protected getSamplesPerParam(): ProjectionSampleGroup[][] {
+  private getSamplesPerParam(): ProjectionSampleGroup[][] {
     const subProjectionsPerSample = this.parsedProjectionSamples.map((sample) =>
       sample.getProjectionSampleGroups()
     );
@@ -179,7 +180,7 @@ export default abstract class ContentGenerator {
     return samplesPerParam;
   }
 
-  protected hasPostfixWidget(lastParamWithSubProj: TemplateParameterWithSubProjections) {
+  private hasPostfixWidget(lastParamWithSubProj: TemplateParameterWithSubProjections) {
     const lastSubProjRangeEnd = lastParamWithSubProj.getEndIndex(
       new AstCursor(this.sampleAsts[0].walk())
     );
@@ -197,7 +198,7 @@ export default abstract class ContentGenerator {
     };
   }
 
-  async generateSubProjectionsForChain(
+  private async generateSubProjectionsForChain(
     templateParam: TemplateChain
   ): Promise<[string[], string[]]> {
     const samplesForParam = this.subProjectionMapping.get(templateParam);
@@ -246,7 +247,7 @@ export default abstract class ContentGenerator {
     return [allSubProjections, newSubProjections];
   }
 
-  async generateSubProjectionsForAggregation(
+  private async generateSubProjectionsForAggregation(
     templateParam: TemplateAggregation
   ): Promise<[string[], string[]]> {
     const samplesForParam = this.subProjectionMapping.get(templateParam);

@@ -125,6 +125,7 @@ class NodeComparison {
 
       const hasSiblingA = this.a.goToNextSibling();
       const hasSiblingB = this.b.goToNextSibling();
+      this.inChain = false;
       if (hasSiblingA !== hasSiblingB) {
         return null; // mismatch (parent)
       }
