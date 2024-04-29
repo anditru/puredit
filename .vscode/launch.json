@@ -16,7 +16,8 @@
       "program": "${workspaceFolder}/apps/generator/src/index.ts",
       "cwd": "${workspaceFolder}/packages/projection-libs/py-my-package",
       "env": {
-        "DEBUG": "true"
+        "DEBUG": "true",
+        "SUBPROJECTION_RESOLUTION": "[[1, 2], [0]]"
       },
       "args": [
         "projection",

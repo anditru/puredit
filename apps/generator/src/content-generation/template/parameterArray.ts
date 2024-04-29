@@ -1,7 +1,6 @@
-import { ProjectionSample } from "../projection/parse";
 import TemplateArgument from "./argument";
 import TemplateParameter from "./parameter";
-import TemplateParameterWithSubProjections from "./parameterWithSubProjections";
+import ComplexTemplateParameter from "./complexParameter";
 
 export default class TemplateParameterArray extends Array<TemplateParameter> {
   sortByAppearance() {
@@ -27,10 +26,10 @@ export default class TemplateParameterArray extends Array<TemplateParameter> {
     });
   }
 
-  removeUnusedParameters(usedParamsWithSubProjections: TemplateParameterWithSubProjections[]) {
+  removeUnusedParameters(usedParamsWithSubProjections: ComplexTemplateParameter[]) {
     this.filterInPlace(
       (templateParam) =>
-        !(templateParam instanceof TemplateParameterWithSubProjections) ||
+        !(templateParam instanceof ComplexTemplateParameter) ||
         usedParamsWithSubProjections.includes(templateParam)
     );
     usedParamsWithSubProjections.forEach((templateParam) => {
@@ -45,8 +44,8 @@ export default class TemplateParameterArray extends Array<TemplateParameter> {
     return this;
   }
 
-  removeParamsWithSubProjections() {
-    this.filterInPlace((param) => !(param instanceof TemplateParameterWithSubProjections));
+  removeComplexParams() {
+    this.filterInPlace((param) => !(param instanceof ComplexTemplateParameter));
     return this;
   }
 
@@ -62,8 +61,8 @@ export default class TemplateParameterArray extends Array<TemplateParameter> {
     return this;
   }
 
-  getParamsWithSubProjections(): Array<TemplateParameterWithSubProjections> {
-    return this.filter((parameter) => parameter instanceof TemplateParameterWithSubProjections);
+  getComplexParams(): Array<ComplexTemplateParameter> {
+    return this.filter((parameter) => parameter instanceof ComplexTemplateParameter);
   }
 
   getTemplateArguments(): TemplateArgument[] {

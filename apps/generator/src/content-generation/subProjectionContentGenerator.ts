@@ -1,5 +1,5 @@
 import { parseCodeSamples } from "./code/parse";
-import { ProjectionSample } from "./projection/parse";
+import { ProjectionTree } from "./projection/parse";
 import SubProjectionGenerator from "../subProjection/subProjectionGenerator";
 import { ContentGenerator } from "./internal";
 
@@ -11,17 +11,17 @@ export default class SubProjectionContentGenerator extends ContentGenerator {
   async execute(
     projectionPath: string,
     codeSamples: string[],
-    parsedProjectionSamples: ProjectionSample[],
+    parsedProjectionSamples: ProjectionTree[],
     ignoreBlocks: boolean
   ): Promise<string[]> {
     this.projectionPath = projectionPath;
     this.ignoreBlocks = ignoreBlocks;
     this.codeSamples = codeSamples;
-    this.parsedProjectionSamples = parsedProjectionSamples;
+    this.projectionTrees = parsedProjectionSamples;
 
     const projectionName = await this.generator.showPrompts();
     this.assertLanguageAvailable();
-    this.sampleAsts = await parseCodeSamples(this.codeSamples, this.generator.language);
+    this.codeAsts = await parseCodeSamples(this.codeSamples, this.generator.language);
 
     const projectionContent = await this.generateContent();
     await this.generator.writeFiles(projectionContent);

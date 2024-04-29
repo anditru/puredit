@@ -1,8 +1,8 @@
 import { Path } from "../context-var-detection/blockVariableMap";
 import AstCursor from "@puredit/parser/ast/cursor";
-import TemplateParameterWithSubProjections from "./parameterWithSubProjections";
+import ComplexTemplateParameter from "./complexParameter";
 
-export class TemplateChain extends TemplateParameterWithSubProjections {
+export class TemplateChain extends ComplexTemplateParameter {
   static lastId = -1;
   static issueId() {
     TemplateChain.lastId++;
@@ -35,7 +35,7 @@ ${subProjectionsString}
     return astCursor.currentNode.endIndex;
   }
 
-  getSubprojectionsCode(astCursor: AstCursor, sample: string): string {
+  getSubProjectionsCode(astCursor: AstCursor, sample: string): string {
     let subProjectionsCodes = [];
     subProjectionsCodes.push(this.start.extractText(astCursor, sample));
     subProjectionsCodes = subProjectionsCodes.concat(

@@ -8,10 +8,10 @@ export function parseProjections(projections: string[]) {
   });
 }
 
-export class ProjectionSample {
+export class ProjectionTree {
   constructor(
     public readonly widgets: WidgetSample[],
-    public readonly subProjectionGroups: ProjectionSampleGroup[]
+    public readonly subProjectionGroups: ProjectionTreeGroup[]
   ) {}
 
   getProjectionTokens(): string[] {
@@ -28,18 +28,18 @@ export class ProjectionSample {
     return widgetBoundries;
   }
 
-  getProjectionSampleGroups(): ProjectionSampleGroup[] {
-    return this.subProjectionGroups.flatMap((group) => group.getProjectionSampleGroups());
+  getProjectionTreeGroups(): ProjectionTreeGroup[] {
+    return this.subProjectionGroups.flatMap((group) => group.getProjectionTreeGroups());
   }
 }
 
-export class ProjectionSampleGroup {
-  constructor(public readonly projections: ProjectionSample[]) {}
+export class ProjectionTreeGroup {
+  constructor(public readonly projections: ProjectionTree[]) {}
 
-  getProjectionSampleGroups() {
+  getProjectionTreeGroups() {
     return [
       this,
-      ...this.projections.flatMap((projection) => projection.getProjectionSampleGroups()),
+      ...this.projections.flatMap((projection) => projection.getProjectionTreeGroups()),
     ];
   }
 }
@@ -109,7 +109,7 @@ function countIndents(tokens: string[]) {
 class Parser {
   private tokens = [];
   private tokenPointer = 0;
-  private projectionSamples: ProjectionSample[] = [];
+  private projectionSamples: ProjectionTree[] = [];
 
   parse(tokens: string[]) {
     this.tokens = tokens;
@@ -121,9 +121,9 @@ class Parser {
     return this.projectionSamples;
   }
 
-  private parseProjectionSample(): ProjectionSample {
+  private parseProjectionSample(): ProjectionTree {
     const widgetSamples: WidgetSample[] = [];
-    const subProjectionSampleGroups: ProjectionSampleGroup[] = [];
+    const subProjectionSampleGroups: ProjectionTreeGroup[] = [];
     while (this.currentToken !== ".") {
       const nextWidgetTokens = this.getNextWidgetTokens();
       widgetSamples.push(new WidgetSample(nextWidgetTokens));
@@ -132,11 +132,11 @@ class Parser {
         const subProjectionsTokens = this.tokens.slice(this.tokenPointer + 1, dedentIndex);
         const subParser = new Parser();
         const subProjectionSamples = subParser.parse(subProjectionsTokens);
-        subProjectionSampleGroups.push(new ProjectionSampleGroup(subProjectionSamples));
+        subProjectionSampleGroups.push(new ProjectionTreeGroup(subProjectionSamples));
         this.goTo(dedentIndex + 1);
       }
     }
-    return new ProjectionSample(widgetSamples, subProjectionSampleGroups);
+    return new ProjectionTree(widgetSamples, subProjectionSampleGroups);
   }
 
   private getNextWidgetTokens(): string[] {

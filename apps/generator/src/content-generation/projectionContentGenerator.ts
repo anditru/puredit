@@ -1,9 +1,10 @@
-import { Language } from "./common";
+import { doubleNewline, Language } from "./common";
 import { parseCodeSamples } from "./code/parse";
 import { parseProjections } from "./projection/parse";
 import ProjectionGenerator from "../projection/projectionGenerator";
 import { ContentGenerator } from "./internal";
 import path from "path";
+import fs from "fs";
 
 export default class ProjectionContentGenerator extends ContentGenerator {
   constructor(generator: ProjectionGenerator) {
@@ -18,7 +19,7 @@ export default class ProjectionContentGenerator extends ContentGenerator {
     description?: string,
     language?: Language
   ) {
-    const { codeSamples, projectionSamples } = this.extractCodeAndProjections(samplesFilePath);
+    const { codeSamples, projectionSamples } = extractCodeAndProjections(samplesFilePath);
     this.ignoreBlocks = ignoreBlocks;
     this.codeSamples = codeSamples;
 
@@ -34,10 +35,19 @@ export default class ProjectionContentGenerator extends ContentGenerator {
       projectionName
     );
     this.assertLanguageAvailable();
-    this.sampleAsts = await parseCodeSamples(this.codeSamples, this.generator.language);
-    this.parsedProjectionSamples = parseProjections(projectionSamples);
+    this.codeAsts = await parseCodeSamples(this.codeSamples, this.generator.language);
+    this.projectionTrees = parseProjections(projectionSamples);
 
     const projectionContent = await this.generateContent();
     await this.generator.writeFiles(projectionContent);
   }
+}
+
+function extractCodeAndProjections(samplesFilePath: string) {
+  const samplesRaw = fs.readFileSync(samplesFilePath, { encoding: "utf-8" });
+  const [codeRaw, projectionsRaw] = samplesRaw.split(`${doubleNewline}---${doubleNewline}`);
+  return {
+    codeSamples: codeRaw.split(doubleNewline),
+    projectionSamples: projectionsRaw.split(doubleNewline),
+  };
 }
