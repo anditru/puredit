@@ -24,7 +24,21 @@ export class BlockVariableMap {
     }
   }
 
-  delete(blockPath: Path) {
+  deleteVariable(variablePath: Path) {
+    for (const entry of this.entries) {
+      for (const variable of entry.variables) {
+        if (this.pathsEqual(variablePath, variable.path)) {
+          const index = entry.variables.indexOf(variable);
+          entry.variables.splice(index, 1);
+          if (!entry.variables.length) {
+            this.deleteBlock(entry.blockPath);
+          }
+        }
+      }
+    }
+  }
+
+  deleteBlock(blockPath: Path) {
     const entry = this.getEntry(blockPath);
     if (entry) {
       const index = this.entries.indexOf(entry);

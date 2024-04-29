@@ -47,7 +47,7 @@ export default abstract class ContentGenerator {
   }
 
   protected async generateContent(): Promise<ProjectionContent> {
-    this.generatePattern();
+    await this.generatePattern();
     await this.resolveSubProjections();
     await this.generateSubProjections();
     this.serializePattern();
@@ -64,8 +64,8 @@ export default abstract class ContentGenerator {
     );
   }
 
-  private generatePattern() {
-    const { pattern, templateParameters } = scanCode(
+  private async generatePattern() {
+    const { pattern, templateParameters } = await scanCode(
       this.codeAsts,
       this.generator.language,
       this.ignoreBlocks
