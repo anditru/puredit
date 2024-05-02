@@ -31,5 +31,6 @@ module.exports = {
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/no-this-alias": 1,
     "no-inner-declarations": 1,
+    "no-case-declarations": 0,
   },
 };

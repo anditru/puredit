@@ -16,7 +16,6 @@
       "script": "build",
       "isBackground": false,
       "presentation": {
-        "revealProblems": "always",
         "close": true
       }
     },

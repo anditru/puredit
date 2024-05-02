@@ -90,12 +90,14 @@ export default abstract class TemplateTransformation {
         specialStartPatternMap[aggregation.name] = aggregationStartPattern;
       }
     }
-    return new AggregationDecorator(
+    const aggregationDecorator = new AggregationDecorator(
       pattern,
       aggregationPatternMap,
       specialStartPatternMap,
       aggregationTypeMap
     );
+    this.template!.pattern = aggregationDecorator;
+    return aggregationDecorator;
   }
 
   private getAggregatedNodeType(pattern: Pattern, aggregation: TemplateAggregation): string {
@@ -130,6 +132,8 @@ export default abstract class TemplateTransformation {
       startPatternMap[chain.name] = startPattern;
       linkPatternMap[chain.name] = linkPatterns;
     }
-    return new ChainDecorator(pattern, startPatternMap, linkPatternMap);
+    const chainDecorator = new ChainDecorator(pattern, startPatternMap, linkPatternMap);
+    this.template!.pattern = chainDecorator;
+    return chainDecorator;
   }
 }

@@ -8,7 +8,6 @@ import IntoWidget from "./IntoWidget.svelte";
 import { selectStartSubProjection } from "./selectStartSubProjection/config";
 import { selectSubProjection } from "./selectSubProjection/config";
 import { columnSubProjection } from "./columnSubProjection/config";
-import { columnWithAliasSubProjection } from "./columnWithAliasSubProjection/config";
 import { filterSubProjection } from "./filterSubProjection/config";
 import { dropNullsSubProjection } from "./dropNullsSubProjection/config";
 import { dropNullsColumnsSubProjection } from "./dropNullsColumnsSubProjection/config";
@@ -63,7 +62,6 @@ export const selectChainProjection: RootProjection = {
     selectStartSubProjection,
     selectSubProjection,
     columnSubProjection,
-    columnWithAliasSubProjection,
     filterSubProjection,
     dropNullsSubProjection,
     dropNullsColumnsSubProjection,

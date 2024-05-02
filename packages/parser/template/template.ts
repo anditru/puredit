@@ -4,8 +4,11 @@ import TemplateAggregation from "./parameters/templateAggregation";
 import TemplateChain from "./parameters/templateChain";
 import { Language } from "@puredit/language-config";
 import CodeString from "./codeString";
+import Pattern from "../pattern/pattern";
 
 export default class Template {
+  private _pattern: Pattern | undefined;
+
   constructor(
     public readonly name: string,
     public readonly language: Language,
@@ -35,6 +38,12 @@ export default class Template {
     return CodeString.fromTemplate(this.templateStrings!, this.params);
   }
 
+  getAggregation(name: string): TemplateAggregation | undefined {
+    return this.params.find(
+      (param) => param instanceof TemplateAggregation && param.name === name
+    ) as TemplateAggregation;
+  }
+
   toDraftString(): string {
     const substitutions = this.params.map((param) => {
       if (isString(param)) {
@@ -44,5 +53,13 @@ export default class Template {
       }
     });
     return String.raw(this.templateStrings, ...substitutions);
+  }
+
+  set pattern(pattern: Pattern) {
+    this._pattern = pattern;
+  }
+
+  get pattern(): Pattern | undefined {
+    return this._pattern;
   }
 }

@@ -1,5 +1,31 @@
 [
   {
+    "type": "subProjectionExtension",
+    "package": "py-polars",
+    "projection": "Processing Chain",
+    "subProjection": "Select Column",
+    "parentParameter": "columns",
+    "subProjections": [
+      {
+        "type": "aggregationPart",
+        "name": "Column with Alias",
+        "description": "Column with alias to select from a dataframe.",
+        "arguments": [
+          {
+            "name": "columnName",
+            "types": ["string"]
+          },
+          {
+            "name": "columnAlias",
+            "types": ["identifier"]
+          }
+        ],
+        "template": "<%columnAlias%>=<%columnName%>",
+        "projection": "<%columnName%> as <%columnAlias%>"
+      }
+    ]
+  },
+  {
     "type": "projectionExtension",
     "package": "py-polars",
     "projection": "Processing Chain",
