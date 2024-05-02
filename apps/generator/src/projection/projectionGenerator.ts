@@ -111,7 +111,7 @@ export default class ProjectionGenerator extends BaseGenerator {
       .map((field) => projectionQuestions[field]);
     const projectionAnswers = await this.prompt<ProjectionAnswers>(questionsToAsk);
     Object.assign(this.projectionConfig, projectionAnswers);
-    this.projectionConfig.technicalName = toLowerCamelCase(projectionAnswers.displayName);
+    this.projectionConfig.technicalName = toLowerCamelCase(this.projectionConfig.displayName);
     this.language = this.projectionConfig.language;
     return this.projectionConfig.technicalName;
   }

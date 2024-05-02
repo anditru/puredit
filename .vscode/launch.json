@@ -17,7 +17,8 @@
       "cwd": "${workspaceFolder}/packages/projection-libs/py-my-package",
       "env": {
         "DEBUG": "true",
-        "SUBPROJECTION_RESOLUTION": "[[0]]"
+        "SUBPROJECTION_RESOLUTION": "[]",
+        "UNDECLARED_VAR_USAGES": "[\"c\"]"
       },
       "args": [
         "projection",
@@ -26,9 +27,9 @@
         "-t",
         "myTestProjection",
         "-d",
-        "Open and edit a file",
+        "Projection to test the generator",
         "-s",
-        "../../../apps/generator/examples/py-resolve.txt",
+        "../../../apps/generator/examples/ts-remove.txt",
         "-l",
         "py"
       ],

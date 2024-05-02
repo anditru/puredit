@@ -48,8 +48,7 @@ export default class ProjectionContentGenerator extends ContentGenerator {
   private async extractGlobalTemplateParams() {
     const { undeclaredVariableMap, templateParameters } = await handleUndeclaredVariables(
       this.codeAsts,
-      this.generator.language,
-      this.ignoreBlocks
+      this.generator.language
     );
     this.undeclaredVariableMap = undeclaredVariableMap;
     this.globalTemplateParameters = new TemplateParameterArray(...templateParameters);

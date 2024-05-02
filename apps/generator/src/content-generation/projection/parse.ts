@@ -66,18 +66,29 @@ function tokenize(projection: string) {
     .map((line) => line.replaceAll(indent, `${indentToken} `))
     .map((line) => line.split(/\s+/))
     .map((tokens) => {
-      let sanitizedTokens = [];
-      for (let token of tokens) {
-        const extractedTokens = [];
-        while ([",", "."].includes(getLastChar(token))) {
-          extractedTokens.push(getLastChar(token));
-          token = token.slice(0, token.length - 1);
+      const sanitizedTokens = [];
+      for (const token of tokens) {
+        let buffer = [];
+        let escapeSequence = false;
+        for (let i = 0; i < token.length; i++) {
+          const char = token.charAt(i);
+          if (char === "\\" && !escapeSequence) {
+            escapeSequence = true;
+          } else {
+            if (char === "." && !escapeSequence) {
+              sanitizedTokens.push(buffer.join(""));
+              sanitizedTokens.push(".");
+              buffer = [];
+            } else {
+              buffer.push(char);
+              escapeSequence = false;
+            }
+          }
         }
-        if (token !== "") {
-          sanitizedTokens.push(token);
+        if (buffer.length) {
+          sanitizedTokens.push(buffer.join(""));
+          escapeSequence = false;
         }
-        extractedTokens.reverse();
-        sanitizedTokens = sanitizedTokens.concat(extractedTokens);
       }
       sanitizedTokens.push(newlineToken);
       return sanitizedTokens;

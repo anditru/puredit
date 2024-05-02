@@ -64,7 +64,7 @@ export class PatternCursor extends Cursor {
   }
 
   get currentFieldName(): string {
-    return this.node.fieldName || "";
+    return this.node.fieldName || undefined;
   }
 
   goToParent(): boolean {

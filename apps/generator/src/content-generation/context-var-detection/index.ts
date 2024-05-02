@@ -8,16 +8,8 @@ import TemplateArgument from "../template/argument";
 import TemplateParameter from "../template/parameter";
 import TemplateContextVariable from "../template/contextVariable";
 
-export async function handleUndeclaredVariables(
-  samples: AstNode[],
-  language: Language,
-  ignoreBlocks: boolean
-) {
-  const undeclaredVariableMap = findUndeclaredVariables(
-    samples,
-    language as Language,
-    ignoreBlocks
-  );
+export async function handleUndeclaredVariables(samples: AstNode[], language: Language) {
+  const undeclaredVariableMap = findUndeclaredVariables(samples, language as Language);
   const undeclaredVariables = undeclaredVariableMap.getAll();
   let usages: string[] = [];
 
@@ -69,16 +61,12 @@ export async function handleUndeclaredVariables(
   return { undeclaredVariableMap, templateParameters };
 }
 
-function findUndeclaredVariables(
-  samples: AstNode[],
-  language: Language,
-  ignoreBlocks: boolean
-): BlockVariableMap {
+function findUndeclaredVariables(samples: AstNode[], language: Language): BlockVariableMap {
   let undeclaredVariableSearch = getUndeclaredVarSearchFor(language, samples[0]);
-  const undeclaredVariableMap: BlockVariableMap = undeclaredVariableSearch.execute(ignoreBlocks);
+  const undeclaredVariableMap: BlockVariableMap = undeclaredVariableSearch.execute();
   samples.slice(1).forEach((sample) => {
     undeclaredVariableSearch = getUndeclaredVarSearchFor(language, sample);
-    const newUndeclaredVariableMap = undeclaredVariableSearch.execute(ignoreBlocks);
+    const newUndeclaredVariableMap = undeclaredVariableSearch.execute();
     undeclaredVariableMap.setIntersections(newUndeclaredVariableMap);
   });
   return undeclaredVariableMap;
