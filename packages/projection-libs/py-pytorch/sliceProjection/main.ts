@@ -5,8 +5,8 @@ import BeginWidget from "./BeginWidget.svelte";
 import EndWidget from "./EndWidget.svelte";
 import { Match, agg, arg } from "@puredit/parser";
 
-import { fromBeginningSubProjection } from "./fromBeginningSubProjection/config";
-import { untilEndSubProjection } from "./untilEndSubProjection/config";
+import { toEndIndexSubProjection } from "./toEndIndexSubProjection/config";
+import { fromStartIndexSubProjection } from "./fromStartIndexSubProjection/config";
 import { betweenIndicesSubProjection } from "./betweenIndicesSubProjection/config";
 import { singleItemSubProjection } from "./singleItemSubProjection/config";
 
@@ -17,8 +17,8 @@ const slices = agg(
   "slices",
   "subscript",
   [
-    fromBeginningSubProjection.pattern,
-    untilEndSubProjection.pattern,
+    toEndIndexSubProjection.pattern,
+    fromStartIndexSubProjection.pattern,
     betweenIndicesSubProjection.pattern,
     singleItemSubProjection.pattern,
   ],
@@ -36,8 +36,8 @@ export const sliceProjection: RootProjection = {
   requiredContextVariables: [],
   segmentWidgets: [beginWidget, endWidget],
   subProjections: [
-    fromBeginningSubProjection,
-    untilEndSubProjection,
+    toEndIndexSubProjection,
+    fromStartIndexSubProjection,
     betweenIndicesSubProjection,
     singleItemSubProjection,
   ],

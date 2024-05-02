@@ -7,34 +7,81 @@ import ChainLinkTemplateTransformation from "@puredit/parser/parse/chainLinkTemp
 import TemplateParameter from "@puredit/parser/template/parameters/templateParameter";
 import TemplatePartArray from "./templatePartArray";
 import { toLowerCamelCase } from "@puredit/utils";
+import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
+import AggPartTemplateTransformation from "@puredit/parser/parse/aggPartTemplateTransformation";
+import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
 
 const PLACEHOLDER_PATTERN = /<%[^%>]+%>/g;
+const ALLOWED_EXTENSION_TYPES = ["projectionExtension"].join(", ");
+const ALLOWED_SUBPROJECTION_TYPES = ["chainLink, aggregationPart"].join(", ");
 
 export class PackageExtender {
+  pkg: RootProjection[];
   constructor(private readonly parser: Parser) {}
 
   extendPackage(pkg: RootProjection[], extensions: ProjectionExtension[]) {
+    this.pkg = pkg;
+
     for (const extension of extensions) {
-      extension.subProjections.forEach((definition) => {
-        const subProjection = this.buildSubProjection(definition);
-        const rootProjection = pkg.find((proj) => proj.name === extension.projection);
-        if (!rootProjection) {
-          throw new Error(`Root projection ${rootProjection} not found`);
-        }
-        const pattern = this.buildChainLinkPattern(
-          subProjection,
-          rootProjection,
-          extension.parentParameter
-        );
-        insertChainLinkProjection(
-          subProjection,
-          pattern,
-          rootProjection,
-          extension.parentParameter
-        );
-      });
+      switch (extension.type) {
+        case "projectionExtension":
+          this.processProjectionExtension(extension);
+          break;
+        default:
+          throw new Error(
+            `Invalid extension type ${extension.type}! Allowed values are ${ALLOWED_EXTENSION_TYPES}.`
+          );
+      }
     }
+
     return pkg;
+  }
+
+  private processProjectionExtension(extension: ProjectionExtension) {
+    for (const definition of extension.subProjections) {
+      switch (definition.type) {
+        case "chainLink":
+          this.processChainLink(extension, definition);
+          break;
+        case "aggregationPart":
+          this.processAggregationPart(extension, definition);
+          break;
+        default:
+          throw new Error(
+            `Invalid subprojection type ${definition.type}! Allowed values are ${ALLOWED_SUBPROJECTION_TYPES}.`
+          );
+      }
+    }
+  }
+
+  private processChainLink(extension: ProjectionExtension, definition: SubProjectionDefinition) {
+    const rootProjection = this.getRootProjectionFor(extension);
+    const subProjection = this.buildSubProjection(definition);
+    const pattern = this.buildChainLinkPattern(
+      subProjection,
+      rootProjection,
+      extension.parentParameter
+    );
+    insertChainLinkProjection(subProjection, pattern, rootProjection, extension.parentParameter);
+  }
+
+  private processAggregationPart(
+    extension: ProjectionExtension,
+    definition: SubProjectionDefinition
+  ) {
+    const rootProjection = this.getRootProjectionFor(extension);
+    const subProjection = this.buildSubProjection(definition);
+    const pattern = this.buildAggregationPartPattern(
+      subProjection,
+      rootProjection,
+      extension.parentParameter
+    );
+    insertAggregationPartProjection(
+      subProjection,
+      pattern,
+      rootProjection,
+      extension.parentParameter
+    );
   }
 
   private buildSubProjection(definition: SubProjectionDefinition): SubProjection {
@@ -84,6 +131,40 @@ export class PackageExtender {
       .setTemplate(subProjection.pattern)
       .execute();
   }
+
+  private buildAggregationPartPattern(
+    subProjection: SubProjection,
+    rootProjection: RootProjection,
+    parentParameter: string
+  ): Pattern {
+    const rootPattern = rootProjection.pattern as AggregationDecorator;
+    const aggregation = rootPattern.getAggregation(parentParameter);
+    if (!aggregation) {
+      throw new Error(`Aggregation with name ${parentParameter} not found`);
+    }
+    const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(
+      this.parser.language,
+      aggregation.type
+    );
+    const transformation = new AggPartTemplateTransformation(this.parser.treeSitterParser);
+    transformation;
+    if (aggregation.specialStartPattern) {
+      transformation.setStartTemplateCodeString(aggregation.specialStartPattern?.toCodeString());
+    }
+    return transformation
+      .setNodeTypeConfig(nodeTypeConfig)
+      .setIsExpression(false)
+      .setTemplate(subProjection.pattern)
+      .execute();
+  }
+
+  private getRootProjectionFor(extension: ProjectionExtension) {
+    const rootProjection = this.pkg.find((proj) => proj.name === extension.projection);
+    if (!rootProjection) {
+      throw new Error(`Root projection ${extension.projection} not found`);
+    }
+    return rootProjection;
+  }
 }
 
 function insertChainLinkProjection(
@@ -100,6 +181,22 @@ function insertChainLinkProjection(
   }
   chain.linkPatterns.push(subProjection.pattern);
   rootPattern.addLinkPattern(parentParameter, linkPattern);
+}
+
+function insertAggregationPartProjection(
+  subProjection: SubProjection,
+  partPattern: Pattern,
+  rootProjection: RootProjection,
+  parentParameter: string
+) {
+  rootProjection.subProjections.push(subProjection);
+  const rootPattern = rootProjection.pattern as AggregationDecorator;
+  const aggregation = rootPattern.getAggregation(parentParameter);
+  if (!aggregation) {
+    throw new Error(`Chain with name ${parentParameter} not found`);
+  }
+  aggregation.subPatterns.push(subProjection.pattern);
+  rootPattern.addPartPattern(parentParameter, partPattern);
 }
 
 function merge(

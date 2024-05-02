@@ -6,11 +6,11 @@ import { arg } from "@puredit/parser";
 
 const startIndex = arg("startIndex", ["integer", "identifier"]);
 const stepSize = arg("stepSize", ["integer", "identifier"]);
-const pattern = parser.subPattern("fromBeginningSubProjectionPattern")`${startIndex}::${stepSize}`;
+const pattern = parser.subPattern("fromStartIndexSubProjectionPattern")`${startIndex}::${stepSize}`;
 
 const widget = svelteProjection(Widget);
 
-export const untilEndSubProjection: SubProjection = {
+export const fromStartIndexSubProjection: SubProjection = {
   name: "Select until End",
   description: "Select items until the end.",
   pattern,
