@@ -11,16 +11,23 @@ import { dirname } from "path";
 import { Question } from "inquirer";
 import { Language, ProjectionContent } from "../content-generation/common";
 import { MemFsEditor, VinylMemFsEditorFile } from "mem-fs-editor";
+import { toLowerCamelCase } from "@puredit/utils";
 
 interface SubProjectionAnswers {
+  language: Language;
+  displayName: string;
+  description: string;
+}
+
+interface SubProjectionConfig {
   language: Language;
   displayName: string;
   technicalName: string;
   description: string;
 }
 
-const subProjectionAnswersPrompts: Question[] = [
-  {
+const subProjectionQuestions: Record<string, Question> = {
+  language: {
     type: "list",
     name: "language",
     message: "For which language will your subprojection be?",
@@ -29,25 +36,19 @@ const subProjectionAnswersPrompts: Question[] = [
       { name: "Python", value: "py" },
     ],
   },
-  {
+  displayName: {
     type: "input",
     name: "displayName",
-    message: "What shall be the display name for your sub projection?",
+    message: "What shall be the display name for your subprojection?",
     default: "My Sub Projection",
   },
-  {
-    type: "input",
-    name: "technicalName",
-    message: "What shall be the technical name for your sub projection?",
-    default: "mySubProjection",
-  },
-  {
+  description: {
     type: "input",
     name: "description",
-    message: "Give a description for your sub projection.",
+    message: "Give a description for your subprojection.",
     default: "A fancy sub projection.",
   },
-];
+};
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -58,7 +59,12 @@ export default class SubProjectionGenerator extends BaseGenerator {
     SubProjectionGenerator.highestId++;
     return SubProjectionGenerator.highestId;
   }
-  private subProjectionAnswers: SubProjectionAnswers;
+  private subProjectionConfig: SubProjectionConfig = {
+    language: null,
+    displayName: null,
+    technicalName: null,
+    description: null,
+  };
   private projectionPath: string;
   private relativeSubProjectionPath: string;
   private projectionContent = {
@@ -80,22 +86,22 @@ export default class SubProjectionGenerator extends BaseGenerator {
 
   setLanguage(language: Language) {
     this.language = language;
-    this.subProjectionAnswers.language = language;
+    this.subProjectionConfig.language = language;
     return this;
   }
 
   setDisplayName(displayName: string) {
-    this.subProjectionAnswers.displayName = displayName;
+    this.subProjectionConfig.displayName = displayName;
     return this;
   }
 
   setTechnicalName(technicalName: string) {
-    this.subProjectionAnswers.technicalName = technicalName;
+    this.subProjectionConfig.technicalName = technicalName;
     return this;
   }
 
   setDescription(description: string) {
-    this.subProjectionAnswers.description = description;
+    this.subProjectionConfig.description = description;
     return this;
   }
 
@@ -112,20 +118,23 @@ export default class SubProjectionGenerator extends BaseGenerator {
   async showPrompts(): Promise<string> {
     if (process.env.DEBUG) {
       const id = SubProjectionGenerator.issueId();
-      this.subProjectionAnswers = {
+      this.subProjectionConfig = {
         language: Language.Python,
         displayName: `My Projection ${id}`,
         technicalName: `myProjection${id}`,
         description: `My description ${id}`,
       };
     } else {
-      this.subProjectionAnswers = await this.prompt<SubProjectionAnswers>(
-        subProjectionAnswersPrompts
-      );
+      const questionsToAsk = Object.keys(subProjectionQuestions)
+        .filter((field) => !this.subProjectionConfig[field])
+        .map((field) => subProjectionQuestions[field]);
+      const subProjectionAnswers = await this.prompt<SubProjectionAnswers>(questionsToAsk);
+      Object.assign(this.subProjectionConfig, subProjectionAnswers);
     }
-    this.language = this.subProjectionAnswers.language;
-    this.relativeSubProjectionPath = `./${this.subProjectionAnswers.technicalName}/config`;
-    return this.subProjectionAnswers.technicalName;
+    this.language = this.subProjectionConfig.language;
+    this.subProjectionConfig.technicalName = toLowerCamelCase(this.subProjectionConfig.displayName);
+    this.relativeSubProjectionPath = `./${this.subProjectionConfig.technicalName}/config`;
+    return this.subProjectionConfig.technicalName;
   }
 
   async writeFiles(projectionContent?: ProjectionContent): Promise<void> {
@@ -145,11 +154,11 @@ export default class SubProjectionGenerator extends BaseGenerator {
 
     this.destinationRoot = path.resolve(
       this.projectionPath,
-      this.subProjectionAnswers.technicalName
+      this.subProjectionConfig.technicalName
     );
 
     this.fs.copyTpl(this.templatePath("config.tts"), this.destinationPath("config.ts"), {
-      ...this.subProjectionAnswers,
+      ...this.subProjectionConfig,
       ...this.projectionContent,
     });
 
@@ -159,7 +168,7 @@ export default class SubProjectionGenerator extends BaseGenerator {
           this.templatePath("Widget.tsvelte"),
           this.destinationPath(`Widget${index}.svelte`),
           {
-            ...this.subProjectionAnswers,
+            ...this.subProjectionConfig,
             widgetImports: this.projectionContent.widgetImports,
             widgetContent,
           }
@@ -167,17 +176,17 @@ export default class SubProjectionGenerator extends BaseGenerator {
       );
     } else if (projectionContent && !this.projectionContent.widgetContents.length) {
       this.fs.copyTpl(this.templatePath("Widget.tsvelte"), this.destinationPath("Widget.svelte"), {
-        ...this.subProjectionAnswers,
-        componentContent: this.subProjectionAnswers.displayName,
+        ...this.subProjectionConfig,
+        componentContent: this.subProjectionConfig.displayName,
         widgetImports: this.projectionContent.widgetImports,
         widgetContent: "",
       });
     } else {
       this.fs.copyTpl(this.templatePath("Widget.tsvelte"), this.destinationPath("Widget.svelte"), {
-        ...this.subProjectionAnswers,
-        componentContent: this.subProjectionAnswers.displayName,
+        ...this.subProjectionConfig,
+        componentContent: this.subProjectionConfig.displayName,
         widgetImports: this.projectionContent.widgetImports,
-        widgetContent: this.subProjectionAnswers.displayName,
+        widgetContent: this.subProjectionConfig.displayName,
       });
     }
 
@@ -212,8 +221,8 @@ export default class SubProjectionGenerator extends BaseGenerator {
       const importDecl = importDeclaration(
         [
           importSpecifier(
-            identifier(this.subProjectionAnswers.technicalName),
-            identifier(this.subProjectionAnswers.technicalName)
+            identifier(this.subProjectionConfig.technicalName),
+            identifier(this.subProjectionConfig.technicalName)
           ),
         ],
         stringLiteral(this.relativeSubProjectionPath)
@@ -229,7 +238,7 @@ export default class SubProjectionGenerator extends BaseGenerator {
             parent.key.type === "Identifier" &&
             parent.key.name === "subProjections"
           ) {
-            path.node.elements.push(identifier(that.subProjectionAnswers.technicalName));
+            path.node.elements.push(identifier(that.subProjectionConfig.technicalName));
           }
         },
       });

@@ -58,7 +58,7 @@ export class ProjectionContent {
   }
 
   get postfixWidgetName() {
-    return this.postfixWidgetContent ? `widget${this.segmentWidgetContents.length}` : "null";
+    return this.postfixWidgetContent ? `widget${this.segmentWidgetContents.length}` : "undefined";
   }
 
   get subProjectionArray() {

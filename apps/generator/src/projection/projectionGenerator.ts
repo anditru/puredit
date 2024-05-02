@@ -16,8 +16,15 @@ import { Question } from "inquirer";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { Language, ProjectionContent } from "../content-generation/common";
+import { toLowerCamelCase } from "@puredit/utils";
 
 interface ProjectionAnswers {
+  language?: Language;
+  displayName?: string;
+  description?: string;
+}
+
+interface ProjectionConfig {
   language?: Language;
   displayName?: string;
   technicalName?: string;
@@ -40,12 +47,6 @@ const projectionQuestions: Record<string, Question> = {
     message: "What shall be the display name for your projection?",
     default: "My Projection",
   },
-  technicalName: {
-    type: "input",
-    name: "technicalName",
-    message: "What shall be the technical name for your projection?",
-    default: "myProjection",
-  },
   description: {
     type: "input",
     name: "description",
@@ -59,7 +60,7 @@ const __dirname = dirname(__filename);
 
 export default class ProjectionGenerator extends BaseGenerator {
   public readonly packagePath = path.resolve("./");
-  private projectionAnswers: ProjectionAnswers = {};
+  private projectionConfig: ProjectionConfig = {};
   private projectionContent = {
     widgetContents: [],
     widgetImports: "",
@@ -80,22 +81,22 @@ export default class ProjectionGenerator extends BaseGenerator {
 
   setLanguage(language: Language) {
     this.language = language;
-    this.projectionAnswers.language = language;
+    this.projectionConfig.language = language;
     return this;
   }
 
   setDisplayName(displayName: string) {
-    this.projectionAnswers.displayName = displayName;
+    this.projectionConfig.displayName = displayName;
     return this;
   }
 
   setTechnicalName(technicalName: string) {
-    this.projectionAnswers.technicalName = technicalName;
+    this.projectionConfig.technicalName = technicalName;
     return this;
   }
 
   setDescription(description: string) {
-    this.projectionAnswers.description = description;
+    this.projectionConfig.description = description;
     return this;
   }
 
@@ -106,12 +107,13 @@ export default class ProjectionGenerator extends BaseGenerator {
 
   async showPrompts(): Promise<string> {
     const questionsToAsk = Object.keys(projectionQuestions)
-      .filter((field) => !this.projectionAnswers[field])
+      .filter((field) => !this.projectionConfig[field])
       .map((field) => projectionQuestions[field]);
     const projectionAnswers = await this.prompt<ProjectionAnswers>(questionsToAsk);
-    Object.assign(this.projectionAnswers, projectionAnswers);
-    this.language = this.projectionAnswers.language;
-    return this.projectionAnswers.technicalName;
+    Object.assign(this.projectionConfig, projectionAnswers);
+    this.projectionConfig.technicalName = toLowerCamelCase(projectionAnswers.displayName);
+    this.language = this.projectionConfig.language;
+    return this.projectionConfig.technicalName;
   }
 
   async writeFiles(projectionContent?: ProjectionContent): Promise<void> {
@@ -130,9 +132,9 @@ export default class ProjectionGenerator extends BaseGenerator {
       };
     }
 
-    this.destinationRoot = path.resolve(this.packagePath, this.projectionAnswers.technicalName);
+    this.destinationRoot = path.resolve(this.packagePath, this.projectionConfig.technicalName);
     this.fs.copyTpl(this.templatePath("main.tts"), this.destinationPath("main.ts"), {
-      ...this.projectionAnswers,
+      ...this.projectionConfig,
       ...this.projectionContent,
     });
 
@@ -142,7 +144,7 @@ export default class ProjectionGenerator extends BaseGenerator {
           this.templatePath("Widget.tsvelte"),
           this.destinationPath(`Widget${index}.svelte`),
           {
-            ...this.projectionAnswers,
+            ...this.projectionConfig,
             widgetImports: this.projectionContent.widgetImports,
             widgetContent,
           }
@@ -150,10 +152,10 @@ export default class ProjectionGenerator extends BaseGenerator {
       );
     } else {
       this.fs.copyTpl(this.templatePath("Widget.tsvelte"), this.destinationPath("Widget.svelte"), {
-        ...this.projectionAnswers,
-        componentContent: this.projectionAnswers.displayName,
+        ...this.projectionConfig,
+        componentContent: this.projectionConfig.displayName,
         widgetImports: this.projectionContent.widgetImports,
-        widgetContent: this.projectionAnswers.displayName,
+        widgetContent: this.projectionConfig.displayName,
       });
     }
 
@@ -195,11 +197,11 @@ export default class ProjectionGenerator extends BaseGenerator {
     const importDecl = importDeclaration(
       [
         importSpecifier(
-          identifier(this.projectionAnswers.technicalName),
-          identifier(this.projectionAnswers.technicalName)
+          identifier(this.projectionConfig.technicalName),
+          identifier(this.projectionConfig.technicalName)
         ),
       ],
-      stringLiteral(`./${this.projectionAnswers.technicalName}/main`)
+      stringLiteral(`./${this.projectionConfig.technicalName}/main`)
     );
     packageIndexAst.program.body.splice(importIndex + 1, 0, importDecl);
   }
@@ -208,13 +210,13 @@ export default class ProjectionGenerator extends BaseGenerator {
     const that = this;
     traverse(packageIndexAst, {
       ArrayExpression(path) {
-        path.node.elements.push(identifier(that.projectionAnswers.technicalName));
+        path.node.elements.push(identifier(that.projectionConfig.technicalName));
       },
       ExportNamedDeclaration(path) {
         path.node.specifiers.push(
           exportSpecifier(
-            identifier(that.projectionAnswers.technicalName),
-            identifier(that.projectionAnswers.technicalName)
+            identifier(that.projectionConfig.technicalName),
+            identifier(that.projectionConfig.technicalName)
           )
         );
       },

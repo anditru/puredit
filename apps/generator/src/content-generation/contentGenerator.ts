@@ -206,7 +206,8 @@ export default abstract class ContentGenerator {
         );
       }
       const subProjectionGenerator = new SubProjectionGenerator(this.generator.fs);
-      subProjectionGenerator.setProjectionPath(this.projectionPath);
+      subProjectionGenerator.setProjectionPath(this.projectionPath)
+        .setLanguage(this.generator.language);
       const contentGenerator = new SubProjectionContentGenerator(subProjectionGenerator);
       const subProjectionsBelow = await contentGenerator.execute(
         this.projectionPath,
@@ -261,7 +262,8 @@ export default abstract class ContentGenerator {
         );
       }
       const subProjectionGenerator = new SubProjectionGenerator(this.generator.fs);
-      subProjectionGenerator.setProjectionPath(this.projectionPath);
+      subProjectionGenerator.setProjectionPath(this.projectionPath)
+        .setLanguage(this.generator.language);
       const contentGenerator = new SubProjectionContentGenerator(subProjectionGenerator);
       const subProjectionsBelow = await contentGenerator.execute(
         this.projectionPath,

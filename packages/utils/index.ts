@@ -26,3 +26,10 @@ export function* zip<A, B>(a: A[], b: B[]): Generator<[A, B], void> {
 export function capitalize(text: string): string {
   return text.charAt(0).toLocaleUpperCase() + text.slice(1);
 }
+
+export function toLowerCamelCase(text: string) {
+  return text
+    .replace(/\s(.)/g, (part) => part.toUpperCase().trim())
+    .replace(/\s/g, "")
+    .replace(/^(.)/, (part) => part.toLowerCase());
+}

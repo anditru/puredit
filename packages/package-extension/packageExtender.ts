@@ -6,6 +6,7 @@ import ChainDecorator from "@puredit/parser/pattern/decorators/chainDecorator";
 import ChainLinkTemplateTransformation from "@puredit/parser/parse/chainLinkTemplateTransformation";
 import TemplateParameter from "@puredit/parser/template/parameters/templateParameter";
 import TemplatePartArray from "./templatePartArray";
+import { toLowerCamelCase } from "@puredit/utils";
 
 const PLACEHOLDER_PATTERN = /<%[^%>]+%>/g;
 
@@ -99,13 +100,6 @@ function insertChainLinkProjection(
   }
   chain.linkPatterns.push(subProjection.pattern);
   rootPattern.addLinkPattern(parentParameter, linkPattern);
-}
-
-function toLowerCamelCase(text: string) {
-  return text
-    .replace(/\s(.)/g, (part) => part.toUpperCase().trim())
-    .replace(/\s/g, "")
-    .replace(/^(.)/, (part) => part.toLowerCase());
 }
 
 function merge(

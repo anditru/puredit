@@ -11,11 +11,22 @@ interface PackageAnswers {
   description: string;
 }
 
+interface PackageConfig {
+  languageName: string;
+  name: string;
+  description: string;
+}
+
+const languageNames = {
+  [Language.Python]: "Python",
+  [Language.TypeScript]: "TypeScript",
+};
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export default class PackageGenerator extends BaseGenerator {
-  packageAnswers: PackageAnswers;
+  packageConfig: PackageConfig;
   fullPackageName: string;
 
   constructor() {
@@ -51,9 +62,14 @@ export default class PackageGenerator extends BaseGenerator {
         default: "A package with projections.",
       },
     ];
-    this.packageAnswers = await this.prompt<PackageAnswers>(packageAnswersPrompts);
-    this.language = this.packageAnswers.language;
-    this.fullPackageName = `${this.packageAnswers.language}-${this.packageAnswers.name}`;
+    const answers = await this.prompt<PackageAnswers>(packageAnswersPrompts);
+    this.packageConfig = {
+      languageName: languageNames[answers.language],
+      name: answers.name,
+      description: answers.description,
+    };
+    this.language = answers.language;
+    this.fullPackageName = `${answers.language}-${this.packageConfig.name}`;
     return this.fullPackageName;
   }
 
@@ -70,14 +86,14 @@ export default class PackageGenerator extends BaseGenerator {
     this.fs.copyTpl(this.templatePath("index.tts"), this.destinationPath("index.ts"));
 
     this.fs.copyTpl(this.templatePath("package.tjson"), this.destinationPath("package.json"), {
-      ...this.packageAnswers,
+      ...this.packageConfig,
       fullPackageName: this.fullPackageName,
     });
 
     this.fs.copyTpl(
       this.templatePath("parser.tts"),
       this.destinationPath("parser.ts"),
-      this.packageAnswers
+      this.packageConfig
     );
 
     await this.fs.commit();
