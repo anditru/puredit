@@ -1,3 +1,9 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "json.schemas": [
+    {
+      "fileMatch": ["**/*.ext.json"],
+      "url": "./packages/package-extension/schema/extensionSchema.json"
+    }
+  ]
 }

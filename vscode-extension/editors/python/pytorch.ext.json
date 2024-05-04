@@ -1,0 +1,48 @@
+[
+  {
+    "type": "packageExtension",
+    "package": "py-pytorch",
+    "rootProjections": [
+      {
+        "type": "rootProjection",
+        "name": "tensorMax",
+        "description": "Get the maximum value of a tensor",
+        "parameters": [
+          {
+            "type": "contextVariable",
+            "name": "torch"
+          },
+          {
+            "type": "argument",
+            "name": "tensor",
+            "nodeTypes": ["identifier"]
+          }
+        ],
+        "template": "<%torch%>.max(<%tensor%>)",
+        "segmentWidgets": ["Get the maximum value in tensor <%tensor%>"]
+      }
+    ]
+  },
+  {
+    "type": "rootProjectionExtension",
+    "package": "py-pytorch",
+    "rootProjection": "Slice",
+    "parentParameter": "slices",
+    "subProjections": [
+      {
+        "type": "aggregationPart",
+        "name": "All with Stride",
+        "description": "Select all items with a spcified stride.",
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "stride",
+            "nodeTypes": ["integer", "identifier"]
+          }
+        ],
+        "template": "::<%stride%>",
+        "segmentWidgets": ["Over all indices with stride <%stride%>"]
+      }
+    ]
+  }
+]

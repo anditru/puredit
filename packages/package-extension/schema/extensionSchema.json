@@ -1,0 +1,205 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "PackageExtension": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "packageExtension"
+        },
+        "package": {
+          "type": "string"
+        },
+        "rootProjections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RootProjectionDefinition"
+          }
+        }
+      }
+    },
+    "RootProjectionExtension": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "rootProjectionExtension"
+        },
+        "package": {
+          "type": "string"
+        },
+        "rootProjection": {
+          "type": "string"
+        },
+        "parentParameter": {
+          "type": "string"
+        },
+        "subProjections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubProjectionDefinition"
+          }
+        }
+      }
+    },
+    "SubProjectionExtension": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "subProjectionExtension"
+        },
+        "package": {
+          "type": "string"
+        },
+        "rootProjection": {
+          "type": "string"
+        },
+        "subProjection": {
+          "type": "string"
+        },
+        "parentParameter": {
+          "type": "string"
+        },
+        "subProjections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubProjectionDefinition"
+          }
+        }
+      }
+    },
+    "RootProjectionDefinition": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "rootProjection"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TemplateParameterDefinition"
+          }
+        },
+        "template": {
+          "type": "string"
+        },
+        "segmentWidgets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postfixWidget": {
+          "type": "string"
+        }
+      }
+    },
+    "SubProjectionDefinition": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/SubProjectionType",
+          "enum": ["chainLink", "aggregationPart"]
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TemplateParameterDefinition"
+          }
+        },
+        "template": {
+          "type": "string"
+        },
+        "segmentWidgets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "postfixWidget": {
+          "type": "string"
+        }
+      }
+    },
+    "SubProjectionType": {
+      "type": "string",
+      "enum": ["chainLink", "aggregationPart"]
+    },
+    "TemplateParameterDefinition": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/TemplateArgumentDefinition"
+        },
+        {
+          "$ref": "#/definitions/TemplateContextVariableDefinition"
+        }
+      ]
+    },
+    "TemplateArgumentDefinition": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "argument"
+        },
+        "name": {
+          "type": "string"
+        },
+        "nodeTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "TemplateContextVariableDefinition": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "contextVariable"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "type": "array",
+  "items": {
+    "oneOf": [
+      {
+        "$ref": "#/definitions/PackageExtension"
+      },
+      {
+        "$ref": "#/definitions/RootProjectionExtension"
+      },
+      {
+        "$ref": "#/definitions/SubProjectionExtension"
+      }
+    ]
+  }
+}

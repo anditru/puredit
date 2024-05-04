@@ -1,11 +1,16 @@
 import { RootProjection, SubProjection } from "@puredit/projections";
 import {
   Extension,
-  ProjectionExtension,
+  PackageExtension,
+  RootProjectionDefinition,
+  RootProjectionExtension,
   SubProjectionDefinition,
   SubProjectionExtension,
+  TemplateArgumentDefinition,
+  TemplateContextVariableDefinition,
+  TemplateParameterDefinition,
 } from "./types";
-import { arg, Parser, Pattern } from "@puredit/parser";
+import { arg, contextVariable, Parser, Pattern } from "@puredit/parser";
 import { simpleProjection } from "@puredit/simple-projection";
 import ChainDecorator from "@puredit/parser/pattern/decorators/chainDecorator";
 import ChainLinkTemplateTransformation from "@puredit/parser/parse/chainLinkTemplateTransformation";
@@ -16,9 +21,19 @@ import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregation
 import AggPartTemplateTransformation from "@puredit/parser/parse/aggPartTemplateTransformation";
 import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
 
+type ParamsMap = Record<string, TemplateParameter>;
+
 const PLACEHOLDER_PATTERN = /<%[^%>]+%>/g;
-const ALLOWED_EXTENSION_TYPES = ["projectionExtension", "subProjectionExtension"].join(", ");
-const ALLOWED_SUBPROJECTION_TYPES = ["chainLink, aggregationPart"].join(", ");
+
+const ALLOWED_EXTENSION_TYPES = [
+  "packageExtension",
+  "rootProjectionExtension",
+  "subProjectionExtension",
+].join(", ");
+
+const ALLOWED_SUBPROJECTION_TYPES = ["chainLink", "aggregationPart"].join(", ");
+
+const ALLOWED_PARAMETER_TYPES = ["argument", "contextVariable"].join(", ");
 
 export class PackageExtender {
   pkg: RootProjection[];
@@ -28,8 +43,11 @@ export class PackageExtender {
     this.pkg = pkg;
     for (const extension of extensions) {
       switch (extension.type) {
-        case "projectionExtension":
-          this.processProjectionExtension(extension as ProjectionExtension);
+        case "packageExtension":
+          this.processPackageExtension(extension as PackageExtension);
+          break;
+        case "rootProjectionExtension":
+          this.processRootProjectionExtension(extension as RootProjectionExtension);
           break;
         case "subProjectionExtension":
           this.processSubProjectionExtension(extension as SubProjectionExtension);
@@ -43,7 +61,43 @@ export class PackageExtender {
     return pkg;
   }
 
-  private processProjectionExtension(extension: ProjectionExtension) {
+  private processPackageExtension(extension: PackageExtension) {
+    for (const definition of extension.rootProjections) {
+      const rootProjection = this.processRootProjection(definition);
+      this.pkg.push(rootProjection);
+    }
+  }
+
+  private processRootProjection(definition: RootProjectionDefinition): RootProjection {
+    const technicalName = toLowerCamelCase(definition.name);
+    const paramsMap = buildParamsMap(definition);
+    const { templateStrings, params } = buildParserInput(definition, paramsMap);
+
+    const pattern = this.parser.statementPattern(`${technicalName}Pattern`)(
+      templateStrings as unknown as TemplateStringsArray,
+      ...params
+    );
+
+    const segmentWidgets = definition.segmentWidgets.map((widget) =>
+      buildWidget(widget, paramsMap)
+    );
+    let postfixWidget;
+    if (definition.postfixWidget) {
+      postfixWidget = buildWidget(definition.postfixWidget, paramsMap);
+    }
+
+    return {
+      name: definition.name,
+      description: definition.description,
+      pattern,
+      segmentWidgets,
+      postfixWidget,
+      requiredContextVariables: [],
+      subProjections: [],
+    };
+  }
+
+  private processRootProjectionExtension(extension: RootProjectionExtension) {
     let subProjection: SubProjection, pattern: Pattern;
     const parentProjection = this.getParentProjectionFor(extension) as RootProjection;
     for (const definition of extension.subProjections) {
@@ -99,7 +153,7 @@ export class PackageExtender {
   }
 
   private processAggregationPart(
-    extension: ProjectionExtension | SubProjectionExtension,
+    extension: RootProjectionExtension | SubProjectionExtension,
     definition: SubProjectionDefinition
   ) {
     const parentProjection = this.getParentProjectionFor(extension);
@@ -113,7 +167,7 @@ export class PackageExtender {
   }
 
   private processChainLink(
-    extension: ProjectionExtension | SubProjectionExtension,
+    extension: RootProjectionExtension | SubProjectionExtension,
     definition: SubProjectionDefinition
   ) {
     const parentProjection = this.getParentProjectionFor(extension);
@@ -128,29 +182,28 @@ export class PackageExtender {
 
   private buildSubProjection(definition: SubProjectionDefinition): SubProjection {
     const technicalName = toLowerCamelCase(definition.name);
-    const paramsMap: Record<string, TemplateParameter> = {};
-    definition.arguments.map((definition) => {
-      paramsMap[`<%${definition.name}%>`] = arg(definition.name, definition.types);
-    });
+    const paramsMap = buildParamsMap(definition);
+    const { templateStrings, params } = buildParserInput(definition, paramsMap);
 
-    const patternStaticParts = definition.template.split(PLACEHOLDER_PATTERN);
-    const patternParameters = definition.template.match(PLACEHOLDER_PATTERN) || [];
-    const params = patternParameters.map((param) => paramsMap[param]);
-    const templateStrings = new TemplatePartArray(...patternStaticParts);
     const template = this.parser.subPattern(`${technicalName}Pattern`)(
       templateStrings as unknown as TemplateStringsArray,
       ...params
     );
 
-    const projectionStaticParts = definition.projection.split(PLACEHOLDER_PATTERN);
-    const projectionParameters = definition.projection.match(PLACEHOLDER_PATTERN) || [];
-    const mergedParts = merge(projectionStaticParts, projectionParameters, paramsMap);
-    const widget = simpleProjection(mergedParts);
+    const segmentWidgets = definition.segmentWidgets.map((widget) =>
+      buildWidget(widget, paramsMap)
+    );
+    let postfixWidget;
+    if (definition.postfixWidget) {
+      postfixWidget = buildWidget(definition.postfixWidget, paramsMap);
+    }
+
     return {
       name: definition.name,
       description: definition.description,
       pattern: template,
-      segmentWidgets: [widget],
+      segmentWidgets,
+      postfixWidget,
       requiredContextVariables: [],
     };
   }
@@ -201,22 +254,23 @@ export class PackageExtender {
   }
 
   private getRootProjection(extension: SubProjectionExtension) {
-    const rootProjection = this.pkg.find((proj) => proj.name === extension.projection);
+    const rootProjection = this.pkg.find((proj) => proj.name === extension.rootProjection);
     if (!rootProjection) {
-      throw new Error(`Root projection ${extension.projection} not found`);
+      throw new Error(`Root projection ${extension.rootProjection} not found`);
     }
     return rootProjection;
   }
 
   private getParentProjectionFor(
-    extension: ProjectionExtension | SubProjectionExtension
+    extension: RootProjectionExtension | SubProjectionExtension
   ): RootProjection | SubProjection {
-    const rootProjection = this.pkg.find((proj) => proj.name === extension.projection);
+    const rootProjection = this.pkg.find((proj) => proj.name === extension.rootProjection);
+    console.log(JSON.stringify(extension));
     if (!rootProjection) {
-      throw new Error(`Root projection ${extension.projection} not found`);
+      throw new Error(`Root projection ${extension.rootProjection} not found`);
     }
     switch (extension.type) {
-      case "projectionExtension":
+      case "rootProjectionExtension":
         return rootProjection;
       case "subProjectionExtension":
         const subProjectionExtension = extension as SubProjectionExtension;
@@ -233,6 +287,50 @@ export class PackageExtender {
         );
     }
   }
+}
+
+function buildParamsMap(definition: RootProjectionDefinition | SubProjectionDefinition): ParamsMap {
+  const paramsMap: Record<string, TemplateParameter> = {};
+  for (const paramDefinition of definition.parameters) {
+    paramsMap[`<%${paramDefinition.name}%>`] = buildTemplateParameter(paramDefinition);
+  }
+  return paramsMap;
+}
+
+function buildTemplateParameter(definition: TemplateParameterDefinition) {
+  switch (definition.type) {
+    case "argument":
+      const argDefinition = definition as TemplateArgumentDefinition;
+      return arg(definition.name, argDefinition.nodeTypes);
+    case "contextVariable":
+      const varDefinition = definition as TemplateContextVariableDefinition;
+      return contextVariable(varDefinition.name);
+    default:
+      throw new Error(
+        `Invalid template parameter type. Allowed values are ${ALLOWED_PARAMETER_TYPES}`
+      );
+  }
+}
+
+function buildParserInput(
+  definition: RootProjectionDefinition | SubProjectionDefinition,
+  paramsMap: ParamsMap
+) {
+  const patternStaticParts = definition.template.split(PLACEHOLDER_PATTERN);
+  const patternParameters = definition.template.match(PLACEHOLDER_PATTERN) || [];
+  const templateStrings = new TemplatePartArray(...patternStaticParts);
+  const params = patternParameters.map((param) => paramsMap[param]);
+  return {
+    templateStrings,
+    params,
+  };
+}
+
+function buildWidget(widgetString: string, paramsMap) {
+  const projectionStaticParts = widgetString.split(PLACEHOLDER_PATTERN);
+  const projectionParameters = widgetString.match(PLACEHOLDER_PATTERN) || [];
+  const mergedParts = merge(projectionStaticParts, projectionParameters, paramsMap);
+  return simpleProjection(mergedParts);
 }
 
 function insertChainLinkIntoProjection(

@@ -1,40 +1,88 @@
-export interface Extension {
+//Extensions
+export type Extension = PackageExtension | RootProjectionExtension | SubProjectionExtension;
+
+/**
+ * @additionalProperties false
+ */
+export interface PackageExtension {
   type: string;
   package: string;
+  rootProjections: RootProjectionDefinition[];
 }
 
-export interface PackageExtension extends Extension {
-  projections: ProjectionDefinition[];
-}
-
-export interface ProjectionExtension extends Extension {
-  projection: string;
+/**
+ * @additionalProperties false
+ */
+export interface RootProjectionExtension {
+  type: string;
+  package: string;
+  rootProjection: string;
   parentParameter: string;
   subProjections: SubProjectionDefinition[];
 }
 
-export interface SubProjectionExtension extends Extension {
-  projection: string;
+/**
+ * @additionalProperties false
+ */
+export interface SubProjectionExtension {
+  type: string;
+  package: string;
+  rootProjection: string;
   subProjection: string;
   parentParameter: string;
   subProjections: SubProjectionDefinition[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ProjectionDefinition {
-  // TODO
-}
+// Projections
 
-export interface SubProjectionDefinition {
+/**
+ * @additionalProperties false
+ */
+export interface RootProjectionDefinition {
   type: string;
   name: string;
   description: string;
-  arguments: TemplateArgumentDefinition[];
+  parameters: TemplateParameterDefinition[];
   template: string;
-  projection: string;
+  segmentWidgets: string[];
+  postfixWidget?: string;
 }
 
-export interface TemplateArgumentDefinition {
+/**
+ * @additionalProperties false
+ */
+export interface SubProjectionDefinition {
+  type: SubProjectionType;
   name: string;
-  types: string[];
+  description: string;
+  parameters: TemplateParameterDefinition[];
+  template: string;
+  segmentWidgets: string[];
+  postfixWidget?: string;
+}
+
+export enum SubProjectionType {
+  chainLink = "chainLink",
+  aggregationPart = "aggregationPart",
+}
+
+export type TemplateParameterDefinition =
+  | TemplateArgumentDefinition
+  | TemplateContextVariableDefinition;
+
+/**
+ * @additionalProperties false
+ */
+export interface TemplateArgumentDefinition {
+  type: string;
+  name: string;
+  nodeTypes: string[];
+}
+
+/**
+ * @additionalProperties false
+ */
+export interface TemplateContextVariableDefinition {
+  type: string;
+  name: string;
 }

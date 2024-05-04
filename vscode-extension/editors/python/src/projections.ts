@@ -12,12 +12,12 @@ const wasmPathProvider = new BrowserWasmPathProvider(Language.Python);
 const parser = await Parser.load(Language.Python, wasmPathProvider);
 const packageExtender = new PackageExtender(parser);
 
-const polarsExtensions = await parseExtensions("../editors/python/src/polars-extension.json");
+const polarsExtensions = await parseExtensions("../editors/python/polars.ext.json");
 const extendedPolarsProjections = packageExtender.extendPackage(
   polarsProjections,
   polarsExtensions
 );
-const pyTorchExtensions = await parseExtensions("../editors/python/src/pytorch-extension.json");
+const pyTorchExtensions = await parseExtensions("../editors/python/pytorch.ext.json");
 const extendedPyTorchProjections = packageExtender.extendPackage(
   pyTorchProjections,
   pyTorchExtensions
@@ -27,6 +27,7 @@ export const projectionPluginConfig: ProjectionPluginConfig = {
   parser,
   globalContextVariables: {
     pl: undefined,
+    torch: undefined,
   },
   globalContextInformation: {},
   projections: [
