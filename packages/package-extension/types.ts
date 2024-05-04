@@ -68,7 +68,8 @@ export enum SubProjectionType {
 
 export type TemplateParameterDefinition =
   | TemplateArgumentDefinition
-  | TemplateContextVariableDefinition;
+  | TemplateContextVariableDefinition
+  | TemplateAggregationDefinition;
 
 /**
  * @additionalProperties false
@@ -85,4 +86,15 @@ export interface TemplateArgumentDefinition {
 export interface TemplateContextVariableDefinition {
   type: string;
   name: string;
+}
+
+/**
+ * @additionalProperties false
+ */
+export interface TemplateAggregationDefinition {
+  type: string;
+  name: string;
+  nodeType: string;
+  partSubProjections: SubProjectionDefinition[];
+  startSubProjection?: SubProjectionDefinition;
 }

@@ -152,6 +152,9 @@
         },
         {
           "$ref": "#/definitions/TemplateContextVariableDefinition"
+        },
+        {
+          "$ref": "#/definitions/TemplateAggregationDefinition"
         }
       ]
     },
@@ -184,6 +187,31 @@
         },
         "name": {
           "type": "string"
+        }
+      }
+    },
+    "TemplateAggregationDefinition": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "aggregation"
+        },
+        "name": {
+          "type": "string"
+        },
+        "nodeType": {
+          "type": "string"
+        },
+        "partSubProjections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubProjectionDefinition"
+          }
+        },
+        "startSubProjection": {
+          "$ref": "#/definitions/SubProjectionDefinition"
         }
       }
     }

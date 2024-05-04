@@ -6,11 +6,11 @@ import {
   RootProjectionExtension,
   SubProjectionDefinition,
   SubProjectionExtension,
+  TemplateAggregationDefinition,
   TemplateArgumentDefinition,
   TemplateContextVariableDefinition,
-  TemplateParameterDefinition,
 } from "./types";
-import { arg, contextVariable, Parser, Pattern } from "@puredit/parser";
+import { agg, arg, contextVariable, Parser, Pattern, Template } from "@puredit/parser";
 import { simpleProjection } from "@puredit/simple-projection";
 import ChainDecorator from "@puredit/parser/pattern/decorators/chainDecorator";
 import ChainLinkTemplateTransformation from "@puredit/parser/parse/chainLinkTemplateTransformation";
@@ -33,7 +33,7 @@ const ALLOWED_EXTENSION_TYPES = [
 
 const ALLOWED_SUBPROJECTION_TYPES = ["chainLink", "aggregationPart"].join(", ");
 
-const ALLOWED_PARAMETER_TYPES = ["argument", "contextVariable"].join(", ");
+const ALLOWED_PARAMETER_TYPES = ["argument", "contextVariable", "aggregation"].join(", ");
 
 export class PackageExtender {
   pkg: RootProjection[];
@@ -70,7 +70,7 @@ export class PackageExtender {
 
   private processRootProjection(definition: RootProjectionDefinition): RootProjection {
     const technicalName = toLowerCamelCase(definition.name);
-    const paramsMap = buildParamsMap(definition);
+    const { paramsMap, subProjections } = this.buildParams(definition);
     const { templateStrings, params } = buildParserInput(definition, paramsMap);
 
     const pattern = this.parser.statementPattern(`${technicalName}Pattern`)(
@@ -93,29 +93,37 @@ export class PackageExtender {
       segmentWidgets,
       postfixWidget,
       requiredContextVariables: [],
-      subProjections: [],
+      subProjections,
     };
   }
 
   private processRootProjectionExtension(extension: RootProjectionExtension) {
-    let subProjection: SubProjection, pattern: Pattern;
+    let subProjection: SubProjection, pattern: Pattern, subProjectionsBelow: SubProjection[];
     const parentProjection = this.getParentProjectionFor(extension) as RootProjection;
     for (const definition of extension.subProjections) {
       switch (definition.type) {
         case "chainLink":
-          ({ subProjection, pattern } = this.processChainLink(extension, definition));
+          ({ subProjection, pattern, subProjectionsBelow } = this.processChainLink(
+            extension,
+            definition
+          ));
           insertChainLinkIntoProjection(
             subProjection,
             pattern,
+            subProjectionsBelow,
             parentProjection,
             extension.parentParameter
           );
           break;
         case "aggregationPart":
-          ({ subProjection, pattern } = this.processAggregationPart(extension, definition));
+          ({ subProjection, pattern, subProjectionsBelow } = this.processAggregationPart(
+            extension,
+            definition
+          ));
           insertAggregationPartIntoProjection(
             subProjection,
             pattern,
+            subProjectionsBelow,
             parentProjection,
             extension.parentParameter
           );
@@ -129,16 +137,20 @@ export class PackageExtender {
   }
 
   private processSubProjectionExtension(extension: SubProjectionExtension) {
-    let subProjection: SubProjection, pattern: Pattern;
+    let subProjection: SubProjection, pattern: Pattern, subProjectionsBelow: SubProjection[];
     const rootProjection = this.getRootProjection(extension);
     const parentSubProjection = this.getParentProjectionFor(extension) as SubProjection;
     for (const definition of extension.subProjections) {
       switch (definition.type) {
         case "aggregationPart":
-          ({ subProjection, pattern } = this.processAggregationPart(extension, definition));
+          ({ subProjection, pattern, subProjectionsBelow } = this.processAggregationPart(
+            extension,
+            definition
+          ));
           insertAggregationPartIntoSubProjection(
             subProjection,
             pattern,
+            subProjectionsBelow,
             rootProjection,
             parentSubProjection,
             extension.parentParameter
@@ -157,13 +169,13 @@ export class PackageExtender {
     definition: SubProjectionDefinition
   ) {
     const parentProjection = this.getParentProjectionFor(extension);
-    const subProjection = this.buildSubProjection(definition);
+    const { newSubProjection, subProjectionsBelow } = this.buildSubProjection(definition);
     const pattern = this.buildAggregationPartPattern(
-      subProjection,
+      newSubProjection,
       parentProjection,
       extension.parentParameter
     );
-    return { subProjection, pattern };
+    return { subProjection: newSubProjection, pattern, subProjectionsBelow };
   }
 
   private processChainLink(
@@ -171,18 +183,18 @@ export class PackageExtender {
     definition: SubProjectionDefinition
   ) {
     const parentProjection = this.getParentProjectionFor(extension);
-    const subProjection = this.buildSubProjection(definition);
+    const { newSubProjection, subProjectionsBelow } = this.buildSubProjection(definition);
     const pattern = this.buildChainLinkPattern(
-      subProjection,
+      newSubProjection,
       parentProjection,
       extension.parentParameter
     );
-    return { subProjection, pattern };
+    return { subProjection: newSubProjection, pattern, subProjectionsBelow };
   }
 
-  private buildSubProjection(definition: SubProjectionDefinition): SubProjection {
+  private buildSubProjection(definition: SubProjectionDefinition) {
     const technicalName = toLowerCamelCase(definition.name);
-    const paramsMap = buildParamsMap(definition);
+    const { paramsMap, subProjections } = this.buildParams(definition);
     const { templateStrings, params } = buildParserInput(definition, paramsMap);
 
     const template = this.parser.subPattern(`${technicalName}Pattern`)(
@@ -198,7 +210,7 @@ export class PackageExtender {
       postfixWidget = buildWidget(definition.postfixWidget, paramsMap);
     }
 
-    return {
+    const newSubProjection = {
       name: definition.name,
       description: definition.description,
       pattern: template,
@@ -206,6 +218,53 @@ export class PackageExtender {
       postfixWidget,
       requiredContextVariables: [],
     };
+
+    return { newSubProjection, subProjectionsBelow: subProjections };
+  }
+
+  private buildParams(definition: RootProjectionDefinition | SubProjectionDefinition) {
+    const paramsMap: Record<string, TemplateParameter> = {};
+    const subProjections: SubProjection[] = [];
+
+    for (const paramDefinition of definition.parameters) {
+      let param: TemplateParameter;
+      switch (paramDefinition.type) {
+        case "argument":
+          const argDefinition = paramDefinition as TemplateArgumentDefinition;
+          param = arg(definition.name, argDefinition.nodeTypes);
+          break;
+        case "contextVariable":
+          const varDefinition = paramDefinition as TemplateContextVariableDefinition;
+          param = contextVariable(varDefinition.name);
+          break;
+        case "aggregation":
+          const aggDefinition = paramDefinition as TemplateAggregationDefinition;
+          const partTemplates: Template[] = [];
+          for (const partDefinition of aggDefinition.partSubProjections) {
+            const { newSubProjection, subProjectionsBelow } =
+              this.buildSubProjection(partDefinition);
+            partTemplates.push(newSubProjection.pattern);
+            subProjections.push(newSubProjection, ...subProjectionsBelow);
+          }
+          let startTemplate: Template | undefined = undefined;
+          if (aggDefinition.startSubProjection) {
+            const { newSubProjection, subProjectionsBelow } = this.buildSubProjection(
+              aggDefinition.startSubProjection
+            );
+            startTemplate = newSubProjection.pattern;
+            subProjections.push(newSubProjection, ...subProjectionsBelow);
+          }
+          param = agg(aggDefinition.name, aggDefinition.nodeType, partTemplates, startTemplate);
+          break;
+        default:
+          throw new Error(
+            `Invalid template parameter type ${paramDefinition.type}. Allowed values are ${ALLOWED_PARAMETER_TYPES}`
+          );
+      }
+      paramsMap[`<%${paramDefinition.name}%>`] = param;
+    }
+
+    return { paramsMap, subProjections };
   }
 
   private buildChainLinkPattern(
@@ -265,7 +324,6 @@ export class PackageExtender {
     extension: RootProjectionExtension | SubProjectionExtension
   ): RootProjection | SubProjection {
     const rootProjection = this.pkg.find((proj) => proj.name === extension.rootProjection);
-    console.log(JSON.stringify(extension));
     if (!rootProjection) {
       throw new Error(`Root projection ${extension.rootProjection} not found`);
     }
@@ -289,29 +347,6 @@ export class PackageExtender {
   }
 }
 
-function buildParamsMap(definition: RootProjectionDefinition | SubProjectionDefinition): ParamsMap {
-  const paramsMap: Record<string, TemplateParameter> = {};
-  for (const paramDefinition of definition.parameters) {
-    paramsMap[`<%${paramDefinition.name}%>`] = buildTemplateParameter(paramDefinition);
-  }
-  return paramsMap;
-}
-
-function buildTemplateParameter(definition: TemplateParameterDefinition) {
-  switch (definition.type) {
-    case "argument":
-      const argDefinition = definition as TemplateArgumentDefinition;
-      return arg(definition.name, argDefinition.nodeTypes);
-    case "contextVariable":
-      const varDefinition = definition as TemplateContextVariableDefinition;
-      return contextVariable(varDefinition.name);
-    default:
-      throw new Error(
-        `Invalid template parameter type. Allowed values are ${ALLOWED_PARAMETER_TYPES}`
-      );
-  }
-}
-
 function buildParserInput(
   definition: RootProjectionDefinition | SubProjectionDefinition,
   paramsMap: ParamsMap
@@ -319,7 +354,13 @@ function buildParserInput(
   const patternStaticParts = definition.template.split(PLACEHOLDER_PATTERN);
   const patternParameters = definition.template.match(PLACEHOLDER_PATTERN) || [];
   const templateStrings = new TemplatePartArray(...patternStaticParts);
-  const params = patternParameters.map((param) => paramsMap[param]);
+  const params = patternParameters.map((paramName) => {
+    const param = paramsMap[paramName];
+    if (!param) {
+      throw new Error(`Error in template of ${definition.name}: Undefined parameter ${paramName}`);
+    }
+    return param;
+  });
   return {
     templateStrings,
     params,
@@ -336,10 +377,11 @@ function buildWidget(widgetString: string, paramsMap) {
 function insertChainLinkIntoProjection(
   newSubProjection: SubProjection,
   newLinkPattern: Pattern,
+  subProjectionsBelow: SubProjection[],
   rootProjection: RootProjection,
   parentParameter: string
 ) {
-  rootProjection.subProjections.push(newSubProjection);
+  rootProjection.subProjections.push(newSubProjection, ...subProjectionsBelow);
   const rootPattern = rootProjection.pattern as ChainDecorator;
   const chain = rootPattern.getChain(parentParameter);
   if (!chain) {
@@ -352,10 +394,11 @@ function insertChainLinkIntoProjection(
 function insertAggregationPartIntoProjection(
   newSubProjection: SubProjection,
   newPartPattern: Pattern,
+  subProjectionsBelow: SubProjection[],
   rootProjection: RootProjection,
   parentParameter: string
 ) {
-  rootProjection.subProjections.push(newSubProjection);
+  rootProjection.subProjections.push(newSubProjection, ...subProjectionsBelow);
   const rootPattern = rootProjection.pattern as AggregationDecorator;
   const aggregation = rootPattern.getAggregation(parentParameter);
   if (!aggregation) {
@@ -368,11 +411,12 @@ function insertAggregationPartIntoProjection(
 function insertAggregationPartIntoSubProjection(
   newSubProjection: SubProjection,
   newPartPattern: Pattern,
+  subProjectionsBelow: SubProjection[],
   rootProjection: RootProjection,
   parentSubProjection: SubProjection,
   parentParameter: string
 ) {
-  rootProjection.subProjections.push(newSubProjection);
+  rootProjection.subProjections.push(newSubProjection, ...subProjectionsBelow);
   const parentTemplate = parentSubProjection.pattern;
   const aggregation = parentTemplate.getAggregation(parentParameter);
   if (!aggregation) {
@@ -385,14 +429,19 @@ function insertAggregationPartIntoSubProjection(
 
 function merge(
   staticParts: string[],
-  parameters: string[],
+  parameterNames: string[],
   paramsMap: Record<string, TemplateParameter>
 ) {
   const result: (string | TemplateParameter)[] = [];
-  for (let i = 0; i < parameters.length; i++) {
+  for (let i = 0; i < parameterNames.length; i++) {
     result.push(staticParts[i]);
-    result.push(paramsMap[parameters[i]]);
+    const parameterName = parameterNames[i];
+    const parameter = paramsMap[parameterName];
+    if (!parameter) {
+      throw new Error(`Error in widget: Undefined parameter ${parameterName}`);
+    }
+    result.push(parameter);
   }
-  result.push(staticParts[parameters.length]);
+  result.push(staticParts[parameterNames.length]);
   return result.filter((part) => part !== "");
 }

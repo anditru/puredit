@@ -62,3 +62,5 @@ slice_2 = image_data[
 ]
 
 torch.max(a)
+
+torch.cat((x, x, x), 0)

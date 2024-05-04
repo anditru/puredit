@@ -5,7 +5,7 @@
     "rootProjections": [
       {
         "type": "rootProjection",
-        "name": "tensorMax",
+        "name": "Tensor Max",
         "description": "Get the maximum value of a tensor",
         "parameters": [
           {
@@ -20,6 +20,45 @@
         ],
         "template": "<%torch%>.max(<%tensor%>)",
         "segmentWidgets": ["Get the maximum value in tensor <%tensor%>"]
+      },
+      {
+        "type": "rootProjection",
+        "name": "Tensor Max",
+        "description": "Concatenate tensors along an axis.",
+        "parameters": [
+          {
+            "type": "contextVariable",
+            "name": "torch"
+          },
+          {
+            "type": "argument",
+            "name": "dimension",
+            "nodeTypes": ["integer"]
+          },
+          {
+            "type": "aggregation",
+            "name": "tensors",
+            "nodeType": "tuple",
+            "partSubProjections": [
+              {
+                "type": "aggregationPart",
+                "name": "Tensor",
+                "description": "A tensor.",
+                "parameters": [
+                  {
+                    "type": "argument",
+                    "name": "tensor",
+                    "nodeTypes": ["identifier"]
+                  }
+                ],
+                "template": "<%tensor%>",
+                "segmentWidgets": ["<%tensor%>"]
+              }
+            ]
+          }
+        ],
+        "template": "<%torch%>.cat(<%tensors%>, <%dimension%>)",
+        "segmentWidgets": ["Concatenate tensors", "along dimension <%dimension%>"]
       }
     ]
   },

@@ -25,6 +25,7 @@ const types = {
   RootProjectionDefinition: "rootProjection",
   TemplateArgumentDefinition: "argument",
   TemplateContextVariableDefinition: "contextVariable",
+  TemplateAggregationDefinition: "aggregation",
 };
 const enums = {
   SubProjectionDefinition: ["chainLink", "aggregationPart"],
