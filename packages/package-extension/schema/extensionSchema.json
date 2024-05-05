@@ -214,6 +214,30 @@
           "$ref": "#/definitions/SubProjectionDefinition"
         }
       }
+    },
+    "TemplateChainDefinition": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "startSubProjection": {
+          "$ref": "#/definitions/SubProjectionDefinition"
+        },
+        "linkSubProjections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SubProjectionDefinition"
+          }
+        },
+        "minimumLength": {
+          "type": "number"
+        }
+      }
     }
   },
   "type": "array",

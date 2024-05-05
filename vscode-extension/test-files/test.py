@@ -21,7 +21,7 @@ unpivoted_weather = (aggregated_weather.melt(
 
 # CONTEXT: { "first_name": "string", "last_name": "string", "age": "number", "semester": "number" }
 filtered_students = (students.select(
-        pl.col("first_name").name.toLowerCase(),
+        pl.col("first_name").replace({"Müller": "Mayer"}, default="Schulze").name.toLowerCase(),
         "age",
         "semester",
         name="last_name"
@@ -61,6 +61,5 @@ slice_2 = image_data[
     1
 ]
 
-torch.max(a)
-
-torch.cat((x, x, x), 0)
+maximum = torch.max(some_tesnor)
+result = torch.cat((some, some_other), 0)

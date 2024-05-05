@@ -96,7 +96,7 @@ export default abstract class TemplateTransformation {
       specialStartPatternMap,
       aggregationTypeMap
     );
-    this.template!.pattern = aggregationDecorator;
+    this.template!.addPattern(aggregationDecorator);
     return aggregationDecorator;
   }
 
@@ -133,7 +133,7 @@ export default abstract class TemplateTransformation {
       linkPatternMap[chain.name] = linkPatterns;
     }
     const chainDecorator = new ChainDecorator(pattern, startPatternMap, linkPatternMap);
-    this.template!.pattern = chainDecorator;
+    this.template!.addPattern(chainDecorator);
     return chainDecorator;
   }
 }

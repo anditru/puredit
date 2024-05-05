@@ -3,6 +3,55 @@
     "type": "subProjectionExtension",
     "package": "py-polars",
     "rootProjection": "Processing Chain",
+    "subProjection": "Column Chain",
+    "parentParameter": "columnChain",
+    "subProjections": [
+      {
+        "type": "chainLink",
+        "name": "Replace values",
+        "description": "Replace values in a column",
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "defaultValue",
+            "nodeTypes": ["string", "integer"]
+          },
+          {
+            "type": "aggregation",
+            "name": "mappings",
+            "nodeType": "dictionary",
+            "partSubProjections": [
+              {
+                "type": "aggregationPart",
+                "name": "Value mapping",
+                "description": "Value mapping for replacement in a column",
+                "parameters": [
+                  {
+                    "type": "argument",
+                    "name": "value",
+                    "nodeTypes": ["string", "integer", "identifier"]
+                  },
+                  {
+                    "type": "argument",
+                    "name": "replacement",
+                    "nodeTypes": ["string", "integer", "identifier"]
+                  }
+                ],
+                "template": "<%value%>: <%replacement%>",
+                "segmentWidgets": ["<%value%> with <%replacement%>"]
+              }
+            ]
+          }
+        ],
+        "template": "replace(<%mappings%>, default=<%defaultValue%>)",
+        "segmentWidgets": ["Replace values", "using default <%defaultValue%>"]
+      }
+    ]
+  },
+  {
+    "type": "subProjectionExtension",
+    "package": "py-polars",
+    "rootProjection": "Processing Chain",
     "subProjection": "Select Column",
     "parentParameter": "columns",
     "subProjections": [

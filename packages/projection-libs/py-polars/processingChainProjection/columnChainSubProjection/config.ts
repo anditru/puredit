@@ -4,7 +4,7 @@ import { parser } from "../../parser";
 import EmptyWidget from "@puredit/projections/EmptyWidget.svelte";
 import { columnChain } from "../../columnChainProjection/main";
 
-const pattern = parser.subPattern("columnChain")`${columnChain.copy()}`;
+const pattern = parser.subPattern("columnChainPatternWithCopy")`${columnChain.copy()}`;
 const widget = svelteProjection(EmptyWidget);
 
 export const columnChainSubProjection: SubProjection = {

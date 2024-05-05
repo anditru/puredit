@@ -98,3 +98,14 @@ export interface TemplateAggregationDefinition {
   partSubProjections: SubProjectionDefinition[];
   startSubProjection?: SubProjectionDefinition;
 }
+
+/**
+ * @additionalProperties false
+ */
+export interface TemplateChainDefinition {
+  type: string;
+  name: string;
+  startSubProjection: SubProjectionDefinition;
+  linkSubProjections: SubProjectionDefinition[];
+  minimumLength?: number;
+}

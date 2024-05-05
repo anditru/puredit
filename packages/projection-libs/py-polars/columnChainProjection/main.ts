@@ -25,7 +25,7 @@ export const columnChain = chain("columnChain", columnStartSubProjection.pattern
   castSubProjection.pattern,
 ]);
 
-const pattern = parser.statementPattern("columnChain")`${columnChain}`;
+const pattern = parser.statementPattern("columnChainPattern")`${columnChain}`;
 const widget = svelteProjection(EmptyWidget);
 
 export const columnChainProjection: RootProjection = {

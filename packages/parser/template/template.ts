@@ -7,7 +7,7 @@ import CodeString from "./codeString";
 import Pattern from "../pattern/pattern";
 
 export default class Template {
-  private _pattern: Pattern | undefined;
+  private patterns: Pattern[] = [];
 
   constructor(
     public readonly name: string,
@@ -44,6 +44,12 @@ export default class Template {
     ) as TemplateAggregation;
   }
 
+  getChain(name: string): TemplateChain | undefined {
+    return this.params.find(
+      (param) => param instanceof TemplateChain && param.name === name
+    ) as TemplateChain;
+  }
+
   toDraftString(): string {
     const substitutions = this.params.map((param) => {
       if (isString(param)) {
@@ -55,11 +61,11 @@ export default class Template {
     return String.raw(this.templateStrings, ...substitutions);
   }
 
-  set pattern(pattern: Pattern) {
-    this._pattern = pattern;
+  addPattern(pattern: Pattern) {
+    this.patterns.push(pattern);
   }
 
-  get pattern(): Pattern | undefined {
-    return this._pattern;
+  getPatterns(): Pattern[] {
+    return this.patterns;
   }
 }
