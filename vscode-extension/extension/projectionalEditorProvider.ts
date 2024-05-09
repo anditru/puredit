@@ -126,7 +126,7 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
     );
 
     const baseDir = vscode.Uri.joinPath(this.context.extensionUri, "out/").toString().slice(7);
-    const baseUrl = "https://file+.vscode-resource.vscode-cdn.net" + baseDir;
+    const baseUrl = `https://${scriptUri.authority}${baseDir}`;
 
     const nonce = getNonce();
 

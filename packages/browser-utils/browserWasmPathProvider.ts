@@ -1,6 +1,6 @@
 import { Language } from "@puredit/language-config";
 import { WasmPathProvider } from "@puredit/parser";
-const VSCODE_BASE_PATH = "https://file+.vscode-resource.vscode-cdn.net";
+const VSCODE_BASE_PATH = /^https:\/\/.*\.vscode-resource\.vscode-cdn\.net/;
 
 export default class BrowserWasmPathProvider implements WasmPathProvider {
   constructor(private readonly language: Language) {}
@@ -40,6 +40,6 @@ export default class BrowserWasmPathProvider implements WasmPathProvider {
   }
 
   private runningInVsCode(): boolean {
-    return import.meta.url.startsWith(VSCODE_BASE_PATH);
+    return !!import.meta.url.match(VSCODE_BASE_PATH);
   }
 }

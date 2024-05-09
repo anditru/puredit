@@ -1,3 +1,6 @@
+import polars as pl
+import torch
+
 # CONTEXT: { "city": "string", "date": "string", "temperature": "number" }
 aggregated_weather = weather.pivot(
     index=[
