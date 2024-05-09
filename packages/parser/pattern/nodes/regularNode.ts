@@ -1,4 +1,3 @@
-import { loadAggregatableNodeTypes } from "@puredit/language-config";
 import AstCursor from "../../ast/cursor";
 import PatternNode from "./patternNode";
 import { ContextVariableMap } from "@puredit/projections";

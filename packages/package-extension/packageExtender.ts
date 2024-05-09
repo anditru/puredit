@@ -74,10 +74,18 @@ export class PackageExtender {
     const { paramsMap, subProjections } = this.buildParams(definition);
     const { templateStrings, params } = buildParserInput(definition, paramsMap);
 
-    const pattern = this.parser.statementPattern(`${technicalName}Pattern`)(
-      templateStrings as unknown as TemplateStringsArray,
-      ...params
-    );
+    let pattern;
+    if (definition.isExpression) {
+      pattern = this.parser.expressionPattern(`${technicalName}Pattern`)(
+        templateStrings as unknown as TemplateStringsArray,
+        ...params
+      );
+    } else {
+      pattern = this.parser.statementPattern(`${technicalName}Pattern`)(
+        templateStrings as unknown as TemplateStringsArray,
+        ...params
+      );
+    }
 
     const segmentWidgets = definition.segmentWidgets.map((widget) =>
       buildWidget(widget, paramsMap)

@@ -42,6 +42,7 @@ export interface RootProjectionDefinition {
   type: string;
   name: string;
   description: string;
+  isExpression: boolean;
   parameters: TemplateParameterDefinition[];
   template: string;
   segmentWidgets: string[];

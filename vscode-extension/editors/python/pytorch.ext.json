@@ -7,6 +7,7 @@
         "type": "rootProjection",
         "name": "Tensor Max",
         "description": "Get the maximum value of a tensor",
+        "isExpression": true,
         "parameters": [
           {
             "type": "contextVariable",
@@ -23,8 +24,9 @@
       },
       {
         "type": "rootProjection",
-        "name": "Tensor Max",
+        "name": "Concatenate Tensors",
         "description": "Concatenate tensors along an axis.",
+        "isExpression": true,
         "parameters": [
           {
             "type": "contextVariable",
