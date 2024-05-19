@@ -4,17 +4,12 @@ import type {
   Match,
   CandidateMatch,
   VerificationResult,
-  CodeRange,
   PatternsMap,
-  MatchesMap,
-  MatchMap,
 } from "./types";
 import MatchVerification, { DoesNotMatch } from "./matchVerification";
 import AstCursor from "../ast/cursor";
 import Pattern from "../pattern/pattern";
 import { TreeCursor } from "web-tree-sitter";
-import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
-import ChainDecorator from "../pattern/decorators/chainDecorator";
 import { ContextVariableMap } from "@puredit/projections";
 import CommentContextExtraction from "./commentContextExtraction";
 
@@ -113,39 +108,48 @@ export class PatternMatching {
     logger.debug(
       `Postprocessing verification result with pattern ${verificationResult.pattern.name}`
     );
-    const contextInformation = this.extractContextInformation(verificationResult);
-    const aggregationRanges = this.getAggregationRangesOf(verificationResult);
-    const chainRanges = this.getChainRangesOf(verificationResult);
-    const aggregationToStartMatchMap =
-      this.findMatchesInAggregationStartRangeOf(verificationResult);
-    const aggregationToPartMatchesMap =
-      this.findMatchesInAggregationPartRangesOf(verificationResult);
 
+    const contextInformation = this.extractContextInformation(verificationResult);
     this.matches.push({
       pattern: verificationResult.pattern,
       node: this.astCursor.currentNode,
       from: this.astCursor.currentNode.startIndex,
       to: this.astCursor.currentNode.endIndex,
       argsToAstNodeMap: verificationResult.argsToAstNodeMap,
-      aggregationRanges,
-      chainRanges,
+      chainRanges: verificationResult.chainRanges,
       blockRanges: verificationResult.blockRanges,
       contextInformation,
+      aggregationPartRanges: verificationResult.aggregationPartRanges,
       aggregationToRangeMap: verificationResult.aggregationToRangeMap,
-      aggregationToStartMatchMap,
-      aggregationToPartMatchesMap,
+      aggregationToStartMatchMap: verificationResult.aggregationToStartMatchMap,
+      aggregationToPartMatchesMap: verificationResult.aggregationToPartMatchesMap,
     });
 
-    for (const aggregationName in aggregationToPartMatchesMap) {
-      const startMatch = aggregationToStartMatchMap[aggregationName];
-      if (startMatch) {
-        this.matches.push(startMatch);
-      }
-      this.matches = this.matches.concat(aggregationToPartMatchesMap[aggregationName]);
-    }
+    const chainStartMatches = Object.values(verificationResult.chainToStartMatchMap).reduce(
+      (prev: Match[], curr: Match) => prev.concat(curr),
+      []
+    );
+    const chainLinkMatches = Object.values(verificationResult.chainToLinkMatchesMap).reduce(
+      (prev: Match[], curr: Match[]) => prev.concat(curr),
+      []
+    );
+    const aggregationStartMatches = Object.values(
+      verificationResult.aggregationToStartMatchMap
+    ).reduce((prev: Match[], curr: Match) => prev.concat(curr), []);
+    const aggregationPartMatches = Object.values(
+      verificationResult.aggregationToPartMatchesMap
+    ).reduce((prev: Match[], curr: Match[]) => prev.concat(curr), []);
+    this.matches = this.matches.concat(
+      chainStartMatches,
+      chainLinkMatches,
+      aggregationStartMatches,
+      aggregationPartMatches
+    );
+    this.matches = this.matches.concat(verificationResult.matchesBelow);
+    this.contextVariableRanges = this.contextVariableRanges.concat(
+      verificationResult.contextVariableRanges
+    );
 
-    this.findMatchesInChainStartRangesOf(verificationResult);
-    this.findMatchesInChainLinkRangesOf(verificationResult);
     this.findMatchesInBlockRangesOf(verificationResult);
   }
 
@@ -157,116 +161,6 @@ export class PatternMatching {
     } else {
       return {};
     }
-  }
-
-  private getAggregationRangesOf(verificationResult: VerificationResult): CodeRange[] {
-    return Object.values(verificationResult.aggregationToPartRangesMap).reduce(
-      (previousAggregationRanges: CodeRange[], currentAggregationRange: CodeRange[]) => {
-        return previousAggregationRanges.concat(currentAggregationRange);
-      },
-      []
-    );
-  }
-
-  private getChainRangesOf(verificationResult: VerificationResult): CodeRange[] {
-    const chainRanges = Object.values(verificationResult.chainToStartRangeMap).reduce(
-      (startRanges: CodeRange[], currentStartRange: CodeRange) => {
-        return startRanges.concat(currentStartRange);
-      },
-      []
-    );
-    return Object.values(verificationResult.chainToLinkRangesMap).reduce(
-      (previousChainRanges: CodeRange[], newLinkRanges: CodeRange[]) => {
-        return previousChainRanges.concat(newLinkRanges);
-      },
-      chainRanges
-    );
-  }
-
-  private findMatchesInAggregationStartRangeOf(verificationResult: VerificationResult): MatchMap {
-    const matchMap = {} as MatchMap;
-    if (!(verificationResult.pattern instanceof AggregationDecorator)) {
-      return matchMap;
-    }
-    for (const aggregationName in verificationResult.aggregationToStartRangeMap) {
-      const aggregationStartMatch = this.findAggregationStartMatchFor(
-        aggregationName,
-        verificationResult
-      );
-      if (aggregationStartMatch) {
-        matchMap[aggregationName] = aggregationStartMatch;
-      }
-    }
-    return matchMap;
-  }
-
-  private findMatchesInAggregationPartRangesOf(verificationResult: VerificationResult): MatchesMap {
-    const matchesMap = {} as MatchesMap;
-    if (!(verificationResult.pattern instanceof AggregationDecorator)) {
-      return matchesMap;
-    }
-    for (const aggregationName in verificationResult.aggregationToPartRangesMap) {
-      const aggregationMatches = this.findAggregationPartMatchesFor(
-        aggregationName,
-        verificationResult
-      );
-      matchesMap[aggregationName] = aggregationMatches;
-    }
-    return matchesMap;
-  }
-
-  private findAggregationStartMatchFor(
-    aggregationName: string,
-    verificationResult: VerificationResult
-  ): Match | undefined {
-    const pattern = verificationResult.pattern as AggregationDecorator;
-    const startPatternMap = pattern.getStartPatternMapFor(aggregationName);
-    if (startPatternMap) {
-      const aggregationStartRange = verificationResult.aggregationToStartRangeMap[aggregationName];
-      this.contextVariableRanges.push({
-        from: aggregationStartRange.node.startIndex,
-        to: aggregationStartRange.node.endIndex,
-        contextVariables: aggregationStartRange.contextVariables,
-      });
-
-      const aggregationStartPatternMatching = new PatternMatching(
-        startPatternMap,
-        aggregationStartRange.node.walk(),
-        Object.assign({}, this.contextVariables, aggregationStartRange.contextVariables)
-      );
-      const result = aggregationStartPatternMatching.executeOnlySpanningEntireRange();
-      return result.matches[0];
-    }
-  }
-
-  private findAggregationPartMatchesFor(
-    aggregationName: string,
-    verificationResult: VerificationResult
-  ): Match[] {
-    const pattern = verificationResult.pattern as AggregationDecorator;
-    const subPatternMap = pattern.getPartPatternsMapFor(aggregationName);
-    const aggregationRanges = verificationResult.aggregationToPartRangesMap[aggregationName];
-    let matches: Match[] = [];
-
-    for (const aggregationRange of aggregationRanges) {
-      this.contextVariableRanges.push({
-        from: aggregationRange.node.startIndex,
-        to: aggregationRange.node.endIndex,
-        contextVariables: aggregationRange.contextVariables,
-      });
-
-      const aggregationPatternMatching = new PatternMatching(
-        subPatternMap,
-        aggregationRange.node.walk(),
-        Object.assign({}, this.contextVariables, aggregationRange.contextVariables)
-      );
-      const result = aggregationPatternMatching.executeOnlySpanningEntireRange();
-
-      matches = matches.concat(result.matches);
-      this.contextVariableRanges = this.contextVariableRanges.concat(result.contextVariableRanges);
-    }
-
-    return matches;
   }
 
   private findMatchesInBlockRangesOf(verificationResult: VerificationResult): void {
@@ -283,76 +177,6 @@ export class PatternMatching {
         Object.assign({}, this.contextVariables, blockRange.contextVariables)
       );
       const result = blockPatternMatching.execute();
-
-      this.matches = this.matches.concat(result.matches);
-      this.contextVariableRanges = this.contextVariableRanges.concat(result.contextVariableRanges);
-    }
-  }
-
-  private findMatchesInChainStartRangesOf(verificationResult: VerificationResult): void {
-    if (!(verificationResult.pattern instanceof ChainDecorator)) {
-      return;
-    }
-    for (const chainName in verificationResult.chainToStartRangeMap) {
-      this.findStartMatchForChain(chainName, verificationResult);
-    }
-  }
-
-  private findStartMatchForChain(chainName: string, verificationResult: VerificationResult): void {
-    const pattern = verificationResult.pattern as ChainDecorator;
-    const chainStartPatternMap = pattern.getStartPatternMapFor(chainName);
-    const chainStartRange = verificationResult.chainToStartRangeMap[chainName];
-
-    this.contextVariableRanges.push({
-      from: chainStartRange.node.startIndex,
-      to: chainStartRange.node.endIndex,
-      contextVariables: chainStartRange.contextVariables,
-    });
-
-    const chainStartPatternMatching = new PatternMatching(
-      chainStartPatternMap,
-      chainStartRange.node.walk(),
-      Object.assign({}, this.contextVariables, chainStartRange.contextVariables)
-    );
-    const result = chainStartPatternMatching.executeOnlySpanningEntireRange();
-    this.matches = this.matches.concat(result.matches);
-    this.contextVariableRanges = this.contextVariableRanges.concat(result.contextVariableRanges);
-  }
-
-  private findMatchesInChainLinkRangesOf(verificationResult: VerificationResult): void {
-    if (!(verificationResult.pattern instanceof ChainDecorator)) {
-      return;
-    }
-    for (const chainName in verificationResult.chainToLinkRangesMap) {
-      this.findLinkMatchesForChain(chainName, verificationResult);
-    }
-  }
-
-  private findLinkMatchesForChain(chainName: string, verificationResult: VerificationResult) {
-    const pattern = verificationResult.pattern as ChainDecorator;
-    const chainLinkPatterns = pattern.getLinkPatternMapFor(chainName);
-    const chainLinkRanges = verificationResult.chainToLinkRangesMap[chainName];
-
-    for (const chainLinkRange of chainLinkRanges) {
-      this.contextVariableRanges.push({
-        from: chainLinkRange.node.startIndex,
-        to: chainLinkRange.node.endIndex,
-        contextVariables: chainLinkRange.contextVariables,
-      });
-
-      const chainLinkPatternMatching = new PatternMatching(
-        chainLinkPatterns,
-        chainLinkRange.node.walk(),
-        Object.assign({}, this.contextVariables, chainLinkRange.contextVariables)
-      );
-      const result = chainLinkPatternMatching.executeOnlySpanningEntireRange();
-
-      result.matches
-        .filter((match) => pattern.getAllLinkPatterns().includes(match.pattern))
-        .forEach((match) => {
-          match.from = chainLinkRange.from;
-          match.to = chainLinkRange.to;
-        });
 
       this.matches = this.matches.concat(result.matches);
       this.contextVariableRanges = this.contextVariableRanges.concat(result.contextVariableRanges);

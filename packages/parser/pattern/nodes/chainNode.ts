@@ -30,4 +30,8 @@ export default class ChainNode extends PatternNode {
       this.astNodeTypes.includes(astNode.type) && this.fieldName === astCursor.currentFieldName
     );
   }
+
+  get chainName(): string {
+    return this.templateChain.name;
+  }
 }

@@ -44,4 +44,8 @@ export default class AggregationNode extends PatternNode {
   hasSpecialStartPattern(): boolean {
     return !!this.templateAggregation.specialStartPattern;
   }
+
+  get aggregationName(): string {
+    return this.templateAggregation.name;
+  }
 }
