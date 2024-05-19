@@ -8,6 +8,8 @@
         "name": "Tensor Max",
         "description": "Get the maximum value of a tensor",
         "isExpression": true,
+        "template": "<%torch%>.max(<%tensor%>)",
+        "segmentWidgets": ["Get the maximum value in tensor <%tensor%>"],
         "parameters": [
           {
             "type": "contextVariable",
@@ -18,15 +20,15 @@
             "name": "tensor",
             "nodeTypes": ["identifier"]
           }
-        ],
-        "template": "<%torch%>.max(<%tensor%>)",
-        "segmentWidgets": ["Get the maximum value in tensor <%tensor%>"]
+        ]
       },
       {
         "type": "rootProjection",
         "name": "Concatenate Tensors",
         "description": "Concatenate tensors along an axis.",
         "isExpression": true,
+        "template": "<%torch%>.cat(<%tensors%>, <%dimension%>)",
+        "segmentWidgets": ["Concatenate tensors", "along dimension <%dimension%>"],
         "parameters": [
           {
             "type": "contextVariable",
@@ -46,21 +48,19 @@
                 "type": "aggregationPart",
                 "name": "Tensor",
                 "description": "A tensor.",
+                "template": "<%tensor%>",
+                "segmentWidgets": ["<%tensor%>"],
                 "parameters": [
                   {
                     "type": "argument",
                     "name": "tensor",
                     "nodeTypes": ["identifier"]
                   }
-                ],
-                "template": "<%tensor%>",
-                "segmentWidgets": ["<%tensor%>"]
+                ]
               }
             ]
           }
-        ],
-        "template": "<%torch%>.cat(<%tensors%>, <%dimension%>)",
-        "segmentWidgets": ["Concatenate tensors", "along dimension <%dimension%>"]
+        ]
       }
     ]
   },
@@ -74,15 +74,15 @@
         "type": "aggregationPart",
         "name": "All with Stride",
         "description": "Select all items with a spcified stride.",
+        "template": "::<%stride%>",
+        "segmentWidgets": ["Over all indices with stride <%stride%>"],
         "parameters": [
           {
             "type": "argument",
             "name": "stride",
             "nodeTypes": ["integer", "identifier"]
           }
-        ],
-        "template": "::<%stride%>",
-        "segmentWidgets": ["Over all indices with stride <%stride%>"]
+        ]
       }
     ]
   }

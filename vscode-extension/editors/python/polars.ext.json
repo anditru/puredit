@@ -10,12 +10,9 @@
         "type": "chainLink",
         "name": "Replace values",
         "description": "Replace values in a column",
+        "template": "replace(<%mappings%>, default=<%defaultValue%>)",
+        "segmentWidgets": ["Replace values", "using default <%defaultValue%>"],
         "parameters": [
-          {
-            "type": "argument",
-            "name": "defaultValue",
-            "nodeTypes": ["string", "integer"]
-          },
           {
             "type": "aggregation",
             "name": "mappings",
@@ -25,6 +22,8 @@
                 "type": "aggregationPart",
                 "name": "Value mapping",
                 "description": "Value mapping for replacement in a column",
+                "template": "<%value%>: <%replacement%>",
+                "segmentWidgets": ["<%value%> with <%replacement%>"],
                 "parameters": [
                   {
                     "type": "argument",
@@ -36,15 +35,16 @@
                     "name": "replacement",
                     "nodeTypes": ["string", "integer", "identifier"]
                   }
-                ],
-                "template": "<%value%>: <%replacement%>",
-                "segmentWidgets": ["<%value%> with <%replacement%>"]
+                ]
               }
             ]
+          },
+          {
+            "type": "argument",
+            "name": "defaultValue",
+            "nodeTypes": ["string", "integer"]
           }
-        ],
-        "template": "replace(<%mappings%>, default=<%defaultValue%>)",
-        "segmentWidgets": ["Replace values", "using default <%defaultValue%>"]
+        ]
       }
     ]
   },
@@ -59,6 +59,8 @@
         "type": "aggregationPart",
         "name": "Column with Alias",
         "description": "Column with alias to select from a dataframe.",
+        "template": "<%columnAlias%>=<%columnName%>",
+        "segmentWidgets": ["<%columnName%> as <%columnAlias%>"],
         "parameters": [
           {
             "type": "argument",
@@ -70,9 +72,7 @@
             "name": "columnAlias",
             "nodeTypes": ["identifier"]
           }
-        ],
-        "template": "<%columnAlias%>=<%columnName%>",
-        "segmentWidgets": ["<%columnName%> as <%columnAlias%>"]
+        ]
       }
     ]
   },
@@ -86,29 +86,29 @@
         "type": "chainLink",
         "name": "Extend",
         "description": "Extend the memory backed by this DataFrame with the values from other.",
+        "template": "extend(<%otherDataFrame%>)",
+        "segmentWidgets": ["extending with dataframe <%otherDataFrame%>"],
         "parameters": [
           {
             "type": "argument",
             "name": "otherDataFrame",
             "nodeTypes": ["identifier"]
           }
-        ],
-        "template": "extend(<%otherDataFrame%>)",
-        "segmentWidgets": ["extending with dataframe <%otherDataFrame%>"]
+        ]
       },
       {
         "type": "chainLink",
         "name": "Clear",
         "description": "Create an n-row null-filled (n%>0) copy of the DataFrame.",
+        "template": "clear(n=<%numRows%>)",
+        "segmentWidgets": ["creating a null-filled copy with <%numRows%> rows"],
         "parameters": [
           {
             "type": "argument",
             "name": "numRows",
             "nodeTypes": ["integer"]
           }
-        ],
-        "template": "clear(n=<%numRows%>)",
-        "segmentWidgets": ["creating a null-filled copy with <%numRows%> rows"]
+        ]
       },
       {
         "type": "chainLink",
@@ -122,43 +122,43 @@
         "type": "chainLink",
         "name": "Fill null with value",
         "description": "Fill replace null with a specified value.",
+        "template": "fill_null(<%value%>)",
+        "segmentWidgets": ["replacing nulls with <%value%>"],
         "parameters": [
           {
             "type": "argument",
             "name": "value",
             "nodeTypes": ["string", "integer", "identifier"]
           }
-        ],
-        "template": "fill_null(<%value%>)",
-        "segmentWidgets": ["replacing nulls with <%value%>"]
+        ]
       },
       {
         "type": "chainLink",
         "name": "Fill null with value",
         "description": "Replace nulls with a specified value.",
+        "template": "fill_null(<%value%>)",
+        "segmentWidgets": ["replacing nulls with <%value%>"],
         "parameters": [
           {
             "type": "argument",
             "name": "value",
             "nodeTypes": ["string", "integer", "identifier"]
           }
-        ],
-        "template": "fill_null(<%value%>)",
-        "segmentWidgets": ["replacing nulls with <%value%>"]
+        ]
       },
       {
         "type": "chainLink",
         "name": "Fill null with strategy",
         "description": "Replace null based on a strategy.",
+        "template": "fill_null(strategy=<%strategy%>)",
+        "segmentWidgets": ["replacing nulls with strategy <%strategy%>"],
         "parameters": [
           {
             "type": "argument",
             "name": "strategy",
             "nodeTypes": ["string", "identifier"]
           }
-        ],
-        "template": "fill_null(strategy=<%strategy%>)",
-        "segmentWidgets": ["replacing nulls with strategy <%strategy%>"]
+        ]
       }
     ]
   }

@@ -64,5 +64,5 @@ slice_2 = image_data[
     1
 ]
 
-maximum = torch.max(some_tesnor)
+maximum = torch.max(some_tensor)
 result = torch.cat((some, some_other), 0)

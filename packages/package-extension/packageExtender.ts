@@ -254,7 +254,7 @@ export class PackageExtender {
       switch (paramDefinition.type) {
         case "argument":
           const argDefinition = paramDefinition as TemplateArgumentDefinition;
-          param = arg(definition.name, argDefinition.nodeTypes);
+          param = arg(argDefinition.name, argDefinition.nodeTypes);
           break;
         case "contextVariable":
           const varDefinition = paramDefinition as TemplateContextVariableDefinition;
