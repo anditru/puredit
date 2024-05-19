@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { beforeUpdate, onMount } from "svelte";
   import type { EditorState } from "@codemirror/state";
   import type { EditorView } from "@codemirror/view";
   import type { Match } from "@puredit/parser";
@@ -16,11 +16,19 @@
   export let view: EditorView | null;
   export let match: Match;
   export let context: ContextInformation;
+  let dimension: string | undefined;
 
-  const dimensionIndex = context.sliceMatches.findIndex(
-    (sliceMatch: Match) => sliceMatch === match
-  );
-  let dimension: string = Object.keys(context.commentContext)[dimensionIndex];
+  function updateDimension() {
+    const dimensionIndex = context.sliceMatches.findIndex(
+      (sliceMatch: Match) => sliceMatch === match
+    );
+    if (context.commentContext) {
+      dimension = Object.keys(context.commentContext)[dimensionIndex];
+    } else {
+      dimension = undefined;
+    }
+  }
+  updateDimension();
 
   onMount(() => {
     if (isNew) {
@@ -29,10 +37,18 @@
       });
     }
   });
+
+  beforeUpdate(() => {
+    updateDimension();
+  });
 </script>
 
 <span class="inline-flex">
-  <span>Dimension {dimension} from index</span>
+  {#if dimension}
+    <span>Dimension {dimension} from index</span>
+  {:else}
+    <span>Select from index</span>
+  {/if}
   <TextInput
     className={highlightingFor(state, [tags.atom])}
     node={match.argsToAstNodeMap.startIndex}

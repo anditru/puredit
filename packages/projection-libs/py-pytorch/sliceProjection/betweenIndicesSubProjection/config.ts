@@ -1,8 +1,8 @@
 import { svelteProjection } from "@puredit/projections/svelte";
-import type { SubProjection } from "@puredit/projections/types";
+import type { ContextInformation, SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
-import { arg } from "@puredit/parser";
+import { arg, Match } from "@puredit/parser";
 
 const startIndex = arg("startIndex", ["integer", "identifier"]);
 const endIndex = arg("endIndex", ["integer", "identifier"]);
