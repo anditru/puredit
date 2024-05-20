@@ -1,10 +1,70 @@
-import { ChangeSet, EditorSelection, EditorState } from "@codemirror/state";
-import type { ChangeSpec } from "@codemirror/state";
+import { ChangeSet, EditorSelection, EditorState, Transaction } from "@codemirror/state";
+import { ChangeSpec, SelectionRange } from "@codemirror/state";
 import { ProjectionWidget } from "./projection";
 import { projectionState } from "./state/state";
+import { Match } from "@puredit/parser";
 
 export const transactionFilter = EditorState.transactionFilter.of((tr) => {
   const { decorations } = tr.startState.field(projectionState);
+  const startDoc = tr.startState.doc;
+
+  // When Ctrl + Shift + Up / Down is used to copy a line, the entire projection must be copied
+  if (tr.annotation(Transaction.userEvent) === "input.copyline") {
+    let modifyCopy = false;
+    const modifiedChanges: ChangeSpec[] = [];
+    tr.changes.iterChanges((from, to, _fromB, _toB, insert) => {
+      const change: ChangeSpec = { from, to, insert };
+      decorations.between(from, to, (_, __, dec) => {
+        const match = dec.spec.widget.match;
+        const insertBegin = startDoc.lineAt(match.node.startIndex).from;
+        const insertEnd = match.node.endIndex;
+        change.insert = "\n" + startDoc.slice(insertBegin, insertEnd);
+
+        const matchEndLine = startDoc.lineAt(match.node.endIndex);
+        change.from = matchEndLine.to;
+
+        change.to = undefined;
+
+        modifyCopy = true;
+        return false;
+      });
+      modifiedChanges.push(change);
+    });
+    if (modifyCopy) {
+      const firstChange = modifiedChanges[0] as { from: number; to: number };
+      const cursorPosition = firstChange.from + 1;
+      Object.assign(tr, {
+        selection: EditorSelection.single(cursorPosition, cursorPosition),
+        changes: ChangeSet.of(modifiedChanges, startDoc.length, tr.startState.lineBreak),
+      });
+    }
+  }
+
+  // When Ctrl + Shift + K is used to delte a line, all lines spanned hy the projections must be deleted
+  if (tr.annotation(Transaction.userEvent) === "delete.line") {
+    let modifyDelete = false;
+    const modifiedChanges: ChangeSpec[] = [];
+    let match: Match;
+    tr.changes.iterChanges((from, to, _fromB, _toB, insert) => {
+      const change: ChangeSpec = { from, to, insert };
+      const selection = tr.startState.selection.main;
+      decorations.between(selection.from, selection.to, (_, __, dec) => {
+        match = dec.spec.widget.match;
+        change.from = startDoc.lineAt(match.from).from;
+        change.to = Math.min(startDoc.lineAt(match.node.endIndex).to + 1, startDoc.length);
+        change.insert = "";
+        modifyDelete = true;
+        return false;
+      });
+      modifiedChanges.push(change);
+    });
+    if (modifyDelete) {
+      Object.assign(tr, {
+        selection: EditorSelection.single(match!.from, match!.from),
+        changes: ChangeSet.of(modifiedChanges, startDoc.length, tr.startState.lineBreak),
+      });
+    }
+  }
 
   // Handle changes to a projection's range.
   // Changes that replace the whole projection are accepted.
@@ -21,10 +81,10 @@ export const transactionFilter = EditorState.transactionFilter.of((tr) => {
     decorations.between(from + 1, to - 1, (fromDec, toDec, dec) => {
       const widget: ProjectionWidget = dec.spec.widget;
       if ((from === fromDec && to === from + 1) || (to === toDec && from === to - 1)) {
-        change.from = widget.match.node.startIndex;
+        change.from = widget.match.from;
         change.to = widget.match.node.endIndex;
         Object.assign(tr, {
-          selection: EditorSelection.single(widget.match.node.startIndex),
+          selection: EditorSelection.single(widget.match.from),
         });
         modifyChanges = true;
         return false;
@@ -44,7 +104,9 @@ export const transactionFilter = EditorState.transactionFilter.of((tr) => {
       if (
         decTo === posNextToChange &&
         charNextToChange === "\n" &&
-        change.insert.toString() !== ""
+        change.insert.toString() !== "" &&
+        tr.annotation(Transaction.userEvent) !== "input.copyline" &&
+        tr.annotation(Transaction.userEvent) !== "delete.line"
       ) {
         modifyChanges = true;
         change.from--;
@@ -91,6 +153,28 @@ export const transactionFilter = EditorState.transactionFilter.of((tr) => {
         return false;
       }
     });
+  }
+
+  // Ensure projections are selected either entirely or not at all
+  if (!modifyChanges && selection?.ranges.length) {
+    const newRanges: SelectionRange[] = [];
+    for (const range of selection.ranges) {
+      if (range.empty) {
+        newRanges.push(range);
+      } else {
+        let newFrom: number;
+        let newTo: number;
+        let newRange = range;
+        decorations.between(range.from, range.to, (from, to, dec) => {
+          const widget: ProjectionWidget = dec.spec.widget;
+          newFrom = Math.min(widget.match.from, from);
+          newTo = Math.max(widget.match.to, to);
+          newRange = EditorSelection.range(newFrom, newTo);
+        });
+        newRanges.push(newRange);
+      }
+    }
+    Object.assign(tr, { selection: EditorSelection.create(newRanges) });
   }
 
   return tr;
