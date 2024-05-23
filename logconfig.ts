@@ -5,12 +5,12 @@ export const logProvider = Log4TSProvider.createProvider("Puredit", {
   level: LogLevel.Info,
   groups: [
     {
-      identifier: "all",
-      expression: new RegExp(".+"),
-    },
-    {
       identifier: "parser",
       expression: new RegExp("parser.+"),
+    },
+    {
+      identifier: "projections",
+      expression: new RegExp("projections.+"),
     },
     {
       identifier: "codemirror-typescript",

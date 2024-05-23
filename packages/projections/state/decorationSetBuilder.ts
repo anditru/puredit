@@ -1,4 +1,4 @@
-import type { EditorState } from "@codemirror/state";
+import { RangeSet, type EditorState } from "@codemirror/state";
 import { Decoration } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { zip } from "@puredit/utils";
@@ -21,6 +21,7 @@ import {
 } from "@puredit/language-config";
 import type { AggregatableNodeTypeConfig } from "@puredit/language-config";
 import { toRootProjectionMap, toSubProjectionMap } from "../shared";
+import AstNode from "@puredit/parser/ast/node";
 
 export default class DecorationSetBuilder {
   // Input
@@ -28,6 +29,7 @@ export default class DecorationSetBuilder {
   private decorations!: DecorationSet;
   private isCompletion!: boolean;
   private state!: EditorState;
+  private nodesToInvalidate: AstNode[] = [];
   private matches!: Match[];
 
   // State
@@ -57,6 +59,11 @@ export default class DecorationSetBuilder {
 
   setState(state: EditorState) {
     this.state = state;
+    return this;
+  }
+
+  setNodesToInvalidate(nodesToInvalidate: AstNode[]) {
+    this.nodesToInvalidate = nodesToInvalidate;
     return this;
   }
 
@@ -95,7 +102,13 @@ export default class DecorationSetBuilder {
         this.extractPostfixDecoratorFor(match, postfixWidget, context);
       }
     }
-    return this.newDecorations;
+
+    for (const node of this.nodesToInvalidate) {
+      this.decorations.between(node.startIndex, node.endIndex, (_, __, dec) => {
+        this.removeDecoration(dec);
+      });
+    }
+    return RangeSet.join([this.newDecorations, this.decorations]);
   }
 
   private removeContextOutOfBoundsFor(match: Match) {
@@ -268,6 +281,7 @@ export default class DecorationSetBuilder {
         this.newDecorations = this.newDecorations.update({
           add: [decoration.range(range.from, range.to)],
         });
+        this.removeDecoration(decoration);
         found = true;
         return false;
       }
@@ -324,6 +338,7 @@ export default class DecorationSetBuilder {
         this.newDecorations = this.newDecorations.update({
           add: [decoration.range(match.to, match.to)],
         });
+        this.removeDecoration(decoration);
         found = true;
         return false;
       }
@@ -380,6 +395,7 @@ export default class DecorationSetBuilder {
         this.newDecorations = this.newDecorations.update({
           add: [decoration.range(match.from, match.from)],
         });
+        this.removeDecoration(decoration);
         found = true;
         return false;
       }
@@ -401,6 +417,12 @@ export default class DecorationSetBuilder {
           side: -1000,
         }).range(match.from, match.from),
       ],
+    });
+  }
+
+  private removeDecoration(decoration: Decoration) {
+    this.decorations = this.decorations.update({
+      filter: (_, __, currentDecoration) => currentDecoration !== decoration,
     });
   }
 }
