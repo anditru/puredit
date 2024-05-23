@@ -1,4 +1,4 @@
-import { Action, Message, MessagePayload, MessageType } from "@puredit/editor-interface/message";
+import { Action, Message, MessagePayload, MessageType } from "@puredit/editor-interface";
 import { v4 as uuid } from "uuid";
 
 declare const vscode: {

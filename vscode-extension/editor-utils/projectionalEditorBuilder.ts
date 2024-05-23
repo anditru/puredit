@@ -1,4 +1,4 @@
-import { defaultKeymap } from "@codemirror/commands";
+import { defaultKeymap, indentWithTab } from "@codemirror/commands";
 import {
   lineNumbers,
   highlightSpecialChars,
@@ -7,15 +7,14 @@ import {
   rectangularSelection,
   highlightActiveLine,
   highlightActiveLineGutter,
+  keymap,
 } from "@codemirror/view";
 import { foldGutter, indentOnInput, bracketMatching } from "@codemirror/language";
 import { closeBrackets } from "@codemirror/autocomplete";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
 import type { Extension } from "@codemirror/state";
-import { EditorView, keymap } from "@codemirror/view";
-import { indentWithTab } from "@codemirror/commands";
 import { projectionPlugin, type ProjectionPluginConfig } from "@puredit/projections";
-import { vscodeDark } from "@uiw/codemirror-theme-vscode";
+import { vscodeDarkInit } from "@uiw/codemirror-theme-vscode";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 import ProjectionalEditor from "./projectionalEditor";
 import VsCodeMessenger from "./vsCodeMessenger";
@@ -50,17 +49,12 @@ export default class ProjectionalEditorBuilder {
 
   private addOpticalExtensions(): ProjectionalEditorBuilder {
     this.addExtensions(
-      vscodeDark,
-      indentationMarkers(),
-      EditorView.theme({
-        ".cm-scroller": {
-          fontFamily: "var(--mono-font, monospace)",
-          fontSize: "14px",
+      vscodeDarkInit({
+        settings: {
+          fontSize: 25,
         },
-        ".cm-tooltip": {
-          fontFamily: "var(--system-font, sans-serif)",
-        },
-      })
+      }),
+      indentationMarkers()
     );
     return this;
   }
