@@ -2,18 +2,33 @@
   import { onDestroy, onMount } from "svelte";
   import { projectionPluginConfig } from "./projections";
   import { ProjectionalEditor, ProjectionalEditorBuilder } from "@puredit/editor-utils";
+  import { VsCodeMessenger } from "@puredit/editor-utils";
+  import { python } from "@codemirror/lang-python";
+  import { autocompletion } from "@codemirror/autocomplete";
+  import { completions } from "@puredit/projections";
+  import { indentUnit } from "@codemirror/language";
 
   let container: HTMLDivElement;
   let projectionalEditor: ProjectionalEditor | undefined;
 
-  onMount(() => {
+  onMount(async () => {
+    const vsCodeMessenger = new VsCodeMessenger();
     const projectionalEditorBuilder = new ProjectionalEditorBuilder();
     projectionalEditor = projectionalEditorBuilder
       .configureProjectionPlugin(projectionPluginConfig)
+      .addExtensions(
+        python(),
+        indentUnit.of("    "),
+        autocompletion({
+          activateOnTyping: true,
+          override: [completions],
+        })
+      )
       .setParent(container)
+      .setVsCodeMessenger(vsCodeMessenger)
       .build();
 
-    projectionalEditor.initialize();
+    await projectionalEditor.initialize();
   });
 
   onDestroy(() => {
@@ -21,7 +36,6 @@
   });
 </script>
 
-<svelte:window on:message={projectionalEditor.handleMessage.bind(projectionalEditor)} />
 <div class="container" bind:this={container} />
 
 <style>

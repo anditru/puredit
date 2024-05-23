@@ -5,8 +5,10 @@ import {
   ChangeEditorPayload,
   ChangeType,
   Message,
+  MessageType,
 } from "@puredit/editor-interface";
-import { MessageType } from "@puredit/editor-interface";
+import { Action } from "@puredit/editor-interface";
+import { v4 as uuid } from "uuid";
 
 export interface SvelteResources {
   scriptPath: string;
@@ -24,7 +26,7 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
     return providerRegistration;
   }
 
-  private updateCounter = 0;
+  private pendingDuplicateUpdates = 0;
 
   constructor(
     private readonly context: vscode.ExtensionContext,
@@ -40,19 +42,26 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
     };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
-    webviewPanel.webview.onDidReceiveMessage((message: Message) => {
-      if (message.type === MessageType.GET_DOCUMENT) {
+    webviewPanel.webview.onDidReceiveMessage(async (message: Message) => {
+      if (message.action === Action.GET_DOCUMENT) {
         webviewPanel.webview.postMessage({
-          type: MessageType.SEND_DOCUMENT,
+          id: message.id,
+          type: MessageType.RESPONSE,
+          action: Action.GET_DOCUMENT,
           payload: document.getText(),
         });
-      } else if (message.type === MessageType.UPDATE_DOCUMENT) {
+      } else if (message.action === Action.UPDATE_DOCUMENT) {
         const workspaceEdit = this.mapToWorkspaceEdit(
           message.payload! as ChangeDocumentPayload,
           document
         );
-        vscode.workspace.applyEdit(workspaceEdit);
-        this.updateCounter += 1;
+        this.pendingDuplicateUpdates += 1;
+        await vscode.workspace.applyEdit(workspaceEdit);
+        webviewPanel.webview.postMessage({
+          id: message.id,
+          type: MessageType.RESPONSE,
+          action: Action.UPDATE_DOCUMENT,
+        });
       }
     });
 
@@ -61,15 +70,17 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
         return;
       }
       if (e.document.uri.toString() === document.uri.toString()) {
-        if (this.updateCounter === 0) {
+        if (this.pendingDuplicateUpdates === 0) {
           e.contentChanges.forEach((contentChange) => {
             webviewPanel.webview.postMessage({
-              type: MessageType.UPDATE_EDITOR,
+              id: uuid(),
+              type: MessageType.REQUEST,
+              action: Action.UPDATE_EDITOR,
               payload: this.mapToChangeSpec(contentChange),
             });
           });
         } else {
-          this.updateCounter -= 1;
+          this.pendingDuplicateUpdates -= 1;
         }
       }
     });
@@ -98,21 +109,24 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
   ): vscode.WorkspaceEdit {
     const workspaceEdit = new vscode.WorkspaceEdit();
     if (changePayload.type === ChangeType.INSERTION) {
-      const position = new vscode.Position(changePayload.lineFrom, changePayload.characterFrom);
-      workspaceEdit.insert(document.uri, position, changePayload.inserted);
+      const position = document.positionAt(changePayload.from);
+      workspaceEdit.insert(document.uri, position, changePayload.insert);
     } else if (changePayload.type === ChangeType.REPLACEMENT) {
-      const range = this.buildRange(changePayload);
-      workspaceEdit.replace(document.uri, range, changePayload.inserted);
+      const range = this.buildRange(changePayload, document);
+      workspaceEdit.replace(document.uri, range, changePayload.insert);
     } else if (changePayload.type === ChangeType.DELETION) {
-      const range = this.buildRange(changePayload);
+      const range = this.buildRange(changePayload, document);
       workspaceEdit.delete(document.uri, range);
     }
     return workspaceEdit;
   }
 
-  private buildRange(changePayload: ChangeDocumentPayload): vscode.Range {
-    const positionFrom = new vscode.Position(changePayload.lineFrom, changePayload.characterFrom);
-    const positionTo = new vscode.Position(changePayload.lineTo, changePayload.characterTo);
+  private buildRange(
+    changePayload: ChangeDocumentPayload,
+    document: vscode.TextDocument
+  ): vscode.Range {
+    const positionFrom = document.positionAt(changePayload.from);
+    const positionTo = document.positionAt(changePayload.to);
     return new vscode.Range(positionFrom, positionTo);
   }
 

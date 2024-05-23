@@ -12,10 +12,11 @@
     "@codemirror/language": "6",
     "@codemirror/state": "6",
     "@codemirror/view": "6",
-    "@puredit/editor-interface": "*",
     "@puredit/codemirror-typescript": "*",
+    "@puredit/editor-interface": "*",
     "@puredit/projections": "*",
     "@replit/codemirror-indentation-markers": "6",
+    "@uiw/codemirror-theme-vscode": "^4.22.1",
     "codemirror": "6"
   },
   "devDependencies": {

@@ -1,0 +1,9 @@
+{
+  "extends": "@puredit/tsconfig/base.json",
+  "include": [".", "../editor-utils/vsCodeMessenger.ts"],
+  "exclude": ["dist", "build", "node_modules"],
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext"
+  }
+}

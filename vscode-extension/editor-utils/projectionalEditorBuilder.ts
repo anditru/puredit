@@ -9,34 +9,24 @@ import {
   highlightActiveLineGutter,
 } from "@codemirror/view";
 import { foldGutter, indentOnInput, bracketMatching } from "@codemirror/language";
-import { closeBrackets, autocompletion } from "@codemirror/autocomplete";
+import { closeBrackets } from "@codemirror/autocomplete";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
 import type { Extension } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
-import { projectionPlugin, completions, type ProjectionPluginConfig } from "@puredit/projections";
-import { oneDark } from "@codemirror/theme-one-dark";
-import {
-  typescript,
-  completionSource as typescriptCompletionSource,
-} from "@puredit/codemirror-typescript";
+import { projectionPlugin, type ProjectionPluginConfig } from "@puredit/projections";
+import { vscodeDark } from "@uiw/codemirror-theme-vscode";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 import ProjectionalEditor from "./projectionalEditor";
+import VsCodeMessenger from "./vsCodeMessenger";
 
 export default class ProjectionalEditorBuilder {
   private extenstions: Extension[] = [];
-  private parent: Element | DocumentFragment;
+  private parent!: Element | DocumentFragment;
+  private vsCodeMessenger!: VsCodeMessenger;
 
   constructor() {
-    this.addBasicExtensions()
-      .addOpticalExtensions()
-      .addExtensions(
-        typescript({ disableCompletions: true, disableTooltips: true }),
-        autocompletion({
-          activateOnTyping: true,
-          override: [completions, typescriptCompletionSource],
-        })
-      );
+    this.addBasicExtensions().addOpticalExtensions();
   }
 
   private addBasicExtensions(): ProjectionalEditorBuilder {
@@ -60,7 +50,7 @@ export default class ProjectionalEditorBuilder {
 
   private addOpticalExtensions(): ProjectionalEditorBuilder {
     this.addExtensions(
-      oneDark,
+      vscodeDark,
       indentationMarkers(),
       EditorView.theme({
         ".cm-scroller": {
@@ -90,7 +80,12 @@ export default class ProjectionalEditorBuilder {
     return this;
   }
 
+  setVsCodeMessenger(vsCodeMessenger: VsCodeMessenger) {
+    this.vsCodeMessenger = vsCodeMessenger;
+    return this;
+  }
+
   build(): ProjectionalEditor {
-    return new ProjectionalEditor(this.extenstions, this.parent);
+    return new ProjectionalEditor(this.vsCodeMessenger, this.extenstions, this.parent);
   }
 }

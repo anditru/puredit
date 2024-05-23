@@ -8,5 +8,8 @@
   "types": "./index.ts",
   "devDependencies": {
     "typescript": "^4.5.3"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1"
   }
 }

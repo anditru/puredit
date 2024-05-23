@@ -8,8 +8,7 @@
     "packages/*",
     "packages/projection-libs/*",
     "vscode-extension/*",
-    "vscode-extension/editors/*",
-    "vscode-extension/common/*"
+    "vscode-extension/editors/*"
   ],
   "scripts": {
     "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js",
