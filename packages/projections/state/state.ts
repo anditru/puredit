@@ -103,7 +103,6 @@ export const projectionState = StateField.define<ProjectionState>({
       .setMatches(allMatches)
       .setNodesToInvalidate(nodesToInvalidate);
     decorations = decorationSetBuilder.build();
-
     return { config, patternMap, decorations, contextVariableRanges: allContextVariableRanges };
   },
 
@@ -166,15 +165,15 @@ function analyzeChanges(oldText: string, newText: string, parser: Parser) {
       changedStatementNodes.push(newStatementNode);
       continue;
     }
+    if (newStatementNode.type === "ERROR") {
+      errorNodes.push(newStatementNode);
+      continue;
+    }
     if (
       oldStatementNode.startIndex !== newStatementNode.startIndex ||
       oldStatementNode.endIndex !== newStatementNode.endIndex
     ) {
       changedStatementNodes.push(newStatementNode);
-      continue;
-    }
-    if (newStatementNode.type === "ERROR") {
-      errorNodes.push(newStatementNode);
       continue;
     }
     if (oldStatementNode.text === newStatementNode.text) {
