@@ -1,5 +1,5 @@
-import { ChangeSet, EditorSelection, EditorState, Transaction } from "@codemirror/state";
-import { ChangeSpec, SelectionRange } from "@codemirror/state";
+import { ChangeSet, EditorSelection, EditorState, Line, Transaction } from "@codemirror/state";
+import { ChangeSpec, SelectionRange, Text } from "@codemirror/state";
 import { ProjectionWidget } from "./projection";
 import { projectionState } from "./state/state";
 import { Match } from "@puredit/parser";
@@ -8,26 +8,82 @@ export const transactionFilter = EditorState.transactionFilter.of((tr) => {
   const { decorations } = tr.startState.field(projectionState);
   const startDoc = tr.startState.doc;
 
-  // When Ctrl + Shift + Up / Down is used to copy a line, the entire projection must be copied
+  // When Alt + Up / Down is used to move a line, reject the transaction since this will end up in chaos
+  if (tr.annotation(Transaction.userEvent) === "move.line") {
+    let reject = false;
+    let moveDown: boolean | undefined;
+    let movedLine: Line;
+    let targetLine: Line;
+    let i = 0;
+    tr.changes.iterChanges((from, to, _fromB, _toB, insert) => {
+      if (moveDown === undefined) {
+        moveDown = insert.text.length === 2;
+      }
+      if (moveDown && i === 0) {
+        movedLine = startDoc.lineAt(_fromB);
+        targetLine = startDoc.lineAt(movedLine.to + 1);
+      }
+      if (moveDown === false && i === 0) {
+        movedLine = startDoc.lineAt(to + 1);
+        targetLine = startDoc.lineAt(movedLine.from - 1);
+      }
+      i++;
+    });
+    decorations.between(movedLine!.from, movedLine!.to, (_, __, ___) => {
+      reject = true;
+      return false;
+    });
+    decorations.between(targetLine!.from, targetLine!.to, (_, __, ___) => {
+      reject = true;
+      return false;
+    });
+    if (reject) {
+      const cursorPosition = tr.startState.selection.main.anchor;
+      Object.assign(tr, {
+        changes: ChangeSet.of([], startDoc.length, tr.startState.lineBreak),
+        selection: EditorSelection.single(cursorPosition, cursorPosition),
+      });
+    }
+  }
+
+  // When Alt + Shift + Up / Down is used to copy a line, the entire projection must be copied
   if (tr.annotation(Transaction.userEvent) === "input.copyline") {
     let modifyCopy = false;
     const modifiedChanges: ChangeSpec[] = [];
     tr.changes.iterChanges((from, to, _fromB, _toB, insert) => {
-      const change: ChangeSpec = { from, to, insert };
-      decorations.between(from, to, (_, __, dec) => {
-        const match = dec.spec.widget.match;
-        const insertBegin = startDoc.lineAt(match.node.startIndex).from;
-        const insertEnd = match.node.endIndex;
-        change.insert = "\n" + startDoc.slice(insertBegin, insertEnd);
-
-        const matchEndLine = startDoc.lineAt(match.node.endIndex);
-        change.from = matchEndLine.to;
-
-        change.to = undefined;
-
+      const change: ChangeSpec = { from, to: undefined, insert };
+      let copiedLine: Line;
+      let prefix = "";
+      let postfix = "";
+      if (insert.text[0] === "") {
+        copiedLine = startDoc.lineAt(from - 1);
+        change.from = copiedLine.from - 1;
+        prefix = "\n";
+      } else {
+        copiedLine = startDoc.lineAt(to + 1);
+        change.from = copiedLine.to + 1;
+        postfix = "\n";
+      }
+      let copyFrom = Infinity;
+      let copyTo = 0;
+      let leadingWhiteSpace = "";
+      decorations.between(copiedLine.from, copiedLine.to, (_, __, dec) => {
         modifyCopy = true;
-        return false;
+        const match = dec.spec.widget.match;
+        if (match.from <= copiedLine.from && match.to >= copiedLine.to) {
+          copyFrom = match.from;
+          copyTo = match.to;
+          change.from = startDoc.lineAt(match.to).to + 1;
+          return false;
+        }
+        if (match.from >= copiedLine.from && match.to <= copiedLine.to) {
+          copyFrom = Math.min(copyFrom, match.from);
+          copyTo = Math.max(copyTo, match.to);
+          const whiteSpace = copiedLine.text.match(/^\s*/);
+          leadingWhiteSpace = whiteSpace?.length ? whiteSpace[0] : "";
+        }
       });
+      change.insert = prefix + leadingWhiteSpace + startDoc.slice(copyFrom, copyTo) + postfix;
       modifiedChanges.push(change);
     });
     if (modifyCopy) {
@@ -105,6 +161,7 @@ export const transactionFilter = EditorState.transactionFilter.of((tr) => {
         decTo === posNextToChange &&
         charNextToChange === "\n" &&
         change.insert.toString() !== "" &&
+        tr.annotation(Transaction.userEvent) !== "move.line" &&
         tr.annotation(Transaction.userEvent) !== "input.copyline" &&
         tr.annotation(Transaction.userEvent) !== "delete.line"
       ) {

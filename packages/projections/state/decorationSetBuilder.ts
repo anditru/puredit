@@ -328,12 +328,9 @@ export default class DecorationSetBuilder {
     Widget: ProjectionWidgetClass
   ) {
     let found = false;
-    this.decorations.between(match.from, match.to, (decorationFrom, decorationTo, decoration) => {
+    this.decorations.between(match.from, match.to, (_, __, decoration) => {
       const widget = decoration.spec.widget;
-      if (
-        (decorationFrom === match.from || decorationTo === match.to) &&
-        widget instanceof Widget
-      ) {
+      if (widget instanceof Widget) {
         widget.set(match, contextInformation, this.state);
         this.newDecorations = this.newDecorations.update({
           add: [decoration.range(match.to, match.to)],
@@ -385,12 +382,9 @@ export default class DecorationSetBuilder {
     Widget: ProjectionWidgetClass
   ) {
     let found = false;
-    this.decorations.between(match.from, match.to, (decorationFrom, decorationTo, decoration) => {
+    this.decorations.between(match.from, match.to, (_, __, decoration) => {
       const widget = decoration.spec.widget;
-      if (
-        (decorationFrom === match.from || decorationTo === match.to) &&
-        widget instanceof Widget
-      ) {
+      if (widget instanceof Widget) {
         widget.set(match, contextInformation, this.state);
         this.newDecorations = this.newDecorations.update({
           add: [decoration.range(match.from, match.from)],

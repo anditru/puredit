@@ -145,10 +145,31 @@ function analyzeChanges(oldText: string, newText: string, parser: Parser) {
 
   const changedStatementNodes: AstNode[] = [];
   const errorNodes: AstNode[] = [];
-  for (let i = 0; i < newStatementNodes.length; i++) {
+
+  const oldLeadingWhiteSpace = oldText.match(/^\s*/);
+  const newLeadingWhiteSpace = newText.match(/^\s*/);
+  let i = 0;
+  if (
+    (oldLeadingWhiteSpace &&
+      newLeadingWhiteSpace &&
+      oldLeadingWhiteSpace[0] !== newLeadingWhiteSpace[0]) ||
+    (oldLeadingWhiteSpace && !newLeadingWhiteSpace) ||
+    (!oldLeadingWhiteSpace && newLeadingWhiteSpace)
+  ) {
+    changedStatementNodes.push(newStatementNodes[0]);
+    i = 1;
+  }
+  for (; i < newStatementNodes.length; i++) {
     const oldStatementNode = oldStatementNodes[i];
     const newStatementNode = newStatementNodes[i];
     if (!oldStatementNode) {
+      changedStatementNodes.push(newStatementNode);
+      continue;
+    }
+    if (
+      oldStatementNode.startIndex !== newStatementNode.startIndex ||
+      oldStatementNode.endIndex !== newStatementNode.endIndex
+    ) {
       changedStatementNodes.push(newStatementNode);
       continue;
     }
@@ -169,6 +190,9 @@ function analyzeChanges(oldText: string, newText: string, parser: Parser) {
 
 function nodesEqual(oldNode: AstNode, newNode: AstNode): boolean {
   if (oldNode.type !== newNode.type) {
+    return false;
+  }
+  if (oldNode.startIndex !== newNode.startIndex || oldNode.endIndex !== newNode.endIndex) {
     return false;
   }
   if (oldNode.children?.length !== newNode.children?.length) {
