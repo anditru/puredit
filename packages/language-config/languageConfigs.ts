@@ -80,6 +80,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
       draft: "pass # instructions go here",
     },
     comments: {
+      statementNodeType: "expression_statement",
       commentTypes: {
         comment: {
           startTokenRegexes: ["#"],
@@ -125,6 +126,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
       draft: "{\n  // instructions go here\n}",
     },
     comments: {
+      statementNodeType: "expression_statement",
       commentTypes: {
         comment: {
           startTokenRegexes: ["//", "/*"],

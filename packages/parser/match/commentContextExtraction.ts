@@ -6,16 +6,22 @@ export default class CommentContextExtraction {
   constructor(private readonly verificationResult: VerificationResult) {}
 
   execute(): object | Array<any> | null {
+    const commentsConfig = loadCommentsConfigFor(this.verificationResult.pattern.language);
+    let matchNode = this.verificationResult.node;
+    while (matchNode.type !== commentsConfig.statementNodeType) {
+      if (!matchNode.parent) {
+        return null;
+      }
+      matchNode = matchNode.parent;
+    }
     let childIndex;
     try {
-      childIndex = this.verificationResult.node.getChildIndex();
+      childIndex = matchNode.getChildIndex();
     } catch (error) {
       return null;
     }
-    const matchParent = this.verificationResult.node.parent;
-    const commentTypeConfigs = loadCommentsConfigFor(
-      this.verificationResult.pattern.language
-    ).commentTypes;
+    const matchParent = matchNode.parent;
+    const commentTypeConfigs = commentsConfig.commentTypes;
 
     for (let i = childIndex - 1; i >= 0; i--) {
       const child = matchParent!.children[i];

@@ -50,6 +50,7 @@ export type BlocksConfig = {
 };
 
 export type CommentsConfig = {
+  statementNodeType: string;
   commentTypes: Record<string, CommentTypeConfig>;
 };
 
