@@ -10,7 +10,6 @@ import { fromStartIndexSubProjection } from "./fromStartIndexSubProjection/confi
 import { betweenIndicesSubProjection } from "./betweenIndicesSubProjection/config";
 import { singleItemSubProjection } from "./singleItemSubProjection/config";
 
-const targetTensor = arg("targetTensor", ["identifier"]);
 const baseTensor = arg("baseTensor", ["identifier"]);
 const startPattern = parser.subPattern("baseTensor")`${baseTensor}`;
 const slices = agg(
@@ -24,7 +23,7 @@ const slices = agg(
   ],
   startPattern
 );
-const pattern = parser.statementPattern("sliceProjectionPattern")`${targetTensor} = ${slices}`;
+const pattern = parser.statementPattern("sliceProjectionPattern")`${slices}`;
 
 const beginWidget = svelteProjection(BeginWidget);
 const endWidget = svelteProjection(EndWidget);

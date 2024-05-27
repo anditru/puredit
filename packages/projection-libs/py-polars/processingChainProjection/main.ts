@@ -1,9 +1,6 @@
-import { arg, chain } from "@puredit/parser";
-import { svelteProjection } from "@puredit/projections/svelte";
+import { chain } from "@puredit/parser";
 import type { RootProjection } from "@puredit/projections/types";
 import { parser } from "../parser";
-import EmptyWidget from "@puredit/projections/EmptyWidget.svelte";
-import IntoWidget from "./IntoWidget.svelte";
 
 import { selectStartSubProjection } from "./selectStartSubProjection/config";
 import { selectSubProjection } from "./selectSubProjection/config";
@@ -43,21 +40,14 @@ const processingChain = chain(
   1
 );
 
-const targetDataFrame = arg("targetDataFrame", ["identifier"]);
-const pattern = parser.statementPattern(
-  "selectChainPattern"
-)`${targetDataFrame} = ${processingChain}`;
-
-const widget = svelteProjection(EmptyWidget);
-const intoWidget = svelteProjection(IntoWidget);
+const pattern = parser.expressionPattern("selectChainPattern")`${processingChain}`;
 
 export const selectChainProjection: RootProjection = {
   name: "Processing Chain",
   description: "Transform a dataset",
   pattern,
   requiredContextVariables: [],
-  segmentWidgets: [widget, widget],
-  postfixWidget: intoWidget,
+  segmentWidgets: [],
   subProjections: [
     selectStartSubProjection,
     selectSubProjection,

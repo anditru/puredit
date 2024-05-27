@@ -8,9 +8,7 @@ export interface Projection {
   name: string;
   description: string;
   requiredContextVariables: string[];
-  prefixWidget?: ProjectionWidgetClass;
   segmentWidgets: Array<ProjectionWidgetClass>;
-  postfixWidget?: ProjectionWidgetClass;
   contextProvider?: FnContextProvider;
 }
 

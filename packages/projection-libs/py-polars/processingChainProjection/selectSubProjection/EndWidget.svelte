@@ -1,21 +1,25 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { tags } from "@lezer/highlight";
   import type { EditorState } from "@codemirror/state";
   import type { EditorView } from "@codemirror/view";
-  import { highlightingFor } from "@codemirror/language";
   import type { Match } from "@puredit/parser";
   import type { FocusGroup } from "@puredit/projections/focus";
-  import TextInput from "@puredit/projections/TextInput.svelte";
   import { ContextInformation } from "@puredit/projections";
 
+  import TextInput from "@puredit/projections/TextInput.svelte";
+  import { tags } from "@lezer/highlight";
+  import { highlightingFor } from "@codemirror/language";
+
   export let isNew: boolean;
-  export let view: EditorView | null;
-  export let match: Match;
-  //svelte-ignore unused-export-let
-  export let context: ContextInformation;
-  export let state: EditorState;
   export let focusGroup: FocusGroup;
+  // svelte-ignore unused-export-let
+  export let state: EditorState;
+  // svelte-ignore unused-export-let
+  export let view: EditorView | null;
+  // svelte-ignore unused-export-let
+  export let match: Match;
+  // svelte-ignore unused-export-let
+  export let context: ContextInformation;
 
   onMount(() => {
     if (isNew) {
@@ -26,14 +30,4 @@
   });
 </script>
 
-<span class="inline-flex">
-  <span>into</span>
-  <TextInput
-    className={highlightingFor(state, [tags.atom])}
-    node={match.argsToAstNodeMap.targetDataFrame}
-    {state}
-    {view}
-    {focusGroup}
-    placeholder="data frame"
-  />
-</span>
+<span class="inline-flex"> end columns </span>

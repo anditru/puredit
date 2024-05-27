@@ -15,5 +15,4 @@ export const castSubProjection: SubProjection = {
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],
-  postfixWidget: undefined,
 };

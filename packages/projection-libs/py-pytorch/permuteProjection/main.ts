@@ -1,5 +1,6 @@
 import { parser } from "../parser";
 import { svelteProjection } from "@puredit/projections/svelte";
+import { simpleProjection } from "@puredit/simple-projection";
 import {
   LineAlignment,
   type ContextInformation,
@@ -8,7 +9,6 @@ import {
 import Widget from "./Widget.svelte";
 import { Match, agg, arg } from "@puredit/parser";
 import { integerPart } from "../common/integerPart/config";
-import EmptyWidget from "@puredit/projections/EmptyWidget.svelte";
 
 const tensor = arg("tensor", ["identifier"]);
 const dimensions = agg("dimensions", "argument_list", [integerPart.pattern]);
@@ -16,7 +16,7 @@ const dimensions = agg("dimensions", "argument_list", [integerPart.pattern]);
 const pattern = parser.statementPattern("permuteProjectionPattern")`${tensor}.permute${dimensions}`;
 
 const widget = svelteProjection(Widget);
-const emptyWidget = svelteProjection(EmptyWidget);
+const emptyWidget = simpleProjection(["end permutation"]);
 
 export const permuteProjection: RootProjection = {
   name: "Permute",

@@ -30,14 +30,4 @@
   });
 </script>
 
-<span class="inline-flex">
-  <span>into</span>
-  <TextInput
-    className={highlightingFor(state, [tags.atom])}
-    node={match.argsToAstNodeMap.targetTensor}
-    {state}
-    {view}
-    {focusGroup}
-    placeholder="target tensor"
-  />
-</span>
+<span class="inline-flex"> end slice </span>

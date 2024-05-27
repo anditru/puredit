@@ -1,7 +1,7 @@
 import { svelteProjection } from "@puredit/projections/svelte";
 import type { SubProjection } from "@puredit/projections/types";
-import Widget from "./Widget.svelte";
-import EmptyWidget from "@puredit/projections/EmptyWidget.svelte";
+import BeginWidget from "./BeginWidget.svelte";
+import EndWidget from "./EndWidget.svelte";
 
 import { parser } from "../../parser";
 import { agg } from "@puredit/parser";
@@ -14,13 +14,13 @@ const columns = agg("columns", "argument_list", [
 ]);
 const selectFunction = parser.subPattern("selectFunction")`select${columns}`;
 
-const widget = svelteProjection(Widget);
-const emptyWidget = svelteProjection(EmptyWidget);
+const beginWidget = svelteProjection(BeginWidget);
+const endWidget = svelteProjection(EndWidget);
 
 export const selectSubProjection: SubProjection = {
   name: "Select Column",
   description: "Select a column from a dataframe",
   pattern: selectFunction,
   requiredContextVariables: [],
-  segmentWidgets: [widget, emptyWidget],
+  segmentWidgets: [beginWidget, endWidget],
 };

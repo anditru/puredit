@@ -86,15 +86,17 @@ function correctCopyLine(tr: Transaction) {
     const change: ChangeSpec = { from, to: undefined, insert };
     let copiedLine: Line;
     let prefix = "";
-    let postfix = "";
+    const postfix = "";
     if (insert.text[0] === "") {
+      // Copy up
       copiedLine = startDoc.lineAt(from - 1);
       change.from = copiedLine.from - 1;
       prefix = "\n";
     } else {
+      // Copy down
       copiedLine = startDoc.lineAt(to + 1);
-      change.from = copiedLine.to + 1;
-      postfix = "\n";
+      change.from = copiedLine.to;
+      prefix = "\n";
     }
     let copyFrom = Infinity;
     let copyTo = 0;
@@ -105,7 +107,7 @@ function correctCopyLine(tr: Transaction) {
       if (match.from <= copiedLine.from && match.to >= copiedLine.to) {
         copyFrom = match.from;
         copyTo = match.to;
-        change.from = startDoc.lineAt(match.to).to + 1;
+        change.from = startDoc.lineAt(match.to).to;
         return false;
       }
       if (match.from >= copiedLine.from && match.to <= copiedLine.to) {
@@ -178,7 +180,7 @@ function correctSelectionRanges(tr: Transaction) {
       let newFrom: number;
       let newTo: number;
       let newRange = range;
-      decorations.between(range.from, range.to, (from, to, dec) => {
+      decorations.between(range.from + 1, range.to - 1, (from, to, dec) => {
         const widget: ProjectionWidget = dec.spec.widget;
         newFrom = Math.min(widget.match.from, from);
         newTo = Math.max(widget.match.to, to);
@@ -202,7 +204,7 @@ function correctCursorMovements(tr: Transaction) {
   const assoc = selection!.main.assoc;
   // Find decorations that _contain_ the cursor (hence the +/- 1),
   // not only touch it
-  decorations.between(pos + 1, pos - 1, (fromDec, toDec, dec) => {
+  decorations.between(pos, pos, (fromDec, toDec, dec) => {
     const widget = dec.spec.widget;
     if (!(widget instanceof ProjectionWidget)) {
       return;
@@ -264,10 +266,11 @@ function correctOtherChanges(tr: Transaction) {
     // Correct transactions where text is inserted at the end of a line
     // right after a widget to prevent the cursor from jumping to the next line.
     const posNextToChange = from - 1;
+    const cursorPosAtBegin = tr.startState.selection.main.anchor;
     decorations.between(posNextToChange, posNextToChange, (_, decTo, ___) => {
       const charNextToChange = tr.startState.doc.toString().charAt(posNextToChange);
       if (
-        decTo === posNextToChange &&
+        decTo === cursorPosAtBegin &&
         charNextToChange === "\n" &&
         change.insert.toString() !== ""
       ) {

@@ -46,7 +46,6 @@ export interface RootProjectionDefinition {
   parameters: TemplateParameterDefinition[];
   template: string;
   segmentWidgets: string[];
-  postfixWidget?: string;
 }
 
 /**
@@ -59,7 +58,6 @@ export interface SubProjectionDefinition {
   parameters: TemplateParameterDefinition[];
   template: string;
   segmentWidgets: string[];
-  postfixWidget?: string;
 }
 
 export enum SubProjectionType {
