@@ -1,6 +1,9 @@
 import { Action, Message, MessagePayload, MessageType } from "@puredit/editor-interface";
 import { v4 as uuid } from "uuid";
 
+import { logProvider } from "../../logconfig";
+const logger = logProvider.getLogger("vscode.editor-utils.VsCodeMessenger");
+
 declare const vscode: {
   postMessage(message: Message): void;
 };
@@ -52,8 +55,7 @@ export default class VSCodeMessenger {
     if (this.queue.length > 0 && !this.processing) {
       this.processing = true;
       const { message } = this.queue[0];
-      console.log("Sending message");
-      console.log(JSON.stringify(message));
+      logger.debug(`Sending message ${JSON.stringify(message, null, 2)}`);
       vscode.postMessage(message);
 
       setTimeout(() => {
@@ -71,8 +73,7 @@ export default class VSCodeMessenger {
 
   private handleIncomingMessage(event: MessageEvent) {
     const message = event.data as Message;
-    console.log("Processing message");
-    console.log(JSON.stringify(message));
+    logger.debug(`Processing message ${JSON.stringify(message, null, 2)}`);
     if (
       message.type === MessageType.RESPONSE &&
       this.queue.length > 0 &&

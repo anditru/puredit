@@ -108,6 +108,13 @@ export default class DecorationSetBuilder {
         this.removeDecoration(dec);
       });
     }
+    this.decorations = this.decorations.update({
+      filter: (from, to, value) => {
+        return (
+          from !== to || !!this.matches.find((match) => from === match.from || to === match.to)
+        );
+      },
+    });
     return RangeSet.join([this.newDecorations, this.decorations]);
   }
 

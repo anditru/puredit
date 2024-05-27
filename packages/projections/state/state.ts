@@ -142,6 +142,10 @@ function analyzeChanges(oldText: string, newText: string, parser: Parser) {
   const newAstCursor = new AstCursor(parser.parse(newText).walk());
   const newStatementNodes = newAstCursor.currentNode.children;
 
+  if (!newStatementNodes.length) {
+    return { changedStatementNodes: [], errorNodes: [] };
+  }
+
   const changedStatementNodes: AstNode[] = [];
   const errorNodes: AstNode[] = [];
 
