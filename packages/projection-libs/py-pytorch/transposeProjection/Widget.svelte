@@ -30,42 +30,44 @@
   });
 </script>
 
-<div style="display: flex; flex-direction: column;">
-  <span class="inline-flex">
-    <span>Swap dimensions</span>
-    <TextInput
-      className={highlightingFor(state, [tags.atom])}
-      node={match.argsToAstNodeMap.dim0}
-      {state}
-      {view}
-      {focusGroup}
-      placeholder="dimension"
-    />
-    <span>and</span>
-    <TextInput
-      className={highlightingFor(state, [tags.atom])}
-      node={match.argsToAstNodeMap.dim1}
-      {state}
-      {view}
-      {focusGroup}
-      placeholder="other dimension"
-    />
-    <span>of tensor</span>
-    <TextInput
-      className={highlightingFor(state, [tags.atom])}
-      node={match.argsToAstNodeMap.tensor}
-      {state}
-      {view}
-      {focusGroup}
-      placeholder="tensor"
-    />
-  </span>
-  {#if context.dimensions}
-    <span>Dimensions after transpose:</span>
-    <div style="display: flex; flex-direction: column;">
-      {#each context.dimensions as dimension, index}
-        <span style="margin-left: 10px;">{index}: {dimension}</span>
-      {/each}
-    </div>
-  {/if}
-</div>
+<span class="inline-flex">
+  <div style="display: flex; flex-direction: column;">
+    <span class="inline-flex">
+      <span>Swap dimensions</span>
+      <TextInput
+        className={highlightingFor(state, [tags.atom])}
+        node={match.argsToAstNodeMap.dim0}
+        {state}
+        {view}
+        {focusGroup}
+        placeholder="dimension"
+      />
+      <span>and</span>
+      <TextInput
+        className={highlightingFor(state, [tags.atom])}
+        node={match.argsToAstNodeMap.dim1}
+        {state}
+        {view}
+        {focusGroup}
+        placeholder="other dimension"
+      />
+      <span>of tensor</span>
+      <TextInput
+        className={highlightingFor(state, [tags.atom])}
+        node={match.argsToAstNodeMap.tensor}
+        {state}
+        {view}
+        {focusGroup}
+        placeholder="tensor"
+      />
+    </span>
+    {#if context.dimensions}
+      <span>Dimensions after transpose:</span>
+      <div style="display: flex; flex-direction: column;">
+        {#each context.dimensions as dimension, index}
+          <span style="margin-left: 10px;">{index}: {dimension}</span>
+        {/each}
+      </div>
+    {/if}
+  </div>
+</span>

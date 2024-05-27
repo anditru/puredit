@@ -64,8 +64,7 @@ unpivoted_weather = (aggregated_weather.melt(
         "date"
     ], value_vars=[
         "city"
-    ], variable_name="city",
-    value_name="average_temperature"
+    ], variable_name="city", value_name="average_temperature"
 )
 .drop_nulls())
 
@@ -94,7 +93,6 @@ extended_prices = prices.with_columns(
 
 # CONTEXT: [ "Batches", "Images", "Channels", "Width", "Height" ]
 image_data.transpose(0, 1)
-
 
 # CONTEXT: [ "Batches", "Images", "Channels", "Width", "Height" ]
 image_data.permute(2, 3, 0, 1, 4)

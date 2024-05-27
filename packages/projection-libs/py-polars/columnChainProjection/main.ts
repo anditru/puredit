@@ -2,7 +2,6 @@ import { chain } from "@puredit/parser";
 import { svelteProjection } from "@puredit/projections/svelte";
 import type { RootProjection } from "@puredit/projections/types";
 import { parser } from "../parser";
-import EmptyWidget from "@puredit/projections/EmptyWidget.svelte";
 
 import { columnStartSubProjection } from "./columnStartSubProjection/config";
 import { colSubProjection } from "./colSubProjection/config";
@@ -26,14 +25,13 @@ export const columnChain = chain("columnChain", columnStartSubProjection.pattern
 ]);
 
 const pattern = parser.statementPattern("columnChainPattern")`${columnChain}`;
-const widget = svelteProjection(EmptyWidget);
 
 export const columnChainProjection: RootProjection = {
   name: "Column Chain",
   description: "Pick a column and apply transfomrations to its name",
   pattern,
   requiredContextVariables: [],
-  segmentWidgets: [widget],
+  segmentWidgets: [],
   subProjections: [
     columnStartSubProjection,
     colSubProjection,

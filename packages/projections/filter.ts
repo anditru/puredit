@@ -104,7 +104,7 @@ function correctCopyLine(tr: Transaction) {
     decorations.between(copiedLine.from, copiedLine.to, (_, __, dec) => {
       modifyCopy = true;
       const match = dec.spec.widget.match;
-      if (match.from <= copiedLine.from && match.to >= copiedLine.to) {
+      if (match.from <= copiedLine.from || match.to >= copiedLine.to) {
         copyFrom = match.from;
         copyTo = match.to;
         change.from = startDoc.lineAt(match.to).to;
@@ -172,24 +172,35 @@ function correctSelectionRanges(tr: Transaction) {
   const { selection } = tr;
   const { decorations } = tr.startState.field(projectionState);
 
-  const newRanges: SelectionRange[] = [];
-  for (const range of selection!.ranges) {
-    if (range.empty) {
-      newRanges.push(range);
-    } else {
-      let newFrom: number;
-      let newTo: number;
-      let newRange = range;
-      decorations.between(range.from + 1, range.to - 1, (from, to, dec) => {
-        const widget: ProjectionWidget = dec.spec.widget;
-        newFrom = Math.min(widget.match.from, from);
-        newTo = Math.max(widget.match.to, to);
-        newRange = EditorSelection.range(newFrom, newTo);
-      });
-      newRanges.push(newRange);
-    }
+  const anchor = selection!.main.anchor;
+  const head = selection!.main.head;
+
+  let left: number;
+  let right: number;
+  let direction: number;
+  if (head <= anchor) {
+    left = head;
+    right = anchor;
+    direction = -1;
+  } else {
+    left = anchor;
+    right = head;
+    direction = 1;
   }
-  Object.assign(tr, { selection: EditorSelection.create(newRanges) });
+  let newRange = selection!.main;
+
+  decorations.between(left + 1, right - 1, (from, to, dec) => {
+    const widget: ProjectionWidget = dec.spec.widget;
+    left = Math.min(widget.match.from, from, left);
+    right = Math.max(widget.match.to, to, right);
+    if (direction === -1) {
+      newRange = EditorSelection.range(right, left);
+    } else {
+      newRange = EditorSelection.range(left, right);
+    }
+  });
+
+  Object.assign(tr, { selection: EditorSelection.create([newRange]) });
 }
 
 /**

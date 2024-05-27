@@ -4,14 +4,17 @@
   import type { EditorView } from "@codemirror/view";
   import type { Match } from "@puredit/parser";
   import type { FocusGroup } from "@puredit/projections/focus";
-  import TextInput from "@puredit/projections/TextInput.svelte";
-  import { highlightingFor } from "@codemirror/language";
-  import { tags } from "@lezer/highlight";
   import { ContextInformation } from "@puredit/projections";
+
+  import TextInput from "@puredit/projections/TextInput.svelte";
+  import { tags } from "@lezer/highlight";
+  import { highlightingFor } from "@codemirror/language";
 
   export let isNew: boolean;
   export let focusGroup: FocusGroup;
+  // svelte-ignore unused-export-let
   export let state: EditorState;
+  // svelte-ignore unused-export-let
   export let view: EditorView | null;
   export let match: Match;
   // svelte-ignore unused-export-let
@@ -27,22 +30,14 @@
 </script>
 
 <span class="inline-flex">
-  <span>name variable column</span>
+  <span>Permute dimensions of tensor</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
-    node={match.argsToAstNodeMap.variableColumnName}
+    node={match.argsToAstNodeMap.tensor}
     {state}
     {view}
     {focusGroup}
-    placeholder="valiable column name"
+    placeholder="tensor"
   />
-  <span>name value column</span>
-  <TextInput
-    className={highlightingFor(state, [tags.atom])}
-    node={match.argsToAstNodeMap.valueColumnName}
-    {state}
-    {view}
-    {focusGroup}
-    placeholder="value column name"
-  />
+  <span>to order</span>
 </span>

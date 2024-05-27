@@ -14,7 +14,6 @@ export function mapTransactionToChanges(transaction: Transaction): Change[] {
         toAfter + previousDelta,
         inserted
       );
-      console.log(JSON.stringify(change));
       changes.push(change);
     }
   );

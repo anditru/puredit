@@ -70,7 +70,10 @@ export default class TemplateAggregation extends TemplateParameter {
   }
 
   toDraftString(): string {
-    return this.subPatterns[0].toDraftString();
+    const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(this.template!.language, this.type);
+    return (
+      nodeTypeConfig.startToken + this.subPatterns[0].toDraftString() + nodeTypeConfig.endToken
+    );
   }
 
   copy(): TemplateAggregation {

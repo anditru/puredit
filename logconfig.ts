@@ -16,5 +16,9 @@ export const logProvider = Log4TSProvider.createProvider("Puredit", {
       identifier: "codemirror-typescript",
       expression: new RegExp("codemirror-typescript.+"),
     },
+    {
+      identifier: "vscode.editor-utils",
+      expression: new RegExp("vscode.editor-utils.+"),
+    },
   ],
 });
