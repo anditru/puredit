@@ -10,8 +10,8 @@ export const filterFunction = parser.subPattern("filterFunction")`filter(${condi
 const widget = svelteProjection(Widget);
 
 export const filterSubProjection: SubProjection = {
-  name: "Filter Function",
-  description: "Filter selection result",
+  name: "Polars:Dataframe:Filter",
+  description: "Filter the rows of a dataframe.",
   pattern: filterFunction,
   requiredContextVariables: [],
   segmentWidgets: [widget],

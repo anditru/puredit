@@ -19,8 +19,8 @@ const beginWidget = svelteProjection(Widget);
 const endWidget = simpleProjection(["end columns"]);
 
 export const aggSubProjection: SubProjection = {
-  name: "Aggregate function",
-  description: "Aggregate columns after group by",
+  name: "Polars:Dataframe:Aggregate",
+  description: "Aggregate columns of a dataframe after a group by.",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [beginWidget, endWidget],

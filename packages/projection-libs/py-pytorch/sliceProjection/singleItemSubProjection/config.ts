@@ -10,7 +10,7 @@ const pattern = parser.subPattern("singleItemSubProjectionPattern")`${index}`;
 const widget = svelteProjection(Widget);
 
 export const singleItemSubProjection: SubProjection = {
-  name: "Select single Item",
+  name: "PyTorch:Tensor:Slice:SingleItem",
   description: "Select a single item.",
   pattern,
   requiredContextVariables: [],

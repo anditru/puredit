@@ -1,8 +1,8 @@
 import { svelteProjection } from "@puredit/projections/svelte";
-import type { ContextInformation, SubProjection } from "@puredit/projections/types";
+import type { SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
-import { arg, Match } from "@puredit/parser";
+import { arg } from "@puredit/parser";
 
 const startIndex = arg("startIndex", ["integer", "identifier"]);
 const endIndex = arg("endIndex", ["integer", "identifier"]);
@@ -14,7 +14,7 @@ const pattern = parser.subPattern(
 const widget = svelteProjection(Widget);
 
 export const betweenIndicesSubProjection: SubProjection = {
-  name: "Select between indices",
+  name: "PyTorch:Tensor:Slice:BetweenIndices",
   description: "Select from a given index to a given index.",
   pattern,
   requiredContextVariables: [],

@@ -14,7 +14,7 @@ const pattern = parser.subPattern(
 const widget = svelteProjection(Widget);
 
 export const joinSubProjection: SubProjection = {
-  name: "Join function",
+  name: "Polars:Dataframe:Join",
   description: "Join another dataframe.",
   pattern,
   requiredContextVariables: [],

@@ -19,7 +19,7 @@ const beginWidget = svelteProjection(BeginWidget);
 const endWidget = svelteProjection(EndWidget);
 
 export const permuteProjection: RootProjection = {
-  name: "Permute",
+  name: "PyTorch:Tensor:Permute",
   description: "Permute the dimensions of a tensor.",
   pattern,
   requiredContextVariables: [],

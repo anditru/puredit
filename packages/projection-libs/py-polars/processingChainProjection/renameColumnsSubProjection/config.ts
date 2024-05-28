@@ -13,7 +13,7 @@ const beginWidget = svelteProjection(Widget);
 const endWidget = simpleProjection(["end columns"]);
 
 export const renameColumnsSubProjection: SubProjection = {
-  name: "Rename columns function",
+  name: "Polars:RenameColumns",
   description: "Rename columns in dataframe.",
   pattern,
   requiredContextVariables: [],

@@ -19,7 +19,7 @@ const beginWidget = svelteProjection(Widget);
 const endWidget = simpleProjection(["end columns"]);
 
 export const extendDataFrameSubProjection: SubProjection = {
-  name: "Extend Dataframe",
+  name: "Polars:Dataframe:Extend",
   description: "Extend a dataframe with a set of columns.",
   pattern,
   requiredContextVariables: [],

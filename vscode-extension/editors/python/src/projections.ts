@@ -1,7 +1,6 @@
 import type { ProjectionPluginConfig } from "@puredit/projections";
 import { Language } from "@puredit/language-config";
 import { projections as polarsProjections } from "@puredit/py-polars";
-import { projections as latexMathProjections } from "@puredit/py-latex-math";
 import { projections as pyTorchProjections } from "@puredit/py-pytorch";
 import { Parser } from "@puredit/parser";
 import { BrowserWasmPathProvider } from "@puredit/browser-utils";
@@ -30,9 +29,5 @@ export const projectionPluginConfig: ProjectionPluginConfig = {
     torch: undefined,
   },
   globalContextInformation: {},
-  projections: [
-    ...extendedPolarsProjections,
-    ...latexMathProjections,
-    ...extendedPyTorchProjections,
-  ],
+  projections: [...extendedPolarsProjections, ...extendedPyTorchProjections],
 };

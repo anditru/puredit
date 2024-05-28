@@ -10,8 +10,8 @@ export const chainStart = parser.subPattern("chainStart")`${sourceDataFrame}`;
 const widget = svelteProjection(FilterProjection);
 
 export const selectStartSubProjection: SubProjection = {
-  name: "Select Chain Start",
-  description: "Dataframe to select from",
+  name: "Polars:Dataframe:StartDataframe",
+  description: "Dataframe to transform.",
   pattern: chainStart,
   requiredContextVariables: [],
   segmentWidgets: [widget],

@@ -20,7 +20,7 @@ unpivoted_weather = (aggregated_weather.melt(
 
 # CONTEXT: { "first_name": "string", "last_name": "string", "age": "number", "semester": "number" }
 filtered_students = (students.select(
-        pl.col("first_name").name.toLowerCase(),
+        pl.col("firstName").alias("first_name"),
         "age",
         "semester",
         name="last_name"

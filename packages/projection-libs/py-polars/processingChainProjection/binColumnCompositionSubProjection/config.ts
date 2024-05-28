@@ -5,9 +5,9 @@ import Widget from "./Widget.svelte";
 import { arg, contextVariable } from "@puredit/parser";
 
 const polars = contextVariable("pl");
-const leftColumnName = arg("leftColumnName", ["string", "identifier", "attribute"]);
-const rightColumnName = arg("rightColumnName", ["string", "identifier", "attribute"]);
-const newColumnName = arg("newColumnName", ["string", "identifier", "attribute"]);
+const leftColumnName = arg("leftColumnName", ["string"]);
+const rightColumnName = arg("rightColumnName", ["string"]);
+const newColumnName = arg("newColumnName", ["string"]);
 
 const pattern = parser.subPattern(
   "binColumnCompositionSubProjectionPattern"
@@ -16,7 +16,7 @@ const pattern = parser.subPattern(
 const widget = svelteProjection(Widget);
 
 export const binColumnCompositionSubProjection: SubProjection = {
-  name: "Binary Column Composition",
+  name: "Polars:Dataframe:BinaryColumnComposition",
   description: "Combine the values of two columns with a binary operator.",
   pattern,
   requiredContextVariables: [],

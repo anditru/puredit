@@ -29,7 +29,7 @@ const beginWidget = svelteProjection(BeginWidget);
 const endWidget = svelteProjection(EndWidget);
 
 export const sliceProjection: RootProjection = {
-  name: "Slice",
+  name: "PyTorch:Tensor:Slice",
   description: "Extract a slice from a tensor.",
   pattern,
   requiredContextVariables: [],

@@ -15,7 +15,7 @@ const pattern = parser.statementPattern(
 const widget = svelteProjection(Widget);
 
 export const transposeProjection: RootProjection = {
-  name: "Transpose",
+  name: "PyTorch:Tensor:Transpose",
   description: "Swap two dimensions of a tensor.",
   pattern,
   requiredContextVariables: [],

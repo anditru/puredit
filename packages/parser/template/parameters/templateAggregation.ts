@@ -9,7 +9,6 @@ import {
 } from "@puredit/language-config";
 import { ContextVariableMap } from "@puredit/projections";
 import AggregationNode from "../../pattern/nodes/aggregationNode";
-import CodeString from "../codeString";
 
 export default class TemplateAggregation extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_agg_";
@@ -71,8 +70,15 @@ export default class TemplateAggregation extends TemplateParameter {
 
   toDraftString(): string {
     const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(this.template!.language, this.type);
+    let startString = "";
+    if (this.specialStartPattern) {
+      startString = this.specialStartPattern.toDraftString();
+    }
     return (
-      nodeTypeConfig.startToken + this.subPatterns[0].toDraftString() + nodeTypeConfig.endToken
+      startString +
+      nodeTypeConfig.startToken +
+      this.subPatterns[0].toDraftString() +
+      nodeTypeConfig.endToken
     );
   }
 

@@ -11,8 +11,8 @@ const pattern = parser.subPattern("fromStartIndexSubProjectionPattern")`${startI
 const widget = svelteProjection(Widget);
 
 export const fromStartIndexSubProjection: SubProjection = {
-  name: "Select until End",
-  description: "Select items until the end.",
+  name: "PyTorch:Tensor:Slice:FromIndex",
+  description: "Select items from a specific index until the end.",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],

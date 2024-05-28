@@ -4,14 +4,14 @@ import type { SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 
-const columnName = arg("columnName", ["string", "attribute", "identifier"]);
+const columnName = arg("columnName", ["string"]);
 const pattern = parser.subPattern("column")`${columnName}`;
 
 const widget = svelteProjection(Widget);
 
 export const columnSubProjection: SubProjection = {
-  name: "Column",
-  description: "Column to select from a table",
+  name: "Polars:Column",
+  description: "Column to select from a dataframe.",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],

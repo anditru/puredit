@@ -10,7 +10,7 @@ const pattern = parser.subPattern("castSubProjectionPattern")`cast(pl.${dataType
 const widget = svelteProjection(Widget);
 
 export const castSubProjection: SubProjection = {
-  name: "Cast Function",
+  name: "Polars:Column:Cast",
   description: "Cast data to a certain datatype.",
   pattern,
   requiredContextVariables: [],

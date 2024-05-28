@@ -5,6 +5,7 @@ import { parser } from "../parser";
 import { selectStartSubProjection } from "./selectStartSubProjection/config";
 import { selectSubProjection } from "./selectSubProjection/config";
 import { columnSubProjection } from "./columnSubProjection/config";
+import { columnWithAliasSubProjection } from "./columnWithAliasSubProjection/config";
 import { filterSubProjection } from "./filterSubProjection/config";
 import { dropNullsSubProjection } from "./dropNullsSubProjection/config";
 import { dropNullsColumnsSubProjection } from "./dropNullsColumnsSubProjection/config";
@@ -43,8 +44,8 @@ const processingChain = chain(
 const pattern = parser.expressionPattern("selectChainPattern")`${processingChain}`;
 
 export const selectChainProjection: RootProjection = {
-  name: "Processing Chain",
-  description: "Transform a dataset",
+  name: "Polars:Dataframe:Chain",
+  description: "Transform a dataframe.",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [],
@@ -52,6 +53,7 @@ export const selectChainProjection: RootProjection = {
     selectStartSubProjection,
     selectSubProjection,
     columnSubProjection,
+    columnWithAliasSubProjection,
     filterSubProjection,
     dropNullsSubProjection,
     dropNullsColumnsSubProjection,

@@ -22,7 +22,7 @@ const columnsWidget = svelteProjection(ColumnsWidget);
 const endWidget = svelteProjection(EndWidget);
 
 export const pivotSubProjection: SubProjection = {
-  name: "Pivot Function",
+  name: "Polars:Dataframe:Pivot",
   description: "Create a pivot table from a dataframe.",
   pattern,
   requiredContextVariables: [],

@@ -4,8 +4,8 @@ import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 import { arg } from "@puredit/parser";
 
-const columnName = arg("columnName", ["string", "identifier", "attribute"]);
-const alias = arg("alias", ["string", "identifier", "attribute"]);
+const columnName = arg("columnName", ["string"]);
+const alias = arg("alias", ["string"]);
 
 export const columnMapping = parser.subPattern(
   "columnMappingSubProjectionPattern"
@@ -14,7 +14,7 @@ export const columnMapping = parser.subPattern(
 const widget = svelteProjection(Widget);
 
 export const columnMappingSubProjection: SubProjection = {
-  name: "Column mapping",
+  name: "Polars:ColumnMapping",
   description: "Map a column name to an alias.",
   pattern: columnMapping,
   requiredContextVariables: [],

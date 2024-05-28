@@ -21,7 +21,7 @@ const valueVarsWidget = svelteProjection(ValueVarsWidget);
 const endWidget = svelteProjection(EndWidget);
 
 export const meltSubProjection: SubProjection = {
-  name: "Melt function",
+  name: "Polars:Dataframe:Melt",
   description: "Un-pivot a dataframe.",
   pattern,
   requiredContextVariables: [],

@@ -1,14 +1,13 @@
 [
   {
-    "type": "subProjectionExtension",
+    "type": "rootProjectionExtension",
     "package": "py-polars",
-    "rootProjection": "Processing Chain",
-    "subProjection": "Column Chain",
+    "rootProjection": "Polars:Column:Chain",
     "parentParameter": "columnChain",
     "subProjections": [
       {
         "type": "chainLink",
-        "name": "Replace values",
+        "name": "Polars:Column:ReplaceValues",
         "description": "Replace values in a column",
         "template": "replace(<%mappings%>, default=<%defaultValue%>)",
         "segmentWidgets": ["Replace values", "using default <%defaultValue%>"],
@@ -20,20 +19,20 @@
             "partSubProjections": [
               {
                 "type": "aggregationPart",
-                "name": "Value mapping",
-                "description": "Value mapping for replacement in a column",
+                "name": "Polars:Column:ValueMapping",
+                "description": "Value mapping for replacement in a column.",
                 "template": "<%value%>: <%replacement%>",
                 "segmentWidgets": ["<%value%> with <%replacement%>"],
                 "parameters": [
                   {
                     "type": "argument",
                     "name": "value",
-                    "nodeTypes": ["string", "integer", "identifier"]
+                    "nodeTypes": ["string", "integer"]
                   },
                   {
                     "type": "argument",
                     "name": "replacement",
-                    "nodeTypes": ["string", "integer", "identifier"]
+                    "nodeTypes": ["string", "integer"]
                   }
                 ]
               }
@@ -49,43 +48,15 @@
     ]
   },
   {
-    "type": "subProjectionExtension",
-    "package": "py-polars",
-    "rootProjection": "Processing Chain",
-    "subProjection": "Select Column",
-    "parentParameter": "columns",
-    "subProjections": [
-      {
-        "type": "aggregationPart",
-        "name": "Column with Alias",
-        "description": "Column with alias to select from a dataframe.",
-        "template": "<%columnAlias%>=<%columnName%>",
-        "segmentWidgets": ["<%columnName%> as <%columnAlias%>"],
-        "parameters": [
-          {
-            "type": "argument",
-            "name": "columnName",
-            "nodeTypes": ["string"]
-          },
-          {
-            "type": "argument",
-            "name": "columnAlias",
-            "nodeTypes": ["identifier"]
-          }
-        ]
-      }
-    ]
-  },
-  {
     "type": "rootProjectionExtension",
     "package": "py-polars",
-    "rootProjection": "Processing Chain",
+    "rootProjection": "Polars:Dataframe:Chain",
     "parentParameter": "processingChain",
     "subProjections": [
       {
         "type": "chainLink",
-        "name": "Extend",
-        "description": "Extend the memory backed by this DataFrame with the values from other.",
+        "name": "Polars:Dataframe:ExtendMemory",
+        "description": "Extend the memory backed by this dataframe with the values from other.",
         "template": "extend(<%otherDataFrame%>)",
         "segmentWidgets": ["extending with dataframe <%otherDataFrame%>"],
         "parameters": [
@@ -98,8 +69,8 @@
       },
       {
         "type": "chainLink",
-        "name": "Clear",
-        "description": "Create an n-row null-filled (n%>0) copy of the DataFrame.",
+        "name": "Polars:Dataframe:Clear",
+        "description": "Create an n-row null-filled (n%>0) copy of the dataframe.",
         "template": "clear(n=<%numRows%>)",
         "segmentWidgets": ["creating a null-filled copy with <%numRows%> rows"],
         "parameters": [
@@ -112,29 +83,15 @@
       },
       {
         "type": "chainLink",
-        "name": "Clone",
-        "description": "Create a copy of this DataFrame.",
+        "name": "Polars:Dataframe:Clone",
+        "description": "Create a copy of this dataframe.",
         "parameters": [],
         "template": "clone()",
         "segmentWidgets": ["copying the dataframe"]
       },
       {
         "type": "chainLink",
-        "name": "Fill null with value",
-        "description": "Fill replace null with a specified value.",
-        "template": "fill_null(<%value%>)",
-        "segmentWidgets": ["replacing nulls with <%value%>"],
-        "parameters": [
-          {
-            "type": "argument",
-            "name": "value",
-            "nodeTypes": ["string", "integer", "identifier"]
-          }
-        ]
-      },
-      {
-        "type": "chainLink",
-        "name": "Fill null with value",
+        "name": "Polars:Dataframe:ReplaceNullsWithValue",
         "description": "Replace nulls with a specified value.",
         "template": "fill_null(<%value%>)",
         "segmentWidgets": ["replacing nulls with <%value%>"],
@@ -142,13 +99,13 @@
           {
             "type": "argument",
             "name": "value",
-            "nodeTypes": ["string", "integer", "identifier"]
+            "nodeTypes": ["string", "integer"]
           }
         ]
       },
       {
         "type": "chainLink",
-        "name": "Fill null with strategy",
+        "name": "Polars:Dataframe:ReplaceNullsWithStrategy",
         "description": "Replace null based on a strategy.",
         "template": "fill_null(strategy=<%strategy%>)",
         "segmentWidgets": ["replacing nulls with strategy <%strategy%>"],

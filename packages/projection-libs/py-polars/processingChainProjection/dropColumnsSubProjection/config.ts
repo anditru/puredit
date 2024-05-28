@@ -17,8 +17,8 @@ const beginWidget = svelteProjection(Widget);
 const endWidget = simpleProjection(["end columns"]);
 
 export const dropColumnsSubProjection: SubProjection = {
-  name: "Drop columns function",
-  description: "Remove columns from a dataset",
+  name: "Polars:Dataframe:DropColumns",
+  description: "Remove columns from a dataset.",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [beginWidget, endWidget],

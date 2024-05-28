@@ -5,7 +5,7 @@
     "rootProjections": [
       {
         "type": "rootProjection",
-        "name": "Tensor Max",
+        "name": "PyTorch:Tensor:Max",
         "description": "Get the maximum value of a tensor",
         "isExpression": true,
         "template": "<%torch%>.max(<%tensor%>)",
@@ -24,7 +24,7 @@
       },
       {
         "type": "rootProjection",
-        "name": "Concatenate Tensors",
+        "name": "PyTorch:Tensor:Concatenate",
         "description": "Concatenate tensors along an axis.",
         "isExpression": true,
         "template": "<%torch%>.cat(<%tensors%>, <%dimension%>)",
@@ -67,12 +67,12 @@
   {
     "type": "rootProjectionExtension",
     "package": "py-pytorch",
-    "rootProjection": "Slice",
+    "rootProjection": "PyTorch:Tensor:Slice",
     "parentParameter": "slices",
     "subProjections": [
       {
         "type": "aggregationPart",
-        "name": "All with Stride",
+        "name": "PyTorch:Tensor:Slice:AllWithStride",
         "description": "Select all items with a spcified stride.",
         "template": "::<%stride%>",
         "segmentWidgets": ["Over all indices with stride <%stride%>"],

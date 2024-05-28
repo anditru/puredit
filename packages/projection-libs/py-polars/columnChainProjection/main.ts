@@ -1,5 +1,4 @@
 import { chain } from "@puredit/parser";
-import { svelteProjection } from "@puredit/projections/svelte";
 import type { RootProjection } from "@puredit/projections/types";
 import { parser } from "../parser";
 
@@ -8,27 +7,30 @@ import { colSubProjection } from "./colSubProjection/config";
 import { upperCaseSubProjection } from "./upperCaseSubProjection/config";
 import { lowerCaseSubProjection } from "./lowerCaseSubProjection/config";
 import { aliasSubProjection } from "./aliasSubProjection/config";
-import { attributeSubProjection } from "./attributeSubProjection/config";
 import { sumAggregationSubProjection } from "./sumAggregationSubProjection/config";
 import { avgAggregationSubProjection } from "./avgAggregationSubProjection/config";
 import { castSubProjection } from "./castSubProjection/config";
 
-export const columnChain = chain("columnChain", columnStartSubProjection.pattern, [
-  colSubProjection.pattern,
-  upperCaseSubProjection.pattern,
-  lowerCaseSubProjection.pattern,
-  aliasSubProjection.pattern,
-  attributeSubProjection.pattern,
-  sumAggregationSubProjection.pattern,
-  avgAggregationSubProjection.pattern,
-  castSubProjection.pattern,
-]);
+export const columnChain = chain(
+  "columnChain",
+  columnStartSubProjection.pattern,
+  [
+    colSubProjection.pattern,
+    upperCaseSubProjection.pattern,
+    lowerCaseSubProjection.pattern,
+    aliasSubProjection.pattern,
+    sumAggregationSubProjection.pattern,
+    avgAggregationSubProjection.pattern,
+    castSubProjection.pattern,
+  ],
+  1
+);
 
 const pattern = parser.statementPattern("columnChainPattern")`${columnChain}`;
 
 export const columnChainProjection: RootProjection = {
-  name: "Column Chain",
-  description: "Pick a column and apply transfomrations to its name",
+  name: "Polars:Column:Chain",
+  description: "Pick a column and apply transformations to it.",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [],
@@ -38,7 +40,6 @@ export const columnChainProjection: RootProjection = {
     upperCaseSubProjection,
     lowerCaseSubProjection,
     aliasSubProjection,
-    attributeSubProjection,
     sumAggregationSubProjection,
     avgAggregationSubProjection,
     castSubProjection,

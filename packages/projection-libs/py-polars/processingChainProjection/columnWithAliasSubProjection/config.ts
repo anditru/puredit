@@ -11,8 +11,8 @@ const pattern = parser.subPattern("columnWithAlias")`${columnName}=${columnAlias
 const widget = svelteProjection(Widget);
 
 export const columnWithAliasSubProjection: SubProjection = {
-  name: "Column with alias",
-  description: "Column with alias to select from a table",
+  name: "Polars:ColumnWithAlias",
+  description: "Column with alias to select from a dataframe.",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],

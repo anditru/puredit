@@ -4,11 +4,10 @@ import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 
 const pattern = parser.subPattern("sumAggregationSubProjectionPattern")`sum()`;
-
 const widget = svelteProjection(Widget);
 
 export const sumAggregationSubProjection: SubProjection = {
-  name: "Sum aggregation",
+  name: "Polars:Column:AggregationSum",
   description: "Sum up the values in an aggregated column.",
   pattern,
   requiredContextVariables: [],

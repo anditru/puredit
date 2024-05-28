@@ -7,8 +7,8 @@ const pattern = parser.subPattern("lowerCaseFunction")`toLowerCase()`;
 const widget = svelteProjection(Widget);
 
 export const lowerCaseSubProjection: SubProjection = {
-  name: "Lower Case Function",
-  description: "Convert column name to lower case",
+  name: "Polars:Column:NameToLowerCase",
+  description: "Convert column name to lower case.",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],

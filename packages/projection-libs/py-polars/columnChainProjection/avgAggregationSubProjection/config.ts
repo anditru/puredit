@@ -8,8 +8,8 @@ const pattern = parser.subPattern("avgAggregationSubProjectionPattern")`avg()`;
 const widget = svelteProjection(Widget);
 
 export const avgAggregationSubProjection: SubProjection = {
-  name: "Average aggregation",
-  description: "Take the average of an agggregated column",
+  name: "Polars:Column:AggregationAverage",
+  description: "Take the average of an agggregated column.",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],

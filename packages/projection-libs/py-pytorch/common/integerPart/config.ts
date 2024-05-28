@@ -10,7 +10,7 @@ const pattern = parser.subPattern("integerPartPattern")`${integer}`;
 const widget = svelteProjection(Widget);
 
 export const integerPart: SubProjection = {
-  name: "Integer Part",
+  name: "PyTorch:Tensor:Integer",
   description: "Integer part for aggregations.",
   pattern,
   requiredContextVariables: [],

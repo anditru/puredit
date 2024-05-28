@@ -13,8 +13,8 @@ const beginWidget = svelteProjection(Widget);
 const endWidget = simpleProjection(["end columns"]);
 
 export const groupBySubProjection: SubProjection = {
-  name: "Group by function",
-  description: "Group rows",
+  name: "Polars:Dataframe:GroupBy",
+  description: "Group rows of a dataframe.",
   pattern,
   requiredContextVariables: [],
   segmentWidgets: [beginWidget, endWidget],
