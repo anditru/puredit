@@ -62,7 +62,13 @@ export default class VSCodeMessenger {
         if (this.processing) {
           const { reject } = this.queue.shift()!;
           reject(
-            new Error(`Timed out waiting for response to message ${message.id} after 5 seconds`)
+            new Error(
+              `Timed out waiting for response to message ${JSON.stringify(
+                message,
+                null,
+                2
+              )} after 5 seconds`
+            )
           );
           this.processing = false;
           this.sendNextMessage();

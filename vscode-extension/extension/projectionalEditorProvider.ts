@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getNonce } from "./utils";
+import { getNonce, lineAt } from "./utils";
 import {
   ChangeDocumentPayload,
   ChangeEditorPayload,
@@ -27,11 +27,31 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
   }
 
   private pendingDuplicateUpdates = 0;
+  private documentStates: Map<string, string> = new Map();
 
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly svelteResources: SvelteResources
-  ) {}
+  ) {
+    // Store the initial state of all open documents
+    vscode.workspace.textDocuments.forEach((doc) => {
+      this.documentStates.set(doc.uri.toString(), doc.getText());
+    });
+
+    // Listen to document open events to track newly opened documents
+    context.subscriptions.push(
+      vscode.workspace.onDidOpenTextDocument((doc) => {
+        this.documentStates.set(doc.uri.toString(), doc.getText());
+      })
+    );
+
+    // Listen to document close events to clean up
+    context.subscriptions.push(
+      vscode.workspace.onDidCloseTextDocument((doc) => {
+        this.documentStates.delete(doc.uri.toString());
+      })
+    );
+  }
 
   public async resolveCustomTextEditor(
     document: vscode.TextDocument,
@@ -69,6 +89,9 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
       if (e.contentChanges.length === 0) {
         return;
       }
+      const documentUri = e.document.uri.toString();
+      const oldDocument = this.documentStates.get(documentUri);
+
       if (e.document.uri.toString() === document.uri.toString()) {
         if (this.pendingDuplicateUpdates === 0) {
           e.contentChanges.forEach((contentChange) => {
@@ -76,13 +99,15 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
               id: uuid(),
               type: MessageType.REQUEST,
               action: Action.UPDATE_EDITOR,
-              payload: this.mapToChangeSpec(contentChange),
+              payload: this.mapToChangeSpec(contentChange, oldDocument!),
             });
           });
         } else {
           this.pendingDuplicateUpdates -= 1;
         }
       }
+
+      this.documentStates.set(documentUri, e.document.getText());
     });
 
     webviewPanel.onDidDispose(() => {
@@ -91,15 +116,23 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
   }
 
   private mapToChangeSpec(
-    contentChange: vscode.TextDocumentContentChangeEvent
+    contentChange: vscode.TextDocumentContentChangeEvent,
+    document: string
   ): ChangeEditorPayload {
-    const fromChar = contentChange.rangeOffset;
-    const toChar = fromChar + contentChange.rangeLength;
+    let fromChar = contentChange.rangeOffset;
+    let toChar = fromChar + contentChange.rangeLength;
+    let insert = contentChange.text;
+
+    if (process.platform === "win32") {
+      fromChar = fromChar - lineAt(document, "\r\n", fromChar);
+      toChar = toChar - lineAt(document, "\r\n", toChar);
+      insert = insert.replace(/\r\n/g, "\n");
+    }
 
     return {
       from: fromChar,
       to: toChar,
-      insert: contentChange.text,
+      insert,
     };
   }
 

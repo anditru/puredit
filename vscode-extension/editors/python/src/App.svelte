@@ -12,6 +12,11 @@
   let projectionalEditor: ProjectionalEditor | undefined;
 
   onMount(async () => {
+    const platform = window.navigator?.userAgentData?.platform;
+    if (!platform) {
+      console.warn("Could not detect platform. Defaulting to non-Windows.");
+    }
+    const onWindows = ["Win32", "Win64", "Windows", "WinCE"].includes(platform);
     const vsCodeMessenger = new VsCodeMessenger();
     const projectionalEditorBuilder = new ProjectionalEditorBuilder();
     projectionalEditor = projectionalEditorBuilder
@@ -26,6 +31,7 @@
       )
       .setParent(container)
       .setVsCodeMessenger(vsCodeMessenger)
+      .setOnWindows(onWindows)
       .build();
 
     await projectionalEditor.initialize();

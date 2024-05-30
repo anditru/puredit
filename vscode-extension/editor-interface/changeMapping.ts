@@ -2,18 +2,44 @@ import { Transaction } from "@codemirror/state";
 import type { Text } from "@codemirror/state";
 import { ChangeDocumentPayload, ChangeType } from ".";
 
-export function mapTransactionToChanges(transaction: Transaction): Change[] {
+import { logProvider } from "../../logconfig";
+const logger = logProvider.getLogger("vscode.editor-interface.changeMapping");
+
+export function mapTransactionToChanges(transaction: Transaction, onWindows: boolean): Change[] {
   const changes: Change[] = [];
   transaction.changes.iterChanges(
     (fromBefore: number, toBefore: number, fromAfter: number, toAfter: number, inserted: Text) => {
       const previousDelta = changes[changes.length - 1]?.delta || 0;
+      const lineShift = {
+        fromBefore: 0,
+        toBefore: 0,
+        fromAfter: 0,
+        toAfter: 0,
+      };
+      if (onWindows) {
+        const beforeDoc = transaction.startState.doc;
+        const afterDoc = transaction.newDoc;
+        lineShift.fromBefore = beforeDoc.lineAt(fromBefore).number - 1;
+        lineShift.toBefore = beforeDoc.lineAt(toBefore).number - 1;
+        lineShift.fromAfter = afterDoc.lineAt(fromAfter).number - 1;
+        lineShift.toAfter = afterDoc.lineAt(toAfter).number - 1;
+      }
+      logger.debug(
+        `Mapping change ${JSON.stringify(
+          { fromBefore, toBefore, fromAfter, toAfter, inserted },
+          null,
+          2
+        )} with delta ${previousDelta} and lineShift ${JSON.stringify(lineShift)}...`
+      );
+
       const change = new Change(
-        fromBefore + previousDelta,
-        toBefore + previousDelta,
-        fromAfter + previousDelta,
-        toAfter + previousDelta,
+        fromBefore + previousDelta + lineShift.fromBefore,
+        toBefore + previousDelta + lineShift.toBefore,
+        fromAfter + previousDelta + lineShift.fromAfter,
+        toAfter + previousDelta + lineShift.toAfter,
         inserted
       );
+      logger.debug(`to ${JSON.stringify(change, null, 2)}`);
       changes.push(change);
     }
   );

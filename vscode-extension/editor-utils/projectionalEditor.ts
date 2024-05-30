@@ -10,7 +10,8 @@ export default class ProjectionalEditor {
   constructor(
     private readonly vsCodeMessenger: VsCodeMessenger,
     extensions: Extension[],
-    parent: Element | DocumentFragment
+    parent: Element | DocumentFragment,
+    private readonly onWindows: boolean
   ) {
     this.vsCodeMessenger.registerHandler(Action.UPDATE_EDITOR, (message) => {
       const payload = message.payload as { from: number; to: number; insert: string | Text };
@@ -41,7 +42,7 @@ export default class ProjectionalEditor {
 
   dispatchTransction(transaction: Transaction, projectionalEditor: EditorView) {
     if (!transaction.changes.empty && !transaction.annotation(this.doNotSyncAnnotation)) {
-      const changes = mapTransactionToChanges(transaction);
+      const changes = mapTransactionToChanges(transaction, this.onWindows);
       changes.forEach((change) => {
         this.vsCodeMessenger.sendRequest(Action.UPDATE_DOCUMENT, change.toChangeDocumentPayload());
       });
