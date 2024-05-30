@@ -73,7 +73,7 @@ export default class VSCodeMessenger {
           this.processing = false;
           this.sendNextMessage();
         }
-      }, 5000);
+      }, 10000);
     }
   }
 

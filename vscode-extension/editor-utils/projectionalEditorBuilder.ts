@@ -30,6 +30,10 @@ export default class ProjectionalEditorBuilder {
   }
 
   private addBasicExtensions(): ProjectionalEditorBuilder {
+    const reducedKeymap = defaultKeymap.filter(
+      (binding) => !binding.key || !["Alt-ArrowLeft", "Alt-ArrowRight"].includes(binding.key)
+    );
+
     this.addExtensions(
       lineNumbers(),
       highlightSpecialChars(),
@@ -43,7 +47,7 @@ export default class ProjectionalEditorBuilder {
       closeBrackets(),
       bracketMatching(),
       highlightSelectionMatches(),
-      keymap.of([indentWithTab, ...searchKeymap, ...defaultKeymap])
+      keymap.of([indentWithTab, ...searchKeymap, ...reducedKeymap])
     );
     return this;
   }
