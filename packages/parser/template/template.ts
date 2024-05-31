@@ -1,4 +1,4 @@
-import { isString } from "@puredit/utils";
+import { isString } from "@puredit/utils-shared";
 import TemplateParameter from "./parameters/templateParameter";
 import TemplateAggregation from "./parameters/templateAggregation";
 import TemplateChain from "./parameters/templateChain";

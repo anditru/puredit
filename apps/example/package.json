@@ -28,7 +28,7 @@
     "@puredit/py-latex-math": "*",
     "@puredit/py-polars": "*",
     "@puredit/ts-db-sample": "*",
-    "@puredit/utils": "*",
+    "@puredit/utils-shared": "*",
     "@replit/codemirror-indentation-markers": "6",
     "codemirror": "6",
     "mathlive": "^0.95.5",

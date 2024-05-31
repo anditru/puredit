@@ -1,4 +1,4 @@
-import { EditorState, StateField } from "@codemirror/state";
+import { EditorState, StateEffect, StateField } from "@codemirror/state";
 import { Decoration, EditorView } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { createPatternMap, PatternMatching } from "@puredit/parser";
@@ -8,7 +8,8 @@ import type { ProjectionPluginConfig } from "../types";
 import DecorationSetBuilder from "./decorationSetBuilder";
 import AstNode from "@puredit/parser/ast/node";
 import AstCursor from "@puredit/parser/ast/cursor";
-import { zip } from "@puredit/utils";
+import { zip } from "@puredit/utils-shared";
+import { Extension, ProjectionInserter } from "@puredit/declarative-projections";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("projections.state.state");
@@ -24,7 +25,8 @@ export function createProjectionState(
   state: EditorState,
   config: ProjectionPluginConfig
 ): ProjectionState {
-  const patternMap = createPatternMap(config.projections.map((p) => p.pattern));
+  const projections = Object.keys(config.projections).flatMap((key) => config.projections[key]);
+  const patternMap = createPatternMap(projections.map((p) => p.pattern));
   const cursor = config.parser.parse(state.sliceDoc(0)).walk();
   const patternMatching = new PatternMatching(patternMap, cursor, config.globalContextVariables);
   const { matches, contextVariableRanges } = patternMatching.execute();
@@ -41,6 +43,8 @@ export function createProjectionState(
   return { config, patternMap, decorations, contextVariableRanges };
 }
 
+export const updateProjectionsEffect = StateEffect.define<Extension[]>();
+
 export const projectionState = StateField.define<ProjectionState>({
   create(): ProjectionState {
     throw new Error("ProjectionState must be created through init()");
@@ -51,14 +55,32 @@ export const projectionState = StateField.define<ProjectionState>({
     decorations = decorations.map(transaction.changes);
     const oldState = transaction.startState;
     const newState = transaction.state;
-    if (!transaction.docChanged && !transaction.selection) {
+
+    let newProjectionsAdded = false;
+    for (const effect of transaction.effects) {
+      if (effect.is(updateProjectionsEffect)) {
+        logger.debug("updateProjectionsEffect found. Updating projections");
+        const projectionInserter = new ProjectionInserter(config.parser);
+        projectionInserter.insertProjections(effect.value, config.projections);
+        const projections = Object.keys(config.projections).flatMap(
+          (key) => config.projections[key]
+        );
+        patternMap = createPatternMap(projections.map((p) => p.pattern));
+        newProjectionsAdded = true;
+      }
+    }
+
+    if (!transaction.docChanged && !transaction.selection && !newProjectionsAdded) {
       logger.debug("Rematching nothing");
       return { config, patternMap, decorations, contextVariableRanges };
     }
     const mainSelect = transaction.selection?.main;
     let nodesToRematch: AstNode[];
     let nodesToInvalidate: AstNode[] = [];
-    if (transaction.docChanged) {
+    if (newProjectionsAdded) {
+      logger.debug("New projections added. Rematching everything");
+      nodesToRematch = getAllStatementNodes(newState.sliceDoc(0), config.parser);
+    } else if (transaction.docChanged) {
       logger.debug("Rematching changed nodes");
       const { changedStatementNodes, errorNodes } = analyzeChanges(
         oldState.sliceDoc(0),

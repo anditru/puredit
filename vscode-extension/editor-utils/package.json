@@ -15,7 +15,7 @@
     "@codemirror/view": "6",
     "@puredit/codemirror-typescript": "*",
     "@puredit/editor-interface": "*",
-    "@puredit/package-extension": "*",
+    "@puredit/declarative-projections": "*",
     "@puredit/projections": "*",
     "@replit/codemirror-indentation-markers": "6",
     "@uiw/codemirror-theme-vscode": "^4.22.1",

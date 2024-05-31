@@ -16,7 +16,7 @@ import { Question } from "inquirer";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { Language, ProjectionContent } from "../content-generation/common";
-import { toLowerCamelCase } from "@puredit/utils";
+import { toLowerCamelCase } from "@puredit/utils-shared";
 
 interface ProjectionAnswers {
   language?: Language;

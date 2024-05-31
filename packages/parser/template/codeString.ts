@@ -1,4 +1,4 @@
-import { isString } from "@puredit/utils";
+import { isString } from "@puredit/utils-shared";
 import ParameterTable from "./parameterTable";
 import TemplateParameter from "./parameters/templateParameter";
 

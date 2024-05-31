@@ -6,7 +6,7 @@
   "main": "./index.ts",
   "dependencies": {
     "@puredit/language-config": "*",
-    "@puredit/utils": "*",
+    "@puredit/utils-shared": "*",
     "typescript-logging": "^2.1.0",
     "typescript-logging-log4ts-style": "^2.1.0",
     "web-tree-sitter": "0.20.8"

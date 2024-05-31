@@ -2,7 +2,7 @@ export interface Message {
   id: string;
   type: MessageType;
   action: Action;
-  payload?: MessagePayload;
+  payload?: any;
 }
 
 export const enum MessageType {
@@ -15,9 +15,11 @@ export const enum Action {
   SEND_DOCUMENT = "SEND_DOCUMENT",
   UPDATE_DOCUMENT = "UPDATE_DOCUMENT",
   UPDATE_EDITOR = "UPDATE_EDITOR",
+  UPDATE_PROJECTIONS = "UPDATE_PROJECTIONS",
+  GET_PROJECTION_EXTENSIONS = "GET_PROJECTION_EXTENSIONS",
 }
 
-export type MessagePayload = ChangeDocumentPayload | ChangeEditorPayload | string;
+export type MessagePayload = ChangeDocumentPayload | ChangeEditorPayload | string | any;
 
 export interface ChangeDocumentPayload {
   type: ChangeType;

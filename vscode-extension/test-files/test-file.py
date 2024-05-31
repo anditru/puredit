@@ -58,3 +58,6 @@ slice_2 = image_data[
     25:50:2,
     1
 ]
+
+maximum = torch.max(some_tensor)
+result = torch.cat((some, some_other), 0)

@@ -7,7 +7,7 @@ import { FocusGroup } from "@puredit/projections/focus";
 import type { FocusGroupHandler } from "@puredit/projections/focus";
 import { ProjectionWidget } from "@puredit/projections/projection";
 import TextInput from "@puredit/projections/TextInput.svelte";
-import { isString } from "@puredit/utils";
+import { isString } from "@puredit/utils-shared";
 import type { SvelteComponent } from "@puredit/projections/svelte";
 import type TemplateArgument from "@puredit/parser/define/templateArgument";
 

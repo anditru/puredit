@@ -1,5 +1,5 @@
 {
-  "name": "@puredit/node-utils",
+  "name": "@puredit/declarative-projections",
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",
@@ -7,6 +7,7 @@
   "types": "./index.ts",
   "dependencies": {
     "@puredit/language-config": "*",
-    "@puredit/parser": "*"
+    "@puredit/parser": "*",
+    "typescript-json-schema": "^0.63.0"
   }
 }

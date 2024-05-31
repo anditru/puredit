@@ -17,7 +17,7 @@ import ChainDecorator from "@puredit/parser/pattern/decorators/chainDecorator";
 import ChainLinkTemplateTransformation from "@puredit/parser/parse/chainLinkTemplateTransformation";
 import TemplateParameter from "@puredit/parser/template/parameters/templateParameter";
 import TemplatePartArray from "./templatePartArray";
-import { toLowerCamelCase } from "@puredit/utils";
+import { toLowerCamelCase } from "@puredit/utils-shared";
 import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
 import AggPartTemplateTransformation from "@puredit/parser/parse/aggPartTemplateTransformation";
 import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
@@ -36,12 +36,12 @@ const ALLOWED_SUBPROJECTION_TYPES = ["chainLink", "aggregationPart"].join(", ");
 
 const ALLOWED_PARAMETER_TYPES = ["argument", "contextVariable", "aggregation", "chain"].join(", ");
 
-export class PackageExtender {
-  pkg: RootProjection[];
+export class ProjectionInserter {
+  projections: Record<string, RootProjection[]>;
   constructor(private readonly parser: Parser) {}
 
-  extendPackage(pkg: RootProjection[], extensions: Extension[]) {
-    this.pkg = pkg;
+  insertProjections(extensions: Extension[], projections: Record<string, RootProjection[]>) {
+    this.projections = projections;
     for (const extension of extensions) {
       switch (extension.type) {
         case "packageExtension":
@@ -59,22 +59,25 @@ export class PackageExtender {
           );
       }
     }
-    return pkg;
+    return this.projections;
   }
 
   private processPackageExtension(extension: PackageExtension) {
+    if (!this.projections[extension.package]) {
+      return;
+    }
     for (const definition of extension.rootProjections) {
-      const rootProjection = this.processRootProjection(definition);
-      this.pkg.push(rootProjection);
+      const rootProjection = this.buildRootProjection(definition);
+      this.projections[extension.package].push(rootProjection);
     }
   }
 
-  private processRootProjection(definition: RootProjectionDefinition): RootProjection {
+  private buildRootProjection(definition: RootProjectionDefinition): RootProjection {
     const technicalName = toLowerCamelCase(definition.name);
     const { paramsMap, subProjections } = this.buildParams(definition);
     const { templateStrings, params } = buildParserInput(definition, paramsMap);
 
-    let pattern;
+    let pattern: Pattern;
     if (definition.isExpression) {
       pattern = this.parser.expressionPattern(`${technicalName}Pattern`)(
         templateStrings as unknown as TemplateStringsArray,
@@ -90,17 +93,12 @@ export class PackageExtender {
     const segmentWidgets = definition.segmentWidgets.map((widget) =>
       buildWidget(widget, paramsMap)
     );
-    let postfixWidget;
-    if (definition.postfixWidget) {
-      postfixWidget = buildWidget(definition.postfixWidget, paramsMap);
-    }
 
     return {
       name: definition.name,
       description: definition.description,
       pattern,
       segmentWidgets,
-      postfixWidget,
       requiredContextVariables: [],
       subProjections,
     };
@@ -109,12 +107,16 @@ export class PackageExtender {
   private processRootProjectionExtension(extension: RootProjectionExtension) {
     let subProjection: SubProjection, pattern: Pattern, subProjectionsBelow: SubProjection[];
     const parentProjection = this.getParentProjectionFor(extension) as RootProjection;
+    if (!parentProjection) {
+      return;
+    }
     for (const definition of extension.subProjections) {
       switch (definition.type) {
         case "chainLink":
           ({ subProjection, pattern, subProjectionsBelow } = this.processChainLink(
             extension,
-            definition
+            definition,
+            parentProjection
           ));
           insertChainLinkIntoProjection(
             subProjection,
@@ -127,7 +129,8 @@ export class PackageExtender {
         case "aggregationPart":
           ({ subProjection, pattern, subProjectionsBelow } = this.processAggregationPart(
             extension,
-            definition
+            definition,
+            parentProjection
           ));
           insertAggregationPartIntoProjection(
             subProjection,
@@ -148,13 +151,17 @@ export class PackageExtender {
   private processSubProjectionExtension(extension: SubProjectionExtension) {
     let subProjection: SubProjection, pattern: Pattern, subProjectionsBelow: SubProjection[];
     const rootProjection = this.getRootProjection(extension);
+    if (!rootProjection) {
+      return;
+    }
     const parentSubProjection = this.getParentProjectionFor(extension) as SubProjection;
     for (const definition of extension.subProjections) {
       switch (definition.type) {
         case "chainLink":
           ({ subProjection, pattern, subProjectionsBelow } = this.processChainLink(
             extension,
-            definition
+            definition,
+            parentSubProjection
           ));
           insertChainLinkIntoSubProjection(
             subProjection,
@@ -168,7 +175,8 @@ export class PackageExtender {
         case "aggregationPart":
           ({ subProjection, pattern, subProjectionsBelow } = this.processAggregationPart(
             extension,
-            definition
+            definition,
+            parentSubProjection
           ));
           insertAggregationPartIntoSubProjection(
             subProjection,
@@ -189,9 +197,9 @@ export class PackageExtender {
 
   private processAggregationPart(
     extension: RootProjectionExtension | SubProjectionExtension,
-    definition: SubProjectionDefinition
+    definition: SubProjectionDefinition,
+    parentProjection: RootProjection | SubProjection
   ) {
-    const parentProjection = this.getParentProjectionFor(extension);
     const { newSubProjection, subProjectionsBelow } = this.buildSubProjection(definition);
     const pattern = this.buildAggregationPartPattern(
       newSubProjection,
@@ -203,9 +211,9 @@ export class PackageExtender {
 
   private processChainLink(
     extension: RootProjectionExtension | SubProjectionExtension,
-    definition: SubProjectionDefinition
+    definition: SubProjectionDefinition,
+    parentProjection: RootProjection | SubProjection
   ) {
-    const parentProjection = this.getParentProjectionFor(extension);
     const { newSubProjection, subProjectionsBelow } = this.buildSubProjection(definition);
     const pattern = this.buildChainLinkPattern(
       newSubProjection,
@@ -228,17 +236,12 @@ export class PackageExtender {
     const segmentWidgets = definition.segmentWidgets.map((widget) =>
       buildWidget(widget, paramsMap)
     );
-    let postfixWidget;
-    if (definition.postfixWidget) {
-      postfixWidget = buildWidget(definition.postfixWidget, paramsMap);
-    }
 
     const newSubProjection = {
       name: definition.name,
       description: definition.description,
       pattern: template,
       segmentWidgets,
-      postfixWidget,
       requiredContextVariables: [],
     };
 
@@ -374,7 +377,12 @@ export class PackageExtender {
   }
 
   private getRootProjection(extension: SubProjectionExtension) {
-    const rootProjection = this.pkg.find((proj) => proj.name === extension.rootProjection);
+    if (!this.projections[extension.package]) {
+      return null;
+    }
+    const rootProjection = this.projections[extension.package].find(
+      (proj) => proj.name === extension.rootProjection
+    );
     if (!rootProjection) {
       throw new Error(`Root projection ${extension.rootProjection} not found`);
     }
@@ -383,8 +391,13 @@ export class PackageExtender {
 
   private getParentProjectionFor(
     extension: RootProjectionExtension | SubProjectionExtension
-  ): RootProjection | SubProjection {
-    const rootProjection = this.pkg.find((proj) => proj.name === extension.rootProjection);
+  ): RootProjection | SubProjection | null {
+    if (!this.projections[extension.package]) {
+      return null;
+    }
+    const rootProjection = this.projections[extension.package].find(
+      (proj) => proj.name === extension.rootProjection
+    );
     if (!rootProjection) {
       throw new Error(`Root projection ${extension.rootProjection} not found`);
     }

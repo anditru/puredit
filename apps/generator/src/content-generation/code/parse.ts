@@ -1,4 +1,4 @@
-import { NodeWasmPathProvider } from "@puredit/node-utils";
+import { NodeWasmPathProvider } from "@puredit/utils-node";
 import { Parser } from "@puredit/parser";
 import { Language } from "../common";
 import AstNode from "@puredit/parser/ast/node";

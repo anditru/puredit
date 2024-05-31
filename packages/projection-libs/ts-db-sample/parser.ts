@@ -1,4 +1,4 @@
-import { BrowserWasmPathProvider } from "@puredit/browser-utils";
+import { BrowserWasmPathProvider } from "@puredit/utils-browser";
 import { Parser } from "@puredit/parser";
 import { Language } from "@puredit/language-config";
 

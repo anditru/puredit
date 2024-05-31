@@ -1,4 +1,4 @@
-import { zip } from "@puredit/utils";
+import { zip } from "@puredit/utils-shared";
 import ComplexTemplateParameter from "./template/complexParameter";
 import inquirer from "inquirer";
 import { ProjectionTree, ProjectionTreeGroup } from "./projection/parse";

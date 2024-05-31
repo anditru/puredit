@@ -16,7 +16,7 @@
     "@codemirror/language": "6",
     "@puredit/parser": "*",
     "@puredit/projections": "*",
-    "@puredit/browser-utils": "*",
+    "@puredit/utils-browser": "*",
     "@puredit/editor-utils": "*",
     "vite-plugin-static-copy": "^0.10.0"
   },

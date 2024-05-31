@@ -4,7 +4,7 @@ import type { TreeSitterParser } from "../tree-sitter/treeSitterParser";
 import { createTreeSitterParser } from "../tree-sitter/treeSitterParser";
 import { Language } from "@puredit/language-config";
 import { CompleteTemplateTransformation } from "./internal";
-import { isString } from "@puredit/utils";
+import { isString } from "@puredit/utils-shared";
 import WasmPathProvider from "../tree-sitter/wasmPathProvider";
 
 export default class Parser {

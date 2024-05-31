@@ -9,7 +9,7 @@
     "@codemirror/state": "6",
     "@codemirror/view": "6",
     "@puredit/projections": "*",
-    "@puredit/utils": "*"
+    "@puredit/utils-shared": "*"
   },
   "devDependencies": {
     "@puredit/tsconfig": "*",

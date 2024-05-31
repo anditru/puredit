@@ -1,5 +1,5 @@
 import { Diff } from "mdiff";
-import { assert, zip } from "@puredit/utils";
+import { assert, zip } from "@puredit/utils-shared";
 import { ProjectionSegment, ProjectionVariable } from "./projection/scan";
 import TemplateArgument from "./template/argument";
 import AstNode from "@puredit/parser/ast/node";

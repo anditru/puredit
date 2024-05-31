@@ -35,7 +35,7 @@ export interface SubProjection extends Projection {
 
 export interface ProjectionPluginConfig {
   parser: Parser;
-  projections: RootProjection[];
+  projections: Record<string, RootProjection[]>;
   globalContextVariables: ContextVariableMap;
   globalContextInformation: ContextInformation;
 }

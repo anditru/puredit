@@ -1,7 +1,7 @@
 import { RangeSet, type EditorState } from "@codemirror/state";
 import { Decoration } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
-import { zip } from "@puredit/utils";
+import { zip } from "@puredit/utils-shared";
 import type { Match, Pattern } from "@puredit/parser";
 import type { CodeRange } from "@puredit/parser/match/types";
 import type {
@@ -25,7 +25,7 @@ import AstNode from "@puredit/parser/ast/node";
 
 export default class DecorationSetBuilder {
   // Input
-  private config!: ProjectionPluginConfig;
+  private projections!: RootProjection[];
   private decorations!: DecorationSet;
   private isCompletion!: boolean;
   private state!: EditorState;
@@ -42,7 +42,7 @@ export default class DecorationSetBuilder {
   private newDecorations = Decoration.none;
 
   setProjectionPluginConfig(config: ProjectionPluginConfig) {
-    this.config = config;
+    this.projections = Object.keys(config.projections).flatMap((key) => config.projections[key]);
     this.contextInformations = [config.globalContextInformation];
     return this;
   }
@@ -140,8 +140,8 @@ export default class DecorationSetBuilder {
   }
 
   private initProjectionMaps(): void {
-    this.projectionMap = toRootProjectionMap(this.config.projections);
-    this.subProjectionMap = toSubProjectionMap(this.config.projections);
+    this.projectionMap = toRootProjectionMap(this.projections);
+    this.subProjectionMap = toSubProjectionMap(this.projections);
   }
 
   private extractSegmentDecoratorsFor(

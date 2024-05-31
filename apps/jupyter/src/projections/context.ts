@@ -1,5 +1,3 @@
-import type { Context } from "@puredit/parser";
-
 export type ContextColumns = Record<string, "TEXT" | "INTEGER">;
 
 export interface ContextTable {
@@ -12,12 +10,7 @@ export interface ContextGlobal {
   tables: ContextTables;
 }
 
-export const globalContextVariables: Context = {
-  dsl: "dsl",
-  mathdsl: "mathdsl",
-};
-
-export const globalContextValues: ContextGlobal = {
+export const globalContextInformation: ContextGlobal = {
   tables: {
     students: {
       columns: {

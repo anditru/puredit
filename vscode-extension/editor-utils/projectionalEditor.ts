@@ -2,6 +2,8 @@ import { EditorView } from "codemirror";
 import { Annotation, ChangeSpec, EditorState, Extension, Transaction } from "@codemirror/state";
 import { Action, mapTransactionToChanges } from "@puredit/editor-interface";
 import VsCodeMessenger from "./vsCodeMessenger";
+import { Extension as ProjectionPackageExtension } from "@puredit/declarative-projections";
+import { updateProjectionsEffect } from "@puredit/projections";
 
 export default class ProjectionalEditor {
   private readonly doNotSyncAnnotation = Annotation.define<boolean>();
@@ -33,10 +35,38 @@ export default class ProjectionalEditor {
         filter: false,
       });
     });
+
+    this.vsCodeMessenger.registerHandler(Action.UPDATE_PROJECTIONS, (message) => {
+      const extensions = JSON.parse(message.payload) as ProjectionPackageExtension[];
+      this.editorView.dispatch({
+        effects: updateProjectionsEffect.of(extensions),
+        annotations: this.doNotSyncAnnotation.of(true),
+      });
+    });
+
     this.editorView = new EditorView({
       state: EditorState.create({ extensions }),
       parent,
       dispatch: this.dispatchTransction.bind(this),
+    });
+  }
+
+  async initialize(): Promise<void> {
+    const documentResponse = await this.vsCodeMessenger.sendRequest(Action.GET_DOCUMENT);
+    const text = documentResponse.payload as string;
+    this.editorView.dispatch({
+      changes: { from: 0, insert: text },
+      annotations: this.doNotSyncAnnotation.of(true),
+      filter: false,
+    });
+
+    const projectionsResponse = await this.vsCodeMessenger.sendRequest(
+      Action.GET_PROJECTION_EXTENSIONS
+    );
+    const extensions = JSON.parse(projectionsResponse.payload) as ProjectionPackageExtension[];
+    this.editorView.dispatch({
+      effects: updateProjectionsEffect.of(extensions),
+      annotations: this.doNotSyncAnnotation.of(true),
     });
   }
 
@@ -50,16 +80,6 @@ export default class ProjectionalEditor {
     } else {
       projectionalEditor.update([transaction]);
     }
-  }
-
-  async initialize(): Promise<void> {
-    const response = await this.vsCodeMessenger.sendRequest(Action.GET_DOCUMENT);
-    const text = response.payload as string;
-    this.editorView.dispatch({
-      changes: { from: 0, insert: text },
-      annotations: this.doNotSyncAnnotation.of(true),
-      filter: false,
-    });
   }
 
   destroy() {

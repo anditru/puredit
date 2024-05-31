@@ -1,4 +1,4 @@
-import { assert, isString } from "@puredit/utils";
+import { assert, isString } from "@puredit/utils-shared";
 import { PatternCursor, PatternNode } from "./pattern";
 import { ProjectionSegment } from "./projection/scan";
 import TemplateParameterArray from "./template/parameterArray";

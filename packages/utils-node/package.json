@@ -1,5 +1,5 @@
 {
-  "name": "@puredit/browser-utils",
+  "name": "@puredit/utils-node",
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",

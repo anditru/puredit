@@ -18,7 +18,8 @@
             "$ref": "#/definitions/RootProjectionDefinition"
           }
         }
-      }
+      },
+      "required": ["type", "package", "rootProjections"]
     },
     "RootProjectionExtension": {
       "additionalProperties": false,
@@ -43,7 +44,8 @@
             "$ref": "#/definitions/SubProjectionDefinition"
           }
         }
-      }
+      },
+      "required": ["type", "package", "rootProjection", "parentParameter", "subProjections"]
     },
     "SubProjectionExtension": {
       "additionalProperties": false,
@@ -71,7 +73,15 @@
             "$ref": "#/definitions/SubProjectionDefinition"
           }
         }
-      }
+      },
+      "required": [
+        "type",
+        "package",
+        "rootProjection",
+        "subProjection",
+        "parentParameter",
+        "subProjections"
+      ]
     },
     "RootProjectionDefinition": {
       "additionalProperties": false,
@@ -104,11 +114,9 @@
           "items": {
             "type": "string"
           }
-        },
-        "postfixWidget": {
-          "type": "string"
         }
-      }
+      },
+      "required": ["type", "name", "description", "parameters", "template", "segmentWidgets"]
     },
     "SubProjectionDefinition": {
       "additionalProperties": false,
@@ -138,11 +146,9 @@
           "items": {
             "type": "string"
           }
-        },
-        "postfixWidget": {
-          "type": "string"
         }
-      }
+      },
+      "required": ["type", "name", "description", "parameters", "template", "segmentWidgets"]
     },
     "SubProjectionType": {
       "type": "string",
@@ -178,7 +184,8 @@
             "type": "string"
           }
         }
-      }
+      },
+      "required": ["type", "name", "nodeTypes"]
     },
     "TemplateContextVariableDefinition": {
       "additionalProperties": false,
@@ -191,7 +198,8 @@
         "name": {
           "type": "string"
         }
-      }
+      },
+      "required": ["type", "name"]
     },
     "TemplateAggregationDefinition": {
       "additionalProperties": false,
@@ -216,7 +224,8 @@
         "startSubProjection": {
           "$ref": "#/definitions/SubProjectionDefinition"
         }
-      }
+      },
+      "required": ["type", "name", "nodeType", "partSubProjections"]
     },
     "TemplateChainDefinition": {
       "additionalProperties": false,
@@ -240,7 +249,8 @@
         "minimumLength": {
           "type": "number"
         }
-      }
+      },
+      "required": ["type", "name", "startSubProjection", "linkSubProjections", "minimumLength"]
     }
   },
   "type": "array",

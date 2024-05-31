@@ -1,5 +1,5 @@
 {
-  "name": "@puredit/utils",
+  "name": "@puredit/utils-shared",
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",

@@ -22,7 +22,7 @@
     "@puredit/language-config": "*",
     "@puredit/projections": "*",
     "@puredit/py-db-sample": "*",
-    "@puredit/utils": "*",
+    "@puredit/utils-shared": "*",
     "@replit/codemirror-indentation-markers": "6",
     "codemirror": "6",
     "normalize.css": "^8.0.1",

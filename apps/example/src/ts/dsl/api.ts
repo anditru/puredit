@@ -1,4 +1,4 @@
-import { isString } from "@puredit/utils";
+import { isString } from "@puredit/utils-shared";
 
 export function isEmptyText(value: TextValue): boolean {
   return value instanceof TextLiteral && value.value === "";
@@ -34,11 +34,7 @@ export class TextValue extends Value {
   }
 
   replace(target: TextConvertible, replacement: TextConvertible) {
-    return new ReplaceOperation(
-      this,
-      toTextValue(target),
-      toTextValue(replacement)
-    );
+    return new ReplaceOperation(this, toTextValue(target), toTextValue(replacement));
   }
 
   replaceAll(...replacements: Pair<TextConvertible, TextConvertible>[]) {
@@ -65,11 +61,7 @@ export class TextValue extends Value {
   }
 
   patternReplace(pattern: TextConvertible, replacement: TextConvertible) {
-    return new PatternReplaceOperation(
-      this,
-      toTextValue(pattern),
-      toTextValue(replacement)
-    );
+    return new PatternReplaceOperation(this, toTextValue(pattern), toTextValue(replacement));
   }
 
   patternReplaceAll(...replacements: Pair<TextConvertible, TextConvertible>[]) {
@@ -105,30 +97,19 @@ export class TrimOperation extends TextValue {
 }
 
 export class SliceOperation extends TextValue {
-  constructor(
-    public value: TextValue,
-    public start: number,
-    public end: number
-  ) {
+  constructor(public value: TextValue, public start: number, public end: number) {
     super();
   }
 }
 
 export class ReplaceOperation extends TextValue {
-  constructor(
-    public value: TextValue,
-    public target: TextValue,
-    public replacement: TextValue
-  ) {
+  constructor(public value: TextValue, public target: TextValue, public replacement: TextValue) {
     super();
   }
 }
 
 export class ReplaceAllOperation extends TextValue {
-  constructor(
-    public value: TextValue,
-    public replacements: Pair<TextValue, TextValue>[]
-  ) {
+  constructor(public value: TextValue, public replacements: Pair<TextValue, TextValue>[]) {
     super();
   }
 }
@@ -158,51 +139,35 @@ export class ExtractOneOperation extends TextValue {
 }
 
 export class PatternReplaceOperation extends TextValue {
-  constructor(
-    public value: TextValue,
-    public pattern: TextValue,
-    public replacement: TextValue
-  ) {
+  constructor(public value: TextValue, public pattern: TextValue, public replacement: TextValue) {
     super();
   }
 }
 
 export class PatternReplaceAllOperation extends TextValue {
-  constructor(
-    public value: TextValue,
-    public replacements: Pair<TextValue, TextValue>[]
-  ) {
+  constructor(public value: TextValue, public replacements: Pair<TextValue, TextValue>[]) {
     super();
   }
 }
 
 export function text(value: string): TextLiteral;
-export function text(
-  template: TemplateStringsArray,
-  ...params: TextValue[]
-): ConcatOperation;
-export function text(
-  template: TemplateStringsArray | string,
-  ...params: TextValue[]
-): TextValue {
+export function text(template: TemplateStringsArray, ...params: TextValue[]): ConcatOperation;
+export function text(template: TemplateStringsArray | string, ...params: TextValue[]): TextValue {
   if (isString(template)) {
     return new TextLiteral(template);
   }
-  return params.reduce(
-    (previousValue: TextValue, currentValue: TextValue, i: number) => {
-      let newValue = previousValue;
-      if (isEmptyText(newValue)) {
-        newValue = currentValue;
-      } else {
-        newValue = newValue.add(currentValue);
-      }
-      if (template[i + 1] !== "") {
-        newValue = newValue.add(new TextLiteral(template[i + 1]));
-      }
-      return newValue;
-    },
-    new TextLiteral(template[0])
-  );
+  return params.reduce((previousValue: TextValue, currentValue: TextValue, i: number) => {
+    let newValue = previousValue;
+    if (isEmptyText(newValue)) {
+      newValue = currentValue;
+    } else {
+      newValue = newValue.add(currentValue);
+    }
+    if (template[i + 1] !== "") {
+      newValue = newValue.add(new TextLiteral(template[i + 1]));
+    }
+    return newValue;
+  }, new TextLiteral(template[0]));
 }
 
 export function toIntegerValue(value: IntegerConvertible): IntegerValue {

@@ -1,4 +1,4 @@
-//Extensions
+// Extensions
 export type Extension = PackageExtension | RootProjectionExtension | SubProjectionExtension;
 
 /**

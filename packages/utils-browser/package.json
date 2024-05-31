@@ -1,5 +1,5 @@
 {
-  "name": "@puredit/package-extension",
+  "name": "@puredit/utils-browser",
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",
@@ -7,7 +7,6 @@
   "types": "./index.ts",
   "dependencies": {
     "@puredit/language-config": "*",
-    "@puredit/parser": "*",
-    "typescript-json-schema": "^0.63.0"
+    "@puredit/parser": "*"
   }
 }

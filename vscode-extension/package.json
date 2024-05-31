@@ -13,11 +13,16 @@
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
+      "title": "Puredit",
       "properties": {
-        "webview.allowLocalFiles": {
-          "type": "boolean",
-          "default": true,
-          "description": "Allow webviews to access local files (not recommended for security reasons)."
+        "puredit.extensionDescriptors": {
+          "type": "array",
+          "scope": "application",
+          "default": [],
+          "description": "Enter absolute paths to your .ext.json files containing packge, root projection or subprojection extensions.",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -53,5 +58,8 @@
     "glob": "^10.3.3",
     "mocha": "^10.2.0",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "vscode-json-languageservice": "^5.3.11"
   }
 }

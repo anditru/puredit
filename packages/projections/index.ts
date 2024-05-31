@@ -1,5 +1,5 @@
 import { flexPlugin } from "./flex";
-import { createProjectionState, projectionState } from "./state/state";
+import { createProjectionState, projectionState, updateProjectionsEffect } from "./state/state";
 import { transactionFilter } from "./filter";
 import { completions } from "./completions/completions";
 import type {
@@ -28,4 +28,4 @@ export const projectionPlugin = (config: ProjectionPluginConfig) => [
   flexPlugin,
 ];
 
-export { completions };
+export { completions, updateProjectionsEffect };

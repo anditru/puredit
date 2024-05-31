@@ -11,7 +11,7 @@ import { dirname } from "path";
 import { Question } from "inquirer";
 import { Language, ProjectionContent } from "../content-generation/common";
 import { MemFsEditor, VinylMemFsEditorFile } from "mem-fs-editor";
-import { toLowerCamelCase } from "@puredit/utils";
+import { toLowerCamelCase } from "@puredit/utils-shared";
 
 interface SubProjectionAnswers {
   language: Language;

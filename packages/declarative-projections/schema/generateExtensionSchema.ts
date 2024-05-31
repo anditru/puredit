@@ -39,5 +39,14 @@ Object.keys(types).forEach((key) => {
 Object.keys(enums).forEach((key) => {
   schema!.definitions![key].properties.type.enum = enums[key];
 });
+Object.keys(schema!.definitions!).forEach((definitionKey) => {
+  const definition = schema!.definitions![definitionKey];
+  if (definition.type !== "object") {
+    return;
+  }
+  console.log(definition);
+  const properties = Object.keys(definition.properties);
+  definition["required"] = properties;
+});
 const completeSchema = Object.assign({}, schema, staticPart);
 fs.writeFileSync("./extensionSchema.json", JSON.stringify(completeSchema, null, 2));

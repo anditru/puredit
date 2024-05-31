@@ -9,6 +9,8 @@ import {
 } from "@puredit/editor-interface";
 import { Action } from "@puredit/editor-interface";
 import { v4 as uuid } from "uuid";
+import { Diagnostic, LanguageService, TextDocument } from "vscode-json-languageservice";
+import * as fs from "fs";
 
 export interface SvelteResources {
   scriptPath: string;
@@ -19,9 +21,10 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
   public static register(
     context: vscode.ExtensionContext,
     viewType: string,
-    svelteResources: SvelteResources
+    svelteResources: SvelteResources,
+    extensionLanguageService: LanguageService
   ): vscode.Disposable {
-    const provider = new this(context, svelteResources);
+    const provider = new this(context, svelteResources, extensionLanguageService);
     const providerRegistration = vscode.window.registerCustomEditorProvider(viewType, provider);
     return providerRegistration;
   }
@@ -31,7 +34,8 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
 
   constructor(
     private readonly context: vscode.ExtensionContext,
-    private readonly svelteResources: SvelteResources
+    private readonly svelteResources: SvelteResources,
+    private readonly extensionLanguageService: LanguageService
   ) {
     // Store the initial state of all open documents
     vscode.workspace.textDocuments.forEach((doc) => {
@@ -62,6 +66,12 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
     };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
 
+    vscode.workspace.onDidChangeConfiguration(async (e) => {
+      if (e.affectsConfiguration("puredit.extensionDescriptors")) {
+        webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+      }
+    });
+
     webviewPanel.webview.onDidReceiveMessage(async (message: Message) => {
       if (message.action === Action.GET_DOCUMENT) {
         webviewPanel.webview.postMessage({
@@ -81,6 +91,16 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
           id: message.id,
           type: MessageType.RESPONSE,
           action: Action.UPDATE_DOCUMENT,
+        });
+      } else if (message.action === Action.GET_PROJECTION_EXTENSIONS) {
+        const config = vscode.workspace.getConfiguration("puredit");
+        const descriptorPaths = config.get("extensionDescriptors") as string[];
+        const extensions = await this.readProjectionExtensions(descriptorPaths);
+        webviewPanel.webview.postMessage({
+          id: message.id,
+          type: MessageType.RESPONSE,
+          action: Action.GET_PROJECTION_EXTENSIONS,
+          payload: JSON.stringify(extensions),
         });
       }
     });
@@ -113,6 +133,42 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
     webviewPanel.onDidDispose(() => {
       changeDocumentSubscription.dispose();
     });
+  }
+
+  private async readProjectionExtensions(descriptorPaths: string[]) {
+    let extensions: any[] = [];
+    for (const descriptorPath of descriptorPaths) {
+      let descriptor: string;
+      try {
+        descriptor = fs.readFileSync(descriptorPath, "utf-8");
+      } catch (error) {
+        vscode.window.showErrorMessage(
+          `Failed to read extension descriptor path ${descriptorPath}.`
+        );
+        continue;
+      }
+
+      const textDocument = TextDocument.create("config.json", "json", 1, descriptor);
+      const jsonDocument = this.extensionLanguageService.parseJSONDocument(textDocument);
+      const diagnostics = await this.extensionLanguageService.doValidation(
+        textDocument,
+        jsonDocument
+      );
+      const errors = diagnostics.filter(
+        (diagnostic) => diagnostic.severity && diagnostic.severity <= 2
+      );
+      if (errors.length > 0) {
+        const message = errors.reduce((prev, error: Diagnostic) => {
+          const newMessage =
+            (prev += `\nLine ${error.range.start.line}:${error.range.start.character} ${error.message}`);
+          return newMessage;
+        }, "Invalid configuration for Puredit extensions:");
+        vscode.window.showErrorMessage(message);
+      } else {
+        extensions = extensions.concat(JSON.parse(descriptor));
+      }
+    }
+    return extensions;
   }
 
   private mapToChangeSpec(
