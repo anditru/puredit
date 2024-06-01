@@ -1,6 +1,6 @@
 {
   "name": "@puredit/vscode-extension",
-  "displayName": "pureditcode",
+  "displayName": "puredit",
   "description": "",
   "version": "0.0.1",
   "engines": {
@@ -14,21 +14,54 @@
   "contributes": {
     "configuration": {
       "title": "Puredit",
+      "type": "object",
       "properties": {
-        "puredit.extensionDescriptors": {
+        "puredit.declarativeProjectionDescriptors": {
           "type": "array",
-          "scope": "application",
           "default": [],
-          "description": "Enter absolute paths to your .ext.json files containing packge, root projection or subprojection extensions.",
+          "description": "Enter absolute paths to your .ext.json files containing declaratively defined projections.",
           "items": {
             "type": "string"
           }
+        },
+        "puredit.enabledPackages.py-polars": {
+          "type": "boolean",
+          "scope": "application",
+          "default": true,
+          "description": "Enable projections for Polars."
+        },
+        "puredit.enabledPackages.py-pytorch": {
+          "type": "boolean",
+          "scope": "application",
+          "default": true,
+          "description": "Enable projections for PyTorch."
         }
       }
     },
+    "jsonValidation": [
+      {
+        "fileMatch": "*.ext.json",
+        "url": "./extension/declarativeProjectionSchema.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "puredit.reloadProjectionalEditor",
+        "title": "Reload Projectional Editor"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "puredit.reloadProjectionalEditor",
+          "group": "navigation",
+          "when": "projectionalEditorRunning"
+        }
+      ]
+    },
     "customEditors": [
       {
-        "viewType": "pureditcode.PythonEditor",
+        "viewType": "puredit.PythonEditor",
         "displayName": "Projectional Python Editor",
         "priority": "option",
         "selector": [

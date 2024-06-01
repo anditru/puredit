@@ -12,6 +12,8 @@ import { v4 as uuid } from "uuid";
 import { Diagnostic, LanguageService, TextDocument } from "vscode-json-languageservice";
 import * as fs from "fs";
 
+const PROJECTIONAL_EDITOR_RUNNING_KEY = "projectionalEditorRunning";
+
 export interface SvelteResources {
   scriptPath: string;
   stylePath: string;
@@ -65,9 +67,19 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
       enableScripts: true,
     };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+    vscode.commands.executeCommand("setContext", PROJECTIONAL_EDITOR_RUNNING_KEY, true);
+
+    this.context.subscriptions.push(
+      vscode.commands.registerCommand("puredit.reloadProjectionalEditor", () => {
+        webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
+      })
+    );
 
     vscode.workspace.onDidChangeConfiguration(async (e) => {
-      if (e.affectsConfiguration("puredit.extensionDescriptors")) {
+      if (
+        e.affectsConfiguration("puredit.declarativeProjectionDescriptors") ||
+        e.affectsConfiguration("puredit.enabledPackages")
+      ) {
         webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
       }
     });
@@ -92,15 +104,27 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
           type: MessageType.RESPONSE,
           action: Action.UPDATE_DOCUMENT,
         });
-      } else if (message.action === Action.GET_PROJECTION_EXTENSIONS) {
+      } else if (message.action === Action.GET_DECLARATIVE_PROJECTIONS) {
         const config = vscode.workspace.getConfiguration("puredit");
-        const descriptorPaths = config.get("extensionDescriptors") as string[];
-        const extensions = await this.readProjectionExtensions(descriptorPaths);
+        const descriptorPaths = config.get<string[]>("declarativeProjectionDescriptors") || [];
+        const extensions = await this.readDeclarativeProjections(descriptorPaths);
         webviewPanel.webview.postMessage({
           id: message.id,
           type: MessageType.RESPONSE,
-          action: Action.GET_PROJECTION_EXTENSIONS,
+          action: Action.GET_DECLARATIVE_PROJECTIONS,
           payload: JSON.stringify(extensions),
+        });
+      } else if (message.action === Action.GET_DISABLED_PACKAGES) {
+        const config = vscode.workspace.getConfiguration("puredit");
+        const enabledPackages = config.get<Record<string, boolean>>("enabledPackages") || {};
+        const disabledPackages = Object.keys(enabledPackages).filter(
+          (key) => !enabledPackages[key]
+        );
+        webviewPanel.webview.postMessage({
+          id: message.id,
+          type: MessageType.RESPONSE,
+          action: Action.GET_DISABLED_PACKAGES,
+          payload: JSON.stringify(disabledPackages),
         });
       }
     });
@@ -135,7 +159,7 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
     });
   }
 
-  private async readProjectionExtensions(descriptorPaths: string[]) {
+  private async readDeclarativeProjections(descriptorPaths: string[]) {
     let extensions: any[] = [];
     for (const descriptorPath of descriptorPaths) {
       let descriptor: string;

@@ -43,7 +43,8 @@ export function createProjectionState(
   return { config, patternMap, decorations, contextVariableRanges };
 }
 
-export const updateProjectionsEffect = StateEffect.define<Extension[]>();
+export const insertDeclarativeProjectionsEffect = StateEffect.define<Extension[]>();
+export const removeProjectionPackagesEffect = StateEffect.define<string[]>();
 
 export const projectionState = StateField.define<ProjectionState>({
   create(): ProjectionState {
@@ -56,30 +57,39 @@ export const projectionState = StateField.define<ProjectionState>({
     const oldState = transaction.startState;
     const newState = transaction.state;
 
-    let newProjectionsAdded = false;
+    let projectionsChanged = false;
     for (const effect of transaction.effects) {
-      if (effect.is(updateProjectionsEffect)) {
-        logger.debug("updateProjectionsEffect found. Updating projections");
+      if (effect.is(removeProjectionPackagesEffect)) {
+        logger.debug("removeProjectionPackagesEffect found. Updating projections");
+        effect.value.forEach((packageName) => delete config.projections[packageName]);
+        const projections = Object.keys(config.projections).flatMap(
+          (key) => config.projections[key]
+        );
+        patternMap = createPatternMap(projections.map((p) => p.pattern));
+        projectionsChanged = true;
+      } else if (effect.is(insertDeclarativeProjectionsEffect)) {
+        logger.debug("insertDeclarativeProjectionsEffect found. Updating projections");
         const projectionInserter = new ProjectionInserter(config.parser);
         projectionInserter.insertProjections(effect.value, config.projections);
         const projections = Object.keys(config.projections).flatMap(
           (key) => config.projections[key]
         );
         patternMap = createPatternMap(projections.map((p) => p.pattern));
-        newProjectionsAdded = true;
+        projectionsChanged = true;
       }
     }
 
-    if (!transaction.docChanged && !transaction.selection && !newProjectionsAdded) {
+    if (!transaction.docChanged && !transaction.selection && !projectionsChanged) {
       logger.debug("Rematching nothing");
       return { config, patternMap, decorations, contextVariableRanges };
     }
     const mainSelect = transaction.selection?.main;
     let nodesToRematch: AstNode[];
     let nodesToInvalidate: AstNode[] = [];
-    if (newProjectionsAdded) {
-      logger.debug("New projections added. Rematching everything");
+    if (projectionsChanged) {
+      logger.debug("Projections changed. Rematching everything");
       nodesToRematch = getAllStatementNodes(newState.sliceDoc(0), config.parser);
+      nodesToInvalidate = nodesToRematch;
     } else if (transaction.docChanged) {
       logger.debug("Rematching changed nodes");
       const { changedStatementNodes, errorNodes } = analyzeChanges(

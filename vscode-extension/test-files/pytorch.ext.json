@@ -9,7 +9,7 @@
         "description": "Get the maximum value of a tensor",
         "isExpression": true,
         "template": "<%torch%>.max(<%tensor%>)",
-        "segmentWidgets": ["Get the maximum value in tensor <%tensor%>"],
+        "segmentWidgets": ["Get the max value in tensor <%tensor%>"],
         "parameters": [
           {
             "type": "contextVariable",

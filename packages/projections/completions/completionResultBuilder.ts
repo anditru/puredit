@@ -27,16 +27,11 @@ export default class CompletionsBuilder {
     return this;
   }
 
-  setRootProjections(rootProjections: RootProjection[]): CompletionsBuilder {
-    this.rootProjections = rootProjections;
-    for (const projection of rootProjections) {
+  setRootProjections(projections: Record<string, RootProjection[]>): CompletionsBuilder {
+    this.rootProjections = Object.keys(projections).flatMap((key) => projections[key]);
+    for (const projection of this.rootProjections) {
       this.subProjections = this.subProjections.concat(projection.subProjections);
     }
-    return this;
-  }
-
-  setSubProjections(subProjections: SubProjection[]): CompletionsBuilder {
-    this.subProjections = this.subProjections.concat(subProjections);
     return this;
   }
 
