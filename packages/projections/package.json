@@ -11,6 +11,7 @@
     "@codemirror/view": "6",
     "@puredit/parser": "*",
     "@types/string-similarity": "^4.0.0",
+    "fuse.js": "^7.0.0",
     "lodash": "^4.17.21",
     "string-similarity": "^4.0.4"
   },

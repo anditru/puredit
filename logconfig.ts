@@ -11,7 +11,6 @@ export const logProvider = Log4TSProvider.createProvider("Puredit", {
     {
       identifier: "projections",
       expression: new RegExp("projections.+"),
-      level: LogLevel.Debug,
     },
     {
       identifier: "codemirror-typescript",
@@ -20,7 +19,6 @@ export const logProvider = Log4TSProvider.createProvider("Puredit", {
     {
       identifier: "vscode.editor-utils",
       expression: new RegExp("vscode.editor-utils.+"),
-      level: LogLevel.Debug,
     },
     {
       identifier: "vscode.editor-interface",

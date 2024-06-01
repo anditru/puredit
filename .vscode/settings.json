@@ -3,7 +3,7 @@
   "json.schemas": [
     {
       "fileMatch": ["**/*.ext.json"],
-      "url": "./packages/package-extension/schema/extensionSchema.json"
+      "url": "./vscode-extension/extension/declarativeProjectionSchema.json"
     }
   ]
 }

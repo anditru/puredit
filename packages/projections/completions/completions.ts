@@ -3,7 +3,7 @@ import type { CompletionContext } from "@codemirror/autocomplete";
 import type { CompletionResult } from "@codemirror/autocomplete";
 import { projectionState } from "../state/state";
 import CompletionsBuilder from "./completionResultBuilder";
-import { ContextVariableMap, RootProjection, SubProjection } from "..";
+import { ContextVariableMap } from "..";
 
 /**
  * Transforms the registered projections into suggestions for the code completion
@@ -27,11 +27,18 @@ export function completions(completionContext: CompletionContext): CompletionRes
     }
   }
 
+  const selection = completionContext.state.selection?.main;
+  let searchString = "";
+  if (selection.from !== selection.to) {
+    searchString = completionContext.state.doc.slice(selection.from, selection.to).toString();
+  }
+
   const completionsBuilder = new CompletionsBuilder();
   const options = completionsBuilder
     .setIndendation(indentation)
     .setContext(contextVariables)
     .setRootProjections(config.projections)
+    .setSeachString(searchString)
     .build();
 
   return {

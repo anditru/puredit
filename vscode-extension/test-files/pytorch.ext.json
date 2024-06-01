@@ -46,7 +46,7 @@
             "partSubProjections": [
               {
                 "type": "aggregationPart",
-                "name": "Tensor",
+                "name": "PyTorch:Tensor:Tensor",
                 "description": "A tensor.",
                 "template": "<%tensor%>",
                 "segmentWidgets": ["<%tensor%>"],
