@@ -16,6 +16,7 @@ export const enum Action {
   UPDATE_EDITOR = "UPDATE_EDITOR",
   GET_DECLARATIVE_PROJECTIONS = "GET_DECLARATIVE_PROJECTIONS",
   GET_DISABLED_PACKAGES = "GET_DISABLED_PACKAGES",
+  REPORT_ERROR = "REPORT_ERROR",
 }
 
 export type MessagePayload = ChangeDocumentPayload | ChangeEditorPayload | string | any;

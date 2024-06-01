@@ -9,7 +9,7 @@ import DecorationSetBuilder from "./decorationSetBuilder";
 import AstNode from "@puredit/parser/ast/node";
 import AstCursor from "@puredit/parser/ast/cursor";
 import { zip } from "@puredit/utils-shared";
-import { Extension, ProjectionInserter } from "@puredit/declarative-projections";
+import { Extension } from "@puredit/declarative-projections";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("projections.state.state");
@@ -69,8 +69,7 @@ export const projectionState = StateField.define<ProjectionState>({
         projectionsChanged = true;
       } else if (effect.is(insertDeclarativeProjectionsEffect)) {
         logger.debug("insertDeclarativeProjectionsEffect found. Updating projections");
-        const projectionInserter = new ProjectionInserter(config.parser);
-        projectionInserter.insertProjections(effect.value, config.projections);
+        config.projectionInserter.insertProjections(effect.value, config.projections);
         const projections = Object.keys(config.projections).flatMap(
           (key) => config.projections[key]
         );

@@ -3,6 +3,7 @@ import type { Match, Parser } from "@puredit/parser";
 import type { ProjectionWidgetClass } from "./projection";
 import type { Pattern } from "@puredit/parser";
 import type Template from "@puredit/parser/template/template";
+import { ProjectionInserter } from "@puredit/declarative-projections";
 
 export interface Projection {
   name: string;
@@ -36,6 +37,7 @@ export interface SubProjection extends Projection {
 export interface ProjectionPluginConfig {
   parser: Parser;
   projections: Record<string, RootProjection[]>;
+  projectionInserter?: ProjectionInserter;
   globalContextVariables: ContextVariableMap;
   globalContextInformation: ContextInformation;
 }

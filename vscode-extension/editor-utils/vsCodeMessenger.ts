@@ -17,11 +17,19 @@ type PendingPromise = {
 type Handler = (message: Message) => void;
 
 export default class VSCodeMessenger {
+  static instance: VSCodeMessenger;
+  static getInstance() {
+    if (!VSCodeMessenger.instance) {
+      VSCodeMessenger.instance = new VSCodeMessenger();
+    }
+    return VSCodeMessenger.instance;
+  }
+
   private queue: PendingPromise[] = [];
   private processing = false;
   private handlers: Record<Action, Handler[]> = {} as Record<Action, Handler[]>;
 
-  constructor() {
+  private constructor() {
     window.addEventListener("message", this.handleIncomingMessage.bind(this));
   }
 

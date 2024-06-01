@@ -38,10 +38,24 @@ const ALLOWED_PARAMETER_TYPES = ["argument", "contextVariable", "aggregation", "
 
 export class ProjectionInserter {
   projections: Record<string, RootProjection[]>;
-  constructor(private readonly parser: Parser) {}
+
+  constructor(
+    private readonly parser: Parser,
+    private readonly reportError: (error: string) => void
+  ) {}
 
   insertProjections(extensions: Extension[], projections: Record<string, RootProjection[]>) {
     this.projections = projections;
+    try {
+      this.processExtension(extensions);
+    } catch (error) {
+      this.reportError("Error in declarative projections: " + error.message);
+      throw error;
+    }
+    return this.projections;
+  }
+
+  processExtension(extensions: Extension[]) {
     for (const extension of extensions) {
       switch (extension.type) {
         case "packageExtension":
@@ -59,7 +73,6 @@ export class ProjectionInserter {
           );
       }
     }
-    return this.projections;
   }
 
   private processPackageExtension(extension: PackageExtension) {
@@ -312,7 +325,7 @@ export class ProjectionInserter {
           break;
         default:
           throw new Error(
-            `Invalid template parameter type ${paramDefinition.type}. Allowed values are ${ALLOWED_PARAMETER_TYPES}`
+            `Invalid template parameter type ${paramDefinition.type} in template parameter ${definition.name}. Allowed values are ${ALLOWED_PARAMETER_TYPES}`
           );
       }
       paramsMap[`<%${paramDefinition.name}%>`] = param;
@@ -334,7 +347,9 @@ export class ProjectionInserter {
     }
     const chain = parentPattern.getChain(parentParameter);
     if (!chain) {
-      throw new Error(`Chain with name ${parentParameter} not found`);
+      throw new Error(
+        `Chain ${parentParameter} not found. Was referenced in subprojection definition ${subProjection.name}`
+      );
     }
     const transformation = new ChainLinkTemplateTransformation(this.parser.treeSitterParser);
     return transformation
@@ -358,7 +373,9 @@ export class ProjectionInserter {
     }
     const aggregation = parentPattern.getAggregation(parentParameter);
     if (!aggregation) {
-      throw new Error(`Aggregation with name ${parentParameter} not found`);
+      throw new Error(
+        `Aggregation ${parentParameter} not found. Was referenced in subprojection definition ${subProjection.name}`
+      );
     }
     const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(
       this.parser.language,
@@ -384,7 +401,9 @@ export class ProjectionInserter {
       (proj) => proj.name === extension.rootProjection
     );
     if (!rootProjection) {
-      throw new Error(`Root projection ${extension.rootProjection} not found`);
+      throw new Error(
+        `Root projection ${extension.rootProjection} not found. Was referenced in for package ${extension.package}`
+      );
     }
     return rootProjection;
   }
@@ -459,7 +478,9 @@ function insertChainLinkIntoProjection(
   const rootPattern = rootProjection.pattern as ChainDecorator;
   const chain = rootPattern.getChain(parentParameter);
   if (!chain) {
-    throw new Error(`Chain with name ${parentParameter} not found`);
+    throw new Error(
+      `Chain with name ${parentParameter} not found. Was referenced in subprojection definition ${newSubProjection.name}`
+    );
   }
   chain.linkPatterns.push(newSubProjection.pattern);
   rootPattern.addLinkPattern(parentParameter, newLinkPattern);
@@ -476,7 +497,9 @@ function insertAggregationPartIntoProjection(
   const rootPattern = rootProjection.pattern as AggregationDecorator;
   const aggregation = rootPattern.getAggregation(parentParameter);
   if (!aggregation) {
-    throw new Error(`Chain with name ${parentParameter} not found`);
+    throw new Error(
+      `Chain with name ${parentParameter} not found. Was referenced in subprojection definition ${newSubProjection.name}`
+    );
   }
   aggregation.subPatterns.push(newSubProjection.pattern);
   rootPattern.addPartPattern(parentParameter, newPartPattern);
@@ -494,7 +517,9 @@ function insertChainLinkIntoSubProjection(
   const parentTemplate = parentSubProjection.pattern;
   const chain = parentTemplate.getChain(parentParameter);
   if (!chain) {
-    throw new Error(`Aggregation with name ${parentParameter} not found`);
+    throw new Error(
+      `Chain with name ${parentParameter} not found. Was referenced in subprojection definition ${newSubProjection.name}`
+    );
   }
   chain.linkPatterns.push(newSubProjection.pattern);
   const parentPatterns = parentTemplate.getPatterns() as ChainDecorator[];
@@ -513,7 +538,9 @@ function insertAggregationPartIntoSubProjection(
   const parentTemplate = parentSubProjection.pattern;
   const aggregation = parentTemplate.getAggregation(parentParameter);
   if (!aggregation) {
-    throw new Error(`Aggregation with name ${parentParameter} not found`);
+    throw new Error(
+      `Aggregation with name ${parentParameter} not found. Was referenced in subprojection definition ${newSubProjection.name}`
+    );
   }
   aggregation.subPatterns.push(newSubProjection.pattern);
   const parentPatterns = parentTemplate.getPatterns() as AggregationDecorator[];

@@ -126,6 +126,8 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
           action: Action.GET_DISABLED_PACKAGES,
           payload: JSON.stringify(disabledPackages),
         });
+      } else if (message.action === Action.REPORT_ERROR) {
+        vscode.window.showErrorMessage(message.payload);
       }
     });
 

@@ -27,7 +27,7 @@
 </script>
 
 <span class="inline-flex">
-  <span>Transform dataframe</span>
+  <span>Dataframe</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
     node={match.argsToAstNodeMap.sourceDataFrame}
@@ -36,4 +36,5 @@
     {focusGroup}
     placeholder="data frame"
   />
+  <span style="margin-right: 6px;">transformed by</span>
 </span>
