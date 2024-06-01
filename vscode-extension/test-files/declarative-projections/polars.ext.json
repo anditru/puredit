@@ -1,5 +1,65 @@
 [
   {
+    "type": "packageExtension",
+    "package": "py-polars",
+    "rootProjections": [
+      {
+        "type": "rootProjection",
+        "name": "Polars:Dataframe:CreateLazy",
+        "description": "Create a new lazyframe.",
+        "isExpression": true,
+        "template": "<%pl%>.LazyFrame(<%dataSource%>)",
+        "segmentWidgets": ["Create new lazyframe from <%dataSource%>"],
+        "parameters": [
+          {
+            "type": "contextVariable",
+            "name": "pl"
+          },
+          {
+            "type": "argument",
+            "name": "dataSource",
+            "nodeTypes": ["identifier"]
+          }
+        ]
+      },
+      {
+        "type": "rootProjection",
+        "name": "Polars:Dataframe:Describe",
+        "description": "Describe a dataframe by summary statistics.",
+        "isExpression": false,
+        "template": "<%dataframe%>.describe()",
+        "segmentWidgets": ["Describe dataframe with summary statistics <%dataframe%>"],
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "dataframe",
+            "nodeTypes": ["identifier"]
+          }
+        ]
+      },
+      {
+        "type": "rootProjection",
+        "name": "Polars:Dataframe:Head",
+        "description": "Get the first n lines (head) of the dataframe.",
+        "isExpression": true,
+        "template": "<%dataframe%>.head(<%numberOfLines%>)",
+        "segmentWidgets": ["Get the first <%numberOfLines%> lines of dataframe <%dataframe%>"],
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "numberOfLines",
+            "nodeTypes": ["integer"]
+          },
+          {
+            "type": "argument",
+            "name": "dataframe",
+            "nodeTypes": ["identifier"]
+          }
+        ]
+      }
+    ]
+  },
+  {
     "type": "rootProjectionExtension",
     "package": "py-polars",
     "rootProjection": "Polars:Column:Chain",
@@ -7,8 +67,40 @@
     "subProjections": [
       {
         "type": "chainLink",
+        "name": "Polars:Column:Minimum",
+        "description": "Take the median of a column.",
+        "parameters": [],
+        "template": "median()",
+        "segmentWidgets": ["taking its median"]
+      },
+      {
+        "type": "chainLink",
+        "name": "Polars:Column:Minimum",
+        "description": "Take the mean of a column.",
+        "parameters": [],
+        "template": "mean()",
+        "segmentWidgets": ["taking its mean"]
+      },
+      {
+        "type": "chainLink",
+        "name": "Polars:Column:Minimum",
+        "description": "Find the minimum value in a column.",
+        "parameters": [],
+        "template": "min()",
+        "segmentWidgets": ["finding its minimum"]
+      },
+      {
+        "type": "chainLink",
+        "name": "Polars:Column:Maximum",
+        "description": "Find the maximum value in a column.",
+        "parameters": [],
+        "template": "max()",
+        "segmentWidgets": ["finding its maximum"]
+      },
+      {
+        "type": "chainLink",
         "name": "Polars:Column:ReplaceValues",
-        "description": "Replace values in a column",
+        "description": "Replace values in a column.",
         "template": "replace(<%mappings%>, default=<%defaultValue%>)",
         "segmentWidgets": ["Replace values", "using default <%defaultValue%>"],
         "parameters": [
