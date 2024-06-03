@@ -29,7 +29,6 @@ The **Pur**ist **edit**or is a projectional editor that uses textual code as its
 - `apps/`: executable applications and demos
   - `example/`: an example of a projectional data manipulation DSL based on the TypeScript programming language, which is also available at <https://puredit.korz.dev/>
   - `generate/`: an application for generating code pattern templates and projection components from samples
-  - `jupyter/`: an example of a projectional DSL for data analysis of Excel sheets, based on Python and integrated into [JupyterLab](https://jupyter.org/)
   - `parser-playground/`: an experimentation playground used for debugging our pattern matching algorithm
   - `python-dsl/`: an example of a projectional data manipulation DSL based on the Python programming language
 - `packages/`: reusable packages that together are used to create a projectional editor
@@ -43,33 +42,6 @@ The **Pur**ist **edit**or is a projectional editor that uses textual code as its
 This projects requires [Node](https://nodejs.org/en/) 16 LTS and [npm](https://www.npmjs.com/) 8.
 Node 18 may work but has not been tested.
 Then, install the dependencies using `npm install`.
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-npm run dev
-```
-
-This will start development servers for `apps/example`, `apps/parser-playground` and `apps/python-dsl`.
-For the JupyterLab example, see the next section.
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-npm run build
-```
-
-### Linting and type checking
-
-To lint and typecheck all apps and packages, run the following command:
-
-```
-npm run lint
-```
 
 ## TypeScript DSL example
 
@@ -88,39 +60,6 @@ docker run -p 3000:80 puredit-example
 ```
 
 Afterwards, the example can be accessed in a browser on <http://localhost:3000>.
-
-## JupyterLab example
-
-To build and run the JupyterLab DSL example, run the following commands:
-
-### Virtual environment
-
-```sh
-# Create and activate Python virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Install dependencies and our Jupyter extension
-npm install
-pip install -r apps/jupyter/requirements.txt
-npm -w apps/jupyter run build:prod
-pip install apps/jupyter
-
-# Start JupyterLab
-cd apps/jupyter/example
-jupyter lab
-```
-
-### Docker
-
-Alternatively, the JupyterLab example can be built and run using [Docker](https://docs.docker.com/):
-
-```sh
-docker build -t puredit-jupyter -f apps/jupyter/Dockerfile .
-docker run -p 8888:8888 puredit-jupyter
-```
-
-Afterwards, JupyterLab can be accessed in a browser on <http://localhost:8888>.
 
 ## Creating new projections
 
