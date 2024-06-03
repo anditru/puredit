@@ -12,7 +12,7 @@ const parser = await Parser.load(Language.Python, wasmPathProvider);
 const projectionRegistry = new ProjectionRegistry();
 projectionRegistry.registerProjectionPackage("py-polars", polarsProjections);
 projectionRegistry.registerProjectionPackage("py-latex-math", latexMathProjections);
-projectionRegistry.registerProjectionPackage("py pytorch", pytorchProjections);
+projectionRegistry.registerProjectionPackage("py-pytorch", pytorchProjections);
 
 export const projectionPluginConfig: ProjectionPluginConfig = {
   parser,

@@ -4,7 +4,8 @@ import type { EditorView } from "@codemirror/view";
 import { highlightingFor } from "@codemirror/language";
 import type { Match } from "@puredit/parser";
 import { FocusGroup } from "@puredit/projections";
-import type { ContextInformation, FocusGroupHandler } from "@puredit/projections";
+import type { FocusGroupHandler } from "./focus";
+import { ContextInformation } from "../types";
 import { ProjectionWidget } from "./widget";
 import TextInput from "@puredit/projections/controls/TextInput.svelte";
 import { isString } from "@puredit/utils-shared";
@@ -26,14 +27,14 @@ export const simpleProjection = (template: Array<string | TemplateArgument | Tem
       const target = document.createElement("span");
       target.className = "inline-flex";
       for (const part of template) {
-        const element = document.createElement("span");
-        target.appendChild(element);
         if (isString(part)) {
+          const element = document.createElement("span");
+          target.appendChild(element);
           element.textContent = part;
         } else {
           const args = part instanceof Array ? part : [part];
           const component = new TextInput({
-            target: element,
+            target,
             props: {
               className: highlightingFor(state, [tags.string]),
               node: match.argsToAstNodeMap[args[0].name],

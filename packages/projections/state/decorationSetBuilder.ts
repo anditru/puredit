@@ -2,7 +2,7 @@ import { RangeSet, type EditorState } from "@codemirror/state";
 import { Decoration } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { zip } from "@puredit/utils-shared";
-import type { Match, Pattern } from "@puredit/parser";
+import type { Match } from "@puredit/parser";
 import type { CodeRange } from "@puredit/parser/match/types";
 import type { ContextInformation, FnContextProvider, ProjectionPluginConfig } from "../types";
 import type { ProjectionWidgetClass } from "../widget/widget";
