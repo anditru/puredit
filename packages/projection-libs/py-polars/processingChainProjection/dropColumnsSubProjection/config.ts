@@ -1,5 +1,4 @@
-import { svelteProjection } from "@puredit/projections/svelte";
-import { simpleProjection } from "@puredit/simple-projection";
+import { svelteProjection, simpleProjection } from "@puredit/projections";
 import type { SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
@@ -8,18 +7,17 @@ import { columnSubProjection } from "../columnSubProjection/config";
 import { columnChainSubProjection } from "../columnChainSubProjection/config";
 
 const columns = agg("columns", "argument_list", [
-  columnSubProjection.pattern,
-  columnChainSubProjection.pattern,
+  columnSubProjection.template,
+  columnChainSubProjection.template,
 ]);
-const pattern = parser.subPattern("dropColumnsSubProjectionPattern")`drop${columns}`;
+const template = parser.subPattern("Polars:Dataframe:DropColumns")`drop${columns}`;
 
 const beginWidget = svelteProjection(Widget);
 const endWidget = simpleProjection(["end columns"]);
 
 export const dropColumnsSubProjection: SubProjection = {
-  name: "Polars:Dataframe:DropColumns",
+  template,
   description: "Remove columns from a dataset.",
-  pattern,
   requiredContextVariables: [],
   segmentWidgets: [beginWidget, endWidget],
 };

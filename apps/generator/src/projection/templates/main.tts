@@ -1,5 +1,5 @@
 import { parser } from "../parser";
-import { svelteProjection } from "@puredit/projections/svelte";
+import { svelteProjection } from "@puredit/projections";
 import type { RootProjection } from "@puredit/projections/types";
 <%- importedWidgets %>
 <%- importedSubProjections %>

@@ -3,8 +3,8 @@
   import type { EditorView } from "@codemirror/view";
   import { onDestroy } from "svelte";
   import { compareTwoStrings } from "string-similarity";
-  import type { FocusGroup } from "./focus";
-  import { stringLiteralValue, stringLiteralValueChange } from "./shared";
+  import type { FocusGroup } from "../widget/focus";
+  import { stringLiteralValue, stringLiteralValueChange } from "../shared";
   import AstNode from "@puredit/parser/ast/node";
 
   export let view: EditorView | null;

@@ -1,18 +1,17 @@
-import { svelteProjection } from "@puredit/projections/svelte";
+import { svelteProjection } from "@puredit/projections";
 import type { SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 import { arg } from "@puredit/parser";
 
 const integer = arg("integer", ["integer"]);
-const pattern = parser.subPattern("integerPartPattern")`${integer}`;
+const template = parser.subPattern("PyTorch:Tensor:Integer")`${integer}`;
 
 const widget = svelteProjection(Widget);
 
 export const integerPart: SubProjection = {
-  name: "PyTorch:Tensor:Integer",
+  template,
   description: "Integer part for aggregations.",
-  pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],
 };

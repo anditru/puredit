@@ -1,12 +1,14 @@
 import { isString } from "@puredit/utils-shared";
 import TemplateParameter from "./parameters/templateParameter";
+import { Language } from "@puredit/language-config";
 
 export default class ParameterTable {
   private table: Record<string, TemplateParameter> = {};
 
   static fromTemplate(
     templateStrings: TemplateStringsArray,
-    params: (string | TemplateParameter)[]
+    params: TemplateParameter[],
+    language: Language
   ): ParameterTable {
     let result = "";
     const table = new ParameterTable();
@@ -16,7 +18,7 @@ export default class ParameterTable {
       const param = params[i];
 
       if (param && param instanceof TemplateParameter) {
-        const substitution = (params[i] as TemplateParameter).toCodeString();
+        const substitution = params[i].toCodeString(language);
         const substitutionIndex = result.length;
         const substitutionLength = substitution.length;
         table.set(substitutionIndex, substitutionIndex + substitutionLength, param);
@@ -80,20 +82,6 @@ export default class ParameterTable {
       }
       this.set(from, to, other.get(from, to)!);
     });
-  }
-
-  private shiftParameter(from: number, to: number, offset: number) {
-    if (offset === 0) {
-      return;
-    }
-    const newFrom = from + offset;
-    const newTo = to + offset;
-    const parameter = this.get(from, to);
-    if (!parameter) {
-      throw new Error(`No item with key from ${from} to ${to} found`);
-    }
-    this.set(newFrom, newTo, parameter);
-    this.delete(from, to);
   }
 
   private getKey(from: number, to: number): string {

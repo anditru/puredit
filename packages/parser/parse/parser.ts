@@ -4,7 +4,6 @@ import type { TreeSitterParser } from "../tree-sitter/treeSitterParser";
 import { createTreeSitterParser } from "../tree-sitter/treeSitterParser";
 import { Language } from "@puredit/language-config";
 import { CompleteTemplateTransformation } from "./internal";
-import { isString } from "@puredit/utils-shared";
 import WasmPathProvider from "../tree-sitter/wasmPathProvider";
 
 export default class Parser {
@@ -19,7 +18,7 @@ export default class Parser {
     public readonly treeSitterParser: TreeSitterParser,
     public readonly language: Language
   ) {
-    this.patternGeneration = new CompleteTemplateTransformation(treeSitterParser);
+    this.patternGeneration = new CompleteTemplateTransformation(this);
   }
 
   parse(
@@ -31,18 +30,13 @@ export default class Parser {
   }
 
   /**
-   * Parses an aggregation subpattern
-   * @param name Name of the aggregation subpattern
+   * Parses a subpattern
+   * @param name Name of the subpattern
    * @returns Template
    */
   subPattern(name: string) {
-    return (templateStrings: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
+    return (templateStrings: TemplateStringsArray, ...params: TemplateParameter[]) => {
       const template = new Template(name, this.language, templateStrings, params);
-      params.forEach((param) => {
-        if (!isString(param)) {
-          param.template = template;
-        }
-      });
       return template;
     };
   }
@@ -53,13 +47,8 @@ export default class Parser {
    * @returns Pattern
    */
   statementPattern(name: string) {
-    return (templateStrings: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
+    return (templateStrings: TemplateStringsArray, ...params: TemplateParameter[]) => {
       const template = new Template(name, this.language, templateStrings, params);
-      params.forEach((param) => {
-        if (!isString(param)) {
-          param.template = template;
-        }
-      });
       return this.patternGeneration.setTemplate(template).setIsExpression(false).execute();
     };
   }
@@ -70,13 +59,8 @@ export default class Parser {
    * @returns Pattern
    */
   expressionPattern(name: string) {
-    return (templateStrings: TemplateStringsArray, ...params: (string | TemplateParameter)[]) => {
+    return (templateStrings: TemplateStringsArray, ...params: TemplateParameter[]) => {
       const template = new Template(name, this.language, templateStrings, params);
-      params.forEach((param) => {
-        if (!isString(param)) {
-          param.template = template;
-        }
-      });
       return this.patternGeneration.setTemplate(template).setIsExpression(true).execute();
     };
   }

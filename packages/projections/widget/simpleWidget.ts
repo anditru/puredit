@@ -2,21 +2,25 @@ import { tags } from "@lezer/highlight";
 import { EditorSelection, EditorState } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
 import { highlightingFor } from "@codemirror/language";
-import type { Context, Match } from "@puredit/parser";
-import { FocusGroup } from "@puredit/projections/focus";
-import type { FocusGroupHandler } from "@puredit/projections/focus";
-import { ProjectionWidget } from "@puredit/projections/projection";
-import TextInput from "@puredit/projections/TextInput.svelte";
+import type { Match } from "@puredit/parser";
+import { FocusGroup } from "@puredit/projections";
+import type { ContextInformation, FocusGroupHandler } from "@puredit/projections";
+import { ProjectionWidget } from "./widget";
+import TextInput from "@puredit/projections/controls/TextInput.svelte";
 import { isString } from "@puredit/utils-shared";
-import type { SvelteComponent } from "@puredit/projections/svelte";
-import type TemplateArgument from "@puredit/parser/define/templateArgument";
+import type { SvelteComponent } from "./svelte";
+import type { TemplateArgument } from "@puredit/parser";
 
 export const simpleProjection = (template: Array<string | TemplateArgument | TemplateArgument[]>) =>
   class extends ProjectionWidget implements FocusGroupHandler {
     focusGroup!: FocusGroup;
     inputs: Array<[TemplateArgument[], SvelteComponent<any>]>;
 
-    protected initialize(match: Match, _context: Context, state: EditorState): HTMLElement {
+    protected initialize(
+      match: Match,
+      _context: ContextInformation,
+      state: EditorState
+    ): HTMLElement {
       this.focusGroup = new FocusGroup(this);
       this.inputs = [];
       const target = document.createElement("span");
@@ -47,7 +51,7 @@ export const simpleProjection = (template: Array<string | TemplateArgument | Tem
       return target;
     }
 
-    protected update(match: Match, context: Context, state: EditorState): void {
+    protected update(match: Match, context: ContextInformation, state: EditorState): void {
       for (const [args, component] of this.inputs) {
         component.$set({
           node: match.argsToAstNodeMap[args[0].name],

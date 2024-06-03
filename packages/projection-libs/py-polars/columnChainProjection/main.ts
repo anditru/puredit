@@ -13,25 +13,24 @@ import { castSubProjection } from "./castSubProjection/config";
 
 export const columnChain = chain(
   "columnChain",
-  columnStartSubProjection.pattern,
+  columnStartSubProjection.template,
   [
-    colSubProjection.pattern,
-    upperCaseSubProjection.pattern,
-    lowerCaseSubProjection.pattern,
-    aliasSubProjection.pattern,
-    sumAggregationSubProjection.pattern,
-    avgAggregationSubProjection.pattern,
-    castSubProjection.pattern,
+    colSubProjection.template,
+    upperCaseSubProjection.template,
+    lowerCaseSubProjection.template,
+    aliasSubProjection.template,
+    sumAggregationSubProjection.template,
+    avgAggregationSubProjection.template,
+    castSubProjection.template,
   ],
   1
 );
 
-const pattern = parser.statementPattern("columnChainPattern")`${columnChain}`;
+const pattern = parser.statementPattern("Polars:Column:Chain")`${columnChain}`;
 
 export const columnChainProjection: RootProjection = {
-  name: "Polars:Column:Chain",
-  description: "Pick a column and apply transformations to it.",
   pattern,
+  description: "Pick a column and apply transformations to it.",
   requiredContextVariables: [],
   segmentWidgets: [],
   subProjections: [

@@ -2,12 +2,11 @@ import type { SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
 import { columnChain } from "../../columnChainProjection/main";
 
-const pattern = parser.subPattern("columnChainPatternWithCopy")`${columnChain.copy()}`;
+const template = parser.subPattern("Polars:Dataframe:ColumnChain")`${columnChain}`;
 
 export const columnChainSubProjection: SubProjection = {
-  name: "Polars:Dataframe:ColumnChain",
+  template,
   description: "Column chain.",
-  pattern,
   requiredContextVariables: [],
   segmentWidgets: [],
 };

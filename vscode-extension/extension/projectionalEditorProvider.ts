@@ -20,23 +20,13 @@ export interface SvelteResources {
 }
 
 export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvider {
-  public static register(
-    context: vscode.ExtensionContext,
-    viewType: string,
-    svelteResources: SvelteResources,
-    extensionLanguageService: LanguageService
-  ): vscode.Disposable {
-    const provider = new this(context, svelteResources, extensionLanguageService);
-    const providerRegistration = vscode.window.registerCustomEditorProvider(viewType, provider);
-    return providerRegistration;
-  }
-
   private pendingDuplicateUpdates = 0;
   private documentStates: Map<string, string> = new Map();
 
   constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly svelteResources: SvelteResources,
+    private readonly projectionalEditors: Record<string, vscode.WebviewPanel>,
     private readonly extensionLanguageService: LanguageService
   ) {
     // Store the initial state of all open documents
@@ -68,14 +58,9 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
     };
     webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
     vscode.commands.executeCommand("setContext", PROJECTIONAL_EDITOR_RUNNING_KEY, true);
+    this.projectionalEditors[document.uri.toString()] = webviewPanel;
 
-    this.context.subscriptions.push(
-      vscode.commands.registerCommand("puredit.reloadProjectionalEditor", () => {
-        webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
-      })
-    );
-
-    vscode.workspace.onDidChangeConfiguration(async (e) => {
+    const changeConfigurationSubscription = vscode.workspace.onDidChangeConfiguration(async (e) => {
       if (
         e.affectsConfiguration("puredit.declarativeProjectionDescriptors") ||
         e.affectsConfiguration("puredit.enabledPackages")
@@ -84,52 +69,54 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
       }
     });
 
-    webviewPanel.webview.onDidReceiveMessage(async (message: Message) => {
-      if (message.action === Action.GET_DOCUMENT) {
-        webviewPanel.webview.postMessage({
-          id: message.id,
-          type: MessageType.RESPONSE,
-          action: Action.GET_DOCUMENT,
-          payload: document.getText(),
-        });
-      } else if (message.action === Action.UPDATE_DOCUMENT) {
-        const workspaceEdit = this.mapToWorkspaceEdit(
-          message.payload! as ChangeDocumentPayload,
-          document
-        );
-        this.pendingDuplicateUpdates += 1;
-        await vscode.workspace.applyEdit(workspaceEdit);
-        webviewPanel.webview.postMessage({
-          id: message.id,
-          type: MessageType.RESPONSE,
-          action: Action.UPDATE_DOCUMENT,
-        });
-      } else if (message.action === Action.GET_DECLARATIVE_PROJECTIONS) {
-        const config = vscode.workspace.getConfiguration("puredit");
-        const descriptorPaths = config.get<string[]>("declarativeProjectionDescriptors") || [];
-        const extensions = await this.readDeclarativeProjections(descriptorPaths);
-        webviewPanel.webview.postMessage({
-          id: message.id,
-          type: MessageType.RESPONSE,
-          action: Action.GET_DECLARATIVE_PROJECTIONS,
-          payload: JSON.stringify(extensions),
-        });
-      } else if (message.action === Action.GET_DISABLED_PACKAGES) {
-        const config = vscode.workspace.getConfiguration("puredit");
-        const enabledPackages = config.get<Record<string, boolean>>("enabledPackages") || {};
-        const disabledPackages = Object.keys(enabledPackages).filter(
-          (key) => !enabledPackages[key]
-        );
-        webviewPanel.webview.postMessage({
-          id: message.id,
-          type: MessageType.RESPONSE,
-          action: Action.GET_DISABLED_PACKAGES,
-          payload: JSON.stringify(disabledPackages),
-        });
-      } else if (message.action === Action.REPORT_ERROR) {
-        vscode.window.showErrorMessage(message.payload);
+    const messageSubscription = webviewPanel.webview.onDidReceiveMessage(
+      async (message: Message) => {
+        if (message.action === Action.GET_DOCUMENT) {
+          webviewPanel.webview.postMessage({
+            id: message.id,
+            type: MessageType.RESPONSE,
+            action: Action.GET_DOCUMENT,
+            payload: document.getText(),
+          });
+        } else if (message.action === Action.UPDATE_DOCUMENT) {
+          const workspaceEdit = this.mapToWorkspaceEdit(
+            message.payload! as ChangeDocumentPayload,
+            document
+          );
+          this.pendingDuplicateUpdates += 1;
+          await vscode.workspace.applyEdit(workspaceEdit);
+          webviewPanel.webview.postMessage({
+            id: message.id,
+            type: MessageType.RESPONSE,
+            action: Action.UPDATE_DOCUMENT,
+          });
+        } else if (message.action === Action.GET_DECLARATIVE_PROJECTIONS) {
+          const config = vscode.workspace.getConfiguration("puredit");
+          const descriptorPaths = config.get<string[]>("declarativeProjectionDescriptors") || [];
+          const extensions = await this.readDeclarativeProjections(descriptorPaths);
+          webviewPanel.webview.postMessage({
+            id: message.id,
+            type: MessageType.RESPONSE,
+            action: Action.GET_DECLARATIVE_PROJECTIONS,
+            payload: JSON.stringify(extensions),
+          });
+        } else if (message.action === Action.GET_DISABLED_PACKAGES) {
+          const config = vscode.workspace.getConfiguration("puredit");
+          const enabledPackages = config.get<Record<string, boolean>>("enabledPackages") || {};
+          const disabledPackages = Object.keys(enabledPackages).filter(
+            (key) => !enabledPackages[key]
+          );
+          webviewPanel.webview.postMessage({
+            id: message.id,
+            type: MessageType.RESPONSE,
+            action: Action.GET_DISABLED_PACKAGES,
+            payload: JSON.stringify(disabledPackages),
+          });
+        } else if (message.action === Action.REPORT_ERROR) {
+          vscode.window.showErrorMessage(message.payload);
+        }
       }
-    });
+    );
 
     const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument((e) => {
       if (e.contentChanges.length === 0) {
@@ -157,7 +144,10 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
     });
 
     webviewPanel.onDidDispose(() => {
+      changeConfigurationSubscription.dispose();
+      messageSubscription.dispose();
       changeDocumentSubscription.dispose();
+      delete this.projectionalEditors[document.uri.toString()];
     });
   }
 
@@ -245,7 +235,7 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
     return new vscode.Range(positionFrom, positionTo);
   }
 
-  private getHtmlForWebview(webview: vscode.Webview): string {
+  public getHtmlForWebview(webview: vscode.Webview): string {
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.context.extensionUri, "out", this.svelteResources.scriptPath)
     );

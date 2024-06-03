@@ -5,10 +5,12 @@ import PatternNode from "../../pattern/nodes/patternNode";
 import {
   aggregationPlaceHolder,
   aggregationStartPlaceHolder,
+  Language,
   loadAggregatableNodeTypeConfigFor,
 } from "@puredit/language-config";
 import { ContextVariableMap } from "@puredit/projections";
 import AggregationNode from "../../pattern/nodes/aggregationNode";
+import Pattern from "../../pattern/pattern";
 
 export default class TemplateAggregation extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_agg_";
@@ -16,31 +18,27 @@ export default class TemplateAggregation extends TemplateParameter {
   constructor(
     public readonly name: string,
     public readonly type: string,
-    public readonly subPatterns: Template[],
-    public readonly specialStartPattern: Template | undefined,
+    public readonly partTemplates: Template[],
+    public readonly startTemplate: Template | undefined,
     public readonly contextVariables: ContextVariableMap
   ) {
     super();
   }
 
-  toCodeString(): string {
-    this.checkAssignedToTemplate();
-    const aggregatableNodeTypeConfig = loadAggregatableNodeTypeConfigFor(
-      this.template!.language,
-      this.type
-    );
+  toCodeString(language: Language): string {
+    const aggregatableNodeTypeConfig = loadAggregatableNodeTypeConfigFor(language, this.type);
 
-    const subPatternCodeString = this.subPatterns[0].toCodeString();
+    const subPatternCodeString = this.partTemplates[0].toCodeString(language);
     const identifyingCodeString = this.getIdentifyingCodeString();
     const innerCodeString =
       identifyingCodeString + aggregatableNodeTypeConfig.delimiterToken + subPatternCodeString.raw;
 
     let codeString;
     if (aggregatableNodeTypeConfig.specialStartPattern) {
-      if (!this.specialStartPattern) {
+      if (!this.startTemplate) {
         throw new Error(`Aggregation of node type ${this.type} requires special start pattern`);
       }
-      const startCodeString = this.specialStartPattern.toCodeString();
+      const startCodeString = this.startTemplate.toCodeString(language);
       codeString = aggregatableNodeTypeConfig.contextTemplate
         .replace(aggregationStartPlaceHolder, startCodeString.raw)
         .replace(aggregationPlaceHolder, innerCodeString);
@@ -57,37 +55,14 @@ export default class TemplateAggregation extends TemplateParameter {
     return TemplateAggregation.CODE_STRING_PREFIX + this.id.toString();
   }
 
-  toPatternNode(cursor: AstCursor): PatternNode {
-    this.checkAssignedToTemplate();
+  toPatternNode(cursor: AstCursor, language: Language): PatternNode {
     return new AggregationNode(
-      this.template!.language,
-      cursor.currentNode.text,
-      cursor.currentFieldName,
-      this.type,
-      this
-    );
-  }
-
-  toDraftString(): string {
-    const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(this.template!.language, this.type);
-    let startString = "";
-    if (this.specialStartPattern) {
-      startString = this.specialStartPattern.toDraftString();
-    }
-    return (
-      startString +
-      nodeTypeConfig.startToken +
-      this.subPatterns[0].toDraftString() +
-      nodeTypeConfig.endToken
-    );
-  }
-
-  copy(): TemplateAggregation {
-    return new TemplateAggregation(
       this.name,
+      language,
       this.type,
-      this.subPatterns,
-      this.specialStartPattern,
+      cursor.currentFieldName,
+      cursor.currentNode.text,
+      !!this.startTemplate,
       this.contextVariables
     );
   }

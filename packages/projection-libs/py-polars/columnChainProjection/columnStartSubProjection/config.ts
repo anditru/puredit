@@ -1,17 +1,15 @@
 import { contextVariable } from "@puredit/parser";
-import { simpleProjection } from "@puredit/simple-projection";
-import type { SubProjection } from "@puredit/projections/types";
+import { SubProjection, simpleProjection } from "@puredit/projections";
 import { parser } from "../../parser";
 
 const polars = contextVariable("pl");
-const pattern = parser.subPattern("columnChainStart")`${polars}`;
+const template = parser.subPattern("Polars:Column:ChainStart")`${polars}`;
 
 const widget = simpleProjection(["Column"]);
 
 export const columnStartSubProjection: SubProjection = {
-  name: "Polars:Column:ChainStart",
+  template,
   description: "Empty Projection for column chain start.",
-  pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],
 };

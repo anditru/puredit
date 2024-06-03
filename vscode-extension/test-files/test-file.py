@@ -45,7 +45,7 @@ extended_prices = prices.with_columns(
 image_data.transpose(0, 1)
 
 # CONTEXT: [ "Batches", "Images", "Channels", "Width", "Height" ]
-image_data.permute(2, 3, 0, 1, 4)
+image_date.permute(2, 3, 0, 1, 4)
 
 # CONTEXT: { "Batches": 200, "Images": 64, "Channels": 3, "Width": 32, "Height": 32 }
 slice_1 = image_data[
@@ -60,4 +60,4 @@ slice_2 = image_data[
 ]
 
 maximum = torch.max(some_tensor)
-result = torch.cat((some, some_other), 0)
+result = torch.cat((some_tensor, some_othe), 3)

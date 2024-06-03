@@ -9,6 +9,7 @@ import type { AstNodeMap, Match } from "./match/types";
 import AstNode from "./ast/node";
 import PatternNode from "./pattern/nodes/patternNode";
 import CodeString from "./template/codeString";
+import { Language } from "@puredit/language-config";
 
 export function patternToString(node: PatternNode, indent = ""): string {
   let out = indent + (node.fieldName ? node.fieldName + ": " : "") + node.type;
@@ -24,24 +25,26 @@ export function patternToString(node: PatternNode, indent = ""): string {
   return out;
 }
 
-export function syntaxNodeToString(node: AstNode, indent = ""): string {
-  const nodeTransformVisitor = new NodeTransformVisitor();
+export function syntaxNodeToString(language: Language, node: AstNode, indent = ""): string {
+  const nodeTransformVisitor = new NodeTransformVisitor(language);
   return patternToString(
-    nodeTransformVisitor.visit(node.walk(), new CodeString(node.text))[0],
+    nodeTransformVisitor.transform(node.walk(), new CodeString(node.text))[0],
     indent
   );
 }
 
-export function argMapToString(args: AstNodeMap, indent = ""): string {
+export function argMapToString(language: Language, args: AstNodeMap, indent = ""): string {
   let out = "{\n";
   for (const key of Object.keys(args)) {
-    out += indent + `  ${key} = {\n${syntaxNodeToString(args[key], indent + "    ") + indent}  }\n`;
+    out +=
+      indent +
+      `  ${key} = {\n${syntaxNodeToString(language, args[key], indent + "    ") + indent}  }\n`;
   }
   return out + indent + "}";
 }
 
 export function matchToString(match: Match): string {
   return `Match {
-  args = ${argMapToString(match.argsToAstNodeMap, "  ")}
+  args = ${argMapToString(match.pattern.language, match.argsToAstNodeMap, "  ")}
 }`;
 }

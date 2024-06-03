@@ -1,25 +1,24 @@
-import { TreeSitterParser } from "../tree-sitter/treeSitterParser";
 import BasePattern from "../pattern/basePattern";
 import Pattern from "../pattern/pattern";
-import { NodeTransformVisitor, TemplateTransformation } from "./internal";
+import { Parser, TemplateTransformation } from "./internal";
 
 export default class CompleteTemplateTransformation extends TemplateTransformation {
-  constructor(parser: TreeSitterParser) {
+  constructor(parser: Parser) {
     super(parser);
   }
 
   execute(): Pattern {
-    this.nodeTransformVisitor = new NodeTransformVisitor();
-
-    const codeString = this.template!.toCodeString();
+    const codeString = this.template.toCodeString(this.parser.language);
     const rootNode = this.transformToPatternTree(codeString);
-    let pattern = new BasePattern(rootNode, this.template!) as Pattern;
+    let pattern = new BasePattern(this.template.name, this.parser.language, rootNode) as Pattern;
 
-    if (this.template!.hasAggregations()) {
+    if (this.template.hasAggregations()) {
       pattern = this.buildAggregationSubPatterns(pattern);
+      rootNode.assignToPattern(pattern);
     }
-    if (this.template!.hasChains()) {
+    if (this.template.hasChains()) {
       pattern = this.buildChainSubPatterns(pattern);
+      rootNode.assignToPattern(pattern);
     }
 
     return pattern;

@@ -1,4 +1,3 @@
-import { getIndentation } from "@codemirror/language";
 import type { CompletionContext } from "@codemirror/autocomplete";
 import type { CompletionResult } from "@codemirror/autocomplete";
 import { projectionState } from "../state/state";
@@ -16,7 +15,9 @@ export function completions(completionContext: CompletionContext): CompletionRes
     return null;
   }
 
-  const indentation = getIndentation(completionContext.state, word.from) || 0;
+  const line = completionContext.state.doc.lineAt(word.from);
+  const whiteSpace = line.text.match(/^\s*/);
+  const indentation = whiteSpace?.length ? whiteSpace[0] : "";
 
   const state = completionContext.state.field(projectionState);
   const { config, contextVariableRanges } = state;
@@ -37,7 +38,7 @@ export function completions(completionContext: CompletionContext): CompletionRes
   const options = completionsBuilder
     .setIndendation(indentation)
     .setContext(contextVariables)
-    .setRootProjections(config.projections)
+    .setProjections(config.projectionRegistry.projectionsAsArray)
     .setSeachString(searchString)
     .build();
 

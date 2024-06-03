@@ -46,14 +46,14 @@
     ],
     "commands": [
       {
-        "command": "puredit.reloadProjectionalEditor",
+        "command": "puredit.reloadProjectionalEditors",
         "title": "Reload Projectional Editor"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "command": "puredit.reloadProjectionalEditor",
+          "command": "puredit.reloadProjectionalEditors",
           "group": "navigation",
           "when": "projectionalEditorRunning"
         }

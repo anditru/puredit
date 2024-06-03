@@ -67,7 +67,7 @@
     "subProjections": [
       {
         "type": "chainLink",
-        "name": "Polars:Column:Minimum",
+        "name": "Polars:Column:Median",
         "description": "Take the median of a column.",
         "parameters": [],
         "template": "median()",
@@ -75,7 +75,7 @@
       },
       {
         "type": "chainLink",
-        "name": "Polars:Column:Minimum",
+        "name": "Polars:Column:Mean",
         "description": "Take the mean of a column.",
         "parameters": [],
         "template": "mean()",
@@ -143,7 +143,7 @@
     "type": "rootProjectionExtension",
     "package": "py-polars",
     "rootProjection": "Polars:Dataframe:Chain",
-    "parentParameter": "processingChain",
+    "parentParameter": "dataframeChain",
     "subProjections": [
       {
         "type": "chainLink",

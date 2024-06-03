@@ -1,15 +1,17 @@
+import { Language } from "@puredit/language-config";
 import AstCursor from "../../ast/cursor";
 import PatternNode from "./patternNode";
 import { ContextVariableMap } from "@puredit/projections";
 
 export default class RegularNode extends PatternNode {
   constructor(
+    language: Language,
     type: string,
-    text: string,
     fieldName: string | undefined,
+    text: string,
     children: PatternNode[] = []
   ) {
-    super(type, text, fieldName, children);
+    super(language, type, fieldName, text, children);
   }
 
   getMatchedTypes(): string[] {
@@ -26,13 +28,30 @@ export default class RegularNode extends PatternNode {
     }
     return (this.hasChildren() && astNode.hasChildren()) || this.text === astNode.text;
   }
+
+  toDraftString(): string {
+    if (!this.children.length) {
+      return this.text;
+    } else {
+      return this.children.reduce(
+        (prev: string, current: PatternNode) => prev + current.toDraftString(),
+        ""
+      );
+    }
+  }
 }
 
 export class RegularNodeBuilder {
-  private _type: string | undefined;
-  private _text: string | undefined;
-  private _fieldName: string | null | undefined;
+  private _language!: Language;
+  private _type!: string;
+  private _text!: string;
+  private _fieldName!: string | undefined;
   private _children: PatternNode[] = [];
+
+  setLanguage(language: Language): RegularNodeBuilder {
+    this._language = language;
+    return this;
+  }
 
   setType(type: string): RegularNodeBuilder {
     this._type = type;
@@ -55,7 +74,13 @@ export class RegularNodeBuilder {
   }
 
   buildAndSetParentOnChildren() {
-    const regularNode = new RegularNode(this._type!, this._text!, this._fieldName!, this._children);
+    const regularNode = new RegularNode(
+      this._language,
+      this._type,
+      this._fieldName,
+      this._text,
+      this._children
+    );
     this._children.forEach((child) => (child.parent = regularNode));
     return regularNode;
   }

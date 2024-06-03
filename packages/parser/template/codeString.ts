@@ -1,21 +1,16 @@
-import { isString } from "@puredit/utils-shared";
+import { Language } from "@puredit/language-config";
 import ParameterTable from "./parameterTable";
 import TemplateParameter from "./parameters/templateParameter";
 
 export default class CodeString {
   static fromTemplate(
     templateStrings: TemplateStringsArray,
-    params: (string | TemplateParameter)[]
+    params: TemplateParameter[],
+    language: Language
   ) {
-    const substitutions = params.map((param) => {
-      if (isString(param)) {
-        return param;
-      } else {
-        return param.toCodeString();
-      }
-    });
+    const substitutions = params.map((param) => param.toCodeString(language));
     const raw = String.raw(templateStrings, ...substitutions);
-    const parameterTable = ParameterTable.fromTemplate(templateStrings, params);
+    const parameterTable = ParameterTable.fromTemplate(templateStrings, params, language);
     return new CodeString(raw, parameterTable);
   }
 

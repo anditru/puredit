@@ -4,28 +4,19 @@ import type { DecorationSet } from "@codemirror/view";
 import { zip } from "@puredit/utils-shared";
 import type { Match, Pattern } from "@puredit/parser";
 import type { CodeRange } from "@puredit/parser/match/types";
-import type {
-  ContextInformation,
-  FnContextProvider,
-  Projection,
-  ProjectionPluginConfig,
-  RootProjection,
-  SubProjection,
-} from "../types";
-import type { Template } from "@puredit/parser";
-import type { ProjectionWidgetClass } from "../projection";
+import type { ContextInformation, FnContextProvider, ProjectionPluginConfig } from "../types";
+import type { ProjectionWidgetClass } from "../widget/widget";
 import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
 import {
   loadAggregationDelimiterTokensFor,
   loadAggregationsConfigFor,
 } from "@puredit/language-config";
 import type { AggregatableNodeTypeConfig } from "@puredit/language-config";
-import { toRootProjectionMap, toSubProjectionMap } from "../shared";
 import AstNode from "@puredit/parser/ast/node";
+import Projection from "../projection";
 
 export default class DecorationSetBuilder {
   // Input
-  private projections!: RootProjection[];
   private decorations!: DecorationSet;
   private isCompletion!: boolean;
   private state!: EditorState;
@@ -33,8 +24,7 @@ export default class DecorationSetBuilder {
   private matches!: Match[];
 
   // State
-  private projectionMap!: Map<Pattern, RootProjection>;
-  private subProjectionMap!: Map<Template, SubProjection>;
+  private projectionMap!: Record<string, Projection>;
   private contextBounds: number[] = [];
   private contextInformations: ContextInformation[] = [];
 
@@ -42,7 +32,7 @@ export default class DecorationSetBuilder {
   private newDecorations = Decoration.none;
 
   setProjectionPluginConfig(config: ProjectionPluginConfig) {
-    this.projections = Object.keys(config.projections).flatMap((key) => config.projections[key]);
+    this.projectionMap = config.projectionRegistry.projectionsByName;
     this.contextInformations = [config.globalContextInformation];
     return this;
   }
@@ -125,23 +115,11 @@ export default class DecorationSetBuilder {
   }
 
   private getProjectionFor(match: Match): Projection {
-    if (!this.projectionMap || !this.subProjectionMap) {
-      this.initProjectionMaps();
-    }
-
-    let projection: Projection | undefined = this.projectionMap.get(match.pattern);
+    const projection = this.projectionMap[match.pattern.name];
     if (!projection) {
-      projection = this.subProjectionMap.get(match.pattern.template);
-      if (!projection) {
-        throw new NoProjectionFound();
-      }
+      throw new NoProjectionFound();
     }
     return projection;
-  }
-
-  private initProjectionMaps(): void {
-    this.projectionMap = toRootProjectionMap(this.projections);
-    this.subProjectionMap = toSubProjectionMap(this.projections);
   }
 
   private extractSegmentDecoratorsFor(

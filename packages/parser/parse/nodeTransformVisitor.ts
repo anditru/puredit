@@ -1,13 +1,16 @@
+import { Language } from "@puredit/language-config";
 import AstCursor from "../ast/cursor";
 import PatternNode from "../pattern/nodes/patternNode";
 import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
 import ParameterTable from "../template/codeString";
 
 export default class NodeTransformVisitor {
-  private astCursor: AstCursor | undefined;
-  private codeString: ParameterTable | undefined;
+  private astCursor!: AstCursor;
+  private codeString!: ParameterTable;
 
-  visit(cursor: AstCursor, codeString: ParameterTable): PatternNode[] {
+  constructor(private readonly language: Language) {}
+
+  transform(cursor: AstCursor, codeString: ParameterTable): PatternNode[] {
     this.astCursor = cursor;
     this.codeString = codeString;
     return this.recurse();
@@ -18,38 +21,38 @@ export default class NodeTransformVisitor {
     do {
       const ignoredNode = false;
       if (
-        this.astCursor!.currentNode.type === "parenthesized_expression" &&
-        this.astCursor!.currentNode.children[1].type === "call"
+        this.astCursor.currentNode.type === "parenthesized_expression" &&
+        this.astCursor.currentNode.children[1].type === "call"
       ) {
-        const fieldName = this.astCursor!.currentFieldName;
-        this.astCursor!.goToFirstChild();
-        this.astCursor!.goToNextSibling();
-        this.astCursor!.currentFieldName = fieldName;
+        const fieldName = this.astCursor.currentFieldName;
+        this.astCursor.goToFirstChild();
+        this.astCursor.goToNextSibling();
+        this.astCursor.currentFieldName = fieldName;
       }
 
       this.checkNoErrorToken();
       nodes.push(this.transformCurrentNode());
 
       if (ignoredNode) {
-        this.astCursor!.goToParent();
+        this.astCursor.goToParent();
       }
-    } while (this.astCursor!.goToNextSibling());
+    } while (this.astCursor.goToNextSibling());
 
     return nodes;
   }
 
   private checkNoErrorToken() {
-    if (this.astCursor!.currentNode.isErrorToken()) {
+    if (this.astCursor.currentNode.isErrorToken()) {
       throw new Error(
         `error in pattern ast at position ${this.astCursor!.startIndex}: ` +
-          `${this.astCursor!.currentNode.text}`
+          `${this.astCursor.currentNode.text}`
       );
     }
   }
 
   private transformCurrentNode(changedFieldName?: string): PatternNode {
     let transformedNode;
-    if (!this.mustTreatNodeAsAtomic() && this.astCursor!.currentNode.hasChildren()) {
+    if (!this.mustTreatNodeAsAtomic() && this.astCursor.currentNode.hasChildren()) {
       transformedNode = this.transformNonAtomicNode(changedFieldName);
     } else {
       transformedNode = this.transformAtomicNode(changedFieldName);
@@ -60,8 +63,8 @@ export default class NodeTransformVisitor {
   private mustTreatNodeAsAtomic() {
     const currentNode = this.astCursor!.currentNode;
     const templateParameter = this.codeString!.resolveParameter(
-      this.astCursor!.currentNode.startIndex,
-      this.astCursor!.currentNode.endIndex
+      this.astCursor.currentNode.startIndex,
+      this.astCursor.currentNode.endIndex
     );
     return currentNode.type === "string" || templateParameter;
   }
@@ -69,9 +72,9 @@ export default class NodeTransformVisitor {
   private transformNonAtomicNode(changedFieldName?: string): PatternNode {
     const patternNodeBuilder = new RegularNodeBuilder();
     patternNodeBuilder
-      .setType(this.astCursor!.currentNode.type)
-      .setText(this.astCursor!.currentNode.text)
-      .setFieldName(changedFieldName || this.astCursor!.currentFieldName);
+      .setType(this.astCursor.currentNode.type)
+      .setText(this.astCursor.currentNode.text)
+      .setFieldName(changedFieldName || this.astCursor.currentFieldName);
 
     this.astCursor!.goToFirstChild();
     patternNodeBuilder.setChildren(this.recurse());
@@ -84,17 +87,17 @@ export default class NodeTransformVisitor {
       return firstChild;
     }
 
-    this.astCursor!.goToParent();
+    this.astCursor.goToParent();
     return patternNodeBuilder.buildAndSetParentOnChildren();
   }
 
   private transformAtomicNode(changedFieldName?: string): PatternNode {
-    const templateParameter = this.codeString!.resolveParameter(
-      this.astCursor!.currentNode.startIndex,
-      this.astCursor!.currentNode.endIndex
+    const templateParameter = this.codeString.resolveParameter(
+      this.astCursor.currentNode.startIndex,
+      this.astCursor.currentNode.endIndex
     );
     if (templateParameter) {
-      return templateParameter.toPatternNode(this.astCursor!);
+      return templateParameter.toPatternNode(this.astCursor, this.language);
     } else {
       return this.transformRegularNode(changedFieldName);
     }
@@ -102,9 +105,10 @@ export default class NodeTransformVisitor {
 
   private transformRegularNode(changedFieldName?: string) {
     return new RegularNode(
-      this.astCursor!.currentNode.type,
-      this.astCursor!.currentNode.text,
-      changedFieldName || this.astCursor!.currentFieldName
+      this.language,
+      this.astCursor.currentNode.type,
+      changedFieldName || this.astCursor.currentFieldName,
+      this.astCursor.currentNode.text
     );
   }
 }

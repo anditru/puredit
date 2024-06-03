@@ -2,7 +2,7 @@
   import type { EditorState } from "@codemirror/state";
   import type { EditorView } from "@codemirror/view";
   import type AstNode from "@puredit/parser/ast/node";
-  import type { FocusGroup } from "@puredit/projections/focus";
+  import type { FocusGroup } from "@puredit/projections";
   import { stringLiteralValue, stringLiteralValueChange } from "@puredit/projections/shared";
   import { MathfieldElement } from "mathlive";
   import { onDestroy, onMount } from "svelte";

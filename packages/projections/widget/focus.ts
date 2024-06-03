@@ -13,19 +13,13 @@ function focusOnNextFrame(target: HTMLElement) {
   });
 }
 
-function setInputCursorOnNextFrame(
-  target: HTMLInputElement,
-  cursorPosition: number
-) {
+function setInputCursorOnNextFrame(target: HTMLInputElement, cursorPosition: number) {
   requestAnimationFrame(() => {
     target.selectionStart = target.selectionEnd = cursorPosition;
   });
 }
 
-function setCursorOnNextFrame(
-  target: CursorPositionHandler,
-  cursorPosition: "start" | "end"
-) {
+function setCursorOnNextFrame(target: CursorPositionHandler, cursorPosition: "start" | "end") {
   requestAnimationFrame(() => {
     target.focusGroupSetCursorPosition(cursorPosition);
   });
@@ -41,10 +35,7 @@ export class FocusGroup {
       for (let i = 0; i < this.elements.length; i++) {
         // check if the new element comes before the current
         // element in the document tree
-        if (
-          this.elements[i].compareDocumentPosition(el) &
-          Node.DOCUMENT_POSITION_PRECEDING
-        ) {
+        if (this.elements[i].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING) {
           // insert new element before the current element
           this.elements.splice(i, 0, el);
           return;

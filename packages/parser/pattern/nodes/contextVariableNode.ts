@@ -1,16 +1,20 @@
 import { ContextVariableMap } from "@puredit/projections";
 import AstCursor from "../../ast/cursor";
-import TemplateContextVariable from "../../template/parameters/templateContextVariable";
 import RegularNode from "./regularNode";
+import { Language } from "@puredit/language-config";
 
 export default class ContextVariableNode extends RegularNode {
+  public readonly name: string;
+
   constructor(
+    name: string,
+    language: Language,
     type: string,
-    text: string,
     fieldName: string | undefined,
-    public readonly templateContextVariable: TemplateContextVariable
+    text: string
   ) {
-    super(type, text, fieldName);
+    super(language, type, fieldName, text);
+    this.name = name;
   }
 
   getMatchedTypes(): string[] {
@@ -23,18 +27,17 @@ export default class ContextVariableNode extends RegularNode {
     }
     const astNode = astCursor.currentNode;
     if (contextVariables && this.requiredContextExists(contextVariables)) {
-      return (
-        astNode.cleanNodeType === "identifier" && astNode.text === this.templateContextVariable.name
-      );
+      return astNode.cleanNodeType === "identifier" && astNode.text === this.name;
     } else {
       return super.matches(astCursor);
     }
   }
 
   private requiredContextExists(contextVariables: ContextVariableMap): boolean {
-    return Object.prototype.hasOwnProperty.call(
-      contextVariables,
-      this.templateContextVariable.name
-    );
+    return Object.prototype.hasOwnProperty.call(contextVariables, this.name);
+  }
+
+  toDraftString(): string {
+    return this.name;
   }
 }

@@ -5,9 +5,9 @@
   import type { EditorView } from "@codemirror/view";
   import { highlightingFor } from "@codemirror/language";
   import type { Match } from "@puredit/parser";
-  import type { FocusGroup } from "@puredit/projections/focus";
+  import type { FocusGroup } from "@puredit/projections";
   import { stringLiteralValue, validateFromList } from "@puredit/projections/shared";
-  import TextInput from "@puredit/projections/TextInput.svelte";
+  import TextInput from "@puredit/projections/controls/TextInput.svelte";
   import type { ContextTable } from "../context";
 
   export let isNew: boolean;

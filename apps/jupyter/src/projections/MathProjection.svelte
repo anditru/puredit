@@ -2,7 +2,7 @@
   import type { EditorState } from "@codemirror/state";
   import type { EditorView } from "@codemirror/view";
   import type { Match } from "@puredit/parser";
-  import type { FocusGroup } from "@puredit/projections/focus";
+  import type { FocusGroup } from "@puredit/projections";
   import { onMount } from "svelte";
 
   import EquationEditor from "./EquationEditor.svelte";

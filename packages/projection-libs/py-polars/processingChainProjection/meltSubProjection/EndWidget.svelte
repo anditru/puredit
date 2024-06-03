@@ -3,8 +3,8 @@
   import type { EditorState } from "@codemirror/state";
   import type { EditorView } from "@codemirror/view";
   import type { Match } from "@puredit/parser";
-  import type { FocusGroup } from "@puredit/projections/focus";
-  import TextInput from "@puredit/projections/TextInput.svelte";
+  import type { FocusGroup } from "@puredit/projections";
+  import TextInput from "@puredit/projections/controls/TextInput.svelte";
   import { highlightingFor } from "@codemirror/language";
   import { tags } from "@lezer/highlight";
   import { ContextInformation } from "@puredit/projections";

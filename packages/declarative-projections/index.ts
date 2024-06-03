@@ -1,2 +1,2 @@
-export { ProjectionInserter } from "./projectionInserter";
+export { ProjectionCompiler } from "./projectionCompiler";
 export * from "./types";

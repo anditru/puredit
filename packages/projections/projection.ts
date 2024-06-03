@@ -1,74 +1,36 @@
-import type { EditorState } from "@codemirror/state";
-import { EditorView, WidgetType } from "@codemirror/view";
-import type { Match } from "@puredit/parser";
-import { ContextInformation } from "./types";
+import { Pattern } from "@puredit/parser";
+import { ProjectionWidgetClass } from "./widget/widget";
+import { FnContextProvider, RootProjection, SubProjection } from "./types";
 
-export abstract class ProjectionWidget extends WidgetType {
-  private dom: HTMLElement;
-  protected view: EditorView | null = null;
-
-  constructor(
-    protected isNew: boolean,
-    public match: Match,
-    context: ContextInformation,
-    state: EditorState
-  ) {
-    super();
-    this.dom = this.initialize(match, context, state);
-    this.update(match, context, state);
+export default class Projection {
+  static fromRootProjection(rootProjection: RootProjection) {
+    return new this(
+      rootProjection.pattern.name,
+      rootProjection.pattern,
+      rootProjection.description,
+      rootProjection.requiredContextVariables,
+      rootProjection.segmentWidgets,
+      rootProjection.contextProvider
+    );
   }
 
-  set(match: Match, context: ContextInformation, state: EditorState) {
-    this.isNew = false;
-    this.match = match;
-    this.update(match, context, state);
+  static fromSubProjection(subProjection: SubProjection, pattern: Pattern) {
+    return new this(
+      subProjection.template.name,
+      pattern,
+      subProjection.description,
+      subProjection.requiredContextVariables,
+      subProjection.segmentWidgets,
+      subProjection.contextProvider
+    );
   }
 
-  protected abstract initialize(
-    match: Match,
-    context: ContextInformation,
-    state: EditorState
-  ): HTMLElement;
-
-  protected abstract update(match: Match, context: ContextInformation, state: EditorState): void;
-
-  get position(): number | undefined {
-    return this.view?.posAtDOM(this.dom);
-  }
-
-  eq(other: ProjectionWidget): boolean {
-    return other.match === this.match;
-  }
-
-  toDOM(view: EditorView): HTMLElement {
-    this.view = view;
-    return this.dom;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  destroy(_dom: HTMLElement): void {
-    this.view = null;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ignoreEvent(_event: Event): boolean {
-    return true;
-  }
-
-  enterFromStart(): boolean {
-    return false;
-  }
-
-  enterFromEnd(): boolean {
-    return false;
-  }
-}
-
-export interface ProjectionWidgetClass {
-  new (
-    isNew: boolean,
-    match: Match,
-    context: ContextInformation,
-    state: EditorState
-  ): ProjectionWidget;
+  private constructor(
+    public readonly name: string,
+    public readonly pattern: Pattern,
+    public readonly description: string,
+    public readonly requiredContextVariables: string[],
+    public readonly segmentWidgets: Array<ProjectionWidgetClass>,
+    public readonly contextProvider?: FnContextProvider
+  ) {}
 }

@@ -1,4 +1,4 @@
-import { svelteProjection } from "@puredit/projections/svelte";
+import { svelteProjection } from "@puredit/projections";
 import type { SubProjection } from "@puredit/projections/types";
 import BeginWidget from "./BeginWidget.svelte";
 import EndWidget from "./EndWidget.svelte";
@@ -10,19 +10,18 @@ import { columnWithAliasSubProjection } from "../columnWithAliasSubProjection/co
 import { columnChainSubProjection } from "../columnChainSubProjection/config";
 
 const columns = agg("columns", "argument_list", [
-  columnSubProjection.pattern,
-  columnWithAliasSubProjection.pattern,
-  columnChainSubProjection.pattern,
+  columnSubProjection.template,
+  columnWithAliasSubProjection.template,
+  columnChainSubProjection.template,
 ]);
-const selectFunction = parser.subPattern("selectFunction")`select${columns}`;
+const template = parser.subPattern("Polars:Dataframe:SelectColumns")`select${columns}`;
 
 const beginWidget = svelteProjection(BeginWidget);
 const endWidget = svelteProjection(EndWidget);
 
 export const selectSubProjection: SubProjection = {
-  name: "Polars:Dataframe:SelectColumns",
+  template,
   description: "Select columns from a dataframe.",
-  pattern: selectFunction,
   requiredContextVariables: [],
   segmentWidgets: [beginWidget, endWidget],
 };

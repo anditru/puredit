@@ -1,21 +1,20 @@
-import type { ContextVariableMap, RootProjection, SubProjection } from "../types";
+import type { ContextVariableMap } from "../types";
 import type { Completion } from "@codemirror/autocomplete";
-import { indentString } from "@codemirror/language";
 import { pickedCompletion } from "@codemirror/autocomplete";
 import Fuse from "fuse.js";
+import Projection from "../projection";
 
 export default class CompletionsBuilder {
-  private indentation!: number;
+  private indentation!: string;
   private contextVariables!: ContextVariableMap;
   private delimiterToken = "";
-  private rootProjections: RootProjection[] = [];
-  private subProjections: SubProjection[] = [];
-  private searchString: string;
+  private projections: Projection[] = [];
+  private searchString = "";
 
   private completions: Completion[] = [];
   private boost = 100;
 
-  setIndendation(indentation: number): CompletionsBuilder {
+  setIndendation(indentation: string): CompletionsBuilder {
     this.indentation = indentation;
     return this;
   }
@@ -25,16 +24,13 @@ export default class CompletionsBuilder {
     return this;
   }
 
-  setDelimiterToken(delimiterToken: string) {
+  setDelimiterToken(delimiterToken: string): CompletionsBuilder {
     this.delimiterToken = delimiterToken;
     return this;
   }
 
-  setRootProjections(projections: Record<string, RootProjection[]>): CompletionsBuilder {
-    this.rootProjections = Object.keys(projections).flatMap((key) => projections[key]);
-    for (const projection of this.rootProjections) {
-      this.subProjections = this.subProjections.concat(projection.subProjections);
-    }
+  setProjections(projections: Projection[]): CompletionsBuilder {
+    this.projections = projections;
     return this;
   }
 
@@ -44,15 +40,10 @@ export default class CompletionsBuilder {
   }
 
   build(): Completion[] {
-    let fittingProjections: (RootProjection | SubProjection)[] = [];
-    fittingProjections = fittingProjections.concat(this.rootProjections);
-    fittingProjections = fittingProjections.concat(this.subProjections);
+    let fittingProjections = this.projections;
 
     if (this.searchString) {
-      fittingProjections = fuzzySearch<RootProjection | SubProjection>(
-        fittingProjections,
-        this.searchString
-      );
+      fittingProjections = fuzzySearch(fittingProjections, this.searchString);
     }
 
     for (const projection of fittingProjections) {
@@ -62,14 +53,14 @@ export default class CompletionsBuilder {
     return this.completions;
   }
 
-  private processProjection(projection: RootProjection | SubProjection) {
+  private processProjection(projection: Projection) {
     const showOption = this.requiredContextExistsFor(projection);
     if (showOption) {
       this.completions.push(this.transformToCompletion(projection));
     }
   }
 
-  private requiredContextExistsFor(projection: RootProjection | SubProjection): boolean {
+  private requiredContextExistsFor(projection: Projection): boolean {
     let requiredContextExists = true;
     for (const variable of projection.requiredContextVariables) {
       if (!Object.prototype.hasOwnProperty.call(this.contextVariables, variable)) {
@@ -80,7 +71,7 @@ export default class CompletionsBuilder {
     return requiredContextExists;
   }
 
-  private transformToCompletion(projection: RootProjection | SubProjection): Completion {
+  private transformToCompletion(projection: Projection): Completion {
     this.boost = Math.max(--this.boost, 1);
     return {
       label: projection.name,
@@ -91,7 +82,7 @@ export default class CompletionsBuilder {
         const selection = view.state.selection?.main;
         let replaceFrom = from;
         let replaceTo = to;
-        if (selection) {
+        if (selection.from !== selection.to) {
           replaceFrom = selection.from;
           replaceTo = selection.to;
         }
@@ -99,11 +90,10 @@ export default class CompletionsBuilder {
           changes: {
             from: replaceFrom,
             to: replaceTo,
-            insert:
-              projection.pattern
-                .toDraftString()
-                .split("\n")
-                .join("\n" + indentString(view.state, this.indentation)) + this.delimiterToken,
+            insert: projection.pattern
+              .toDraftString()
+              .split("\n")
+              .join("\n" + this.indentation + this.delimiterToken),
           },
           annotations: pickedCompletion.of(completion),
         });
@@ -124,7 +114,7 @@ const fuseOptions = {
   ignoreLocation: true,
 };
 
-function fuzzySearch<T>(projections: T[], seachString: string): T[] {
+function fuzzySearch(projections: Projection[], seachString: string): Projection[] {
   const fuse = new Fuse(projections, fuseOptions);
   const results = fuse.search(seachString);
   return results.map((result) => result.item);

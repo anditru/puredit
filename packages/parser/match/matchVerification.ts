@@ -11,7 +11,7 @@ import type {
   MatchMap,
   VerificationResult,
 } from "./types";
-import { PatternMatching } from "..";
+import { agg, PatternMatching } from "..";
 import { ContextVariableMap } from "@puredit/projections";
 import Pattern from "../pattern/pattern";
 import ArgumentNode from "../pattern/nodes/argumentNode";
@@ -26,6 +26,7 @@ import {
   Language,
   loadChainableNodeTypeConfigFor,
   ChainableNodeTypeConfig,
+  loadAggregatableNodeTypeConfigFor,
 } from "@puredit/language-config";
 import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
 
@@ -170,7 +171,7 @@ export default class MatchVerification {
       logger.debug("AST does not match ArgumentNode");
       throw new DoesNotMatch();
     }
-    this.argsToAstNodeMap[argumentNode.templateArgument.name] = this.astCursor.currentNode;
+    this.argsToAstNodeMap[argumentNode.name] = this.astCursor.currentNode;
   }
 
   private visitKeywordNode() {
@@ -197,28 +198,28 @@ export default class MatchVerification {
     }
 
     const aggregationRange = this.extractAggregationRangeFor(aggregationNode);
-    this.aggregationToRangeMap[aggregationNode.aggregationName] = aggregationRange;
+    this.aggregationToRangeMap[aggregationNode.name] = aggregationRange;
 
-    if (aggregationNode.hasSpecialStartPattern()) {
+    if (aggregationNode.hasStartPattern) {
       const startMatch = this.findAggregationStartMatchFor(aggregationNode);
       if (!startMatch) {
         throw new DoesNotMatch();
       }
-      this.aggregationToStartMatchMap[aggregationNode.aggregationName] = startMatch;
+      this.aggregationToStartMatchMap[aggregationNode.name] = startMatch;
     }
 
     const aggregationPartMatches = this.findAggregationPartMatchesFor(aggregationNode);
     if (!aggregationPartMatches.length) {
       throw new DoesNotMatch();
     }
-    this.aggregationToPartMatchesMap[aggregationNode.aggregationName] = aggregationPartMatches;
+    this.aggregationToPartMatchesMap[aggregationNode.name] = aggregationPartMatches;
   }
 
   private extractAggregationRangeFor(aggregationNode: AggregationNode): CodeRange {
     const currentAstNode = this.astCursor.currentNode;
     return {
       node: currentAstNode,
-      contextVariables: aggregationNode.templateAggregation.contextVariables,
+      contextVariables: aggregationNode.contextVariables,
       from: currentAstNode.startIndex,
       to: currentAstNode.endIndex,
       language: this.pattern.language,
@@ -227,7 +228,7 @@ export default class MatchVerification {
 
   private findAggregationStartMatchFor(aggregationNode: AggregationNode): Match | undefined {
     const pattern = this.pattern as AggregationDecorator;
-    const aggregationName = aggregationNode.aggregationName;
+    const aggregationName = aggregationNode.name;
     const startPatternMap = pattern.getStartPatternMapFor(aggregationName);
     if (startPatternMap) {
       const aggregationStartRange = this.extractAggregationStartRangeFor(aggregationNode);
@@ -253,7 +254,7 @@ export default class MatchVerification {
     const aggregationStartRoot = currentAstNode.children[0];
     return {
       node: aggregationStartRoot,
-      contextVariables: aggregationNode.templateAggregation.contextVariables,
+      contextVariables: aggregationNode.contextVariables,
       from: aggregationStartRoot.startIndex,
       to: aggregationStartRoot.endIndex,
       language: this.pattern.language,
@@ -262,7 +263,7 @@ export default class MatchVerification {
 
   private findAggregationPartMatchesFor(aggregationNode: AggregationNode): Match[] {
     const pattern = this.pattern as AggregationDecorator;
-    const aggregationName = aggregationNode.aggregationName;
+    const aggregationName = aggregationNode.name;
     const subPatternMap = pattern.getPartPatternsMapFor(aggregationName);
     const aggregationRanges = this.extractAggregationPartRangesFor(aggregationNode);
     this.aggregationToPartRangesMap[aggregationName] = aggregationRanges;
@@ -297,23 +298,28 @@ export default class MatchVerification {
     const currentAstNode = this.astCursor.currentNode;
 
     let childNodes;
-    if (aggregationNode.hasSpecialStartPattern()) {
+    if (aggregationNode.hasStartPattern) {
       childNodes = currentAstNode.children.slice(1, currentAstNode.children.length);
     } else {
       childNodes = currentAstNode.children;
     }
 
+    const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(
+      aggregationNode.language,
+      aggregationNode.astNodeType
+    );
+
     const aggregationPartRoots = childNodes.filter((astNode) => {
       return !(
-        astNode.text === aggregationNode.startToken ||
-        astNode.text === aggregationNode.delimiterToken ||
-        astNode.text === aggregationNode.endToken
+        astNode.text === nodeTypeConfig.startToken ||
+        astNode.text === nodeTypeConfig.delimiterToken ||
+        astNode.text === nodeTypeConfig.endToken
       );
     });
 
     return aggregationPartRoots.map((aggregationPartRoot) => ({
       node: aggregationPartRoot,
-      contextVariables: aggregationNode.templateAggregation.contextVariables,
+      contextVariables: aggregationNode.contextVariables,
       from: aggregationPartRoot.startIndex,
       to: aggregationPartRoot.endIndex,
       language: this.pattern.language,
@@ -345,7 +351,7 @@ export default class MatchVerification {
     let chainDepth = -1;
     let oneLinkMatched = false;
     let chainableNodeTypeConfig;
-    this.chainToLinkMatchesMap[chainNode.chainName] = [];
+    this.chainToLinkMatchesMap[chainNode.name] = [];
     do {
       chainDepth++;
       const currentAstNode = this.astCursor.currentNode;
@@ -390,7 +396,7 @@ export default class MatchVerification {
     chainableNodeTypeConfig: ChainableNodeTypeConfig
   ): boolean {
     const pattern = this.pattern as ChainDecorator;
-    const chainName = chainNode.chainName;
+    const chainName = chainNode.name;
     const chainLinkPatterns = pattern.getLinkPatternMapFor(chainName);
     const chainLinkRange = this.extractChainLinkRangeFor(chainNode, chainableNodeTypeConfig);
 
@@ -438,7 +444,7 @@ export default class MatchVerification {
     const currentAstNode = this.astCursor.currentNode;
     const linkRange = {
       node: currentAstNode,
-      contextVariables: chainNode.templateChain.contextVariables,
+      contextVariables: chainNode.contextVariables,
       from,
       to: currentAstNode.endIndex,
       language: this.pattern.language,
@@ -449,7 +455,7 @@ export default class MatchVerification {
 
   private findChainStartMatchFor(chainNode: ChainNode) {
     const pattern = this.pattern as ChainDecorator;
-    const chainName = chainNode.chainName;
+    const chainName = chainNode.name;
     const chainStartPatternMap = pattern.getStartPatternMapFor(chainName);
     const chainStartRange = this.extractChainStartRangeFor(chainNode);
 
@@ -477,7 +483,7 @@ export default class MatchVerification {
     const currentAstNode = this.astCursor.currentNode;
     const startRange = {
       node: currentAstNode,
-      contextVariables: chainNode.templateChain.contextVariables,
+      contextVariables: chainNode.contextVariables,
       from: currentAstNode.startIndex,
       to: currentAstNode.endIndex,
       language: this.pattern.language,
@@ -524,7 +530,7 @@ export default class MatchVerification {
       to: this.astCursor.endIndex - rangeModifierEnd,
       language: this.pattern.language,
       node: this.astCursor.currentNode,
-      contextVariables: blockNode.templateBlock.contextVariables,
+      contextVariables: blockNode.contextVariables,
     };
   }
 

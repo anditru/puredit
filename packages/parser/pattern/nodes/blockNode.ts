@@ -1,23 +1,23 @@
 import PatternNode from "./patternNode";
-import TemplateBlock from "../../template/parameters/templateBlock";
 import AstCursor from "../../ast/cursor";
-import { Language } from "@puredit/language-config";
-import { loadBlocksConfigFor } from "@puredit/language-config";
+import { Language, loadBlocksConfigFor } from "@puredit/language-config";
+import { ContextVariableMap } from "@puredit/projections";
 
 export default class BlockNode extends PatternNode {
   static readonly TYPE = "BlockNode";
 
   public readonly astNodeType: string;
+  public readonly contextVariables: ContextVariableMap;
 
   constructor(
     language: Language,
-    text: string,
     fieldName: string | undefined,
-    public readonly templateBlock: TemplateBlock
+    text: string,
+    contextVariables: ContextVariableMap
   ) {
-    super(BlockNode.TYPE, text, fieldName);
-    const blocksConfig = loadBlocksConfigFor(language);
-    this.astNodeType = blocksConfig.blockNodeType;
+    super(language, BlockNode.TYPE, fieldName, text);
+    this.contextVariables = contextVariables;
+    this.astNodeType = loadBlocksConfigFor(this.language).blockNodeType;
   }
 
   getMatchedTypes(): string[] {
@@ -29,5 +29,10 @@ export default class BlockNode extends PatternNode {
     return (
       this.astNodeType === astNode.cleanNodeType && astCursor.currentFieldName === this.fieldName
     );
+  }
+
+  toDraftString(): string {
+    const blocksConfig = loadBlocksConfigFor(this.language);
+    return blocksConfig.draft;
   }
 }

@@ -1,21 +1,40 @@
 import { ContextVariableMap } from "@puredit/projections";
 import AstCursor from "../../ast/cursor";
+import { Pattern } from "../..";
+import { Language } from "@puredit/language-config";
 
 export default abstract class PatternNode {
-  public fieldName: string | undefined;
   private _parent: PatternNode | null | undefined;
 
+  protected owningPattern: Pattern | undefined;
+
+  public readonly language: Language;
+  public readonly type: string;
+  public fieldName: string | undefined;
+  public readonly text: string;
+  public readonly children: PatternNode[];
+
   constructor(
-    public readonly type: string,
-    public readonly text: string,
+    language: Language,
+    type: string,
     fieldName: string | undefined,
-    public readonly children: PatternNode[] = []
+    text: string,
+    children: PatternNode[] = []
   ) {
+    this.language = language;
+    this.type = type;
     if (!fieldName) {
       this.fieldName = undefined;
     } else {
       this.fieldName = fieldName;
     }
+    this.text = text;
+    this.children = children;
+  }
+
+  assignToPattern(pattern: Pattern) {
+    this.owningPattern = pattern;
+    this.children.forEach((child) => child.assignToPattern(pattern));
   }
 
   isTopNode(): boolean {
@@ -75,4 +94,5 @@ export default abstract class PatternNode {
 
   abstract matches(astCursor: AstCursor, contextVariables?: ContextVariableMap): boolean;
   abstract getMatchedTypes(): string[];
+  abstract toDraftString(): string;
 }

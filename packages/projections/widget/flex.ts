@@ -1,7 +1,7 @@
 import { Decoration, EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import type { DecorationSet, PluginValue } from "@codemirror/view";
 import type { Range } from "@codemirror/state";
-import { projectionState } from "./state/state";
+import { projectionState } from "../state/state";
 
 function lines(view: EditorView) {
   const state = view.state.field(projectionState);

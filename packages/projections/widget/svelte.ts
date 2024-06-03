@@ -3,8 +3,8 @@ import { EditorState, EditorSelection } from "@codemirror/state";
 import type { Match } from "@puredit/parser";
 import { FocusGroup } from "./focus";
 import type { FocusGroupHandler } from "./focus";
-import { ProjectionWidget } from "./projection";
-import { ContextInformation } from "./types";
+import { ProjectionWidget } from "./widget";
+import { ContextInformation } from "../types";
 
 interface Props {
   isNew: boolean;

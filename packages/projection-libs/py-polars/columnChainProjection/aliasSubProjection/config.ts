@@ -1,18 +1,17 @@
 import { arg } from "@puredit/parser";
-import { svelteProjection } from "@puredit/projections/svelte";
+import { svelteProjection } from "@puredit/projections";
 import type { SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 
 const columnName = arg("columnName", ["string"]);
-const pattern = parser.subPattern("aliasFunction")`alias(${columnName})`;
+const template = parser.subPattern("Polars:Column:Alias")`alias(${columnName})`;
 
 const widget = svelteProjection(Widget);
 
 export const aliasSubProjection: SubProjection = {
-  name: "Polars:Column:Alias",
+  template,
   description: "Set an alias for a column.",
-  pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],
 };

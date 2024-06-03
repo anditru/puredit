@@ -1,5 +1,5 @@
 import { arg, contextVariable } from "@puredit/parser";
-import { svelteProjection } from "@puredit/projections/svelte";
+import { svelteProjection } from "@puredit/projections";
 import type { RootProjection } from "@puredit/projections/types";
 import { pythonParser } from "./parser";
 import StoreSheetProjection from "./StoreSheetProjection.svelte";

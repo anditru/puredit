@@ -21,32 +21,31 @@ import { extendDataFrameSubProjection } from "./extendDataFrameSubProjection/con
 import { meltSubProjection } from "./meltSubProjection/config";
 import { pivotSubProjection } from "./pivotSubProjection/config";
 
-const processingChain = chain(
-  "processingChain",
-  selectStartSubProjection.pattern,
+const dataframeChain = chain(
+  "dataframeChain",
+  selectStartSubProjection.template,
   [
-    selectSubProjection.pattern,
-    filterSubProjection.pattern,
-    dropNullsSubProjection.pattern,
-    dropNullsColumnsSubProjection.pattern,
-    groupBySubProjection.pattern,
-    aggSubProjection.pattern,
-    dropColumnsSubProjection.pattern,
-    renameColumnsSubProjection.pattern,
-    joinSubProjection.pattern,
-    extendDataFrameSubProjection.pattern,
-    meltSubProjection.pattern,
-    pivotSubProjection.pattern,
+    selectSubProjection.template,
+    filterSubProjection.template,
+    dropNullsSubProjection.template,
+    dropNullsColumnsSubProjection.template,
+    groupBySubProjection.template,
+    aggSubProjection.template,
+    dropColumnsSubProjection.template,
+    renameColumnsSubProjection.template,
+    joinSubProjection.template,
+    extendDataFrameSubProjection.template,
+    meltSubProjection.template,
+    pivotSubProjection.template,
   ],
   1
 );
 
-const pattern = parser.expressionPattern("selectChainPattern")`${processingChain}`;
+const pattern = parser.expressionPattern("Polars:Dataframe:Chain")`${dataframeChain}`;
 
 export const selectChainProjection: RootProjection = {
-  name: "Polars:Dataframe:Chain",
-  description: "Transform a dataframe.",
   pattern,
+  description: "Transform a dataframe.",
   requiredContextVariables: [],
   segmentWidgets: [],
   subProjections: [

@@ -13,7 +13,7 @@ export default class Template {
     public readonly name: string,
     public readonly language: Language,
     public readonly templateStrings: TemplateStringsArray,
-    public readonly params: (string | TemplateParameter)[]
+    public readonly params: TemplateParameter[]
   ) {}
 
   hasAggregations(): boolean {
@@ -34,8 +34,8 @@ export default class Template {
     return this.params.filter((param) => param instanceof TemplateChain) as TemplateChain[];
   }
 
-  toCodeString(): CodeString {
-    return CodeString.fromTemplate(this.templateStrings!, this.params);
+  toCodeString(language: Language): CodeString {
+    return CodeString.fromTemplate(this.templateStrings, this.params, language);
   }
 
   getAggregation(name: string): TemplateAggregation | undefined {
@@ -48,17 +48,6 @@ export default class Template {
     return this.params.find(
       (param) => param instanceof TemplateChain && param.name === name
     ) as TemplateChain;
-  }
-
-  toDraftString(): string {
-    const substitutions = this.params.map((param) => {
-      if (isString(param)) {
-        return param;
-      } else {
-        return param.toDraftString();
-      }
-    });
-    return String.raw(this.templateStrings, ...substitutions);
   }
 
   addPattern(pattern: Pattern) {

@@ -31,7 +31,7 @@ export class ProjectionContent {
   get widgetImports() {
     return `  import { highlightingFor } from "@codemirror/language";
   import { tags } from "@lezer/highlight";
-  import TextInput from "@puredit/projections/TextInput.svelte";`;
+  import TextInput from "@puredit/projections/controls/TextInput.svelte";`;
   }
 
   get importedWidgets() {

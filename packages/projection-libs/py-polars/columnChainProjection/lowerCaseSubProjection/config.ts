@@ -1,15 +1,14 @@
-import { svelteProjection } from "@puredit/projections/svelte";
+import { svelteProjection } from "@puredit/projections";
 import type { SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 
-const pattern = parser.subPattern("lowerCaseFunction")`toLowerCase()`;
+const template = parser.subPattern("Polars:Column:NameToLowerCase")`toLowerCase()`;
 const widget = svelteProjection(Widget);
 
 export const lowerCaseSubProjection: SubProjection = {
-  name: "Polars:Column:NameToLowerCase",
+  template,
   description: "Convert column name to lower case.",
-  pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],
 };

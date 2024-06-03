@@ -1,15 +1,14 @@
-import { svelteProjection } from "@puredit/projections/svelte";
+import { svelteProjection } from "@puredit/projections";
 import type { SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 
-const pattern = parser.subPattern("sumAggregationSubProjectionPattern")`sum()`;
+const template = parser.subPattern("Polars:Column:AggregationSum")`sum()`;
 const widget = svelteProjection(Widget);
 
 export const sumAggregationSubProjection: SubProjection = {
-  name: "Polars:Column:AggregationSum",
+  template,
   description: "Sum up the values in an aggregated column.",
-  pattern,
   requiredContextVariables: [],
   segmentWidgets: [widget],
 };

@@ -4,7 +4,7 @@ import { highlightingFor } from "@codemirror/language";
 import type { EditorState, ChangeSpec } from "@codemirror/state";
 import type { Text } from "@codemirror/state";
 import type { Match } from "@puredit/parser";
-import { ProjectionWidget } from "./projection";
+import { ProjectionWidget } from "./widget/widget";
 import type AstNode from "@puredit/parser/ast/node";
 import { ContextInformation, RootProjection } from "./types";
 
@@ -115,6 +115,6 @@ export function toRootProjectionMap(projections: RootProjection[]) {
 
 export function toSubProjectionMap(projections: RootProjection[]) {
   return new Map(
-    projections.flatMap((p: RootProjection) => p.subProjections.map((s) => [s.pattern, s]))
+    projections.flatMap((p: RootProjection) => p.subProjections.map((s) => [s.template, s]))
   );
 }

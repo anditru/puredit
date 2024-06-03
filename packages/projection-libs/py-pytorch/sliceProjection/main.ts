@@ -1,5 +1,5 @@
 import { parser } from "../parser";
-import { svelteProjection } from "@puredit/projections/svelte";
+import { svelteProjection } from "@puredit/projections";
 import type { ContextInformation, RootProjection } from "@puredit/projections/types";
 import BeginWidget from "./BeginWidget.svelte";
 import EndWidget from "./EndWidget.svelte";
@@ -16,22 +16,21 @@ const slices = agg(
   "slices",
   "subscript",
   [
-    toEndIndexSubProjection.pattern,
-    fromStartIndexSubProjection.pattern,
-    betweenIndicesSubProjection.pattern,
-    singleItemSubProjection.pattern,
+    toEndIndexSubProjection.template,
+    fromStartIndexSubProjection.template,
+    betweenIndicesSubProjection.template,
+    singleItemSubProjection.template,
   ],
   startPattern
 );
-const pattern = parser.statementPattern("sliceProjectionPattern")`${slices}`;
+const pattern = parser.statementPattern("PyTorch:Tensor:Slice")`${slices}`;
 
 const beginWidget = svelteProjection(BeginWidget);
 const endWidget = svelteProjection(EndWidget);
 
 export const sliceProjection: RootProjection = {
-  name: "PyTorch:Tensor:Slice",
-  description: "Extract a slice from a tensor.",
   pattern,
+  description: "Extract a slice from a tensor.",
   requiredContextVariables: [],
   segmentWidgets: [beginWidget, endWidget],
   subProjections: [

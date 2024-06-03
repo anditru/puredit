@@ -61,7 +61,9 @@ export interface SubProjectionDefinition {
 }
 
 export enum SubProjectionType {
+  chainStart = "chainStart",
   chainLink = "chainLink",
+  aggregationStart = "aggregationStart",
   aggregationPart = "aggregationPart",
 }
 

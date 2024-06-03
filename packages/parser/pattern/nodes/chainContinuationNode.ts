@@ -1,21 +1,16 @@
 import PatternNode from "./patternNode";
 import AstCursor from "../../ast/cursor";
-import { Language } from "@puredit/language-config";
-import TemplateChain from "../../template/parameters/templateChain";
-import { loadChainableNodeTypesFor } from "@puredit/language-config";
+import { Language, loadChainableNodeTypesFor } from "@puredit/language-config";
+import { ContextVariableMap } from "@puredit/projections";
 
 export default class ChainContinuationNode extends PatternNode {
   static readonly TYPE = "ChainContinuationNode";
+  static readonly TEXT = "__chain_continuation_";
 
   private readonly astNodeTypes: string[];
-
-  constructor(
-    language: Language,
-    startPatternRootNode: PatternNode,
-    public readonly templateChain: TemplateChain
-  ) {
-    super(ChainContinuationNode.TYPE, "__chain_continuation_", undefined);
-    const chainableNodeTypes = loadChainableNodeTypesFor(language);
+  constructor(language: Language, startPatternRootNode: PatternNode) {
+    super(language, ChainContinuationNode.TYPE, undefined, ChainContinuationNode.TEXT);
+    const chainableNodeTypes = loadChainableNodeTypesFor(this.language);
     this.astNodeTypes = [...chainableNodeTypes, ...startPatternRootNode.getMatchedTypes()];
   }
 
@@ -25,5 +20,9 @@ export default class ChainContinuationNode extends PatternNode {
 
   matches(astCursor: AstCursor): boolean {
     return this.astNodeTypes.includes(astCursor.currentNode.type);
+  }
+
+  toDraftString(): string {
+    return "";
   }
 }

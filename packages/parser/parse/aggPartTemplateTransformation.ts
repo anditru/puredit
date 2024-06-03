@@ -1,4 +1,3 @@
-import { TreeSitterParser } from "../tree-sitter/treeSitterParser";
 import BasePattern from "../pattern/basePattern";
 import Pattern from "../pattern/pattern";
 import PatternCursor from "../pattern/cursor";
@@ -8,14 +7,14 @@ import {
   aggregationStartPlaceHolder,
   aggregationPlaceHolder,
 } from "@puredit/language-config";
-import { TemplateTransformation, NodeTransformVisitor } from "./internal";
+import { TemplateTransformation, Parser } from "./internal";
 import CodeString from "../template/codeString";
 
 export default class AggPartTemplateTransformation extends TemplateTransformation {
   private nodeTypeConfig: AggregatableNodeTypeConfig | undefined;
   private startTemplateCodeString: CodeString | undefined;
 
-  constructor(parser: TreeSitterParser) {
+  constructor(parser: Parser) {
     super(parser);
   }
 
@@ -30,17 +29,17 @@ export default class AggPartTemplateTransformation extends TemplateTransformatio
   }
 
   execute(): Pattern {
-    this.nodeTransformVisitor = new NodeTransformVisitor();
-
     const codeString = this.buildCodeString();
     const rootNode = this.transformToPatternTree(codeString);
     let pattern = this.extractAggPartPattern(rootNode) as Pattern;
 
     if (this.template!.hasAggregations()) {
       pattern = this.buildAggregationSubPatterns(pattern);
+      rootNode.assignToPattern(pattern);
     }
     if (this.template!.hasChains()) {
       pattern = this.buildChainSubPatterns(pattern);
+      rootNode.assignToPattern(pattern);
     }
 
     return pattern;
@@ -48,7 +47,7 @@ export default class AggPartTemplateTransformation extends TemplateTransformatio
 
   private buildCodeString(): CodeString {
     const contextTemplate = new CodeString(this.nodeTypeConfig!.contextTemplate);
-    const partCodeString = this.template!.toCodeString();
+    const partCodeString = this.template!.toCodeString(this.parser.language);
     if (this.startTemplateCodeString) {
       contextTemplate.replace(aggregationStartPlaceHolder, this.startTemplateCodeString);
     }
@@ -62,15 +61,16 @@ export default class AggPartTemplateTransformation extends TemplateTransformatio
     const subPatternRoot = patternTreeCursor.currentNode;
     subPatternRoot.cutOff();
     subPatternRoot.fieldName = undefined;
-    return new BasePattern(subPatternRoot, this.template!);
+    return new BasePattern(this.template.name, this.parser.language, subPatternRoot);
   }
 
   private getAggregationStartPath() {
     const contextTemplate = this.nodeTypeConfig!.contextTemplate;
-    const contextTemplateTree = this.transformToPatternTree(new CodeString(contextTemplate));
+    const contextTemplateRoot = this.transformToPatternTree(new CodeString(contextTemplate));
     const contextTemplatePattern = new BasePattern(
-      contextTemplateTree,
-      this.template! // TODO: Find a more sensible template to pass here
+      "helperTemplateToDetermineStartPath",
+      this.parser.language,
+      contextTemplateRoot
     );
     return contextTemplatePattern.getPathToNodeWithText(aggregationPlaceHolder);
   }

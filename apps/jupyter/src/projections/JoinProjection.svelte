@@ -5,8 +5,8 @@
   import type { EditorView } from "@codemirror/view";
   import { highlightingFor } from "@codemirror/language";
   import type { Match } from "@puredit/parser";
-  import type { FocusGroup } from "@puredit/projections/focus";
-  import TextInput from "@puredit/projections/TextInput.svelte";
+  import type { FocusGroup } from "@puredit/projections";
+  import TextInput from "@puredit/projections/controls/TextInput.svelte";
   import { validateFromList } from "@puredit/projections/shared";
   import type { ContextTable } from "./context";
   import { listCodeToValue, listValueToCode } from "./helpers";

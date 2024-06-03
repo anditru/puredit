@@ -1,35 +1,38 @@
 import PatternNode from "./patternNode";
-import TemplateAggregation from "../../template/parameters/templateAggregation";
 import AstCursor from "../../ast/cursor";
-import { Language } from "@puredit/language-config";
-import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
+import { Language, loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
+import AggregationDecorator from "../decorators/aggregationDecorator";
+import { ContextVariableMap } from "@puredit/projections";
 
 export default class AggregationNode extends PatternNode {
   static readonly TYPE = "AggregationNode";
 
-  public readonly startToken: string;
-  public readonly delimiterToken: string;
-  public readonly endToken: string;
+  public readonly name: string;
+  public readonly astNodeType: string;
+  public readonly hasStartPattern: boolean;
+  public readonly contextVariables: ContextVariableMap;
 
   constructor(
+    name: string,
     language: Language,
-    text: string,
+    astNodeType: string,
     fieldName: string | undefined,
-    public astNodeType: string,
-    public readonly templateAggregation: TemplateAggregation
+    text: string,
+    hasStartPattern: boolean,
+    contextVariables: ContextVariableMap
   ) {
-    super(AggregationNode.TYPE, text, fieldName);
+    super(language, AggregationNode.TYPE, fieldName, text);
+    this.name = name;
+    this.astNodeType = astNodeType;
+    this.contextVariables = contextVariables;
+    this.hasStartPattern = hasStartPattern;
 
-    const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(language, astNodeType);
+    const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(this.language, astNodeType);
     if (!nodeTypeConfig) {
       throw new Error(
-        `AST node type ${astNodeType} of language ${language} is not supported for aggregation`
+        `AST node type ${astNodeType} of language ${this.language} is not supported for aggregation`
       );
     }
-
-    this.startToken = nodeTypeConfig.startToken;
-    this.delimiterToken = nodeTypeConfig.delimiterToken;
-    this.endToken = nodeTypeConfig.endToken;
   }
 
   getMatchedTypes(): string[] {
@@ -41,11 +44,26 @@ export default class AggregationNode extends PatternNode {
     return this.astNodeType === astNode.type && this.fieldName === astCursor.currentFieldName;
   }
 
-  hasSpecialStartPattern(): boolean {
-    return !!this.templateAggregation.specialStartPattern;
-  }
-
-  get aggregationName(): string {
-    return this.templateAggregation.name;
+  toDraftString(): string {
+    if (!this.owningPattern) {
+      throw new Error("Aggregation node not assigned to pattern. Cannot build draft string");
+    }
+    const pattern = this.owningPattern as AggregationDecorator;
+    const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(this.language, this.astNodeType);
+    const startPattern = pattern.getStartPatternFor(this.name);
+    let startString = "";
+    if (startPattern) {
+      startString = startPattern.toDraftString();
+    }
+    const partPatterns = pattern.getPartPatternsFor(this.name);
+    return (
+      startString +
+      nodeTypeConfig.startToken +
+      "\n" +
+      "    " +
+      partPatterns[0].toDraftString() +
+      "\n" +
+      nodeTypeConfig.endToken
+    );
   }
 }

@@ -1,6 +1,5 @@
 import { parser } from "../../parser";
-import { svelteProjection } from "@puredit/projections/svelte";
-import { simpleProjection } from "@puredit/simple-projection";
+import { svelteProjection, simpleProjection } from "@puredit/projections";
 import type { SubProjection } from "@puredit/projections/types";
 import Widget from "./Widget.svelte";
 import { agg } from "@puredit/parser";
@@ -8,20 +7,17 @@ import { binColumnCompositionSubProjection } from "../binColumnCompositionSubPro
 import { columnChainSubProjection } from "../columnChainSubProjection/config";
 
 const columnCombinations = agg("columnCombinations", "argument_list", [
-  binColumnCompositionSubProjection.pattern,
-  columnChainSubProjection.pattern,
+  binColumnCompositionSubProjection.template,
+  columnChainSubProjection.template,
 ]);
-const pattern = parser.subPattern(
-  "extendDataFrameProjectionPattern"
-)`with_columns${columnCombinations}`;
+const template = parser.subPattern("Polars:Dataframe:Extend")`with_columns${columnCombinations}`;
 
 const beginWidget = svelteProjection(Widget);
 const endWidget = simpleProjection(["end columns"]);
 
 export const extendDataFrameSubProjection: SubProjection = {
-  name: "Polars:Dataframe:Extend",
   description: "Extend a dataframe with a set of columns.",
-  pattern,
+  template,
   requiredContextVariables: [],
   segmentWidgets: [beginWidget, endWidget],
 };

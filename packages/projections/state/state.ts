@@ -1,9 +1,9 @@
 import { EditorState, StateEffect, StateField } from "@codemirror/state";
 import { Decoration, EditorView } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
-import { createPatternMap, PatternMatching } from "@puredit/parser";
+import { PatternMatching } from "@puredit/parser";
 import { pickedCompletion } from "@codemirror/autocomplete";
-import type { ContextVariableRange, Match, Parser, PatternsMap } from "@puredit/parser";
+import type { ContextVariableRange, Match, Parser } from "@puredit/parser";
 import type { ProjectionPluginConfig } from "../types";
 import DecorationSetBuilder from "./decorationSetBuilder";
 import AstNode from "@puredit/parser/ast/node";
@@ -16,7 +16,6 @@ const logger = logProvider.getLogger("projections.state.state");
 
 export interface ProjectionState {
   config: ProjectionPluginConfig;
-  patternMap: PatternsMap;
   decorations: DecorationSet;
   contextVariableRanges: ContextVariableRange[];
 }
@@ -25,10 +24,12 @@ export function createProjectionState(
   state: EditorState,
   config: ProjectionPluginConfig
 ): ProjectionState {
-  const projections = Object.keys(config.projections).flatMap((key) => config.projections[key]);
-  const patternMap = createPatternMap(projections.map((p) => p.pattern));
   const cursor = config.parser.parse(state.sliceDoc(0)).walk();
-  const patternMatching = new PatternMatching(patternMap, cursor, config.globalContextVariables);
+  const patternMatching = new PatternMatching(
+    config.projectionRegistry.rootProjectionPatternsByRootNodeType,
+    cursor,
+    config.globalContextVariables
+  );
   const { matches, contextVariableRanges } = patternMatching.execute();
 
   const decorationSetBuilder = new DecorationSetBuilder();
@@ -40,7 +41,7 @@ export function createProjectionState(
     .setMatches(matches);
   const decorations = decorationSetBuilder.build();
 
-  return { config, patternMap, decorations, contextVariableRanges };
+  return { config, decorations, contextVariableRanges };
 }
 
 export const insertDeclarativeProjectionsEffect = StateEffect.define<Extension[]>();
@@ -51,7 +52,7 @@ export const projectionState = StateField.define<ProjectionState>({
     throw new Error("ProjectionState must be created through init()");
   },
 
-  update({ config, patternMap, decorations, contextVariableRanges }, transaction) {
+  update({ config, decorations, contextVariableRanges }, transaction) {
     const isCompletion = Boolean(transaction.annotation(pickedCompletion));
     decorations = decorations.map(transaction.changes);
     const oldState = transaction.startState;
@@ -61,26 +62,18 @@ export const projectionState = StateField.define<ProjectionState>({
     for (const effect of transaction.effects) {
       if (effect.is(removeProjectionPackagesEffect)) {
         logger.debug("removeProjectionPackagesEffect found. Updating projections");
-        effect.value.forEach((packageName) => delete config.projections[packageName]);
-        const projections = Object.keys(config.projections).flatMap(
-          (key) => config.projections[key]
-        );
-        patternMap = createPatternMap(projections.map((p) => p.pattern));
+        effect.value.forEach((packageName) => config.projectionRegistry.removePackage(packageName));
         projectionsChanged = true;
-      } else if (effect.is(insertDeclarativeProjectionsEffect)) {
+      } else if (effect.is(insertDeclarativeProjectionsEffect) && config.projectionCompiler) {
         logger.debug("insertDeclarativeProjectionsEffect found. Updating projections");
-        config.projectionInserter.insertProjections(effect.value, config.projections);
-        const projections = Object.keys(config.projections).flatMap(
-          (key) => config.projections[key]
-        );
-        patternMap = createPatternMap(projections.map((p) => p.pattern));
+        config.projectionCompiler.compile(effect.value);
         projectionsChanged = true;
       }
     }
 
     if (!transaction.docChanged && !transaction.selection && !projectionsChanged) {
       logger.debug("Rematching nothing");
-      return { config, patternMap, decorations, contextVariableRanges };
+      return { config, decorations, contextVariableRanges };
     }
     const mainSelect = transaction.selection?.main;
     let nodesToRematch: AstNode[];
@@ -116,7 +109,7 @@ export const projectionState = StateField.define<ProjectionState>({
     for (const changedNode of nodesToRematch) {
       const cursor = changedNode.walk();
       const patternMatching = new PatternMatching(
-        patternMap,
+        config.projectionRegistry.rootProjectionPatternsByRootNodeType,
         cursor,
         config.globalContextVariables
       );
@@ -134,7 +127,7 @@ export const projectionState = StateField.define<ProjectionState>({
       .setMatches(allMatches)
       .setNodesToInvalidate(nodesToInvalidate);
     decorations = decorationSetBuilder.build();
-    return { config, patternMap, decorations, contextVariableRanges: allContextVariableRanges };
+    return { config, decorations, contextVariableRanges: allContextVariableRanges };
   },
 
   provide(field: StateField<ProjectionState>) {

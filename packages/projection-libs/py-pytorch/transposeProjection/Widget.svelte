@@ -3,10 +3,10 @@
   import type { EditorState } from "@codemirror/state";
   import type { EditorView } from "@codemirror/view";
   import type { Match } from "@puredit/parser";
-  import type { FocusGroup } from "@puredit/projections/focus";
+  import type { FocusGroup } from "@puredit/projections";
   import { ContextInformation } from "@puredit/projections";
 
-  import TextInput from "@puredit/projections/TextInput.svelte";
+  import TextInput from "@puredit/projections/controls/TextInput.svelte";
   import { tags } from "@lezer/highlight";
   import { highlightingFor } from "@codemirror/language";
 

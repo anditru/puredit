@@ -2,7 +2,6 @@ import Pattern from "../pattern";
 import PatternDecorator from "./patternDecorator";
 import { createPatternMap } from "../../common";
 import { PatternMap, PatternsMap } from "../../match/types";
-import TemplateChain from "../../template/parameters/templateChain";
 
 export default class ChainDecorator extends PatternDecorator {
   constructor(
@@ -19,6 +18,14 @@ export default class ChainDecorator extends PatternDecorator {
       throw new Error(`Chain with name ${chainName} not found`);
     }
     return startPattern;
+  }
+
+  getLinkPatternsFor(chainName: string): Pattern[] {
+    const linkPatterns = this.linkPatternMap[chainName];
+    if (!linkPatterns) {
+      throw new Error(`Chain with name ${chainName} not found`);
+    }
+    return linkPatterns;
   }
 
   getStartPatternMapFor(chainName: string): PatternsMap {
@@ -51,13 +58,22 @@ export default class ChainDecorator extends PatternDecorator {
     linkPatterns.push(pattern);
   }
 
-  getChain(name: string): TemplateChain | undefined {
-    return this.template.params.find(
-      (param) => param instanceof TemplateChain && param.name === name
-    ) as TemplateChain;
-  }
-
   hasChains(): boolean {
     return !!this.startPatternMap && !!this.linkPatternMap;
+  }
+
+  getSubPatterns(): Record<string, Pattern> {
+    const subPatterns = {} as Record<string, Pattern>;
+    Object.values(this.startPatternMap).forEach((pattern) => {
+      subPatterns[pattern.name] = pattern;
+      Object.assign(subPatterns, pattern.getSubPatterns());
+    });
+    Object.values(this.linkPatternMap).forEach((patterns) => {
+      patterns.forEach((pattern) => {
+        subPatterns[pattern.name] = pattern;
+        Object.assign(subPatterns, pattern.getSubPatterns());
+      });
+    });
+    return subPatterns;
   }
 }

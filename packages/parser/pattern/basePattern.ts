@@ -1,16 +1,24 @@
 import PatternNode from "./nodes/patternNode";
 import Pattern from "./pattern";
 import TreePath from "../cursor/treePath";
-import Template from "../template/template";
 import { Language } from "@puredit/language-config";
 
 export default class BasePattern implements Pattern {
-  private numberOfLeafNodes: number;
-  private _name: string;
+  private readonly numberOfLeafNodes: number;
 
-  constructor(public readonly rootNode: PatternNode, public readonly template: Template) {
-    this._name = template.name;
+  constructor(
+    public readonly name: string,
+    public readonly language: Language,
+    public readonly rootNode: PatternNode
+  ) {
+    this.rootNode.assignToPattern(this);
     this.numberOfLeafNodes = this.countLeafNodes();
+  }
+
+  private assertRootNodeSet() {
+    if (!this.rootNode) {
+      throw new Error("Pattern has no root node");
+    }
   }
 
   countLeafNodes(): number {
@@ -28,10 +36,11 @@ export default class BasePattern implements Pattern {
   }
 
   getTypesMatchedByRootNode(): string[] {
-    return this.rootNode.getMatchedTypes();
+    return this.rootNode.getMatchedTypes() || [];
   }
 
   getPathToNodeWithText(text: string): TreePath {
+    this.assertRootNodeSet();
     const result = this.findPathByDfs(text, this.rootNode);
     if (!result) {
       throw new Error(`Node with text ${text} does not exist in this pattern`);
@@ -67,15 +76,11 @@ export default class BasePattern implements Pattern {
   }
 
   toDraftString(): string {
-    return this.template.toDraftString();
+    return this.rootNode.toDraftString();
   }
 
-  get name(): string {
-    return this._name;
-  }
-
-  get language(): Language {
-    return this.template.language;
+  getSubPatterns(): Record<string, Pattern> {
+    return {};
   }
 
   get priority(): number {

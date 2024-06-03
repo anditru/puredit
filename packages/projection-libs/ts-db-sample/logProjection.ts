@@ -1,20 +1,18 @@
 import { arg } from "@puredit/parser";
-import type { RootProjection } from "@puredit/projections/types";
-import { simpleProjection } from "@puredit/simple-projection";
+import { RootProjection, simpleProjection } from "@puredit/projections";
 import { parser } from "./parser";
 
 const message = arg("message", ["string"]);
 
-export const pattern = parser.statementPattern("logMessage")`
+export const pattern = parser.statementPattern("DBSample:LogMessage")`
 console.log(${message});
 `;
 
 export const widget = simpleProjection(["log", message, "to console"]);
 
 export const logProjection: RootProjection = {
-  name: "log message",
-  description: "Log a message to the console",
   pattern,
+  description: "Log a message to the console",
   requiredContextVariables: [],
   segmentWidgets: [widget],
   subProjections: [],

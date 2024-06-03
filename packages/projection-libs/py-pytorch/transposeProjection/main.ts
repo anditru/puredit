@@ -1,5 +1,5 @@
 import { parser } from "../parser";
-import { svelteProjection } from "@puredit/projections/svelte";
+import { svelteProjection } from "@puredit/projections";
 import type { ContextInformation, RootProjection } from "@puredit/projections/types";
 import Widget from "./Widget.svelte";
 import { Match, arg } from "@puredit/parser";
@@ -9,15 +9,14 @@ const dim0 = arg("dim0", ["integer"]);
 const dim1 = arg("dim1", ["integer"]);
 
 const pattern = parser.statementPattern(
-  "transposeProjectionPattern"
+  "PyTorch:Tensor:Transpose"
 )`${tensor}.transpose(${dim0}, ${dim1})`;
 
 const widget = svelteProjection(Widget);
 
 export const transposeProjection: RootProjection = {
-  name: "PyTorch:Tensor:Transpose",
-  description: "Swap two dimensions of a tensor.",
   pattern,
+  description: "Swap two dimensions of a tensor.",
   requiredContextVariables: [],
   segmentWidgets: [widget],
   subProjections: [],

@@ -1,23 +1,34 @@
 import PatternNode from "./patternNode";
-import TemplateChain from "../../template/parameters/templateChain";
 import AstCursor from "../../ast/cursor";
-import { Language } from "@puredit/language-config";
-import { loadChainableNodeTypesFor } from "@puredit/language-config";
+import {
+  Language,
+  loadChainableNodeTypeConfigFor,
+  loadChainableNodeTypesFor,
+} from "@puredit/language-config";
+import ChainDecorator from "../decorators/chainDecorator";
+import { ContextVariableMap } from "@puredit/projections";
 
 export default class ChainNode extends PatternNode {
   static readonly TYPE = "ChainNode";
 
-  private astNodeTypes: string[];
+  public readonly name: string;
+  public readonly minumumLength: number;
+  public readonly contextVariables: ContextVariableMap;
+  private readonly astNodeTypes: string[];
 
   constructor(
+    name: string,
     language: Language,
-    text: string,
     fieldName: string | undefined,
-    public readonly minumumLength: number,
-    public readonly templateChain: TemplateChain
+    text: string,
+    minumumLength: number,
+    contextVariables: ContextVariableMap
   ) {
-    super(ChainNode.TYPE, text, fieldName);
-    this.astNodeTypes = loadChainableNodeTypesFor(language);
+    super(language, ChainNode.TYPE, fieldName, text);
+    this.name = name;
+    this.minumumLength = minumumLength;
+    this.contextVariables = contextVariables;
+    this.astNodeTypes = loadChainableNodeTypesFor(this.language);
   }
 
   getMatchedTypes(): string[] {
@@ -31,7 +42,17 @@ export default class ChainNode extends PatternNode {
     );
   }
 
-  get chainName(): string {
-    return this.templateChain.name;
+  toDraftString(): string {
+    if (!this.owningPattern) {
+      throw new Error("Chain node not assigned to pattern. Cannot build draft string");
+    }
+    const pattern = this.owningPattern as ChainDecorator;
+    const startPattern = pattern.getStartPatternFor(this.name);
+    const startDraftString = startPattern.toDraftString();
+    const linkDraftPatterns = pattern
+      .getLinkPatternsFor(this.name)
+      .slice(0, this.minumumLength)
+      .map((linkPattern) => linkPattern.toDraftString());
+    return [startDraftString, ...linkDraftPatterns].join("");
   }
 }

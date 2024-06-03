@@ -1,4 +1,4 @@
-import { flexPlugin } from "./flex";
+import { flexPlugin } from "./widget/flex";
 import {
   createProjectionState,
   projectionState,
@@ -9,17 +9,15 @@ import { transactionFilter } from "./filter";
 import { completions } from "./completions/completions";
 import type {
   ProjectionPluginConfig,
-  Projection,
   SubProjection,
   RootProjection,
   ContextVariableMap,
   ContextInformation,
 } from "./types";
-import { style } from "./style";
+import { style } from "./widget/style";
 
 export type {
   ProjectionPluginConfig,
-  Projection,
   SubProjection,
   RootProjection,
   ContextVariableMap,
@@ -34,3 +32,9 @@ export const projectionPlugin = (config: ProjectionPluginConfig) => [
 ];
 
 export { completions, insertDeclarativeProjectionsEffect, removeProjectionPackagesEffect };
+
+export { default as ProjectionRegistry } from "./projectionRegistry";
+export { default as Projection } from "./projection";
+export { FocusGroup } from "./widget/focus";
+export { svelteProjection } from "./widget/svelte";
+export { simpleProjection } from "./widget/simpleWidget";
