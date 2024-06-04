@@ -7,10 +7,10 @@ import {
   aggregationStartPlaceHolder,
   aggregationPlaceHolder,
 } from "@puredit/language-config";
-import { TemplateTransformation, Parser } from "./internal";
+import { TemplateTransformer, Parser } from "./internal";
 import CodeString from "../template/codeString";
 
-export default class AggPartTemplateTransformation extends TemplateTransformation {
+export default class AggPartTemplateTransformer extends TemplateTransformer {
   private nodeTypeConfig: AggregatableNodeTypeConfig | undefined;
   private startTemplateCodeString: CodeString | undefined;
 
@@ -18,7 +18,7 @@ export default class AggPartTemplateTransformation extends TemplateTransformatio
     super(parser);
   }
 
-  setNodeTypeConfig(nodeTypeConfig: AggregatableNodeTypeConfig): AggPartTemplateTransformation {
+  setNodeTypeConfig(nodeTypeConfig: AggregatableNodeTypeConfig): AggPartTemplateTransformer {
     this.nodeTypeConfig = nodeTypeConfig;
     return this;
   }
@@ -47,7 +47,7 @@ export default class AggPartTemplateTransformation extends TemplateTransformatio
 
   private buildCodeString(): CodeString {
     const contextTemplate = new CodeString(this.nodeTypeConfig!.contextTemplate);
-    const partCodeString = this.template!.toCodeString(this.parser.language);
+    const partCodeString = CodeString.fromTemplate(this.template, this.parser.language);
     if (this.startTemplateCodeString) {
       contextTemplate.replace(aggregationStartPlaceHolder, this.startTemplateCodeString);
     }

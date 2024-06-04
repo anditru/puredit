@@ -4,7 +4,6 @@ import PatternNode from "../../pattern/nodes/patternNode";
 import BlockNode from "../../pattern/nodes/blockNode";
 import { Language } from "@puredit/language-config";
 import { ContextVariableMap } from "@puredit/projections";
-import Pattern from "../../pattern/pattern";
 
 export default class TemplateBlock extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_block_";
@@ -13,7 +12,7 @@ export default class TemplateBlock extends TemplateParameter {
     super();
   }
 
-  toCodeString(language: Language): string {
+  toCodeString(): string {
     return TemplateBlock.CODE_STRING_PREFIX + this.id.toString();
   }
 

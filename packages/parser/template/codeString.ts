@@ -1,14 +1,13 @@
 import { Language } from "@puredit/language-config";
 import ParameterTable from "./parameterTable";
 import TemplateParameter from "./parameters/templateParameter";
+import { TransformableTemplate } from "./template";
 
 export default class CodeString {
-  static fromTemplate(
-    templateStrings: TemplateStringsArray,
-    params: TemplateParameter[],
-    language: Language
-  ) {
-    const substitutions = params.map((param) => param.toCodeString(language));
+  static fromTemplate(template: TransformableTemplate, language: Language) {
+    const templateStrings = template.templateStrings;
+    const params = template.params;
+    const substitutions = params.map((param: TemplateParameter) => param.toCodeString(language));
     const raw = String.raw(templateStrings, ...substitutions);
     const parameterTable = ParameterTable.fromTemplate(templateStrings, params, language);
     return new CodeString(raw, parameterTable);

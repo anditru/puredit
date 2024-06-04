@@ -11,10 +11,10 @@ import {
 } from "./types";
 import { agg, arg, chain, contextVariable, Parser, Pattern, Template } from "@puredit/parser";
 import ChainDecorator from "@puredit/parser/pattern/decorators/chainDecorator";
-import ChainLinkTemplateTransformation from "@puredit/parser/parse/chainLinkTemplateTransformation";
+import ChainLinkTemplateTransformer from "@puredit/parser/parse/chainLinkTemplateTransformer";
 import TemplateParameter from "@puredit/parser/template/parameters/templateParameter";
 import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
-import AggPartTemplateTransformation from "@puredit/parser/parse/aggPartTemplateTransformation";
+import AggPartTemplateTransformer from "@puredit/parser/parse/aggPartTemplateTransformer";
 import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
 import CodeString from "@puredit/parser/template/codeString";
 import {
@@ -229,7 +229,7 @@ export default class ProjectionExtensionCompiler {
       packageName,
       parentProjectionName
     ) as ChainDecorator;
-    const transformation = new ChainLinkTemplateTransformation(this.parser);
+    const transformation = new ChainLinkTemplateTransformer(this.parser);
     return transformation
       .setStartPatternRootNode(parentPattern.getStartPatternFor(parentParameter).rootNode)
       .setIsExpression(false)
@@ -257,7 +257,7 @@ export default class ProjectionExtensionCompiler {
       this.parser.language,
       aggregatedNodeType
     );
-    const transformation = new AggPartTemplateTransformation(this.parser);
+    const transformation = new AggPartTemplateTransformer(this.parser);
     transformation;
     if (nodeTypeConfig.specialStartPattern) {
       transformation.setStartTemplateCodeString(new CodeString("a"));

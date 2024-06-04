@@ -48,20 +48,16 @@ export default class AggregationDecorator extends PatternDecorator {
     partPatterns.push(pattern);
   }
 
-  hasAggregations(): boolean {
-    return !!this.partPatternMap;
-  }
-
-  getSubPatterns(): Record<string, Pattern> {
-    const subPatterns = {} as Record<string, Pattern>;
+  getSubPatterns(): Pattern[] {
+    let subPatterns: Pattern[] = [];
     Object.values(this.startPatternMap).forEach((pattern) => {
-      subPatterns[pattern.name] = pattern;
-      Object.assign(subPatterns, pattern.getSubPatterns());
+      subPatterns.push(pattern);
+      subPatterns = subPatterns.concat(pattern.getSubPatterns());
     });
     Object.values(this.partPatternMap).forEach((patterns) => {
       patterns.forEach((pattern) => {
-        subPatterns[pattern.name] = pattern;
-        Object.assign(subPatterns, pattern.getSubPatterns());
+        subPatterns.push(pattern);
+        subPatterns = subPatterns.concat(pattern.getSubPatterns());
       });
     });
     return subPatterns;

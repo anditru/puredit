@@ -4,11 +4,11 @@ import Pattern from "../pattern/pattern";
 import PatternCursor from "../pattern/cursor";
 import { ChainsConfig } from "@puredit/language-config";
 import { loadChainableNodeTypeConfigFor, loadChainsConfigFor } from "@puredit/language-config";
-import { Parser, TemplateTransformation } from "./internal";
+import { Parser, TemplateTransformer } from "./internal";
 import ChainContinuationNode from "../pattern/nodes/chainContinuationNode";
 import CodeString from "../template/codeString";
 
-export default class ChainLinkTemplateTransformation extends TemplateTransformation {
+export default class ChainLinkTemplateTransformer extends TemplateTransformer {
   private chainsConfig!: ChainsConfig;
   private startPatternRootNode!: PatternNode;
 
@@ -16,7 +16,7 @@ export default class ChainLinkTemplateTransformation extends TemplateTransformat
     super(parser);
   }
 
-  setStartPatternRootNode(startPatternRootNode: PatternNode): ChainLinkTemplateTransformation {
+  setStartPatternRootNode(startPatternRootNode: PatternNode): ChainLinkTemplateTransformer {
     this.startPatternRootNode = startPatternRootNode;
     return this;
   }
@@ -41,7 +41,7 @@ export default class ChainLinkTemplateTransformation extends TemplateTransformat
   }
 
   private buildCodeString(): CodeString {
-    const linkCodeString = this.template.toCodeString(this.parser.language);
+    const linkCodeString = CodeString.fromTemplate(this.template, this.parser.language);
     return linkCodeString.insertInto("a.<link>", "<link>");
   }
 

@@ -1,5 +1,5 @@
 import AstCursor from "../ast/cursor";
-import Template from "../template/template";
+import { TransformableTemplate } from "../template/template";
 import TemplateAggregation from "../template/parameters/templateAggregation";
 import PatternNode from "../pattern/nodes/patternNode";
 import Pattern from "../pattern/pattern";
@@ -10,17 +10,17 @@ import { PatternMap, PatternsMap } from "../match/types";
 import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
 import {
   NodeTransformVisitor,
-  AggStartTemplateTransformation,
-  AggPartTemplateTransformation,
-  ChainLinkTemplateTransformation,
-  CompleteTemplateTransformation,
+  AggStartTemplateTransformer,
+  AggPartTemplateTransformer,
+  ChainLinkTemplateTransformer,
+  CompleteTemplateTransformer,
   Parser,
 } from "./internal";
 import AggregationNode from "../pattern/nodes/aggregationNode";
 import CodeString from "../template/codeString";
 
-export default abstract class TemplateTransformation {
-  protected template!: Template;
+export default abstract class TemplateTransformer {
+  protected template!: TransformableTemplate;
   protected isExpression!: boolean;
   protected nodeTransformVisitor!: NodeTransformVisitor;
 
@@ -28,12 +28,12 @@ export default abstract class TemplateTransformation {
     this.nodeTransformVisitor = new NodeTransformVisitor(this.parser.language);
   }
 
-  setIsExpression(isExpression: boolean): TemplateTransformation {
+  setIsExpression(isExpression: boolean): TemplateTransformer {
     this.isExpression = isExpression;
     return this;
   }
 
-  setTemplate(template: Template): TemplateTransformation {
+  setTemplate(template: TransformableTemplate): TemplateTransformer {
     this.template = template;
     return this;
   }
@@ -55,7 +55,7 @@ export default abstract class TemplateTransformation {
   protected buildAggregationSubPatterns(pattern: Pattern): AggregationDecorator {
     const aggregationPatternMap: PatternsMap = {};
     const aggregationTypeMap: Record<string, string> = {};
-    const specialStartPatternMap: PatternMap = {};
+    const startPatternMap: PatternMap = {};
     const aggregations = this.template.getAggregations();
     for (const aggregation of aggregations) {
       const aggregatedNodeType = this.getAggregatedNodeType(pattern, aggregation);
@@ -64,41 +64,42 @@ export default abstract class TemplateTransformation {
         aggregatedNodeType
       );
 
-      const aggregationPartPatternsGeneration = new AggPartTemplateTransformation(this.parser);
+      const aggregationPartPatternsTransformer = new AggPartTemplateTransformer(this.parser);
       if (aggregation.startTemplate) {
-        aggregationPartPatternsGeneration.setStartTemplateCodeString(
-          aggregation.startTemplate.toCodeString(this.parser.language)
+        aggregationPartPatternsTransformer.setStartTemplateCodeString(
+          CodeString.fromTemplate(aggregation.startTemplate, this.parser.language)
         );
       }
       const aggregationSubPatterns = aggregation.partTemplates.map((subTemplate) => {
-        return aggregationPartPatternsGeneration
-          .setNodeTypeConfig(nodeTypeConfig)
-          .setIsExpression(false)
-          .setTemplate(subTemplate)
-          .execute();
+        if (subTemplate instanceof TransformableTemplate) {
+          return aggregationPartPatternsTransformer
+            .setNodeTypeConfig(nodeTypeConfig)
+            .setIsExpression(false)
+            .setTemplate(subTemplate)
+            .execute();
+        } else {
+          return subTemplate.toPattern();
+        }
       });
       aggregationPatternMap[aggregation.name] = aggregationSubPatterns;
       aggregationTypeMap[aggregation.name] = aggregatedNodeType;
 
       if (aggregation.startTemplate) {
-        const aggregationStartTemplateTransformation = new AggStartTemplateTransformation(
-          this.parser
-        );
-        const aggregationStartPattern = aggregationStartTemplateTransformation
+        const aggregationStartTemplateTransformer = new AggStartTemplateTransformer(this.parser);
+        const aggregationStartPattern = aggregationStartTemplateTransformer
           .setNodeTypeConfig(nodeTypeConfig)
           .setIsExpression(false)
           .setTemplate(aggregation.startTemplate)
           .execute();
-        specialStartPatternMap[aggregation.name] = aggregationStartPattern;
+        startPatternMap[aggregation.name] = aggregationStartPattern;
       }
     }
     const aggregationDecorator = new AggregationDecorator(
       pattern,
       aggregationPatternMap,
-      specialStartPatternMap,
+      startPatternMap,
       aggregationTypeMap
     );
-    this.template.addPattern(aggregationDecorator);
     return aggregationDecorator;
   }
 
@@ -116,15 +117,15 @@ export default abstract class TemplateTransformation {
     const linkPatternMap: PatternsMap = {};
     const chains = this.template.getChains();
     for (const chain of chains) {
-      const startTemplateTransformation = new CompleteTemplateTransformation(this.parser);
-      const startPattern = startTemplateTransformation
+      const startTemplateTransformer = new CompleteTemplateTransformer(this.parser);
+      const startPattern = startTemplateTransformer
         .setIsExpression(true)
         .setTemplate(chain.startTemplate)
         .execute();
 
       const linkPatterns = chain.linkTemplates.map((linkTemplate) => {
-        const linkTemplateTransformation = new ChainLinkTemplateTransformation(this.parser);
-        return linkTemplateTransformation
+        const linkTemplateTransformer = new ChainLinkTemplateTransformer(this.parser);
+        return linkTemplateTransformer
           .setStartPatternRootNode(startPattern.rootNode)
           .setIsExpression(false)
           .setTemplate(linkTemplate)
@@ -134,7 +135,6 @@ export default abstract class TemplateTransformation {
       linkPatternMap[chain.name] = linkPatterns;
     }
     const chainDecorator = new ChainDecorator(pattern, startPatternMap, linkPatternMap);
-    this.template.addPattern(chainDecorator);
     return chainDecorator;
   }
 }

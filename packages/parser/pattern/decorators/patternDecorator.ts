@@ -34,5 +34,5 @@ export default abstract class PatternDecorator implements Pattern {
     return this.pattern.priority;
   }
 
-  abstract getSubPatterns(): Record<string, Pattern>;
+  abstract getSubPatterns(): Pattern[];
 }

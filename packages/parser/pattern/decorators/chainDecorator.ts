@@ -58,20 +58,16 @@ export default class ChainDecorator extends PatternDecorator {
     linkPatterns.push(pattern);
   }
 
-  hasChains(): boolean {
-    return !!this.startPatternMap && !!this.linkPatternMap;
-  }
-
-  getSubPatterns(): Record<string, Pattern> {
-    const subPatterns = {} as Record<string, Pattern>;
+  getSubPatterns(): Pattern[] {
+    let subPatterns: Pattern[] = [];
     Object.values(this.startPatternMap).forEach((pattern) => {
-      subPatterns[pattern.name] = pattern;
-      Object.assign(subPatterns, pattern.getSubPatterns());
+      subPatterns.push(pattern);
+      subPatterns = subPatterns.concat(pattern.getSubPatterns());
     });
     Object.values(this.linkPatternMap).forEach((patterns) => {
       patterns.forEach((pattern) => {
-        subPatterns[pattern.name] = pattern;
-        Object.assign(subPatterns, pattern.getSubPatterns());
+        subPatterns.push(pattern);
+        subPatterns = subPatterns.concat(pattern.getSubPatterns());
       });
     });
     return subPatterns;

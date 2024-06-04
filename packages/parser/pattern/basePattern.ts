@@ -79,8 +79,8 @@ export default class BasePattern implements Pattern {
     return this.rootNode.toDraftString();
   }
 
-  getSubPatterns(): Record<string, Pattern> {
-    return {};
+  getSubPatterns(): Pattern[] {
+    return [];
   }
 
   get priority(): number {

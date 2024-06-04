@@ -2,7 +2,6 @@ import AstCursor from "../../ast/cursor";
 import { Language } from "@puredit/language-config";
 import ArgumentNode from "../../pattern/nodes/argumentNode";
 import TemplateParameter from "./templateParameter";
-import Pattern from "../../pattern/pattern";
 
 export default class TemplateArgument extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_arg_";
@@ -11,7 +10,7 @@ export default class TemplateArgument extends TemplateParameter {
     super();
   }
 
-  toCodeString(language: Language): string {
+  toCodeString(): string {
     return TemplateArgument.CODE_STRING_PREFIX + this.id.toString();
   }
 

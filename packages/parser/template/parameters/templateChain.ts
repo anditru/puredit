@@ -1,26 +1,25 @@
 import AstCursor from "../../ast/cursor";
-import Template from "../template";
 import TemplateParameter from "./templateParameter";
 import PatternNode from "../../pattern/nodes/patternNode";
 import ChainNode from "../../pattern/nodes/chainNode";
 import { ContextVariableMap } from "@puredit/projections";
 import { Language } from "@puredit/language-config";
-import Pattern from "../../pattern/pattern";
+import { TransformableTemplate } from "../template";
 
 export default class TemplateChain extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_chain_";
 
   constructor(
     public readonly name: string,
-    public readonly startTemplate: Template,
-    public readonly linkTemplates: Template[],
+    public readonly startTemplate: TransformableTemplate,
+    public readonly linkTemplates: TransformableTemplate[],
     public readonly minimumLength: number,
     public readonly contextVariables: ContextVariableMap
   ) {
     super();
   }
 
-  toCodeString(language: Language): string {
+  toCodeString(): string {
     return TemplateChain.CODE_STRING_PREFIX + this.id.toString();
   }
 

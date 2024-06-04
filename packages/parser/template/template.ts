@@ -1,12 +1,14 @@
-import { isString } from "@puredit/utils-shared";
 import TemplateParameter from "./parameters/templateParameter";
 import TemplateAggregation from "./parameters/templateAggregation";
 import TemplateChain from "./parameters/templateChain";
 import { Language } from "@puredit/language-config";
 import CodeString from "./codeString";
 import Pattern from "../pattern/pattern";
+import ReferencePattern from "../pattern/referencePattern";
 
-export default class Template {
+export type Template = TransformableTemplate | ReferenceTemplate;
+
+export class TransformableTemplate {
   private patterns: Pattern[] = [];
 
   constructor(
@@ -35,7 +37,7 @@ export default class Template {
   }
 
   toCodeString(language: Language): CodeString {
-    return CodeString.fromTemplate(this.templateStrings, this.params, language);
+    return CodeString.fromTemplate(this, language);
   }
 
   getAggregation(name: string): TemplateAggregation | undefined {
@@ -56,5 +58,13 @@ export default class Template {
 
   getPatterns(): Pattern[] {
     return this.patterns;
+  }
+}
+
+export class ReferenceTemplate {
+  constructor(public readonly name: string) {}
+
+  toPattern(): Pattern {
+    return new ReferencePattern(this.name);
   }
 }

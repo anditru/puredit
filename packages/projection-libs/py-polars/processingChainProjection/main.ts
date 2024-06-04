@@ -14,7 +14,6 @@ import { aggSubProjection } from "./aggSubProjection/config";
 import { dropColumnsSubProjection } from "./dropColumnsSubProjection/config";
 import { renameColumnsSubProjection } from "./renameColumnsSubProjection/config";
 import { columnMappingSubProjection } from "./columnMappingSubProjection/config";
-import { columnChainSubProjection } from "./columnChainSubProjection/config";
 import { joinSubProjection } from "./joinSubProjection/config";
 import { binColumnCompositionSubProjection } from "./binColumnCompositionSubProjection/config";
 import { extendDataFrameSubProjection } from "./extendDataFrameSubProjection/config";
@@ -61,7 +60,6 @@ export const selectChainProjection: RootProjection = {
     dropColumnsSubProjection,
     renameColumnsSubProjection,
     columnMappingSubProjection,
-    columnChainSubProjection,
     joinSubProjection,
     binColumnCompositionSubProjection,
     extendDataFrameSubProjection,

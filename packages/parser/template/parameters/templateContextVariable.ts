@@ -3,7 +3,6 @@ import AstCursor from "../../ast/cursor";
 import ContextVariableNode from "../../pattern/nodes/contextVariableNode";
 import PatternNode from "../../pattern/nodes/patternNode";
 import TemplateParameter from "./templateParameter";
-import Pattern from "../../pattern/pattern";
 
 export default class TemplateContextVariable extends TemplateParameter {
   static readonly CODE_STRING_PREFIX = "__template_context_variable_";
@@ -12,7 +11,7 @@ export default class TemplateContextVariable extends TemplateParameter {
     super();
   }
 
-  toCodeString(language: Language): string {
+  toCodeString(): string {
     return TemplateContextVariable.CODE_STRING_PREFIX + this.id.toString();
   }
 

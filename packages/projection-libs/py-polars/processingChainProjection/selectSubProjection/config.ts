@@ -4,15 +4,14 @@ import BeginWidget from "./BeginWidget.svelte";
 import EndWidget from "./EndWidget.svelte";
 
 import { parser } from "../../parser";
-import { agg } from "@puredit/parser";
+import { agg, reference } from "@puredit/parser";
 import { columnSubProjection } from "../columnSubProjection/config";
 import { columnWithAliasSubProjection } from "../columnWithAliasSubProjection/config";
-import { columnChainSubProjection } from "../columnChainSubProjection/config";
 
 const columns = agg("columns", "argument_list", [
   columnSubProjection.template,
   columnWithAliasSubProjection.template,
-  columnChainSubProjection.template,
+  reference("Polars:Column:Chain"),
 ]);
 const template = parser.subPattern("Polars:Dataframe:SelectColumns")`select${columns}`;
 

@@ -7,7 +7,7 @@ import TemplateAggregation from "./parameters/templateAggregation";
 import TemplateArgument from "./parameters/templateArgument";
 import TemplateBlock from "./parameters/templateBlock";
 import TemplateContextVariable from "./parameters/templateContextVariable";
-import Template from "./template";
+import { ReferenceTemplate, Template, TransformableTemplate } from "./template";
 import TemplateChain from "./parameters/templateChain";
 import { ContextVariableMap } from "@puredit/projections";
 
@@ -24,18 +24,18 @@ export function arg(name: string, types: string[]): TemplateArgument {
 /**
  * Defines a TeamplateAggregation
  * @param name Name of the Aggregation
- * @param subPatterns Allowed patterns in the Aggregation
+ * @param partTemplates Allowed patterns in the Aggregation
  * @param context Context Variables required in the Aggregation
  * @returns TeamplateAggregation
  */
 export function agg(
   name: string,
   type: string,
-  subPatterns: Template[],
-  specialStartPattern?: Template,
+  partTemplates: Template[],
+  startTemplate?: TransformableTemplate,
   contextVariables: ContextVariableMap = {}
 ): TemplateAggregation {
-  return new TemplateAggregation(name, type, subPatterns, specialStartPattern, contextVariables);
+  return new TemplateAggregation(name, type, partTemplates, startTemplate, contextVariables);
 }
 
 /**
@@ -48,12 +48,12 @@ export function agg(
  */
 export function chain(
   name: string,
-  startPattern: Template,
-  linkPatterns: Template[],
+  startTemplate: TransformableTemplate,
+  linkTemplates: TransformableTemplate[],
   minimumLength = 2,
   contextVariables: ContextVariableMap = {}
 ): TemplateChain {
-  return new TemplateChain(name, startPattern, linkPatterns, minimumLength, contextVariables);
+  return new TemplateChain(name, startTemplate, linkTemplates, minimumLength, contextVariables);
 }
 
 /**
@@ -72,4 +72,8 @@ export function block(contextVariables: ContextVariableMap = {}): TemplateBlock 
  */
 export function contextVariable(name: string): TemplateContextVariable {
   return new TemplateContextVariable(name);
+}
+
+export function reference(templateName: string): ReferenceTemplate {
+  return new ReferenceTemplate(templateName);
 }

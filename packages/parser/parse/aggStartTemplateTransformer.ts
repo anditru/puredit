@@ -3,17 +3,17 @@ import Pattern from "../pattern/pattern";
 import PatternCursor from "../pattern/cursor";
 import PatternNode from "../pattern/nodes/patternNode";
 import { AggregatableNodeTypeConfig, aggregationStartPlaceHolder } from "@puredit/language-config";
-import { TemplateTransformation, Parser } from "./internal";
+import { TemplateTransformer, Parser } from "./internal";
 import CodeString from "../template/codeString";
 
-export default class AggStartTemplateTransformation extends TemplateTransformation {
+export default class AggStartTemplateTransformer extends TemplateTransformer {
   private nodeTypeConfig!: AggregatableNodeTypeConfig;
 
   constructor(parser: Parser) {
     super(parser);
   }
 
-  setNodeTypeConfig(nodeTypeConfig: AggregatableNodeTypeConfig): AggStartTemplateTransformation {
+  setNodeTypeConfig(nodeTypeConfig: AggregatableNodeTypeConfig): AggStartTemplateTransformer {
     this.nodeTypeConfig = nodeTypeConfig;
     return this;
   }
@@ -37,7 +37,7 @@ export default class AggStartTemplateTransformation extends TemplateTransformati
 
   private buildCodeString(): CodeString {
     const contextTemplate = new CodeString(this.nodeTypeConfig.contextTemplate);
-    const startCodeString = this.template!.toCodeString(this.parser.language);
+    const startCodeString = CodeString.fromTemplate(this.template, this.parser.language);
     return contextTemplate.replace(aggregationStartPlaceHolder, startCodeString);
   }
 

@@ -1,14 +1,15 @@
 import BasePattern from "../pattern/basePattern";
 import Pattern from "../pattern/pattern";
-import { Parser, TemplateTransformation } from "./internal";
+import CodeString from "../template/codeString";
+import { Parser, TemplateTransformer } from "./internal";
 
-export default class CompleteTemplateTransformation extends TemplateTransformation {
+export default class CompleteTemplateTransformer extends TemplateTransformer {
   constructor(parser: Parser) {
     super(parser);
   }
 
   execute(): Pattern {
-    const codeString = this.template.toCodeString(this.parser.language);
+    const codeString = CodeString.fromTemplate(this.template, this.parser.language);
     const rootNode = this.transformToPatternTree(codeString);
     let pattern = new BasePattern(this.template.name, this.parser.language, rootNode) as Pattern;
 

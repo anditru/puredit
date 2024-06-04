@@ -4,6 +4,7 @@ import Pattern from "./pattern";
 import PatternDecorator from "./decorators/patternDecorator";
 import TreePath from "../cursor/treePath";
 import Cursor from "../cursor/cursor";
+import ReferencePattern from "./referencePattern";
 
 export default class PatternCursor extends Cursor {
   private _currentNode: PatternNode;
@@ -12,9 +13,13 @@ export default class PatternCursor extends Cursor {
   private runningRollback = false;
   private operationLog: TransactionOperation[] = [];
 
-  constructor(source: Pattern | PatternNode | PatternDecorator) {
+  constructor(source: Pattern | PatternNode | PatternDecorator | ReferencePattern) {
     super();
-    if (source instanceof BasePattern || source instanceof PatternDecorator) {
+    if (
+      source instanceof BasePattern ||
+      source instanceof PatternDecorator ||
+      source instanceof ReferencePattern
+    ) {
       this._currentNode = source.rootNode;
     } else if (source instanceof PatternNode) {
       this._currentNode = source;

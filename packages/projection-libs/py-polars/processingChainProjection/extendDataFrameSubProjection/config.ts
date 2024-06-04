@@ -2,13 +2,12 @@ import { parser } from "../../parser";
 import { svelteProjection, simpleProjection } from "@puredit/projections";
 import type { SubProjection } from "@puredit/projections/types";
 import Widget from "./Widget.svelte";
-import { agg } from "@puredit/parser";
+import { agg, reference } from "@puredit/parser";
 import { binColumnCompositionSubProjection } from "../binColumnCompositionSubProjection/config";
-import { columnChainSubProjection } from "../columnChainSubProjection/config";
 
 const columnCombinations = agg("columnCombinations", "argument_list", [
   binColumnCompositionSubProjection.template,
-  columnChainSubProjection.template,
+  reference("Polars:Column:Chain"),
 ]);
 const template = parser.subPattern("Polars:Dataframe:Extend")`with_columns${columnCombinations}`;
 

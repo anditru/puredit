@@ -6,7 +6,7 @@ export default interface Pattern {
   getTypesMatchedByRootNode(): string[];
   getPathToNodeWithText(text: string): TreePath;
   toDraftString(): string;
-  getSubPatterns(): Record<string, Pattern>;
+  getSubPatterns(): Pattern[];
   get language(): Language;
   get name(): string;
   get rootNode(): PatternNode;

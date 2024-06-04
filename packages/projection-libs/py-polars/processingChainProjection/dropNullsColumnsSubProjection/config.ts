@@ -3,12 +3,11 @@ import type { SubProjection } from "@puredit/projections/types";
 import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 import { columnSubProjection } from "../columnSubProjection/config";
-import { columnChainSubProjection } from "../columnChainSubProjection/config";
-import { agg } from "@puredit/parser";
+import { agg, reference } from "@puredit/parser";
 
 const columns = agg("columns", "argument_list", [
   columnSubProjection.template,
-  columnChainSubProjection.template,
+  reference("Polars:Column:Chain"),
 ]);
 const template = parser.subPattern("Polars:Dataframe:DropNulls")`drop_nulls${columns}`;
 
