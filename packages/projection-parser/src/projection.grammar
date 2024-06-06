@@ -1,0 +1,46 @@
+@context trackIndent from "./tokens.js"
+
+@top Projection { ProjectionContent }
+
+ProjectionContent {
+  ((MiddleWidget SubProjectionGroup)* EndWidget Period lineEnd) |
+  SubProjectionGroup
+}
+
+MiddleWidget {
+  WordSequence lineEnd
+}
+
+EndWidget {
+  WordSequence
+}
+
+WordSequence {
+  Word (Comma? Word)*
+}
+
+SubProjectionGroup {
+  indent ProjectionContent+ (dedent | eof)
+}
+
+lineEnd { newline | eof }
+
+@skip {
+  space |
+  blankLineStart space* lineEnd
+}
+
+@external tokens indentation from "./tokens.js" {
+  indent
+  dedent
+  blankLineStart
+}
+
+@tokens {
+  space { $[ \t]+ }
+  newline { "\n" | "\r\n" }
+  eof { @eof }
+  Word { $[a-zA-Z0-9_]+ }
+  Period { "." }
+  Comma { "," }
+}

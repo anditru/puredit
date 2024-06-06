@@ -1,0 +1,17 @@
+{
+  "name": "@puredit/projection-parser",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@lezer/common": "^1.2.1",
+    "@lezer/lr": "^1.0.0"
+  },
+  "devDependencies": {
+    "@lezer/generator": "^1.7.0",
+    "rollup": "^3.0.0"
+  },
+  "scripts": {
+    "build": "lezer-generator src/projection.grammar -o src/parser && rollup -c"
+  }
+}

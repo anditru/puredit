@@ -1,0 +1,4 @@
+From students select columns
+    name as first_name.
+    age.
+end columns.
