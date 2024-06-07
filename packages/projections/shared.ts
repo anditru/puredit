@@ -118,3 +118,8 @@ export function toSubProjectionMap(projections: RootProjection[]) {
     projections.flatMap((p: RootProjection) => p.subProjections.map((s) => [s.template, s]))
   );
 }
+
+export interface Range {
+  from: number;
+  to: number;
+}

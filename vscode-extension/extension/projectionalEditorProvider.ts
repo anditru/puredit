@@ -148,6 +148,9 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
       messageSubscription.dispose();
       changeDocumentSubscription.dispose();
       delete this.projectionalEditors[document.uri.toString()];
+      if (!Object.keys(this.projectionalEditors).length) {
+        vscode.commands.executeCommand("setContext", PROJECTIONAL_EDITOR_RUNNING_KEY, false);
+      }
     });
   }
 

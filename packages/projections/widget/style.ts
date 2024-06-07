@@ -27,4 +27,7 @@ export const style = EditorView.theme({
   ".cm-completionIcon-projection::after": {
     content: '"✨"',
   },
+  ".space-left": {
+    marginLeft: "8px",
+  },
 });

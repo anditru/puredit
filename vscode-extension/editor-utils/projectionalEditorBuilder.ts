@@ -56,7 +56,7 @@ export default class ProjectionalEditorBuilder {
     this.addExtensions(
       vscodeDarkInit({
         settings: {
-          fontSize: 25,
+          fontSize: 30,
         },
       }),
       indentationMarkers()

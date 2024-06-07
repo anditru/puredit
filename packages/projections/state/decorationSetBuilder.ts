@@ -14,6 +14,7 @@ import {
 import type { AggregatableNodeTypeConfig } from "@puredit/language-config";
 import AstNode from "@puredit/parser/ast/node";
 import Projection from "../projection";
+import { Range } from "../shared";
 
 export default class DecorationSetBuilder {
   // Input
@@ -247,7 +248,7 @@ export default class DecorationSetBuilder {
         (decorationFrom === range.from || decorationTo === range.to) &&
         widget instanceof Widget
       ) {
-        widget.set(match, contextInformation, this.state);
+        widget.set(range, match, contextInformation, this.state);
         this.newDecorations = this.newDecorations.update({
           add: [decoration.range(range.from, range.to)],
         });
@@ -270,7 +271,7 @@ export default class DecorationSetBuilder {
     this.newDecorations = this.newDecorations.update({
       add: [
         Decoration.replace({
-          widget: new Widget(this.isCompletion, match, contextInformation, this.state),
+          widget: new Widget(range, this.isCompletion, match, contextInformation, this.state),
         }).range(range.from, range.to),
       ],
     });
@@ -281,11 +282,6 @@ export default class DecorationSetBuilder {
       filter: (_, __, currentDecoration) => currentDecoration !== decoration,
     });
   }
-}
-
-interface Range {
-  from: number;
-  to: number;
 }
 
 class NoProjectionFound extends Error {
