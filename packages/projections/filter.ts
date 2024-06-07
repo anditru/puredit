@@ -1,5 +1,5 @@
 import { ChangeSet, EditorSelection, EditorState, Line, Transaction } from "@codemirror/state";
-import { ChangeSpec, SelectionRange } from "@codemirror/state";
+import { ChangeSpec } from "@codemirror/state";
 import { ProjectionWidget } from "./widget/widget";
 import { projectionState } from "./state/state";
 import { Match } from "@puredit/parser";

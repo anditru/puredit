@@ -6,7 +6,6 @@ import { selectStartSubProjection } from "./selectStartSubProjection/config";
 import { selectSubProjection } from "./selectSubProjection/config";
 import { columnSubProjection } from "./columnSubProjection/config";
 import { columnWithAliasSubProjection } from "./columnWithAliasSubProjection/config";
-import { filterSubProjection } from "./filterSubProjection/config";
 import { dropNullsSubProjection } from "./dropNullsSubProjection/config";
 import { dropNullsColumnsSubProjection } from "./dropNullsColumnsSubProjection/config";
 import { groupBySubProjection } from "./groupBySubProjection/config";
@@ -25,7 +24,6 @@ const dataframeChain = chain(
   selectStartSubProjection.template,
   [
     selectSubProjection.template,
-    filterSubProjection.template,
     dropNullsSubProjection.template,
     dropNullsColumnsSubProjection.template,
     groupBySubProjection.template,
@@ -52,7 +50,6 @@ export const selectChainProjection: RootProjection = {
     selectSubProjection,
     columnSubProjection,
     columnWithAliasSubProjection,
-    filterSubProjection,
     dropNullsSubProjection,
     dropNullsColumnsSubProjection,
     groupBySubProjection,

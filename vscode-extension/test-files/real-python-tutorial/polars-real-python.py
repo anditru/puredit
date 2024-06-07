@@ -55,12 +55,10 @@ print(minimum_after_2015)
 
 # Aggregate data
 print("\n=========== Aggregate data ===========")
-building_types = (buildings.group_by(
-    "building_type"
-)
+building_types = (buildings.group_by("building_type")
 .agg(
     pl.mean("sqft").alias("mean_sqft"),
-    pl.median("year").alias("meadian_year"),
+    pl.median("year").alias("median_year"),
     pl.len()
 ))
 print(building_types)
@@ -69,17 +67,12 @@ print(building_types)
 print("\n=========== LazyFrames ===========")
 buildings_lazy = pl.LazyFrame(buildings_data)
 
-lazy_query = (buildings_lazy.with_columns(
-         (pl.col("price") / pl.col("sqft")).alias("price_per_sqft")
-    )
-    .filter(pl.col("price_per_sqft") > 100)
-    .filter(pl.col("year") < 2010)
-)
+
 print(lazy_query.show_graph())
 print(lazy_query.explain())
 
 lazy_result = (lazy_query.collect()
-    .select(pl.col(["price_per_sqft", "year"]))
+    .select(pl.col("price_per_sqft", "year"))
     .describe())
 
 # Scan data
@@ -88,14 +81,17 @@ url = "https://data.wa.gov/api/views/f6w7-q2d2/rows.csv?accessType=DOWNLOAD"
 local_file_path = pathlib.Path("data/lectric_cars.csv")
 download_file(url, local_file_path)
 
-lazy_car_data = pl.scan_csv(local_file_path)
+lazy_car_data = pl.scan_csv("data/lectric_cars.csv")
 lazy_car_data.schema
 
 lazy_car_query = (lazy_car_data.filter((pl.col("Model Year") >= 2018))
     .filter(
         pl.col("Electric Vehicle Type") == "Battery Electric Vehicle (BEV)"
     )
-    .group_by(["State", "Make"])
+    .group_by(
+        "State",
+        "Make"
+    )
     .agg(
         pl.mean("Electric Range").alias("Average Electric Range"),
         pl.min("Model Year").alias("Oldest Model Year"),
@@ -113,7 +109,6 @@ print(lazy_car_result)
 print("\n=========== Seamless integration ===========")
 buildings.write_csv("data/buildings.csv")
 buildings.write_ndjson("data/buildings.json")
-buildings.write_parquet("data/buildings.parquet")
 
 data_csv = pl.read_csv("data/buildings.csv")
 data_csv_lazy = pl.scan_csv("data/buildings.csv")
@@ -122,10 +117,6 @@ print(data_csv_lazy.schema)
 data_json = pl.read_ndjson("data/buildings.json")
 data_json_lazy = pl.scan_ndjson("data/buildings.json")
 print(data_json_lazy.schema)
-
-data_parquet = pl.read_parquet("data/buildings.parquet")
-data_parquet_lazy = pl.scan_parquet("data/buildings.parquet")
-print(data_parquet_lazy.schema)
 
 # Integration with the Python ecosystem
 print("\n=========== Integration with the Python ecosystem ===========")

@@ -48,11 +48,15 @@ export interface RootProjectionDefinition {
   segmentWidgets: string[];
 }
 
+export type SubProjectionDefinition =
+  | NewSubProjectionDefinition
+  | AggregationPartReferenceDefinition;
+
 /**
  * @additionalProperties false
  */
-export interface SubProjectionDefinition {
-  type: SubProjectionType;
+export interface NewSubProjectionDefinition {
+  type: NewSubProjectionType;
   name: string;
   description: string;
   parameters: TemplateParameterDefinition[];
@@ -60,11 +64,16 @@ export interface SubProjectionDefinition {
   segmentWidgets: string[];
 }
 
-export enum SubProjectionType {
+export enum NewSubProjectionType {
   chainStart = "chainStart",
   chainLink = "chainLink",
   aggregationStart = "aggregationStart",
   aggregationPart = "aggregationPart",
+}
+
+export interface AggregationPartReferenceDefinition {
+  type: string;
+  referencedProjection: string;
 }
 
 export type TemplateParameterDefinition =
@@ -97,7 +106,7 @@ export interface TemplateAggregationDefinition {
   name: string;
   nodeType: string;
   partSubProjections: SubProjectionDefinition[];
-  startSubProjection?: SubProjectionDefinition;
+  startSubProjection?: NewSubProjectionDefinition;
 }
 
 /**
@@ -106,7 +115,7 @@ export interface TemplateAggregationDefinition {
 export interface TemplateChainDefinition {
   type: string;
   name: string;
-  startSubProjection: SubProjectionDefinition;
-  linkSubProjections: SubProjectionDefinition[];
+  startSubProjection: NewSubProjectionDefinition;
+  linkSubProjections: NewSubProjectionDefinition[];
   minimumLength?: number;
 }

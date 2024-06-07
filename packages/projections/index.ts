@@ -1,4 +1,3 @@
-import { flexPlugin } from "./widget/flex";
 import {
   createProjectionState,
   projectionState,
@@ -28,7 +27,6 @@ export const projectionPlugin = (config: ProjectionPluginConfig) => [
   style,
   projectionState.init((state) => createProjectionState(state, config)),
   transactionFilter,
-  // flexPlugin,
 ];
 
 export { completions, insertDeclarativeProjectionsEffect, removeProjectionPackagesEffect };

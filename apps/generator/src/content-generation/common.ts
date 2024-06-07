@@ -18,14 +18,11 @@ export class ProjectionContent {
     public templateString: string,
     public paramToSubProjectionsMap: Record<string, string[]>,
     public segmentWidgetContents: string[],
-    public allSubProjections: string[],
-    public postfixWidgetContent?: string
+    public allSubProjections: string[]
   ) {}
 
   get widgetContents() {
-    return this.postfixWidgetContent
-      ? this.segmentWidgetContents.concat(this.postfixWidgetContent)
-      : this.segmentWidgetContents;
+    return this.segmentWidgetContents;
   }
 
   get widgetImports() {
@@ -55,10 +52,6 @@ export class ProjectionContent {
   get segmentWidgetArray() {
     const nameList = this.segmentWidgetContents.map((_, index) => `widget${index}`).join(", ");
     return `[ ${nameList} ]`;
-  }
-
-  get postfixWidgetName() {
-    return this.postfixWidgetContent ? `widget${this.segmentWidgetContents.length}` : "undefined";
   }
 
   get subProjectionArray() {

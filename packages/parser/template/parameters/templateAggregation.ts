@@ -22,19 +22,11 @@ export default class TemplateAggregation extends TemplateParameter {
     public readonly contextVariables: ContextVariableMap
   ) {
     super();
-    if (!this.getTransformablePartTemplate()) {
-      throw new Error("Not all part patterns can be refernce patterns");
-    }
   }
 
   toCodeString(language: Language): string {
     const aggregatableNodeTypeConfig = loadAggregatableNodeTypeConfigFor(language, this.type);
-    const transformablePartTemplate = this.getTransformablePartTemplate();
-    const subPatternCodeString = transformablePartTemplate!.toCodeString(language);
-    const identifyingCodeString = this.getIdentifyingCodeString();
-    const innerCodeString =
-      identifyingCodeString + aggregatableNodeTypeConfig.delimiterToken + subPatternCodeString.raw;
-
+    const innerCodeString = TemplateAggregation.CODE_STRING_PREFIX + this.id.toString();
     let codeString;
     if (aggregatableNodeTypeConfig.specialStartPattern) {
       if (!this.startTemplate) {
@@ -51,14 +43,6 @@ export default class TemplateAggregation extends TemplateParameter {
         aggregatableNodeTypeConfig.endToken;
     }
     return codeString;
-  }
-
-  private getTransformablePartTemplate(): TransformableTemplate | undefined {
-    return this.partTemplates.find((partTemplate) => partTemplate instanceof TransformableTemplate);
-  }
-
-  private getIdentifyingCodeString(): string {
-    return TemplateAggregation.CODE_STRING_PREFIX + this.id.toString();
   }
 
   toPatternNode(cursor: AstCursor, language: Language): PatternNode {

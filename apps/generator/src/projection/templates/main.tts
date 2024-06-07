@@ -16,6 +16,5 @@ export const <%= technicalName %>: RootProjection = {
   pattern,
   requiredContextVariables: [],
   segmentWidgets: <%- segmentWidgetArray %>,
-  postfixWidget: <%= postfixWidgetName %>,
   subProjections: <%- subProjectionArray %>,
 };

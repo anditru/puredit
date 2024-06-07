@@ -9,7 +9,6 @@ import { ProjectionContent } from "./common";
 import SubProjectionGenerator from "../subProjection/subProjectionGenerator";
 import ProjectionGenerator from "../projection/projectionGenerator";
 import { SubProjectionContentGenerator } from "./internal";
-import ComplexTemplateParameter from "./template/complexParameter";
 import { TemplateAggregation } from "./template/aggregation";
 import { SubProjectionResolver, SubProjectionSolution } from "./subProjectionResolution";
 import { PatternNode } from "./pattern";
@@ -39,7 +38,6 @@ export default abstract class ContentGenerator {
   private paramToSubProjectionsMap: Record<string, string[]> = {};
   private allSubProjections: string[] = [];
   private segmentWidgetContents: string[] = [];
-  private postfixWidgetContent: string;
 
   constructor(protected readonly generator: ProjectionGenerator | SubProjectionGenerator) {}
 
@@ -62,8 +60,7 @@ export default abstract class ContentGenerator {
       this.templateString,
       this.paramToSubProjectionsMap,
       this.segmentWidgetContents,
-      this.allSubProjections,
-      this.postfixWidgetContent
+      this.allSubProjections
     );
   }
 
@@ -148,27 +145,9 @@ export default abstract class ContentGenerator {
   }
 
   private serializeWidgets() {
-    const complexParams = this.templateParameters.getComplexParams();
-    if (complexParams.length && this.hasPostfixWidget(complexParams[complexParams.length - 1])) {
-      const widgetContents = this.segmentsPerWidget.map(
-        (widgetSegments) => serializeWidget(widgetSegments)
-      );
-      this.segmentWidgetContents = widgetContents.slice(0, widgetContents.length - 1);
-      this.postfixWidgetContent = widgetContents[widgetContents.length - 1];
-    } else {
-      this.segmentWidgetContents = this.segmentsPerWidget.map(
-        (widgetSegments) => serializeWidget(widgetSegments)
-      );
-    }
-  }
-
-  private hasPostfixWidget(lastParamWithSubProj: ComplexTemplateParameter) {
-    const lastSubProjRangeEnd = lastParamWithSubProj.getEndIndex(
-      this.codeAsts[0].walk()
+    this.segmentWidgetContents = this.segmentsPerWidget.map(
+      (widgetSegments) => serializeWidget(widgetSegments)
     );
-    const widgets = this.projectionTrees[0].widgets;
-    const lastWidget = widgets[widgets.length - 1];
-    return lastWidget.tokens.length > 0 && lastSubProjRangeEnd + 1 === this.codeSamples[0].length;
   }
 
   private async generateSubProjectionsForChain(

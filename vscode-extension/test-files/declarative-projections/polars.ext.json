@@ -5,11 +5,11 @@
     "rootProjections": [
       {
         "type": "rootProjection",
-        "name": "Polars:Dataframe:CreateLazy",
-        "description": "Create a new lazyframe.",
+        "name": "Polars:Dataframe:Create",
+        "description": "Create a new dataframe.",
         "isExpression": true,
-        "template": "<%pl%>.LazyFrame(<%dataSource%>)",
-        "segmentWidgets": ["Create new lazyframe from <%dataSource%>"],
+        "template": "<%pl%>.DataFrame(<%dataSource%>)",
+        "segmentWidgets": ["Create new dataframe from variable <%dataSource%>"],
         "parameters": [
           {
             "type": "contextVariable",
@@ -24,11 +24,166 @@
       },
       {
         "type": "rootProjection",
+        "name": "Polars:Dataframe:CreateFromCsv",
+        "description": "Create a new dataframe from CSV.",
+        "isExpression": true,
+        "template": "<%pl%>.read_csv(<%filePath%>)",
+        "segmentWidgets": ["New dataframe from CSV file <%filePath%>"],
+        "parameters": [
+          {
+            "type": "contextVariable",
+            "name": "pl"
+          },
+          {
+            "type": "argument",
+            "name": "filePath",
+            "nodeTypes": ["string"]
+          }
+        ]
+      },
+      {
+        "type": "rootProjection",
+        "name": "Polars:Dataframe:CreateFromNdjson",
+        "description": "Create a new dataframe from CSV.",
+        "isExpression": true,
+        "template": "<%pl%>.read_ndjson(<%filePath%>)",
+        "segmentWidgets": ["New dataframe from NDJSON file <%filePath%>"],
+        "parameters": [
+          {
+            "type": "contextVariable",
+            "name": "pl"
+          },
+          {
+            "type": "argument",
+            "name": "filePath",
+            "nodeTypes": ["string"]
+          }
+        ]
+      },
+      {
+        "type": "rootProjection",
+        "name": "Polars:Dataframe:CreateLazy",
+        "description": "Create a new lazyframe.",
+        "isExpression": true,
+        "template": "<%pl%>.LazyFrame(<%dataSource%>)",
+        "segmentWidgets": ["Create new lazyframe from variable <%dataSource%>"],
+        "parameters": [
+          {
+            "type": "contextVariable",
+            "name": "pl"
+          },
+          {
+            "type": "argument",
+            "name": "dataSource",
+            "nodeTypes": ["identifier"]
+          }
+        ]
+      },
+      {
+        "type": "rootProjection",
+        "name": "Polars:Dataframe:CreateLazyFromCsv",
+        "description": "Create a new lazyframe from CSV.",
+        "isExpression": true,
+        "template": "<%pl%>.scan_csv(<%filePath%>)",
+        "segmentWidgets": ["New lazyframe from CSV file <%filePath%>"],
+        "parameters": [
+          {
+            "type": "contextVariable",
+            "name": "pl"
+          },
+          {
+            "type": "argument",
+            "name": "filePath",
+            "nodeTypes": ["string"]
+          }
+        ]
+      },
+      {
+        "type": "rootProjection",
+        "name": "Polars:Dataframe:CreateLazyFromNdjson",
+        "description": "Create a new lazyframe from NDJSON.",
+        "isExpression": true,
+        "template": "<%pl%>.scan_ndjson(<%filePath%>)",
+        "segmentWidgets": ["New lazyframe from NDJSON file <%filePath%>"],
+        "parameters": [
+          {
+            "type": "contextVariable",
+            "name": "pl"
+          },
+          {
+            "type": "argument",
+            "name": "filePath",
+            "nodeTypes": ["string"]
+          }
+        ]
+      },
+      {
+        "type": "rootProjection",
+        "name": "Polars:Dataframe:WriteCsv",
+        "description": "Write a dataframe to CSV.",
+        "isExpression": true,
+        "template": "<%dataSource%>.write_csv(<%targetPath%>)",
+        "segmentWidgets": ["Write dataframe <%dataSource%> as CSV to path <%targetPath%>"],
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "dataSource",
+            "nodeTypes": ["identifier"]
+          },
+          {
+            "type": "argument",
+            "name": "targetPath",
+            "nodeTypes": ["string"]
+          }
+        ]
+      },
+      {
+        "type": "rootProjection",
+        "name": "Polars:Dataframe:WriteNdjson",
+        "description": "Write a dataframe to NDJSON.",
+        "isExpression": true,
+        "template": "<%dataSource%>.write_ndjson(<%targetPath%>)",
+        "segmentWidgets": ["Write dataframe <%dataSource%> as NDJSON to path <%targetPath%>"],
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "dataSource",
+            "nodeTypes": ["identifier"]
+          },
+          {
+            "type": "argument",
+            "name": "targetPath",
+            "nodeTypes": ["string"]
+          }
+        ]
+      },
+      {
+        "type": "rootProjection",
+        "name": "Polars:Dataframe:WriteParquet",
+        "description": "Write a dataframe to Parquet.",
+        "isExpression": true,
+        "template": "<%dataSource%>.write_parquet(<%targetPath%>)",
+        "segmentWidgets": ["Write dataframe <%dataSource%> as Parquet to path <%targetPath%>"],
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "dataSource",
+            "nodeTypes": ["identifier"]
+          },
+          {
+            "type": "argument",
+            "name": "targetPath",
+            "nodeTypes": ["string"]
+          }
+        ]
+      },
+      {
+        "type": "rootProjection",
         "name": "Polars:Dataframe:Describe",
         "description": "Describe a dataframe by summary statistics.",
         "isExpression": false,
         "template": "<%dataframe%>.describe()",
-        "segmentWidgets": ["Describe dataframe with summary statistics <%dataframe%>"],
+        "segmentWidgets": ["Describe dataframe <%dataframe%> with summary statistics"],
         "parameters": [
           {
             "type": "argument",
@@ -56,6 +211,36 @@
             "nodeTypes": ["identifier"]
           }
         ]
+      },
+      {
+        "type": "rootProjection",
+        "name": "Polars:Dataframe:ShowGraph",
+        "description": "Show a plot of the query plan.",
+        "isExpression": true,
+        "template": "<%dataframe%>.show_graph()",
+        "segmentWidgets": ["Query plan for lazyframe <%dataframe%> as graphic"],
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "dataframe",
+            "nodeTypes": ["identifier"]
+          }
+        ]
+      },
+      {
+        "type": "rootProjection",
+        "name": "Polars:Dataframe:Explain",
+        "description": "Create a string representation of the query plan.",
+        "isExpression": true,
+        "template": "<%dataframe%>.explain()",
+        "segmentWidgets": ["String representation of the query plan for lazyframe <%dataframe%>"],
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "dataframe",
+            "nodeTypes": ["identifier"]
+          }
+        ]
       }
     ]
   },
@@ -69,33 +254,57 @@
         "type": "chainLink",
         "name": "Polars:Column:Median",
         "description": "Take the median of a column.",
-        "parameters": [],
-        "template": "median()",
-        "segmentWidgets": ["taking its median"]
+        "template": "median(<%column%>)",
+        "segmentWidgets": ["<%column%> taking its median"],
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "column",
+            "nodeTypes": ["string"]
+          }
+        ]
       },
       {
         "type": "chainLink",
         "name": "Polars:Column:Mean",
         "description": "Take the mean of a column.",
-        "parameters": [],
-        "template": "mean()",
-        "segmentWidgets": ["taking its mean"]
+        "template": "mean(<%column%>)",
+        "segmentWidgets": ["<%column%> taking its mean"],
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "column",
+            "nodeTypes": ["string"]
+          }
+        ]
       },
       {
         "type": "chainLink",
         "name": "Polars:Column:Minimum",
         "description": "Find the minimum value in a column.",
-        "parameters": [],
-        "template": "min()",
-        "segmentWidgets": ["finding its minimum"]
+        "template": "min(<%column%>)",
+        "segmentWidgets": ["<%column%> finding its minimum"],
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "column",
+            "nodeTypes": ["string"]
+          }
+        ]
       },
       {
         "type": "chainLink",
         "name": "Polars:Column:Maximum",
         "description": "Find the maximum value in a column.",
-        "parameters": [],
-        "template": "max()",
-        "segmentWidgets": ["finding its maximum"]
+        "template": "max(<%column%>)",
+        "segmentWidgets": ["<%column%> finding its maximum"],
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "column",
+            "nodeTypes": ["string"]
+          }
+        ]
       },
       {
         "type": "chainLink",
@@ -145,6 +354,26 @@
     "rootProjection": "Polars:Dataframe:Chain",
     "parentParameter": "dataframeChain",
     "subProjections": [
+      {
+        "type": "chainLink",
+        "name": "Polars:Dataframe:Sort",
+        "description": "Sort the rows of a dataframe.",
+        "template": "sort<%columnsAndSettings%>",
+        "segmentWidgets": ["sorting by", "end sort"],
+        "parameters": [
+          {
+            "type": "aggregation",
+            "name": "columnsAndSettings",
+            "nodeType": "argument_list",
+            "partSubProjections": [
+              {
+                "type": "aggregationPartReference",
+                "referencedProjection": "Polars:Column:Chain"
+              }
+            ]
+          }
+        ]
+      },
       {
         "type": "chainLink",
         "name": "Polars:Dataframe:ExtendMemory",

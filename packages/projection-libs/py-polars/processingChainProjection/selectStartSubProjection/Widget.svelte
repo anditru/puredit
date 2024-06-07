@@ -36,5 +36,5 @@
     {focusGroup}
     placeholder="data frame"
   />
-  <span style="margin-right: 6px;">transformed by</span>
+  <span>transformed by</span>
 </span>

@@ -4,8 +4,6 @@ import { parser } from "../parser";
 
 import { columnStartSubProjection } from "./columnStartSubProjection/config";
 import { colSubProjection } from "./colSubProjection/config";
-import { upperCaseSubProjection } from "./upperCaseSubProjection/config";
-import { lowerCaseSubProjection } from "./lowerCaseSubProjection/config";
 import { aliasSubProjection } from "./aliasSubProjection/config";
 import { sumAggregationSubProjection } from "./sumAggregationSubProjection/config";
 import { avgAggregationSubProjection } from "./avgAggregationSubProjection/config";
@@ -16,8 +14,6 @@ export const columnChain = chain(
   columnStartSubProjection.template,
   [
     colSubProjection.template,
-    upperCaseSubProjection.template,
-    lowerCaseSubProjection.template,
     aliasSubProjection.template,
     sumAggregationSubProjection.template,
     avgAggregationSubProjection.template,
@@ -36,8 +32,6 @@ export const columnChainProjection: RootProjection = {
   subProjections: [
     columnStartSubProjection,
     colSubProjection,
-    upperCaseSubProjection,
-    lowerCaseSubProjection,
     aliasSubProjection,
     sumAggregationSubProjection,
     avgAggregationSubProjection,

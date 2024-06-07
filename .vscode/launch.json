@@ -16,7 +16,6 @@
       "program": "${workspaceFolder}/apps/generator/src/index.ts",
       "cwd": "${workspaceFolder}/packages/projection-libs/py-my-package",
       "env": {
-        "DEBUG": "true",
         "SUBPROJECTION_RESOLUTION": "[]",
         "UNDECLARED_VAR_USAGES": "[\"c\"]"
       },
@@ -29,7 +28,7 @@
         "-d",
         "Projection to test the generator",
         "-s",
-        "../../../apps/generator/examples/ts-remove.txt",
+        "../../../apps/generator/examples/py-chain.txt",
         "-l",
         "py"
       ],

@@ -1,5 +1,12 @@
-import { RootProjectionDefinition, SubProjectionDefinition } from "./types";
-import { TemplateArgument } from "@puredit/parser";
+import {
+  RootProjectionDefinition,
+  SubProjectionDefinition,
+  TemplateAggregationDefinition,
+  TemplateArgumentDefinition,
+  TemplateContextVariableDefinition,
+  TemplateParameterDefinition,
+} from "./types";
+import { arg, contextVariable, Template, TemplateArgument } from "@puredit/parser";
 import { simpleProjection } from "@puredit/projections";
 import TemplateParameter from "@puredit/parser/template/parameters/templateParameter";
 import TemplatePartArray from "./templatePartArray";
@@ -7,9 +14,13 @@ import TemplatePartArray from "./templatePartArray";
 export const PLACEHOLDER_PATTERN = /<%[^%>]+%>/g;
 export const ALLOWED_EXTENSION_TYPES = ["packageExtension", "rootProjectionExtension"].join(", ");
 export const ALLOWED_SUBPROJECTION_TYPES = ["chainLink", "aggregationPart"].join(", ");
-export const ALLOWED_PARAMETER_TYPES = ["argument", "contextVariable", "aggregation", "chain"].join(
-  ", "
-);
+export const ALLOWED_PARAMETER_TYPES = [
+  "reference",
+  "argument",
+  "contextVariable",
+  "aggregation",
+  "chain",
+].join(", ");
 
 export type ParamsMap = Record<string, TemplateParameter>;
 

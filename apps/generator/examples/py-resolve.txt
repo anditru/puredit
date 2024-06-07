@@ -1,25 +1,23 @@
-filtered_students = students.select("age", pl.col("DateOfBirth").name.toLowerCase(), first_name="name").to_pandas()
+students.select("age", pl.col("DateOfBirth").name.toLowerCase(), first_name="name").to_pandas()
 
-filtered_lectures = lectures.select("credits", pl.col("Room").name.toLowerCase(), professor="lecturer").to_pandas()
+lectures.select("credits", pl.col("Room").name.toLowerCase(), professor="lecturer").to_pandas()
 
 ---
 
 From students export columns
     age.
-        .
+        Column.
         DateOfBirth.
         take its name.
         converted to lower case.
-    .
     name as first_name.
-to Pandas into filtered_students.
+to Pandas.
 
 From lectures export columns
     credits.
-        .
+        Column.
         Room.
         take its name.
         converted to lower case.
-    .
     lecturer as professor.
-to Pandas into filtered_lectures.
+to Pandas.

@@ -116,15 +116,33 @@
           }
         }
       },
-      "required": ["type", "name", "description", "parameters", "template", "segmentWidgets"]
+      "required": [
+        "type",
+        "name",
+        "description",
+        "isExpression",
+        "parameters",
+        "template",
+        "segmentWidgets"
+      ]
     },
     "SubProjectionDefinition": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/NewSubProjectionDefinition"
+        },
+        {
+          "$ref": "#/definitions/AggregationPartReferenceDefinition"
+        }
+      ]
+    },
+    "NewSubProjectionDefinition": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "type": {
-          "$ref": "#/definitions/SubProjectionType",
-          "enum": ["chainLink", "aggregationPart"]
+          "$ref": "#/definitions/NewSubProjectionType",
+          "enum": ["chainStart", "chainLink", "aggregationStart", "aggregationPart"]
         },
         "name": {
           "type": "string"
@@ -150,9 +168,22 @@
       },
       "required": ["type", "name", "description", "parameters", "template", "segmentWidgets"]
     },
-    "SubProjectionType": {
+    "NewSubProjectionType": {
       "type": "string",
-      "enum": ["chainLink", "aggregationPart"]
+      "enum": ["chainStart", "chainLink", "aggregationStart", "aggregationPart"]
+    },
+    "AggregationPartReferenceDefinition": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["aggregationPartReference"]
+        },
+        "referencedProjection": {
+          "type": "string"
+        }
+      },
+      "required": ["type", "referencedProjection"]
     },
     "TemplateParameterDefinition": {
       "anyOf": [
@@ -222,7 +253,7 @@
           }
         },
         "startSubProjection": {
-          "$ref": "#/definitions/SubProjectionDefinition"
+          "$ref": "#/definitions/NewSubProjectionDefinition"
         }
       },
       "required": ["type", "name", "nodeType", "partSubProjections"]
@@ -238,12 +269,12 @@
           "type": "string"
         },
         "startSubProjection": {
-          "$ref": "#/definitions/SubProjectionDefinition"
+          "$ref": "#/definitions/NewSubProjectionDefinition"
         },
         "linkSubProjections": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/SubProjectionDefinition"
+            "$ref": "#/definitions/NewSubProjectionDefinition"
           }
         },
         "minimumLength": {

@@ -1,15 +1,13 @@
-filtered_students = students.select("name", "age", "semester").filter(age==24)
+students.select("name", "age", "semester").filter(age==24)
 
-filtered_lectures = lectures.select("lecturer", "id", "credits").filter(credits==8)
+lectures.select("lecturer", "id", "credits").filter(credits==8)
 
 ---
 
-    From students.
-    select columns name, age, semester.
-    then filter rows where age is 24.
-into filtered_students.
+    Transform dataframe students by.
+    selecting columns name, age, semester.
+    then filtering rows where age is 24.
 
-    From lectures.
+    Transform dataframe lectures by.
     select columns lecturer, id, credits.
-    then filter rows where credits is 8.
-into filtered_lectures.
+    then filtering rows where credits is 8.

@@ -1,4 +1,10 @@
-import { EditorState, StateEffect, StateField } from "@codemirror/state";
+import {
+  Annotation,
+  EditorSelection,
+  EditorState,
+  StateEffect,
+  StateField,
+} from "@codemirror/state";
 import { Decoration, EditorView } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { PatternMatching } from "@puredit/parser";
@@ -12,6 +18,7 @@ import { zip } from "@puredit/utils-shared";
 import { Extension } from "@puredit/declarative-projections";
 
 import { logProvider } from "../../../logconfig";
+import ProjectionRegistry from "../projectionRegistry";
 const logger = logProvider.getLogger("projections.state.state");
 
 export interface ProjectionState {
@@ -58,32 +65,31 @@ export const projectionState = StateField.define<ProjectionState>({
     const oldState = transaction.startState;
     const newState = transaction.state;
 
-    let projectionsChanged = false;
+    let forceRematch = false;
     for (const effect of transaction.effects) {
       if (effect.is(removeProjectionPackagesEffect)) {
         logger.debug("removeProjectionPackagesEffect found. Updating projections");
         effect.value.forEach((packageName) => config.projectionRegistry.removePackage(packageName));
-        projectionsChanged = true;
+        forceRematch = true;
       } else if (effect.is(insertDeclarativeProjectionsEffect) && config.projectionCompiler) {
         logger.debug("insertDeclarativeProjectionsEffect found. Updating projections");
         config.projectionCompiler.compile(effect.value);
-        projectionsChanged = true;
+        forceRematch = true;
       }
     }
 
-    if (!transaction.docChanged && !transaction.selection && !projectionsChanged) {
+    if (!transaction.docChanged && !transaction.selection && !forceRematch) {
       logger.debug("Rematching nothing");
       return { config, decorations, contextVariableRanges };
     }
     const mainSelect = transaction.selection?.main;
-    let nodesToRematch: AstNode[];
+    let nodesToRematch: AstNode[] = [];
     let nodesToInvalidate: AstNode[] = [];
-    if (projectionsChanged) {
-      logger.debug("Projections changed. Rematching everything");
+    if (forceRematch) {
       nodesToRematch = getAllStatementNodes(newState.sliceDoc(0), config.parser);
       nodesToInvalidate = nodesToRematch;
+      logger.debug("Projections changed. Rematching everything");
     } else if (transaction.docChanged) {
-      logger.debug("Rematching changed nodes");
       const { changedStatementNodes, errorNodes } = analyzeChanges(
         oldState.sliceDoc(0),
         newState.sliceDoc(0),
@@ -91,17 +97,33 @@ export const projectionState = StateField.define<ProjectionState>({
       );
       nodesToRematch = changedStatementNodes;
       nodesToInvalidate = errorNodes;
+      logger.debug(
+        `Rematching ${nodesToRematch.length} changed nodes, invalidating ${nodesToInvalidate.length} nodes`
+      );
     } else if (mainSelect && mainSelect.anchor === mainSelect.head) {
       // TODO: Implement partial rematching for selection of size > 0
-      logger.debug("Rematching node with cursor");
-      nodesToRematch = findNodeContainingCursor(
+      logger.debug("Searching node with cursor");
+      const nodeWithCursor = findNodeContainingCursor(
         newState.sliceDoc(0),
         transaction.selection?.main.anchor,
         config.parser
       );
+      if (nodeWithCursor) {
+        const cursorNodeHasError = containsError(nodeWithCursor);
+        if (cursorNodeHasError) {
+          nodesToInvalidate = [nodeWithCursor];
+          logger.debug("Invalidating node with cursor");
+        } else {
+          nodesToRematch = [nodeWithCursor];
+          logger.debug("Rematching node with cursor");
+        }
+      } else {
+        nodesToRematch = getAllStatementNodes(newState.sliceDoc(0), config.parser);
+        logger.debug("Rematching everything");
+      }
     } else {
-      logger.debug("Rematching all nodes");
       nodesToRematch = getAllStatementNodes(newState.sliceDoc(0), config.parser);
+      logger.debug("Rematching all nodes");
     }
 
     let allMatches: Match[] = [];
@@ -117,6 +139,7 @@ export const projectionState = StateField.define<ProjectionState>({
       allMatches = allMatches.concat(matches);
       allContextVariableRanges = allContextVariableRanges.concat(contextVariableRanges);
     }
+    logger.debug("Done rematching. Rebuilding projections");
 
     const decorationSetBuilder = new DecorationSetBuilder();
     decorationSetBuilder
@@ -127,6 +150,8 @@ export const projectionState = StateField.define<ProjectionState>({
       .setMatches(allMatches)
       .setNodesToInvalidate(nodesToInvalidate);
     decorations = decorationSetBuilder.build();
+    logger.debug("Done rebuilding projections");
+
     return { config, decorations, contextVariableRanges: allContextVariableRanges };
   },
 
@@ -140,7 +165,7 @@ function getAllStatementNodes(text: string, parser: Parser): AstNode[] {
   return astCursor.currentNode.children;
 }
 
-function findNodeContainingCursor(text: string, cursorPos: number, parser: Parser): AstNode[] {
+function findNodeContainingCursor(text: string, cursorPos: number, parser: Parser): AstNode | null {
   const astCursor = new AstCursor(parser.parse(text).walk());
   const statementNodes = astCursor.currentNode.children;
   let low = 0;
@@ -149,14 +174,14 @@ function findNodeContainingCursor(text: string, cursorPos: number, parser: Parse
     const mid = Math.floor(low + (high - low) / 2);
     const currentNode = statementNodes[mid];
     if (cursorPos >= currentNode.startIndex && cursorPos <= currentNode.endIndex) {
-      return [currentNode];
-    } else if (cursorPos > currentNode.endIndex) {
+      return currentNode;
+    } else if (cursorPos < currentNode.endIndex) {
       high = mid - 1;
     } else {
       low = mid + 1;
     }
   }
-  return statementNodes;
+  return null;
 }
 
 function analyzeChanges(oldText: string, newText: string, parser: Parser) {
@@ -193,23 +218,20 @@ function analyzeChanges(oldText: string, newText: string, parser: Parser) {
       changedStatementNodes.push(newStatementNode);
       continue;
     }
+    if (oldStatementNode.text === newStatementNode.text) {
+      continue;
+    }
     if (newStatementNode.type === "ERROR") {
       errorNodes.push(newStatementNode);
       continue;
     }
-    if (
-      oldStatementNode.startIndex !== newStatementNode.startIndex ||
-      oldStatementNode.endIndex !== newStatementNode.endIndex
-    ) {
-      changedStatementNodes.push(newStatementNode);
+    if (nodesEqual(oldStatementNode, newStatementNode)) {
       continue;
     }
-    if (oldStatementNode.text === newStatementNode.text) {
-      continue;
-    }
-    if (!nodesEqual(oldStatementNode, newStatementNode)) {
+    if (containsError(newStatementNode)) {
+      errorNodes.push(newStatementNode);
+    } else {
       changedStatementNodes.push(newStatementNode);
-      continue;
     }
   }
   return { changedStatementNodes, errorNodes };
@@ -234,4 +256,24 @@ function nodesEqual(oldNode: AstNode, newNode: AstNode): boolean {
     }
   }
   return true;
+}
+
+function containsError(rootNode: AstNode): boolean {
+  const queue: AstNode[] = [rootNode];
+
+  while (queue.length > 0) {
+    const currentNode = queue.shift();
+
+    if (currentNode) {
+      if (currentNode.type === "ERROR") {
+        return true;
+      }
+
+      for (const childNode of currentNode.children) {
+        queue.push(childNode);
+      }
+    }
+  }
+
+  return false;
 }

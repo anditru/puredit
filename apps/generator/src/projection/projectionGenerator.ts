@@ -70,7 +70,6 @@ export default class ProjectionGenerator extends BaseGenerator {
     templateString: `console.log("Hello World")`,
     widgetTransformations: "const widget = svelteProjection(Widget);",
     segmentWidgetArray: `[ widget ]`,
-    postfixWidgetName: "undefined",
     subProjectionArray: "[]",
   };
 
@@ -127,7 +126,6 @@ export default class ProjectionGenerator extends BaseGenerator {
         templateString: projectionContent.templateString,
         widgetTransformations: projectionContent.widgetTransformations,
         segmentWidgetArray: projectionContent.segmentWidgetArray,
-        postfixWidgetName: projectionContent.postfixWidgetName,
         subProjectionArray: projectionContent.subProjectionArray,
       };
     }

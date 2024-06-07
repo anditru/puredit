@@ -106,11 +106,20 @@ function tokenize(projection: string) {
     }
   }
 
-  return tokenizedLines.flat();
-}
-
-function getLastChar(token: string) {
-  return token.charAt(token.length - 1);
+  const allTokens = tokenizedLines.flat();
+  let openIndents = 0;
+  for (const token of allTokens) {
+    if (token === indentToken) {
+      openIndents++;
+    }
+    if (token === dedentToken) {
+      openIndents--;
+    }
+  }
+  for (let i = 0; i < openIndents; i++) {
+    allTokens.push(dedentToken);
+  }
+  return allTokens;
 }
 
 function countIndents(tokens: string[]) {

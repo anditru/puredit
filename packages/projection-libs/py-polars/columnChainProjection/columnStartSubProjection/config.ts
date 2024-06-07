@@ -5,7 +5,7 @@ import { parser } from "../../parser";
 const polars = contextVariable("pl");
 const template = parser.subPattern("Polars:Column:ChainStart")`${polars}`;
 
-const widget = simpleProjection(["Column"]);
+const widget = simpleProjection(["column"]);
 
 export const columnStartSubProjection: SubProjection = {
   template,

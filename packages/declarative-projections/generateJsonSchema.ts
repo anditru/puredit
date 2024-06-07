@@ -28,10 +28,11 @@ const types = {
   TemplateAggregationDefinition: "aggregation",
 };
 const enums = {
-  SubProjectionDefinition: ["chainLink", "aggregationPart"],
+  NewSubProjectionDefinition: ["chainStart", "chainLink", "aggregationStart", "aggregationPart"],
+  AggregationPartReferenceDefinition: ["aggregationPartReference"],
 };
 
-const program = TJS.getProgramFromFiles([resolve("../types.ts")]);
+const program = TJS.getProgramFromFiles([resolve("./types.ts")]);
 const schema = TJS.generateSchema(program, "*");
 Object.keys(types).forEach((key) => {
   schema!.definitions![key].properties.type.const = types[key];
@@ -44,7 +45,6 @@ Object.keys(schema!.definitions!).forEach((definitionKey) => {
   if (definition.type !== "object") {
     return;
   }
-  console.log(definition);
   const properties = Object.keys(definition.properties);
   definition["required"] = properties;
 });
