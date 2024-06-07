@@ -218,7 +218,7 @@
         "description": "Show a plot of the query plan.",
         "isExpression": true,
         "template": "<%dataframe%>.show_graph()",
-        "segmentWidgets": ["Query plan for lazyframe <%dataframe%> as graphic"],
+        "segmentWidgets": ["Show a plot of the plan for lazyframe <%dataframe%>"],
         "parameters": [
           {
             "type": "argument",
