@@ -3,6 +3,7 @@ import {
   projectionState,
   insertDeclarativeProjectionsEffect,
   removeProjectionPackagesEffect,
+  updateListener,
 } from "./state/state";
 import { transactionFilter } from "./filter";
 import { completions } from "./completions/completions";
@@ -27,6 +28,7 @@ export const projectionPlugin = (config: ProjectionPluginConfig) => [
   style,
   projectionState.init((state) => createProjectionState(state, config)),
   transactionFilter,
+  updateListener,
 ];
 
 export { completions, insertDeclarativeProjectionsEffect, removeProjectionPackagesEffect };

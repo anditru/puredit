@@ -1,12 +1,6 @@
-import {
-  Annotation,
-  EditorSelection,
-  EditorState,
-  StateEffect,
-  StateField,
-} from "@codemirror/state";
+import { EditorState, RangeSetBuilder, StateEffect, StateField } from "@codemirror/state";
 import { Decoration, EditorView } from "@codemirror/view";
-import type { DecorationSet } from "@codemirror/view";
+import type { DecorationSet, ViewUpdate } from "@codemirror/view";
 import { PatternMatching } from "@puredit/parser";
 import { pickedCompletion } from "@codemirror/autocomplete";
 import type { ContextVariableRange, Match, Parser } from "@puredit/parser";
@@ -51,8 +45,17 @@ export function createProjectionState(
   return { config, decorations, contextVariableRanges };
 }
 
+export const updateListener = EditorView.updateListener.of((v: ViewUpdate) => {
+  if (v.viewportChanged && !v.docChanged) {
+    v.view.dispatch({
+      effects: forceRecreateDecorationsEffect.of(true),
+    });
+  }
+});
+
 export const insertDeclarativeProjectionsEffect = StateEffect.define<Extension[]>();
 export const removeProjectionPackagesEffect = StateEffect.define<string[]>();
+export const forceRecreateDecorationsEffect = StateEffect.define<boolean>();
 
 export const projectionState = StateField.define<ProjectionState>({
   create(): ProjectionState {
@@ -75,6 +78,14 @@ export const projectionState = StateField.define<ProjectionState>({
         logger.debug("insertDeclarativeProjectionsEffect found. Updating projections");
         config.projectionCompiler.compile(effect.value);
         forceRematch = true;
+      } else if (effect.is(forceRecreateDecorationsEffect)) {
+        const newDecorations = recreateDecorations(
+          decorations,
+          config.projectionRegistry,
+          newState
+        );
+        logger.debug("forceRecreateDecorationsEffect found. Recreating decorations");
+        return { config, decorations: newDecorations, contextVariableRanges };
       }
     }
 
@@ -276,4 +287,39 @@ function containsError(rootNode: AstNode): boolean {
   }
 
   return false;
+}
+
+function recreateDecorations(
+  decorations: DecorationSet,
+  projectionRegistry: ProjectionRegistry,
+  state: EditorState
+): DecorationSet {
+  const decIterator = decorations.iter();
+  const newDecorations = new RangeSetBuilder<Decoration>();
+  while (decIterator.value) {
+    const dec = decIterator.value;
+    const oldWidget = dec.spec.widget;
+
+    // Save old state
+    const range = { from: decIterator.from, to: decIterator.to };
+    const match: Match = Object.assign({}, oldWidget.match);
+    const contextInformation = Object.assign({}, oldWidget.contextInformation);
+    const isCompletion = oldWidget.isCompletion;
+
+    // Destroy old widget
+    dec.spec.widget.destroy(dec.spec.widget.dom);
+
+    // Create new
+    const segmentWidgets = projectionRegistry.projectionsByName[match.pattern.name].segmentWidgets;
+    const Widget = segmentWidgets.find((WidgetClass) => dec.spec.widget instanceof WidgetClass)!;
+    newDecorations.add(
+      range.from,
+      range.to,
+      Decoration.replace({
+        widget: new Widget(range, isCompletion, match, contextInformation, state),
+      })
+    );
+    decIterator.next();
+  }
+  return newDecorations.finish();
 }
