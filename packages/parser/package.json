@@ -7,8 +7,10 @@
   "dependencies": {
     "@puredit/language-config": "*",
     "@puredit/utils-shared": "*",
+    "@types/uuid": "^9.0.8",
     "typescript-logging": "^2.1.0",
     "typescript-logging-log4ts-style": "^2.1.0",
+    "uuid": "^9.0.1",
     "web-tree-sitter": "0.20.8"
   },
   "devDependencies": {

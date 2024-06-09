@@ -12,6 +12,7 @@ import Pattern from "../pattern/pattern";
 import { TreeCursor } from "web-tree-sitter";
 import { ContextVariableMap } from "@puredit/projections";
 import CommentContextExtraction from "./commentContextExtraction";
+import { v4 as uuid } from "uuid";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.PatternMatching");
@@ -111,6 +112,7 @@ export class PatternMatching {
 
     const contextInformation = this.extractContextInformation(verificationResult);
     this.matches.push({
+      ID: uuid(),
       pattern: verificationResult.pattern,
       node: this.astCursor.currentNode,
       from: this.astCursor.currentNode.startIndex,

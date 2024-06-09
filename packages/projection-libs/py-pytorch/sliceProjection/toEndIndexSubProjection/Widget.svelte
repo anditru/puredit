@@ -5,6 +5,7 @@
   import type { Match } from "@puredit/parser";
   import type { FocusGroup } from "@puredit/projections";
   import { ContextInformation } from "@puredit/projections";
+  import { getDimension } from "../utils";
 
   import TextInput from "@puredit/projections/controls/TextInput.svelte";
   import { highlightingFor } from "@codemirror/language";
@@ -18,17 +19,7 @@
   export let context: ContextInformation;
   let dimension: string | undefined;
 
-  function updateDimension() {
-    const dimensionIndex = context.sliceMatches.findIndex(
-      (sliceMatch: Match) => sliceMatch === match
-    );
-    if (context.commentContext) {
-      dimension = Object.keys(context.commentContext)[dimensionIndex];
-    } else {
-      dimension = undefined;
-    }
-  }
-  updateDimension();
+  dimension = getDimension(match, context);
 
   onMount(() => {
     if (isNew) {
@@ -39,7 +30,7 @@
   });
 
   beforeUpdate(() => {
-    updateDimension();
+    dimension = getDimension(match, context);
   });
 </script>
 

@@ -69,6 +69,7 @@ export const projectionState = StateField.define<ProjectionState>({
     const newState = transaction.state;
 
     let forceRematch = false;
+    let forceRecreation = false;
     for (const effect of transaction.effects) {
       if (effect.is(removeProjectionPackagesEffect)) {
         logger.debug("removeProjectionPackagesEffect found. Updating projections");
@@ -79,13 +80,9 @@ export const projectionState = StateField.define<ProjectionState>({
         config.projectionCompiler.compile(effect.value);
         forceRematch = true;
       } else if (effect.is(forceRecreateDecorationsEffect)) {
-        const newDecorations = recreateDecorations(
-          decorations,
-          config.projectionRegistry,
-          newState
-        );
         logger.debug("forceRecreateDecorationsEffect found. Recreating decorations");
-        return { config, decorations: newDecorations, contextVariableRanges };
+        forceRematch = true;
+        forceRecreation = true;
       }
     }
 
@@ -160,10 +157,14 @@ export const projectionState = StateField.define<ProjectionState>({
       .setState(newState)
       .setMatches(allMatches)
       .setNodesToInvalidate(nodesToInvalidate);
-    decorations = decorationSetBuilder.build();
+    let newDecorations = decorationSetBuilder.build();
     logger.debug("Done rebuilding projections");
 
-    return { config, decorations, contextVariableRanges: allContextVariableRanges };
+    if (forceRecreation) {
+      newDecorations = recreateDecorations(newDecorations, config.projectionRegistry, newState);
+    }
+
+    return { config, decorations: newDecorations, contextVariableRanges: allContextVariableRanges };
   },
 
   provide(field: StateField<ProjectionState>) {
@@ -236,6 +237,10 @@ function analyzeChanges(oldText: string, newText: string, parser: Parser) {
       errorNodes.push(newStatementNode);
       continue;
     }
+    if (newStatementNode.type === "comment") {
+      changedStatementNodes.push(newStatementNode, newStatementNodes[i + 1]);
+      i++;
+    }
     if (nodesEqual(oldStatementNode, newStatementNode)) {
       continue;
     }
@@ -303,7 +308,7 @@ function recreateDecorations(
     // Save old state
     const range = { from: decIterator.from, to: decIterator.to };
     const match: Match = Object.assign({}, oldWidget.match);
-    const contextInformation = Object.assign({}, oldWidget.contextInformation);
+    const contextInformation = Object.assign({}, oldWidget.context);
     const isCompletion = oldWidget.isCompletion;
 
     // Destroy old widget

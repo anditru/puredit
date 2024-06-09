@@ -12,7 +12,7 @@ export abstract class ProjectionWidget extends WidgetType {
     protected range: Range,
     protected isNew: boolean,
     public match: Match,
-    context: ContextInformation,
+    public context: ContextInformation,
     state: EditorState
   ) {
     super();
@@ -24,6 +24,7 @@ export abstract class ProjectionWidget extends WidgetType {
     this.range = range;
     this.isNew = false;
     this.match = match;
+    this.context = context;
     this.update(match, context, state);
   }
 

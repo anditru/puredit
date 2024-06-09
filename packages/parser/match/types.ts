@@ -57,6 +57,7 @@ export interface CodeRange {
 
 // Result of Phase 3 (Post-processing)
 export interface Match {
+  ID: string;
   pattern: Pattern;
   node: AstNode;
   from: number;
