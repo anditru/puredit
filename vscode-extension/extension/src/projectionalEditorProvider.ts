@@ -240,14 +240,24 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
 
   public getHtmlForWebview(webview: vscode.Webview): string {
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "out", this.svelteResources.scriptPath)
+      vscode.Uri.joinPath(
+        this.context.extensionUri,
+        "../extension/out",
+        this.svelteResources.scriptPath
+      )
     );
 
     const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this.context.extensionUri, "out", this.svelteResources.stylePath)
+      vscode.Uri.joinPath(
+        this.context.extensionUri,
+        "../extension/out",
+        this.svelteResources.stylePath
+      )
     );
 
-    const baseDir = vscode.Uri.joinPath(this.context.extensionUri, "out/").toString().slice(7);
+    const baseDir = vscode.Uri.joinPath(this.context.extensionUri, "../extension/out/")
+      .toString()
+      .slice(7);
     const baseUrl = `https://${scriptUri.authority}${baseDir}`;
 
     const nonce = getNonce();

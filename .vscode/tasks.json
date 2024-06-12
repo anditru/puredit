@@ -22,7 +22,7 @@
     {
       "label": "Watch extension",
       "type": "npm",
-      "path": "vscode-extension",
+      "path": "vscode-extension/extension",
       "script": "watch",
       "problemMatcher": "$tsc-watch",
       "isBackground": true,

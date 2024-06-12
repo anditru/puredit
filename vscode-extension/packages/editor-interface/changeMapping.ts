@@ -2,7 +2,7 @@ import { Transaction } from "@codemirror/state";
 import type { Text } from "@codemirror/state";
 import { ChangeDocumentPayload, ChangeType } from ".";
 
-import { logProvider } from "../../logconfig";
+import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("vscode.editor-interface.changeMapping");
 
 export function mapTransactionToChanges(transaction: Transaction, onWindows: boolean): Change[] {

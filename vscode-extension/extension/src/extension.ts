@@ -4,7 +4,7 @@ import { ProjectionalEditorProvider } from "./projectionalEditorProvider";
 import { getLanguageService } from "vscode-json-languageservice";
 
 const declarativeProjectionSchema = fs.readFileSync(
-  __dirname + "/../extension/declarativeProjectionSchema.json",
+  __dirname + "/../src/declarativeProjectionSchema.json",
   "utf-8"
 );
 const extensionLanguageService = getLanguageService({
