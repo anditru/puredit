@@ -11,7 +11,7 @@ import {
 } from "@codemirror/view";
 import { foldGutter, indentOnInput, bracketMatching } from "@codemirror/language";
 import { closeBrackets } from "@codemirror/autocomplete";
-import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
+import { highlightSelectionMatches } from "@codemirror/search";
 import type { Extension } from "@codemirror/state";
 import { projectionPlugin, type ProjectionPluginConfig } from "@puredit/projections";
 import { vscodeDarkInit } from "@uiw/codemirror-theme-vscode";
@@ -31,7 +31,11 @@ export default class ProjectionalEditorBuilder {
 
   private addBasicExtensions(): ProjectionalEditorBuilder {
     const reducedKeymap = defaultKeymap.filter(
-      (binding) => !binding.key || !["Alt-ArrowLeft", "Alt-ArrowRight"].includes(binding.key)
+      (binding) =>
+        !binding.key ||
+        !["Alt-ArrowLeft", "Alt-ArrowRight", "Mod-ArrowLeft", "Mod-ArrowRight"].includes(
+          binding.key
+        )
     );
 
     this.addExtensions(
@@ -47,7 +51,7 @@ export default class ProjectionalEditorBuilder {
       closeBrackets(),
       bracketMatching(),
       highlightSelectionMatches(),
-      keymap.of([indentWithTab, ...searchKeymap, ...reducedKeymap])
+      keymap.of([indentWithTab, ...reducedKeymap])
     );
     return this;
   }
