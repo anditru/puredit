@@ -79,6 +79,10 @@ export default class CompletionsBuilder {
       boost: this.searchString ? this.boost : 1,
       info: projection.description,
       apply: (view, completion, from, to) => {
+        const insert = projection.pattern
+          .toDraftString()
+          .split("\n")
+          .join("\n" + this.indentation + this.delimiterToken);
         const selection = view.state.selection?.main;
         let replaceFrom = from;
         let replaceTo = to;
@@ -86,14 +90,18 @@ export default class CompletionsBuilder {
           replaceFrom = selection.from;
           replaceTo = selection.to;
         }
+        if (replaceFrom > 0) {
+          const characterLeft = view.state.doc.slice(replaceFrom - 1, replaceFrom).toString();
+          const firstCharacter = insert[0];
+          if (characterLeft === "." && firstCharacter === ".") {
+            replaceFrom--;
+          }
+        }
         view.dispatch({
           changes: {
             from: replaceFrom,
             to: replaceTo,
-            insert: projection.pattern
-              .toDraftString()
-              .split("\n")
-              .join("\n" + this.indentation + this.delimiterToken),
+            insert,
           },
           annotations: pickedCompletion.of(completion),
         });
