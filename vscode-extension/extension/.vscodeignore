@@ -13,4 +13,4 @@ node_modules
 ../../**
 ../packages
 ../editors
-../test-files
+../test-project

@@ -1,0 +1,123 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: Version
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.1.0'
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set version
+        run: npm version ${{ github.event.inputs.version }} --prefix vscode-extension/extension
+      
+      - name: Commit version
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: "[ 'vscode-extension/extension/package-lock.json', 'vscode-extension/extension/package.json' ]"
+          message: "Upgrade extension version to ${{ github.event.inputs.version }}"
+          default_author: user_info
+          push: false
+
+      - name: Clean install node packages
+        run: npm install --build-from-resource
+
+      - name: Build
+        run: npm run pack --prefix vscode-extension/extension
+
+      - name: Create tag
+        shell: bash
+        run: |
+          git tag v${{ github.event.inputs.version }}
+          git push origin v${{ github.event.inputs.version }}
+          git push
+
+      - name: Generate change log
+        id: generateChangeLog
+        uses: actions/github-script@v7
+        env:
+          VERSION_NAME: ${{ github.event.inputs.version }}
+        with:
+          script: |
+            const { data } = await github.rest.repos.generateReleaseNotes({
+              owner: 'andretrump',
+              repo: 'puredit',
+              tag_name: `v${process.env.VERSION_NAME}`,
+            });
+            core.setOutput('data', data);
+
+      - name: Create release
+        id: createRelease
+        uses: actions/github-script@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+          VERSION_NAME: ${{ github.event.inputs.version }}
+          RELEASE_NOTES: ${{ fromJSON(steps.generateChangeLog.outputs.data).body }}
+        with:
+          script: |
+            const { data } = await github.rest.repos.createRelease({
+              owner: 'andretrump',
+              repo: 'puredit',
+              tag_name: `v${process.env.VERSION_NAME}`,
+              release_name: `Release ${process.env.VERSION_NAME}`,
+              body: process.env.RELEASE_NOTES,
+              draft: false,
+              prerelease: false
+            });
+            core.setOutput('data', data);
+
+      - name: Upload VSIX
+        uses: actions/github-script@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+          VERSION_NAME: ${{ github.event.inputs.version }}
+          RELEASE_ID: ${{ fromJSON(steps.createRelease.outputs.data).id }}
+        with:
+          script: |
+            const fs = require("fs");
+            await github.rest.repos.uploadReleaseAsset({
+              owner: 'andretrump',
+              repo: 'puredit',
+              release_id: process.env.RELEASE_ID,
+              name: `puredit-code-${process.env.VERSION_NAME}.vsix`,
+              data: fs.readFileSync(`./vscode-extension/extension/puredit-code-${process.env.VERSION_NAME}.vsix`),
+            });
+      
+      - name: Zip test project
+        run: |
+          cp vscode-extension/extension/puredit-code-${{ github.event.inputs.version }}.vsix vscode-extension/test-project
+          cd vscode-extension/test-project
+          zip -r test-project.zip *
+
+      - name: Upload test project
+        uses: actions/github-script@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
+          VERSION_NAME: ${{ github.event.inputs.version }}
+          RELEASE_ID: ${{ fromJSON(steps.createRelease.outputs.data).id }}
+        with:
+          script: |
+            const fs = require("fs");
+            await github.rest.repos.uploadReleaseAsset({
+              owner: 'andretrump',
+              repo: 'puredit',
+              release_id: process.env.RELEASE_ID,
+              name: 'test-project.zip',
+              data: fs.readFileSync('./vscode-extension/test-project/test-project.zip'),
+            });

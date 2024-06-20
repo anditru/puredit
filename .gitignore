@@ -38,3 +38,6 @@ yarn-error.log*
 
 # repeated here to ensure eslint picks it up
 apps/jupyter/puredit/labextension/
+
+*.zip
+*.vsix

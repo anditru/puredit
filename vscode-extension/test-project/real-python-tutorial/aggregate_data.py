@@ -8,6 +8,7 @@ building_types = (buildings.group_by("building_type")
 .agg(
     pl.mean("sft").alias("mean_sqft"),
     pl.median("year").alias("median_year"),
+    
     pl.len(),
 ))
 print(building_types)

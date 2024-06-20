@@ -2,8 +2,9 @@
   "name": "puredit-code",
   "displayName": "Puredit",
   "description": "A projectional editor that uses textual code as its source of truth.",
+  "icon": "logo.png",
   "repository": "https://github.com/andretrump/puredit",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "engines": {
     "vscode": "^1.83.0"
   },
