@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
+import * as path from "path";
 import { ProjectionalEditorProvider } from "./projectionalEditorProvider";
 import { getLanguageService } from "vscode-json-languageservice";
 
@@ -23,7 +24,19 @@ extensionLanguageService.configure({
 
 const projectionalEditors: Record<string, vscode.WebviewPanel> = {};
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
+  const config = vscode.workspace.getConfiguration("puredit");
+  const scanForDescriptors =
+    config.get<string[]>("scanForDeclarativeProjectionDescriptors") || false;
+  if (scanForDescriptors) {
+    const descriptorFiles = await vscode.workspace.findFiles("**/*.ext.json");
+    const existingDescriptorPaths = config.get<string[]>("declarativeProjectionDescriptors") || [];
+    const pathSet = new Set(existingDescriptorPaths);
+    descriptorFiles.map((path) => path.fsPath).forEach((path) => pathSet.add(path));
+    const newDescriptorPaths = [...pathSet];
+    config.update("declarativeProjectionDescriptors", newDescriptorPaths);
+  }
+
   const projectionalEditorProvider = new ProjectionalEditorProvider(
     context,
     {
