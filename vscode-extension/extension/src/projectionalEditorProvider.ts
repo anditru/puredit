@@ -6,8 +6,8 @@ import {
   ChangeType,
   Message,
   MessageType,
-} from "@puredit/editor-interface";
-import { Action } from "@puredit/editor-interface";
+} from "@puredit/webview-interface";
+import { Action } from "@puredit/webview-interface";
 import { v4 as uuid } from "uuid";
 import { Diagnostic, LanguageService, TextDocument } from "vscode-json-languageservice";
 import * as fs from "fs";
@@ -239,25 +239,18 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
   }
 
   public getHtmlForWebview(webview: vscode.Webview): string {
+    console.log(this.context.extensionUri);
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this.context.extensionUri,
-        "../extension/out",
-        this.svelteResources.scriptPath
-      )
+      vscode.Uri.joinPath(this.context.extensionUri, "./dist", this.svelteResources.scriptPath)
     );
 
     const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this.context.extensionUri,
-        "../extension/out",
-        this.svelteResources.stylePath
-      )
+      vscode.Uri.joinPath(this.context.extensionUri, "./dist", this.svelteResources.stylePath)
     );
+    console.log(scriptUri);
+    console.log(styleUri);
 
-    const baseDir = vscode.Uri.joinPath(this.context.extensionUri, "../extension/out/")
-      .toString()
-      .slice(7);
+    const baseDir = vscode.Uri.joinPath(this.context.extensionUri, "./dist/").toString().slice(7);
     const baseUrl = `https://${scriptUri.authority}${baseDir}`;
 
     const nonce = getNonce();

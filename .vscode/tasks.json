@@ -14,21 +14,15 @@
       "type": "npm",
       "path": "vscode-extension/editors/python",
       "script": "build",
-      "isBackground": false,
-      "presentation": {
-        "close": true
-      }
+      "isBackground": false
     },
     {
       "label": "Watch extension",
       "type": "npm",
       "path": "vscode-extension/extension",
       "script": "watch",
-      "problemMatcher": "$tsc-watch",
       "isBackground": true,
-      "presentation": {
-        "reveal": "never"
-      }
+      "problemMatcher": ["$ts-webpack-watch"]
     }
   ]
 }

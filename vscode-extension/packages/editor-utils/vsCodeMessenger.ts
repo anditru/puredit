@@ -1,4 +1,4 @@
-import { Action, Message, MessagePayload, MessageType } from "@puredit/editor-interface";
+import { Action, Message, MessagePayload, MessageType } from "@puredit/webview-interface";
 import { v4 as uuid } from "uuid";
 
 import { logProvider } from "../../../logconfig";

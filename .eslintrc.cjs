@@ -25,7 +25,7 @@ module.exports = {
   globals: {
     vscode: true,
   },
-  ignorePatterns: ["**/public/examples/"],
+  ignorePatterns: ["**/public/examples/", "*.config.js"],
   rules: {
     "@typescript-eslint/no-non-null-assertion": 0,
     "@typescript-eslint/no-explicit-any": 0,

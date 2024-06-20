@@ -1,6 +1,6 @@
 import { Transaction } from "@codemirror/state";
 import type { Text } from "@codemirror/state";
-import { ChangeDocumentPayload, ChangeType } from ".";
+import { ChangeDocumentPayload, ChangeType } from "@puredit/webview-interface";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("vscode.editor-interface.changeMapping");

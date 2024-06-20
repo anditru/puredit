@@ -14,7 +14,7 @@
     "@codemirror/state": "6",
     "@codemirror/view": "6",
     "@puredit/codemirror-typescript": "*",
-    "@puredit/editor-interface": "*",
+    "@puredit/webview-interface": "*",
     "@puredit/declarative-projections": "*",
     "@puredit/projections": "*",
     "@replit/codemirror-indentation-markers": "6",

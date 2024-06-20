@@ -6,7 +6,7 @@ import { viteStaticCopy } from "vite-plugin-static-copy";
 export default defineConfig({
   build: {
     target: ["chrome89", "edge89", "firefox89", "safari15.1"],
-    outDir: "../../extension/out",
+    outDir: "../../extension/dist",
     rollupOptions: {
       output: {
         entryFileNames: `editors/python/[name].js`,

@@ -7,7 +7,7 @@
     "apps/*",
     "packages/*",
     "packages/projection-libs/*",
-    "vscode-extension/extension",
+    "vscode-extension/*",
     "vscode-extension/packages/*",
     "vscode-extension/editors/*"
   ],

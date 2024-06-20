@@ -1,6 +1,7 @@
 import { EditorView } from "codemirror";
 import { Annotation, ChangeSpec, EditorState, Extension, Transaction } from "@codemirror/state";
-import { Action, mapTransactionToChanges } from "@puredit/editor-interface";
+import { Action } from "@puredit/webview-interface";
+import { mapTransactionToChanges } from "./changeMapping";
 import VsCodeMessenger from "./vsCodeMessenger";
 import { Extension as ProjectionPackageExtension } from "@puredit/declarative-projections";
 import {
