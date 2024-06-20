@@ -104,7 +104,7 @@ export const projectionState = StateField.define<ProjectionState>({
         config.parser
       );
       nodesToRematch = changedStatementNodes;
-      nodesToInvalidate = errorNodes;
+      nodesToInvalidate = errorNodes.concat(changedStatementNodes);
       logger.debug(
         `Rematching ${nodesToRematch.length} changed nodes, invalidating ${nodesToInvalidate.length} nodes`
       );

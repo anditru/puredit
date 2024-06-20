@@ -45,5 +45,6 @@ export function completions(completionContext: CompletionContext): CompletionRes
   return {
     from: word.from,
     options,
+    filter: false,
   };
 }
