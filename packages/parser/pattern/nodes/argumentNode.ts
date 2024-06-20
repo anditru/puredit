@@ -34,14 +34,14 @@ export default class ArgumentNode extends PatternNode {
 
   toDraftString(): string {
     if (this.astNodeTypes.length === 1) {
-      return this.getDraftStringForSingeType(this.astNodeTypes[0], this.language!);
+      return this.getDraftStringForSingeType(this.astNodeTypes[0]);
     } else {
-      return this.getDraftStringForMultipleTypes(this.language!);
+      return this.getDraftStringForMultipleTypes();
     }
   }
 
-  private getDraftStringForSingeType(type: string, language: Language): string {
-    const argumentsConfig = loadArgumentsConfigFor(language);
+  private getDraftStringForSingeType(type: string): string {
+    const argumentsConfig = loadArgumentsConfigFor(this.language);
     const maybeDraft = argumentsConfig.draftTypeMapping[type];
     if (maybeDraft) {
       return maybeDraft;
@@ -50,10 +50,10 @@ export default class ArgumentNode extends PatternNode {
     }
   }
 
-  private getDraftStringForMultipleTypes(language: Language): string {
+  private getDraftStringForMultipleTypes(): string {
     return this.astNodeTypes
       .map((type) => {
-        const argumentsConfig = loadArgumentsConfigFor(language);
+        const argumentsConfig = loadArgumentsConfigFor(this.language);
         return argumentsConfig.draftTypeMapping["default"].replace(typePlaceHolder, type);
       })
       .join("_or");

@@ -21,11 +21,11 @@ export default class BasePattern implements Pattern {
     }
   }
 
-  countLeafNodes(): number {
+  private countLeafNodes(): number {
     return this.recurseCountNumberOfLeafNodes(this.rootNode, 0);
   }
 
-  recurseCountNumberOfLeafNodes(currentNode: PatternNode, currentNumber: number): number {
+  private recurseCountNumberOfLeafNodes(currentNode: PatternNode, currentNumber: number): number {
     if (currentNode.isLeafNode()) {
       return 1;
     }

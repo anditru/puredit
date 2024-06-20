@@ -36,7 +36,7 @@ export default class Parser {
    */
   subPattern(name: string) {
     return (templateStrings: TemplateStringsArray, ...params: TemplateParameter[]) => {
-      const template = new TransformableTemplate(name, this.language, templateStrings, params);
+      const template = new TransformableTemplate(name, templateStrings, params);
       return template;
     };
   }
@@ -48,7 +48,7 @@ export default class Parser {
    */
   statementPattern(name: string) {
     return (templateStrings: TemplateStringsArray, ...params: TemplateParameter[]) => {
-      const template = new TransformableTemplate(name, this.language, templateStrings, params);
+      const template = new TransformableTemplate(name, templateStrings, params);
       return this.templateTransformer.setTemplate(template).setIsExpression(false).execute();
     };
   }
@@ -60,7 +60,7 @@ export default class Parser {
    */
   expressionPattern(name: string) {
     return (templateStrings: TemplateStringsArray, ...params: TemplateParameter[]) => {
-      const template = new TransformableTemplate(name, this.language, templateStrings, params);
+      const template = new TransformableTemplate(name, templateStrings, params);
       return this.templateTransformer.setTemplate(template).setIsExpression(true).execute();
     };
   }

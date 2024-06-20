@@ -9,11 +9,8 @@ import ReferencePattern from "../pattern/referencePattern";
 export type Template = TransformableTemplate | ReferenceTemplate;
 
 export class TransformableTemplate {
-  private patterns: Pattern[] = [];
-
   constructor(
     public readonly name: string,
-    public readonly language: Language,
     public readonly templateStrings: TemplateStringsArray,
     public readonly params: TemplateParameter[]
   ) {}
@@ -38,26 +35,6 @@ export class TransformableTemplate {
 
   toCodeString(language: Language): CodeString {
     return CodeString.fromTemplate(this, language);
-  }
-
-  getAggregation(name: string): TemplateAggregation | undefined {
-    return this.params.find(
-      (param) => param instanceof TemplateAggregation && param.name === name
-    ) as TemplateAggregation;
-  }
-
-  getChain(name: string): TemplateChain | undefined {
-    return this.params.find(
-      (param) => param instanceof TemplateChain && param.name === name
-    ) as TemplateChain;
-  }
-
-  addPattern(pattern: Pattern) {
-    this.patterns.push(pattern);
-  }
-
-  getPatterns(): Pattern[] {
-    return this.patterns;
   }
 }
 

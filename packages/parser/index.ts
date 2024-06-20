@@ -1,7 +1,6 @@
 import Pattern from "./pattern/pattern";
 import PatternNode from "./pattern/nodes/patternNode";
 import TreePath from "./cursor/treePath";
-import TransformableTemplate from "./template/transformableTemplate";
 import WasmPathProvider from "./tree-sitter/wasmPathProvider";
 
 export type { SyntaxNode } from "web-tree-sitter";
@@ -19,5 +18,5 @@ export type {
   ContextVariableRange,
   PatternsMap,
 } from "./match/types";
-export type { Pattern, PatternNode, WasmPathProvider, TransformableTemplate as Template };
+export type { Pattern, PatternNode, WasmPathProvider };
 export { TreePath };

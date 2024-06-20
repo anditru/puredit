@@ -60,7 +60,7 @@ export default abstract class TemplateTransformer {
     for (const aggregation of aggregations) {
       const aggregatedNodeType = this.getAggregatedNodeType(pattern, aggregation);
       const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(
-        this.template.language,
+        this.parser.language,
         aggregatedNodeType
       );
 

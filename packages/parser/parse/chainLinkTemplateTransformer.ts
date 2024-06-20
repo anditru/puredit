@@ -22,7 +22,7 @@ export default class ChainLinkTemplateTransformer extends TemplateTransformer {
   }
 
   execute(): Pattern {
-    this.chainsConfig = loadChainsConfigFor(this.template.language);
+    this.chainsConfig = loadChainsConfigFor(this.parser.language);
 
     const codeString = this.buildCodeString();
     const rootNode = this.transformToPatternTree(codeString);
@@ -50,7 +50,7 @@ export default class ChainLinkTemplateTransformer extends TemplateTransformer {
 
     linkPatternCursor.follow(this.chainsConfig.pathToFirstLink);
     const chainableNodeTypeConfig = loadChainableNodeTypeConfigFor(
-      this.template.language,
+      this.parser.language,
       linkPatternCursor.currentNode.type
     );
 
