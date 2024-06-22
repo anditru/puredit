@@ -1,5 +1,5 @@
 import { parseCodeSamples } from "./code/parse";
-import { ProjectionTree } from "./projection/parse";
+import { Tree } from "@lezer/common";
 import SubProjectionGenerator from "../subProjection/subProjectionGenerator";
 import { ContentGenerator } from "./internal";
 import { BlockVariableMap } from "./context-var-detection/blockVariableMap";
@@ -13,7 +13,8 @@ export default class SubProjectionContentGenerator extends ContentGenerator {
   async execute(
     projectionPath: string,
     codeSamples: string[],
-    parsedProjectionSamples: ProjectionTree[],
+    projectionSamples: string[],
+    projectionTrees: Tree[],
     undeclaredVariableMap: BlockVariableMap,
     globalTemplateParameters: TemplateParameterArray,
     ignoreBlocks: boolean
@@ -21,7 +22,8 @@ export default class SubProjectionContentGenerator extends ContentGenerator {
     this.projectionPath = projectionPath;
     this.ignoreBlocks = ignoreBlocks;
     this.codeSamples = codeSamples;
-    this.projectionTrees = parsedProjectionSamples;
+    this.projectionSamples = projectionSamples;
+    this.projectionTrees = projectionTrees;
     this.undeclaredVariableMap = undeclaredVariableMap;
     this.globalTemplateParameters = globalTemplateParameters;
 

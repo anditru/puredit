@@ -3,7 +3,6 @@ import { scanCode } from "./code/scan";
 import { connectArguments, setArgumentNames } from "./variables";
 import { serializePattern, serializeWidget } from "./serialize";
 import { supportedLanguages } from "./common";
-import { ProjectionTree } from "./projection/parse";
 import { TemplateChain } from "./template/chain";
 import { ProjectionContent } from "./common";
 import SubProjectionGenerator from "../subProjection/subProjectionGenerator";
@@ -15,6 +14,9 @@ import { PatternNode } from "./pattern";
 import TemplateParameterArray from "./template/parameterArray";
 import AstNode from "@puredit/parser/ast/node";
 import { BlockVariableMap } from "./context-var-detection/blockVariableMap";
+import { Tree } from "@lezer/common";
+import { zip } from "@puredit/utils-shared";
+import { getWidgetTokens, getWidgetBoundries } from "./projection/parse";
 
 export default abstract class ContentGenerator {
   // Input
@@ -22,7 +24,8 @@ export default abstract class ContentGenerator {
   protected ignoreBlocks = true;
   protected codeSamples: string[];
   protected codeAsts: AstNode[];
-  protected projectionTrees: ProjectionTree[];
+  protected projectionSamples: string[];
+  protected projectionTrees: Tree[];
 
   // State
   protected undeclaredVariableMap: BlockVariableMap;
@@ -79,6 +82,7 @@ export default abstract class ContentGenerator {
     const subProjectionResolver = new SubProjectionResolver(
       this.codeSamples,
       this.codeAsts,
+      this.projectionSamples,
       this.projectionTrees,
       this.templateParameters.getComplexParams()
     );
@@ -123,7 +127,21 @@ export default abstract class ContentGenerator {
   }
 
   private generateWidgets() {
-    const projectionTokens = this.projectionTrees.map((sample) => sample.getProjectionTokens());
+    const tokensPerWidget = Array.from(zip(this.projectionTrees, this.projectionSamples)).map(
+      ([tree, sample]) => {
+        const cursor = tree.cursor();
+        return getWidgetTokens(cursor, sample);
+      }
+    );
+
+    const widgetBoundries = [];
+    let currentBoundry = -1;
+    for (const widget of tokensPerWidget[0]) {
+      currentBoundry += widget.length;
+      widgetBoundries.push(currentBoundry);
+    }
+
+    const projectionTokens = tokensPerWidget.map(sample => sample.flat());
     const projectionSegments = scanProjections(projectionTokens);
     const argumentPaths = this.templateParameters
       .getTemplateArguments()
@@ -137,7 +155,6 @@ export default abstract class ContentGenerator {
     const templateArguments = this.templateParameters.getTemplateArguments();
     setArgumentNames(projectionSegments, connections, templateArguments);
 
-    const widgetBoundries = this.projectionTrees[0].getWidgetBoundries();
     this.segmentsPerWidget = widgetBoundries.map((boundry, index) => {
       const startIndex = index ? widgetBoundries[index - 1] + 1 : 0;
       return projectionSegments.slice(startIndex, boundry + 1);
@@ -154,11 +171,13 @@ export default abstract class ContentGenerator {
     templateParam: TemplateChain
   ): Promise<[string[], string[]]> {
     const samplesForParam = this.subProjectionSolution.get(templateParam);
-    const numSubProj = samplesForParam[0].projections.length;
+    const numSubProj = samplesForParam[0].getChildren("ProjectionContent").length;
     let allSubProjections = [];
     const newSubProjections = [];
     for (let subProjIndex = 0; subProjIndex < numSubProj; subProjIndex++) {
-      const projectionSamples = samplesForParam.map((group) => group.projections[subProjIndex]);
+      const subProjectionNodes = samplesForParam.map((group) => group.getChildren("ProjectionContent")[subProjIndex]);
+      const subProjectionSamples = Array.from(zip(subProjectionNodes, this.projectionSamples)).map(([node, sample]) => sample.slice(node.from, node.to+1));
+      const subProjectionTrees = subProjectionNodes.map(node => node.toTree());
       let codeSampleParts: string[];
       let relevantGlobalTemplateParams: TemplateParameterArray;
       if (subProjIndex === 0) {
@@ -192,7 +211,8 @@ export default abstract class ContentGenerator {
       const subProjectionsBelow = await contentGenerator.execute(
         this.projectionPath,
         codeSampleParts,
-        projectionSamples,
+        subProjectionSamples,
+        subProjectionTrees,
         this.undeclaredVariableMap,
         relevantGlobalTemplateParams,
         this.ignoreBlocks
@@ -209,11 +229,13 @@ export default abstract class ContentGenerator {
     templateParam: TemplateAggregation
   ): Promise<[string[], string[]]> {
     const samplesForParam = this.subProjectionSolution.get(templateParam);
-    const numSubProj = samplesForParam[0].projections.length;
+    const numSubProj = samplesForParam[0].getChildren("ProjectionContent").length;
     let allSubProjections = [];
     const newSubProjections = [];
     for (let subProjIndex = 0; subProjIndex < numSubProj; subProjIndex++) {
-      const projectionSamples = samplesForParam.map((group) => group.projections[subProjIndex]);
+      const subProjectionNodes = samplesForParam.map((group) => group.getChildren("ProjectionContent")[subProjIndex]);
+      const subProjectionSamples = Array.from(zip(subProjectionNodes, this.projectionSamples)).map(([node, sample]) => sample.slice(node.from, node.to+1));
+      const subProjectionTrees = subProjectionNodes.map(node => node.toTree());
       let codeSampleParts: string[];
       let relevantGlobalTemplateParams: TemplateParameterArray;
       if (subProjIndex === 0 && templateParam.start) {
@@ -248,7 +270,8 @@ export default abstract class ContentGenerator {
       const subProjectionsBelow = await contentGenerator.execute(
         this.projectionPath,
         codeSampleParts,
-        projectionSamples,
+        subProjectionSamples,
+        subProjectionTrees,
         this.undeclaredVariableMap,
         relevantGlobalTemplateParams,
         this.ignoreBlocks

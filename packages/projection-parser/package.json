@@ -13,5 +13,6 @@
   },
   "scripts": {
     "build": "lezer-generator src/projection.grammar -o src/parser && rollup -c"
-  }
+  },
+  "main": "dist/index.js"
 }

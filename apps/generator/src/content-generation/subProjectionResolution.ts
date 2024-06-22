@@ -1,8 +1,9 @@
 import { zip } from "@puredit/utils-shared";
 import ComplexTemplateParameter from "./template/complexParameter";
 import inquirer from "inquirer";
-import { ProjectionTree, ProjectionTreeGroup } from "./projection/parse";
 import AstNode from "@puredit/parser/ast/node";
+import { Tree, SyntaxNode } from "@lezer/common";
+import { getSubProjectionGroups, getWidgetTexts } from "./projection/parse";
 
 export class SubProjectionResolver {
   private static runIndex = 0;
@@ -12,7 +13,8 @@ export class SubProjectionResolver {
   constructor(
     private readonly codeSamples: string[],
     private readonly codeAsts: AstNode[],
-    private readonly projectionTrees: ProjectionTree[],
+    private readonly projectionSamples: string[],
+    private readonly projectionTrees: Tree[],
     private readonly complexTemplateParams: ComplexTemplateParameter[]
   ) {}
 
@@ -31,10 +33,11 @@ export class SubProjectionResolver {
     return this.subProjectionSolution;
   }
 
-  private getSamplesPerParam(): ProjectionTreeGroup[][] {
-    const subProjectionsPerSample = this.projectionTrees.map((sample) =>
-      sample.getProjectionTreeGroups()
-    );
+  private getSamplesPerParam(): SyntaxNode[][] {
+    const subProjectionsPerSample = this.projectionTrees.map((projectionTree) => {
+      const cursor = projectionTree.cursor();
+      return getSubProjectionGroups(cursor);
+    });
     const samplesPerParam = [];
     const numSamples = subProjectionsPerSample[0].length;
     for (let i = 0; i < numSamples; i++) {
@@ -47,13 +50,13 @@ export class SubProjectionResolver {
     return samplesPerParam;
   }
 
-  private resolveByOrder(samplesPerParam: ProjectionTreeGroup[][]) {
+  private resolveByOrder(samplesPerParam: SyntaxNode[][]) {
     for (const [param, samplesForOne] of zip(this.complexTemplateParams, samplesPerParam)) {
       this.subProjectionSolution.set(param, samplesForOne);
     }
   }
 
-  private resolveFromEnv(samplesPerParam: ProjectionTreeGroup[][]) {
+  private resolveFromEnv(samplesPerParam: SyntaxNode[][]) {
     if (!process.env.SUBPROJECTION_RESOLUTION) {
       throw new Error(
         "Please provide subprojection solution in DEBUG mode " +
@@ -77,7 +80,7 @@ export class SubProjectionResolver {
     SubProjectionResolver.runIndex++;
   }
 
-  private async resolveByUserInput(samplesPerParam: ProjectionTreeGroup[][]) {
+  private async resolveByUserInput(samplesPerParam: SyntaxNode[][]) {
     console.log("Cannot automatically resolve chains and aggregations. Please provide input.");
     const unassignedParams = [...this.complexTemplateParams];
     for (const samplesForOne of samplesPerParam) {
@@ -93,11 +96,7 @@ export class SubProjectionResolver {
         };
       });
 
-      const dislpayedSamples = samplesForOne[0].projections
-        .map((projection) =>
-          projection.widgets.map((widget) => `${widget.getText() || "<empty>"}`).join(" [...] ")
-        )
-        .join("\n");
+      const dislpayedSamples = getWidgetTexts(samplesForOne[0], this.projectionSamples[0]);
       const message = `Select the code samples for the following projection samples:\n${dislpayedSamples}\n`;
 
       const answer = await inquirer.prompt([
@@ -116,4 +115,4 @@ export class SubProjectionResolver {
   }
 }
 
-export type SubProjectionSolution = Map<ComplexTemplateParameter, ProjectionTreeGroup[]>;
+export type SubProjectionSolution = Map<ComplexTemplateParameter, SyntaxNode[]>;

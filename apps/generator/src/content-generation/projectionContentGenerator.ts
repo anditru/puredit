@@ -24,6 +24,7 @@ export default class ProjectionContentGenerator extends ContentGenerator {
     const { codeSamples, projectionSamples } = extractCodeAndProjections(samplesFilePath);
     this.ignoreBlocks = ignoreBlocks;
     this.codeSamples = codeSamples;
+    this.projectionSamples = projectionSamples;
 
     this.generator
       .setLanguage(language)
