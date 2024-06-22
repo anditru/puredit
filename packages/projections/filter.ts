@@ -100,21 +100,20 @@ function correctCopyLine(tr: Transaction) {
     }
     let copyFrom = Infinity;
     let copyTo = 0;
-    let leadingWhiteSpace = "";
+    const leadingWhiteSpace = "";
     decorations.between(copiedLine.from, copiedLine.to, (_, __, dec) => {
       modifyCopy = true;
       const match = dec.spec.widget.match;
       if (match.from <= copiedLine.from || match.to >= copiedLine.to) {
-        copyFrom = match.from;
-        copyTo = match.to;
+        copyFrom = startDoc.lineAt(match.from).from;
+        copyTo = startDoc.lineAt(match.to).to;
         change.from = startDoc.lineAt(match.to).to;
         return false;
       }
       if (match.from >= copiedLine.from && match.to <= copiedLine.to) {
-        copyFrom = Math.min(copyFrom, match.from);
-        copyTo = Math.max(copyTo, match.to);
-        const whiteSpace = copiedLine.text.match(/^\s*/);
-        leadingWhiteSpace = whiteSpace?.length ? whiteSpace[0] : "";
+        copyFrom = copiedLine.from;
+        copyTo = copiedLine.to;
+        return false;
       }
     });
     change.insert = prefix + leadingWhiteSpace + startDoc.slice(copyFrom, copyTo) + postfix;

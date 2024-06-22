@@ -16,5 +16,5 @@ lazy_query.show_graph()
 print(lazy_query.explain())
 
 lazy_result = (lazy_query.collect()
-    .select(pl.col("price_per_sqft", "year"))
+    .select(pl.col("price_per_sqft"), "year")
     .describe())

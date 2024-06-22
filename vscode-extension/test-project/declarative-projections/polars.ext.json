@@ -356,6 +356,25 @@
     "subProjections": [
       {
         "type": "chainLink",
+        "name": "Polars:Dataframe:FilterEqual",
+        "description": "Filter the rows of a dataframe where a column has a specific value.",
+        "template": "filter(<%column%> == <%value%>)",
+        "segmentWidgets": ["filtering columns where <%column%> is <%value%>"],
+        "parameters": [
+          {
+            "type": "argument",
+            "name": "column",
+            "nodeTypes": ["identifier"]
+          },
+          {
+            "type": "argument",
+            "name": "value",
+            "nodeTypes": ["string", "integer"]
+          }
+        ]
+      },
+      {
+        "type": "chainLink",
         "name": "Polars:Dataframe:Sort",
         "description": "Sort the rows of a dataframe.",
         "template": "sort<%columnsAndSettings%>",
