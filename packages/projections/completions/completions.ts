@@ -1,4 +1,4 @@
-import type { CompletionContext } from "@codemirror/autocomplete";
+import type { Completion, CompletionContext } from "@codemirror/autocomplete";
 import type { CompletionResult } from "@codemirror/autocomplete";
 import { projectionState } from "../state/state";
 import CompletionsBuilder from "./completionResultBuilder";
@@ -34,17 +34,35 @@ export function completions(completionContext: CompletionContext): CompletionRes
     searchString = completionContext.state.doc.slice(selection.from, selection.to).toString();
   }
 
-  const completionsBuilder = new CompletionsBuilder();
-  const options = completionsBuilder
+  const allCompletionsBuilder = new CompletionsBuilder();
+  const allOptions = allCompletionsBuilder
     .setIndendation(indentation)
     .setContext(contextVariables)
-    .setProjections(config.projectionRegistry.projectionsAsArray)
-    .setSeachString(searchString)
+    .setProjectionRegistry(config.projectionRegistry)
+    .setCompletionSection({
+      name: "All Projections",
+      rank: 1,
+    })
     .build();
+
+  let searchOptions: Completion[] = [];
+  if (searchString) {
+    const searchCompletionsBuilder = new CompletionsBuilder();
+    searchOptions = searchCompletionsBuilder
+      .setIndendation(indentation)
+      .setContext(contextVariables)
+      .setProjectionRegistry(config.projectionRegistry)
+      .setCompletionSection({
+        name: "Search Results",
+        rank: 0,
+      })
+      .setSeachString(searchString)
+      .build();
+  }
 
   return {
     from: word.from,
-    options,
+    options: [...searchOptions, ...allOptions],
     filter: false,
   };
 }

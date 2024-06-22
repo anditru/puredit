@@ -1,14 +1,15 @@
 import type { ContextVariableMap } from "../types";
-import type { Completion } from "@codemirror/autocomplete";
+import type { Completion, CompletionSection } from "@codemirror/autocomplete";
 import { pickedCompletion } from "@codemirror/autocomplete";
-import Fuse from "fuse.js";
 import Projection from "../projection";
+import ProjectionRegistry from "../projectionRegistry";
 
 export default class CompletionsBuilder {
   private indentation!: string;
   private contextVariables!: ContextVariableMap;
+  private completionSection: CompletionSection;
   private delimiterToken = "";
-  private projections: Projection[] = [];
+  private projectionRegistry: ProjectionRegistry;
   private searchString = "";
 
   private completions: Completion[] = [];
@@ -24,13 +25,18 @@ export default class CompletionsBuilder {
     return this;
   }
 
+  setCompletionSection(completionSection: CompletionSection) {
+    this.completionSection = completionSection;
+    return this;
+  }
+
   setDelimiterToken(delimiterToken: string): CompletionsBuilder {
     this.delimiterToken = delimiterToken;
     return this;
   }
 
-  setProjections(projections: Projection[]): CompletionsBuilder {
-    this.projections = projections;
+  setProjectionRegistry(projectionRegistry: ProjectionRegistry): CompletionsBuilder {
+    this.projectionRegistry = projectionRegistry;
     return this;
   }
 
@@ -40,10 +46,10 @@ export default class CompletionsBuilder {
   }
 
   build(): Completion[] {
-    let fittingProjections = this.projections;
+    let fittingProjections = this.projectionRegistry.projectionsAsArray;
 
     if (this.searchString) {
-      fittingProjections = fuzzySearch(fittingProjections, this.searchString);
+      fittingProjections = this.projectionRegistry.search(this.searchString);
     }
 
     for (const projection of fittingProjections) {
@@ -76,6 +82,7 @@ export default class CompletionsBuilder {
     return {
       label: projection.name,
       type: "projection",
+      section: this.completionSection,
       boost: this.searchString ? this.boost : 1,
       info: projection.description,
       apply: (view, completion, from, to) => {
@@ -108,22 +115,4 @@ export default class CompletionsBuilder {
       },
     };
   }
-}
-
-const fuseOptions = {
-  includeScore: true,
-  includeMatches: true,
-  keys: [
-    { name: "name", weight: 0.7 },
-    { name: "description", weight: 0.3 },
-  ],
-  fieldNormWeight: 0,
-  minMatchCharLength: 3,
-  ignoreLocation: true,
-};
-
-function fuzzySearch(projections: Projection[], seachString: string): Projection[] {
-  const fuse = new Fuse(projections, fuseOptions);
-  const results = fuse.search(seachString);
-  return results.map((result) => result.item);
 }

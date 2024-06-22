@@ -5,6 +5,7 @@ import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregation
 import ChainDecorator from "@puredit/parser/pattern/decorators/chainDecorator";
 import ReferencePattern from "@puredit/parser/pattern/referencePattern";
 import { removeFromArray } from "@puredit/utils-shared";
+import FlexSearch from "flexsearch";
 
 export default class ProjectionRegistry {
   private _projectionsByPackage: Record<string, Record<string, Projection>> = {};
@@ -237,6 +238,24 @@ export default class ProjectionRegistry {
     } else {
       throw new Error(`Unknown package ${packageName}`);
     }
+  }
+
+  search(seachString: string): Projection[] {
+    const index = new FlexSearch.Document<Projection>({
+      resolution: 9,
+      tokenize: "forward",
+      document: {
+        id: "name",
+        index: ["name", "description"],
+      },
+    });
+    this.projectionsAsArray.forEach((projection) => {
+      index.add(projection);
+    });
+    const results = index.search(seachString);
+    const names = results[0]?.result || [];
+    const fittingProjections = names.map((name) => this.projectionsByName[name]);
+    return fittingProjections;
   }
 
   get projectionsByPackage() {

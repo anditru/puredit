@@ -3,7 +3,7 @@
   import { projectionPluginConfig } from "./projections";
   import { ProjectionalEditor, ProjectionalEditorBuilder } from "@puredit/editor-utils";
   import { VsCodeMessenger } from "@puredit/editor-utils";
-  import { python } from "@codemirror/lang-python";
+  import { python, globalCompletion, localCompletionSource } from "@codemirror/lang-python";
   import { autocompletion } from "@codemirror/autocomplete";
   import { completions } from "@puredit/projections";
   import { indentUnit } from "@codemirror/language";
@@ -25,7 +25,7 @@
         indentUnit.of("    "),
         autocompletion({
           activateOnTyping: true,
-          override: [completions],
+          override: [completions, globalCompletion, localCompletionSource],
         })
       )
       .setParent(container)

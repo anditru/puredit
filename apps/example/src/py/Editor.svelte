@@ -8,7 +8,7 @@
   import { indentWithTab } from "@codemirror/commands";
   import { autocompletion } from "@codemirror/autocomplete";
   import { indentUnit } from "@codemirror/language";
-  import { python } from "@codemirror/lang-python";
+  import { globalCompletion, localCompletionSource, python } from "@codemirror/lang-python";
   import { onDestroy, onMount } from "svelte";
   import { example } from "./code";
   import { projectionPlugin, completions } from "@puredit/projections";
@@ -48,7 +48,7 @@
       projectionPlugin(projectionPluginConfig),
       autocompletion({
         activateOnTyping: true,
-        override: [completions],
+        override: [completions, globalCompletion, localCompletionSource],
       }),
     ]);
     const codeEditorExtensions = extensions;
@@ -117,9 +117,7 @@
 
   function onThemeChange(theme?: Theme) {
     const transaction = {
-      effects: [
-        darkThemeCompartment.reconfigure(theme === "dark" ? oneDark : []),
-      ],
+      effects: [darkThemeCompartment.reconfigure(theme === "dark" ? oneDark : [])],
     };
     projectionalEditor?.dispatch(transaction);
     codeEditor?.dispatch(transaction);
