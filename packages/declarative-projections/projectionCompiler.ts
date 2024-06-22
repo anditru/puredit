@@ -15,17 +15,14 @@ export class ProjectionCompiler {
   private readonly projectionExtensionCompiler: RootProjectionExtensionCompiler;
 
   constructor(
-    private readonly parser: Parser,
-    private readonly projectionRegistry: ProjectionRegistry,
+    parser: Parser,
+    projectionRegistry: ProjectionRegistry,
     private readonly reportError: (error: string) => void
   ) {
-    this.packageExtensionCompiler = new PackageExtensionCompiler(
-      this.parser,
-      this.projectionRegistry
-    );
+    this.packageExtensionCompiler = new PackageExtensionCompiler(parser, projectionRegistry);
     this.projectionExtensionCompiler = new RootProjectionExtensionCompiler(
-      this.parser,
-      this.projectionRegistry
+      parser,
+      projectionRegistry
     );
   }
 

@@ -111,7 +111,7 @@ export default class ProjectionRegistry {
   insertChainLink(
     packageName: string,
     parentProjectionName: string,
-    aggregationName: string,
+    chainName: string,
     subProjection: SubProjection,
     pattern: Pattern,
     subProjectionsBelow: SubProjection[]
@@ -120,7 +120,7 @@ export default class ProjectionRegistry {
     try {
       this.insertSubProjection(packageName, subProjection, pattern);
       const parentPattern = this.getPatternBy(packageName, parentProjectionName) as ChainDecorator;
-      parentPattern.addLinkPattern(aggregationName, pattern);
+      parentPattern.addLinkPattern(chainName, pattern);
 
       const subPatterns = pattern.getSubPatterns();
       this.referencePatterns = this.referencePatterns.concat(
