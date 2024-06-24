@@ -23,7 +23,6 @@ export default class ProjectionalEditorBuilder {
   private extenstions: Extension[] = [];
   private parent!: Element | DocumentFragment;
   private vsCodeMessenger!: VsCodeMessenger;
-  private onWindows!: boolean;
 
   constructor() {
     this.addBasicExtensions().addOpticalExtensions();
@@ -88,17 +87,7 @@ export default class ProjectionalEditorBuilder {
     return this;
   }
 
-  setOnWindows(onWindows: boolean) {
-    this.onWindows = onWindows;
-    return this;
-  }
-
   build(): ProjectionalEditor {
-    return new ProjectionalEditor(
-      this.vsCodeMessenger,
-      this.extenstions,
-      this.parent,
-      this.onWindows
-    );
+    return new ProjectionalEditor(this.vsCodeMessenger, this.extenstions, this.parent);
   }
 }
