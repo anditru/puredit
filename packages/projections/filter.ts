@@ -2,12 +2,14 @@ import { ChangeSet, EditorSelection, EditorState, Line, Transaction } from "@cod
 import { ChangeSpec } from "@codemirror/state";
 import { ProjectionWidget } from "./widget/widget";
 import { projectionState } from "./state/state";
-import { Match } from "@puredit/parser";
+import { chain, Match } from "@puredit/parser";
 
 export const transactionFilter = EditorState.transactionFilter.of((tr) => {
   const userEvent = tr.annotation(Transaction.userEvent);
 
-  if (userEvent === "move.line") {
+  if (userEvent === "move.drop") {
+    rejectMoveDrop(tr);
+  } else if (userEvent === "move.line") {
     correctMoveLine(tr);
   } else if (userEvent === "input.copyline") {
     correctCopyLine(tr);
@@ -29,7 +31,20 @@ export const transactionFilter = EditorState.transactionFilter.of((tr) => {
 });
 
 /**
- * When Alt + Up / Down is used to move a line, reject the transaction since this will end up in chaos
+ * Reject transactions draging code since this will end up in chaos
+ * @param tr Transaction to correct
+ */
+function rejectMoveDrop(tr: Transaction) {
+  const startDoc = tr.startState.doc;
+  const cursorPosition = tr.startState.selection.main.anchor;
+  Object.assign(tr, {
+    changes: ChangeSet.of([], startDoc.length, tr.startState.lineBreak),
+    selection: EditorSelection.single(cursorPosition, cursorPosition),
+  });
+}
+
+/**
+ * When Alt + Up / Down is used to move a line, reject the transaction since this will end up in chaos as well
  * @param tr Transaction to correct
  */
 function correctMoveLine(tr: Transaction) {
@@ -82,48 +97,57 @@ function correctCopyLine(tr: Transaction) {
 
   let modifyCopy = false;
   const modifiedChanges: ChangeSpec[] = [];
+  let isCopyUp = false;
   tr.changes.iterChanges((from, to, _fromB, _toB, insert) => {
     const change: ChangeSpec = { from, to: undefined, insert };
-    let copiedLine: Line;
-    let prefix = "";
-    const postfix = "";
+    let firstCopiedLine: Line;
+    let lastCopiedLine: Line;
     if (insert.text[0] === "") {
       // Copy up
-      copiedLine = startDoc.lineAt(from - 1);
-      change.from = copiedLine.from - 1;
-      prefix = "\n";
+      isCopyUp = true;
+      firstCopiedLine = startDoc.lineAt(to - insert.length + 1);
+      lastCopiedLine = startDoc.lineAt(from - 1);
+      change.from = firstCopiedLine.from - 1;
     } else {
       // Copy down
-      copiedLine = startDoc.lineAt(to + 1);
-      change.from = copiedLine.to;
-      prefix = "\n";
+      firstCopiedLine = startDoc.lineAt(to + 1);
+      lastCopiedLine = startDoc.lineAt(to + insert.length - 1);
+      change.from = lastCopiedLine.to;
     }
     let copyFrom = Infinity;
     let copyTo = 0;
-    const leadingWhiteSpace = "";
-    decorations.between(copiedLine.from, copiedLine.to, (_, __, dec) => {
+    decorations.between(firstCopiedLine.from, lastCopiedLine.to, (_, __, dec) => {
       modifyCopy = true;
       const match = dec.spec.widget.match;
-      if (match.from <= copiedLine.from || match.to >= copiedLine.to) {
+      if (match.from <= firstCopiedLine.from || match.to >= lastCopiedLine.to) {
         copyFrom = startDoc.lineAt(match.from).from;
         copyTo = startDoc.lineAt(match.to).to;
         change.from = startDoc.lineAt(match.to).to;
         return false;
       }
-      if (match.from >= copiedLine.from && match.to <= copiedLine.to) {
-        copyFrom = copiedLine.from;
-        copyTo = copiedLine.to;
+      if (match.from >= firstCopiedLine.from && match.to <= lastCopiedLine.to) {
+        copyFrom = firstCopiedLine.from;
+        copyTo = lastCopiedLine.to;
         return false;
       }
     });
-    change.insert = prefix + leadingWhiteSpace + startDoc.slice(copyFrom, copyTo) + postfix;
+    change.insert = "\n" + startDoc.slice(copyFrom, copyTo);
     modifiedChanges.push(change);
   });
   if (modifyCopy) {
-    const firstChange = modifiedChanges[0] as { from: number; to: number };
-    const cursorPosition = firstChange.from + 1;
+    const firstChange = modifiedChanges[0] as { from: number; insert: string };
+    const insertionLength = firstChange.insert.length;
+    let selectAnchor: number;
+    let selectHead: number;
+    if (isCopyUp) {
+      selectAnchor = tr.startState.selection.main.anchor;
+      selectHead = tr.startState.selection.main.head;
+    } else {
+      selectAnchor = tr.startState.selection.main.anchor + insertionLength;
+      selectHead = tr.startState.selection.main.head + insertionLength;
+    }
     Object.assign(tr, {
-      selection: EditorSelection.single(cursorPosition, cursorPosition),
+      selection: EditorSelection.create([EditorSelection.range(selectAnchor, selectHead)]),
       changes: ChangeSet.of(modifiedChanges, startDoc.length, tr.startState.lineBreak),
     });
   }
