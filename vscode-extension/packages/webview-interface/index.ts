@@ -6,8 +6,8 @@ export interface Message {
 }
 
 export const enum MessageType {
-  REQUEST = "REQUEST",
-  RESPONSE = "RESPONSE",
+  REQUEST,
+  RESPONSE,
 }
 
 export const enum Action {
@@ -17,6 +17,8 @@ export const enum Action {
   GET_DECLARATIVE_PROJECTIONS = "GET_DECLARATIVE_PROJECTIONS",
   GET_DISABLED_PACKAGES = "GET_DISABLED_PACKAGES",
   REPORT_ERROR = "REPORT_ERROR",
+  GET_EOL = "GET_EOL",
+  UPDATE_EOL = "UPDATE_EOL",
 }
 
 export type MessagePayload = ChangeDocumentPayload | ChangeEditorPayload | string | any;

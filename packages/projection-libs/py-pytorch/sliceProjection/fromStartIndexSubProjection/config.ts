@@ -4,8 +4,8 @@ import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 import { arg } from "@puredit/parser";
 
-const startIndex = arg("startIndex", ["integer", "identifier"]);
-const stepSize = arg("stepSize", ["integer", "identifier"]);
+const startIndex = arg("startIndex", ["integer"]);
+const stepSize = arg("stepSize", ["integer"]);
 const template = parser.subPattern("PyTorch:Tensor:Slice:FromIndex")`${startIndex}::${stepSize}`;
 
 const widget = svelteProjection(Widget);

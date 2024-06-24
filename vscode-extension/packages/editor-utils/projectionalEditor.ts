@@ -12,19 +12,20 @@ import {
 export default class ProjectionalEditor {
   private readonly doNotSyncAnnotation = Annotation.define<boolean>();
   private readonly editorView: EditorView;
+  private eol: EndOfLine = EndOfLine.LF;
 
   constructor(
     private readonly vsCodeMessenger: VsCodeMessenger,
     extensions: Extension[],
-    parent: Element | DocumentFragment,
-    private readonly onWindows: boolean
+    parent: Element | DocumentFragment
   ) {
     this.vsCodeMessenger.registerHandler(Action.UPDATE_EDITOR, (message) => {
       const payload = message.payload as { from: number; to: number; insert: string | Text };
+      const lengthDelta = payload.to - payload.from - payload.insert.length;
       let cursorPosition;
       if (payload.insert.length) {
-        const documentLength = this.editorView.state.doc.length + payload.insert.length;
-        cursorPosition = Math.min(payload.to + payload.insert.length, documentLength - 1);
+        const newLength = this.editorView.state.doc.length + lengthDelta;
+        cursorPosition = Math.min(payload.to + payload.insert.length, newLength - 1);
       } else {
         cursorPosition = payload.from;
       }
@@ -38,6 +39,10 @@ export default class ProjectionalEditor {
         annotations: this.doNotSyncAnnotation.of(true),
         filter: false,
       });
+    });
+
+    this.vsCodeMessenger.registerHandler(Action.UPDATE_EOL, (message) => {
+      this.eol = message.payload as EndOfLine;
     });
 
     this.editorView = new EditorView({
@@ -55,6 +60,9 @@ export default class ProjectionalEditor {
       annotations: this.doNotSyncAnnotation.of(true),
       filter: false,
     });
+
+    const eolResponse = await this.vsCodeMessenger.sendRequest(Action.GET_EOL);
+    this.eol = eolResponse.payload as EndOfLine;
 
     const disabledPackagesResponse = await this.vsCodeMessenger.sendRequest(
       Action.GET_DISABLED_PACKAGES
@@ -77,7 +85,7 @@ export default class ProjectionalEditor {
 
   dispatchTransction(transaction: Transaction, projectionalEditor: EditorView) {
     if (!transaction.changes.empty && !transaction.annotation(this.doNotSyncAnnotation)) {
-      const changes = mapTransactionToChanges(transaction, this.onWindows);
+      const changes = mapTransactionToChanges(transaction, this.eol);
       changes.forEach((change) => {
         this.vsCodeMessenger.sendRequest(Action.UPDATE_DOCUMENT, change.toChangeDocumentPayload());
       });
@@ -90,4 +98,9 @@ export default class ProjectionalEditor {
   destroy() {
     this.editorView.destroy();
   }
+}
+
+export enum EndOfLine {
+  LF = 1,
+  CRLF = 2,
 }

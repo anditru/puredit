@@ -4,7 +4,7 @@ import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 import { arg } from "@puredit/parser";
 
-const index = arg("index", ["integer", "identifier"]);
+const index = arg("index", ["integer"]);
 const template = parser.subPattern("PyTorch:Tensor:Slice:SingleItem")`${index}`;
 
 const widget = svelteProjection(Widget);

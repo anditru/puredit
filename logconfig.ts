@@ -20,9 +20,5 @@ export const logProvider = Log4TSProvider.createProvider("Puredit", {
       identifier: "vscode.editor-utils",
       expression: new RegExp("vscode.editor-utils.+"),
     },
-    {
-      identifier: "vscode.editor-interface",
-      expression: new RegExp("vscode.editor-interface.+"),
-    },
   ],
 });

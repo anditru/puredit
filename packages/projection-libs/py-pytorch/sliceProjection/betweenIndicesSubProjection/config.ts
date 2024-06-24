@@ -4,9 +4,9 @@ import { parser } from "../../parser";
 import Widget from "./Widget.svelte";
 import { arg } from "@puredit/parser";
 
-const startIndex = arg("startIndex", ["integer", "identifier"]);
-const endIndex = arg("endIndex", ["integer", "identifier"]);
-const stepSize = arg("stepSize", ["integer", "identifier"]);
+const startIndex = arg("startIndex", ["integer"]);
+const endIndex = arg("endIndex", ["integer"]);
+const stepSize = arg("stepSize", ["integer"]);
 const template = parser.subPattern(
   "PyTorch:Tensor:Slice:BetweenIndices"
 )`${startIndex}:${endIndex}:${stepSize}`;

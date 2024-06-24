@@ -1,11 +1,12 @@
 import { Transaction } from "@codemirror/state";
 import type { Text } from "@codemirror/state";
 import { ChangeDocumentPayload, ChangeType } from "@puredit/webview-interface";
+import { EndOfLine } from "./projectionalEditor";
 
 import { logProvider } from "../../../logconfig";
-const logger = logProvider.getLogger("vscode.editor-interface.changeMapping");
+const logger = logProvider.getLogger("vscode.editor-utils.changeMapping");
 
-export function mapTransactionToChanges(transaction: Transaction, onWindows: boolean): Change[] {
+export function mapTransactionToChanges(transaction: Transaction, eol: EndOfLine): Change[] {
   const changes: Change[] = [];
   transaction.changes.iterChanges(
     (fromBefore: number, toBefore: number, fromAfter: number, toAfter: number, inserted: Text) => {
@@ -16,7 +17,7 @@ export function mapTransactionToChanges(transaction: Transaction, onWindows: boo
         fromAfter: 0,
         toAfter: 0,
       };
-      if (onWindows) {
+      if (eol === EndOfLine.CRLF) {
         const beforeDoc = transaction.startState.doc;
         const afterDoc = transaction.newDoc;
         lineShift.fromBefore = beforeDoc.lineAt(fromBefore).number - 1;
@@ -72,7 +73,7 @@ export class Change {
   }
 
   isReplacement(): boolean {
-    return this.lengthBefore !== this.lengthAfter && !this.insertsNoText();
+    return this.lengthBefore > 0 && this.lengthAfter > 0 && !this.insertsNoText();
   }
 
   insertsNoText(): boolean {

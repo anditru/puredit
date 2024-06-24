@@ -14,6 +14,7 @@ export default defineConfig({
         assetFileNames: `editors/python/[name].[ext]`,
       },
     },
+    chunkSizeWarningLimit: 2000,
   },
   plugins: [
     svelte(),
