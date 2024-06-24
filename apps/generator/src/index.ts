@@ -1,9 +1,9 @@
 #!/usr/bin/env tsx
 import { ArgumentParser } from "argparse";
 import PackageGenerator from "./package/packageGenerator";
-import ProjectionGenerator from "./projection/projectionGenerator";
+import RootProjectionGenerator from "./rootProjection/rootProjectionGenerator";
 import SubProjectionGenerator from "./subProjection/subProjectionGenerator";
-import ProjectionContentGenerator from "./content-generation/projectionContentGenerator";
+import RootProjectionContentGenerator from "./content-generation/rootProjectionContentGenerator";
 
 const parser = new ArgumentParser({
   description:
@@ -68,7 +68,7 @@ if (args.entity === "package") {
   const packageGenerator = new PackageGenerator();
   packageGenerator.execute();
 } else if (args.entity === "projection" && !args.samplesFile) {
-  const projectionGenerator = new ProjectionGenerator();
+  const projectionGenerator = new RootProjectionGenerator();
   projectionGenerator
     .setLanguage(args.language)
     .setDisplayName(args.displayName)
@@ -76,8 +76,8 @@ if (args.entity === "package") {
     .setDescription(args.description)
     .execute();
 } else if (args.entity === "projection" && args.samplesFile) {
-  const projectionGenerator = new ProjectionGenerator();
-  const contentGenerator = new ProjectionContentGenerator(projectionGenerator);
+  const projectionGenerator = new RootProjectionGenerator();
+  const contentGenerator = new RootProjectionContentGenerator(projectionGenerator);
   contentGenerator.execute(
     args.samplesFile,
     args.ignoreBlocks,

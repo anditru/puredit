@@ -41,7 +41,7 @@ export default abstract class UndeclaredVarSearch {
     }
   }
 
-  private visitNode(): void {
+  private visitNode() {
     const currentNodeType = this.astCursor.currentNode.type;
     if (this.IDENTIFIER_NODE_TYPES.includes(currentNodeType)) {
       this.visitIdentifier();
@@ -56,7 +56,7 @@ export default abstract class UndeclaredVarSearch {
     this.blockToVariablesMap.set(this.currentBlockPath, []);
   }
 
-  private visitIdentifier(): undefined {
+  private visitIdentifier() {
     const currentNode = this.astCursor.currentNode;
     const identifierName = currentNode.text;
     const occurenceInfo = this.inspectIdentifierOccurence();

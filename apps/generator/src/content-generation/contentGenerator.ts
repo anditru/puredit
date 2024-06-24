@@ -6,7 +6,6 @@ import { supportedLanguages } from "./common";
 import { TemplateChain } from "./template/chain";
 import { ProjectionContent } from "./common";
 import SubProjectionGenerator from "../subProjection/subProjectionGenerator";
-import ProjectionGenerator from "../projection/projectionGenerator";
 import { SubProjectionContentGenerator } from "./internal";
 import { TemplateAggregation } from "./template/aggregation";
 import { SubProjectionResolver, SubProjectionSolution } from "./subProjectionResolution";
@@ -16,7 +15,8 @@ import AstNode from "@puredit/parser/ast/node";
 import { BlockVariableMap } from "./context-var-detection/blockVariableMap";
 import { Tree } from "@lezer/common";
 import { zip } from "@puredit/utils-shared";
-import { getWidgetTokens, getWidgetBoundries } from "./projection/parse";
+import { getWidgetTokens } from "./projection/parse";
+import BaseGenerator from "../common/baseGenerator";
 
 export default abstract class ContentGenerator {
   // Input
@@ -42,7 +42,7 @@ export default abstract class ContentGenerator {
   private allSubProjections: string[] = [];
   private segmentWidgetContents: string[] = [];
 
-  constructor(protected readonly generator: ProjectionGenerator | SubProjectionGenerator) {}
+  constructor(protected readonly generator: BaseGenerator) {}
 
   protected assertLanguageAvailable() {
     if (!supportedLanguages.includes(this.generator.language)) {

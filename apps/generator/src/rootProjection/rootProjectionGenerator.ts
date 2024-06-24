@@ -58,7 +58,7 @@ const projectionQuestions: Record<string, Question> = {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export default class ProjectionGenerator extends BaseGenerator {
+export default class RootProjectionGenerator extends BaseGenerator {
   public readonly packagePath = path.resolve("./");
   private projectionConfig: ProjectionConfig = {};
   private projectionContent = {

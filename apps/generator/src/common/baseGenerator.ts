@@ -25,6 +25,11 @@ export default abstract class BaseGenerator {
     }
   }
 
+  abstract setLanguage(language: Language): BaseGenerator;
+  abstract setDisplayName(displayName: string): BaseGenerator;
+  abstract setTechnicalName(technicalName: string): BaseGenerator;
+  abstract setDescription(description: string): BaseGenerator;
+
   abstract execute(): void;
 
   abstract showPrompts(): Promise<string>;

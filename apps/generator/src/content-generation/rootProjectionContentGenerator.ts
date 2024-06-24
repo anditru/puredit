@@ -1,15 +1,15 @@
 import { doubleNewline, Language } from "./common";
 import { parseCodeSamples } from "./code/parse";
 import { parseProjections } from "./projection/parse";
-import ProjectionGenerator from "../projection/projectionGenerator";
+import RootProjectionGenerator from "../rootProjection/rootProjectionGenerator";
 import { ContentGenerator } from "./internal";
 import path from "path";
 import fs from "fs";
 import { handleUndeclaredVariables } from "./context-var-detection";
 import TemplateParameterArray from "./template/parameterArray";
 
-export default class ProjectionContentGenerator extends ContentGenerator {
-  constructor(generator: ProjectionGenerator) {
+export default class RootProjectionContentGenerator extends ContentGenerator {
+  constructor(generator: RootProjectionGenerator) {
     super(generator);
   }
 
@@ -34,7 +34,7 @@ export default class ProjectionContentGenerator extends ContentGenerator {
 
     const projectionName = await this.generator.showPrompts();
     this.projectionPath = path.resolve(
-      (this.generator as ProjectionGenerator).packagePath,
+      (this.generator as RootProjectionGenerator).packagePath,
       projectionName
     );
     this.assertLanguageAvailable();
