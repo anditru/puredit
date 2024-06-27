@@ -2,7 +2,6 @@ import { ChangeSet, EditorSelection, EditorState, Line, Transaction } from "@cod
 import { ChangeSpec } from "@codemirror/state";
 import { ProjectionWidget } from "./widget/widget";
 import { projectionState } from "./state/state";
-import { Match } from "@puredit/parser";
 
 export const transactionFilter = EditorState.transactionFilter.of((tr) => {
   const userEvent = tr.annotation(Transaction.userEvent);
@@ -25,7 +24,6 @@ export const transactionFilter = EditorState.transactionFilter.of((tr) => {
       }
     }
   }
-
   return tr;
 });
 
@@ -161,27 +159,29 @@ function correctDeleteLine(tr: Transaction) {
   const startDoc = tr.startState.doc;
 
   let modifyDelete = false;
-  const modifiedChanges: ChangeSpec[] = [];
-  let match: Match;
-  let cursorPosition = 0;
+  let extendBackwards = false;
+  let change: { from: number; to: number; insert: string };
   tr.changes.iterChanges((from, to, _fromB, _toB, insert) => {
-    const change: ChangeSpec = { from, to, insert };
-    const selection = tr.startState.selection.main;
-    decorations.between(selection.from, selection.to, (_, __, dec) => {
-      match = dec.spec.widget.match;
-      change.from = startDoc.lineAt(match.from).from;
-      cursorPosition = change.from;
-      change.to = Math.min(startDoc.lineAt(match.node.endIndex).to + 1, startDoc.length);
-      change.insert = "";
+    change = { from, to, insert: "" };
+    decorations.between(from + 1, to - 1, (_, __, dec) => {
       modifyDelete = true;
-      return false;
+      const match = dec.spec.widget.match;
+      if (match.from <= change.from) {
+        change.from = startDoc.lineAt(match.from).from;
+        extendBackwards = true;
+      }
+      if (match.to >= change.to) {
+        change.to = startDoc.lineAt(match.to).to;
+      }
     });
-    modifiedChanges.push(change);
   });
   if (modifyDelete) {
+    if (extendBackwards) {
+      change!.to = change!.to + 1;
+    }
     Object.assign(tr, {
-      selection: EditorSelection.single(cursorPosition, cursorPosition),
-      changes: ChangeSet.of(modifiedChanges, startDoc.length, tr.startState.lineBreak),
+      selection: EditorSelection.single(change!.from + 1),
+      changes: ChangeSet.of([change!], startDoc.length, tr.startState.lineBreak),
     });
   }
 }
