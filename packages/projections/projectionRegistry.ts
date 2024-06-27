@@ -258,6 +258,19 @@ export default class ProjectionRegistry {
     return fittingProjections;
   }
 
+  getSiblingLinkProjections(pattern: Pattern): Projection[] {
+    for (const projection of this.projectionsAsArray) {
+      if (!(projection.pattern instanceof ChainDecorator)) {
+        continue;
+      }
+      const linkPatterns = projection.pattern.getAllLinkPatterns();
+      if (linkPatterns.find((currPattern) => currPattern.name === pattern.name)) {
+        return linkPatterns.map((currPattern) => this._projectionsByName[currPattern.name]);
+      }
+    }
+    return [];
+  }
+
   get projectionsByPackage() {
     return Object.assign({}, this._projectionsByPackage);
   }

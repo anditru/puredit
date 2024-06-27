@@ -2,14 +2,13 @@ import type { ContextVariableMap } from "../types";
 import type { Completion, CompletionSection } from "@codemirror/autocomplete";
 import { pickedCompletion } from "@codemirror/autocomplete";
 import Projection from "../projection";
-import ProjectionRegistry from "../projectionRegistry";
 
 export default class CompletionsBuilder {
   private indentation!: string;
   private contextVariables!: ContextVariableMap;
-  private completionSection: CompletionSection;
+  private completionSection!: CompletionSection;
   private delimiterToken = "";
-  private projectionRegistry: ProjectionRegistry;
+  private projections!: Projection[];
   private searchString = "";
 
   private completions: Completion[] = [];
@@ -35,8 +34,8 @@ export default class CompletionsBuilder {
     return this;
   }
 
-  setProjectionRegistry(projectionRegistry: ProjectionRegistry): CompletionsBuilder {
-    this.projectionRegistry = projectionRegistry;
+  setProjections(projections: Projection[]): CompletionsBuilder {
+    this.projections = projections;
     return this;
   }
 
@@ -46,13 +45,7 @@ export default class CompletionsBuilder {
   }
 
   build(): Completion[] {
-    let fittingProjections = this.projectionRegistry.projectionsAsArray;
-
-    if (this.searchString) {
-      fittingProjections = this.projectionRegistry.search(this.searchString);
-    }
-
-    for (const projection of fittingProjections) {
+    for (const projection of this.projections) {
       this.processProjection(projection);
     }
 
