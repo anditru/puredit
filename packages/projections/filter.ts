@@ -237,7 +237,7 @@ function correctCursorMovements(tr: Transaction) {
   const assoc = selection!.main.assoc;
   // Find decorations that _contain_ the cursor (hence the +/- 1),
   // not only touch it
-  decorations.between(pos, pos, (fromDec, toDec, dec) => {
+  decorations.between(pos + 1, pos - 1, (fromDec, toDec, dec) => {
     const widget = dec.spec.widget;
     if (!(widget instanceof ProjectionWidget)) {
       return;
