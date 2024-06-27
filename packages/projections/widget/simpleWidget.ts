@@ -71,7 +71,7 @@ export const simpleProjection = (template: Array<string | TemplateArgument | Tem
         isFocused = true;
         view.dispatch({
           selection: {
-            anchor: this.match.node.startIndex,
+            anchor: this.match.from,
           },
         });
       });
@@ -82,8 +82,8 @@ export const simpleProjection = (template: Array<string | TemplateArgument | Tem
         if (!isFocused) {
           view.dispatch({
             selection: {
-              anchor: this.match.node.startIndex,
-              head: this.match.node.endIndex,
+              anchor: this.match.from,
+              head: this.match.to,
             },
           });
         }
@@ -118,12 +118,12 @@ export const simpleProjection = (template: Array<string | TemplateArgument | Tem
     onLeaveStart(): void {
       this.view?.focus();
       this.view?.dispatch({
-        selection: EditorSelection.single(this.match.node.startIndex),
+        selection: EditorSelection.single(this.match.from),
       });
     }
 
     onLeaveEnd(): void {
-      let end = this.match.node.endIndex;
+      let end = this.match.to;
       if (this.match.blockRanges.length) {
         end = this.match.blockRanges[0].from;
       }

@@ -54,7 +54,7 @@ export const svelteProjection = (Component: ComponentClass<Props>) =>
         isFocused = true;
         view.dispatch({
           selection: {
-            anchor: this.match.node.startIndex,
+            anchor: this.match.from,
           },
         });
       });
@@ -65,8 +65,8 @@ export const svelteProjection = (Component: ComponentClass<Props>) =>
         if (!isFocused) {
           view.dispatch({
             selection: {
-              anchor: this.match.node.startIndex,
-              head: this.match.node.endIndex,
+              anchor: this.match.from,
+              head: this.match.to,
             },
           });
         }
@@ -92,7 +92,7 @@ export const svelteProjection = (Component: ComponentClass<Props>) =>
     onLeaveStart(): void {
       this.view?.focus();
       this.view?.dispatch({
-        selection: EditorSelection.single(this.match.node.startIndex),
+        selection: EditorSelection.single(this.match.from),
       });
     }
 

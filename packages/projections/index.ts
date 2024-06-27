@@ -15,6 +15,7 @@ import type {
   ContextInformation,
 } from "./types";
 import { style } from "./widget/style";
+import { cursorRescuer } from "./cursorMovements";
 
 export type {
   ProjectionPluginConfig,
@@ -29,6 +30,7 @@ export const projectionPlugin = (config: ProjectionPluginConfig) => [
   projectionState.init((state) => createProjectionState(state, config)),
   transactionFilter,
   updateListener,
+  cursorRescuer,
 ];
 
 export { completions, insertDeclarativeProjectionsEffect, removeProjectionPackagesEffect };

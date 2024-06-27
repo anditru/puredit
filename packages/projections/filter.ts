@@ -2,11 +2,10 @@ import { ChangeSet, EditorSelection, EditorState, Line, Transaction } from "@cod
 import { ChangeSpec } from "@codemirror/state";
 import { ProjectionWidget } from "./widget/widget";
 import { projectionState } from "./state/state";
-import { chain, Match } from "@puredit/parser";
+import { Match } from "@puredit/parser";
 
 export const transactionFilter = EditorState.transactionFilter.of((tr) => {
   const userEvent = tr.annotation(Transaction.userEvent);
-
   if (userEvent === "move.drop") {
     rejectMoveDrop(tr);
   } else if (userEvent === "move.line") {

@@ -1,4 +1,10 @@
-import { EditorState, RangeSetBuilder, StateEffect, StateField } from "@codemirror/state";
+import {
+  EditorState,
+  RangeSetBuilder,
+  StateEffect,
+  StateField,
+  Transaction,
+} from "@codemirror/state";
 import { Decoration, EditorView } from "@codemirror/view";
 import type { DecorationSet, ViewUpdate } from "@codemirror/view";
 import { PatternMatching } from "@puredit/parser";
@@ -10,9 +16,9 @@ import AstNode from "@puredit/parser/ast/node";
 import AstCursor from "@puredit/parser/ast/cursor";
 import { zip } from "@puredit/utils-shared";
 import { Extension } from "@puredit/declarative-projections";
+import ProjectionRegistry from "../projectionRegistry";
 
 import { logProvider } from "../../../logconfig";
-import ProjectionRegistry from "../projectionRegistry";
 const logger = logProvider.getLogger("projections.state.state");
 
 export interface ProjectionState {
