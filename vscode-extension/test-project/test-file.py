@@ -1,63 +1,80 @@
-# CONTEXT: { "city": "string", "date": "string", "temperature": "number" }
-aggregated_weather = weather.pivot(
+import torch
+import polars as pl
+from tutorial.utils import download_file, get_image_data
+
+download_file("https://corgis-edu.github.io/corgis/datasets/csv/weather/weather.csv", "data/weather.csv")
+
+weather_data = pl.read_csv("data/weather.csv")
+print(weather_data)
+
+aggregated_weather =(weather_data.pivot(
     index=[
-        "date"
+        "Date.Full"
     ], columns=[
-        "city"
+        "Station.City"
     ], values=[
-        "temperature"
+        "Data.Temperature.Avg Temp"
     ], aggregate_function="mean"
 )
-
-unpivoted_weather = (aggregated_weather.melt(
-    id_vars=[
-        "date"
-    ], value_vars=[
-        "city"
-    ], variable_name="city", value_name="average_temperature"
-)
 .drop_nulls())
+print(aggregated_weather)
 
-# CONTEXT: { "first_name": "string", "last_name": "string", "age": "number", "semester": "number" }
-filtered_students = (students.select(
-        pl.col("firstName").alias("first_name"),
-        "age",
-        "semester",
-        name="last_name"
+melted_weather = (weather_data.melt(
+    id_vars=[
+        "Station.City",
+        "Date.Full"
+    ], value_vars=[
+        "Data.Temperature.Min Temp",
+        "Data.Temperature.Max Temp",
+        "Data.Temperature.Avg Temp"
+    ], variable_name="Temperature Variant", value_name="Value"
+))
+print(melted_weather)
+
+transformed_weather = (weather_data.select(
+        pl.col("Date.Full").alias("date"),
+        pl.col("Data.Temperature.Max Temp").alias("max_temperature"),
+        "Station.City",
+        year="Date.Year"
     )
-    .filter(age == 24)
     .drop_nulls()
-    .group_by("age")
+    .filter(pl.col("year") > 2015)
+    .group_by("Station.City")
     .agg(
-        "last_name",
-        pl.col("semster").avg()
+        pl.col("max_temperature").max()
     )
-    .rename({"last_name": "LastName"})
-    .drop("LastName")
+    .rename({"Station.City": "city"})
+    .sort("max_temperature", descending=True)
 )
+print(transformed_weather)
 
-# CONTEXT: { "item": "string", "item_price": "number", "quantity": "number" }
-extended_prices = prices.with_columns(
-    (pl.col("item_pice") + pl.col("quantity")).alias("total_price")
-)
+image_data = get_image_data()
+print(image_data.shape)
 
-# CONTEXT: [ "Batches", "Images", "Channels", "Width", "Height" ]
-image_data.transpose(0, 1)
+# CONTEXT: [ "Batch", "Image", "Gray Scale Value", "Width", "Height" ]
+transposed = image_data.transpose(0, 1)
+print(transposed.shape)
 
-# CONTEXT: [ "Batches", "Images", "Channels", "Width", "Height" ]
-image_date.permute(2, 3, 0, 1, 4)
+# CONTEXT: [ "Batch", "Image", "Gray Scale Value", "Width", "Height" ]
+permuted = image_data.permute(2, 3, 0, 1, 4)
+print(permuted.shape)
 
-# CONTEXT: { "Batches": 200, "Images": 64, "Channels": 3, "Width": 32, "Height": 32 }
+# CONTEXT: { "Batch": 10, "Image": 1000, "Gray Scale Value": 1, "Width": 28, "Height": 28 }
 slice_1 = image_data[
-    50::2,
+    5::2,
     :32:1
 ]
+print(slice_1.shape)
 
-# CONTEXT: { "Batches": 200, "Images": 64, "Channels": 3, "Width": 32, "Height": 32 }
+#CONTEXT: { "Batch": 10, "Image": 1000, "Gray Scale Value": 1, "Width": 28, "Height": 28 }
 slice_2 = image_data[
-    25:50:2,
+    2:9:2,
     1
 ]
+print(slice_2.shape)
 
-maximum = torch.max(some_tensor)
-result = torch.cat((some_tensor, some_other), 3)
+maximum = torch.max(image_data)
+print(maximum)
+
+result = torch.cat((image_data, image_data), 0)
+print(result.shape)

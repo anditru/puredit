@@ -1,6 +1,8 @@
 import requests
 import pathlib
 import numpy as np
+import torch
+import torchvision
 
 def get_buildings_data(num_rows):
     rng = np.random.default_rng(seed=7)
@@ -13,7 +15,6 @@ def get_buildings_data(num_rows):
 
 def download_file(file_url: str, local_file_path: str) -> None:
     local_file = pathlib.Path(local_file_path)
-    """Download a file and save it with the specified file name."""
     response = requests.get(file_url)
     if response:
         local_file.write_bytes(response.content)
@@ -22,3 +23,23 @@ def download_file(file_url: str, local_file_path: str) -> None:
         raise requests.exceptions.RequestException(
             f"Failed to download the file. Status code: {response.status_code}"
         )
+
+def get_image_data():
+    loader = torch.utils.data.DataLoader(
+        torchvision.datasets.MNIST(
+            './data/',
+            train=False,
+            download=True,
+            transform=torchvision.transforms.Compose([
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Normalize(
+                (0.1307,), (0.3081,))
+            ])),
+        batch_size=1000,
+        shuffle=True
+    )
+    all_batches = []
+    for _, (example_data, _) in enumerate(loader):
+        all_batches.append(example_data)
+    all_data = torch.stack(all_batches, dim=0)
+    return all_data
