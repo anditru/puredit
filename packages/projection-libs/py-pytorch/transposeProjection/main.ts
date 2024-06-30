@@ -8,7 +8,7 @@ const tensor = arg("tensor", ["identifier"]);
 const dim0 = arg("dim0", ["integer"]);
 const dim1 = arg("dim1", ["integer"]);
 
-const pattern = parser.statementPattern(
+const pattern = parser.expressionPattern(
   "PyTorch:Tensor:Transpose"
 )`${tensor}.transpose(${dim0}, ${dim1})`;
 

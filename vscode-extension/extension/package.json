@@ -20,6 +20,7 @@
       "properties": {
         "puredit.declarativeProjectionDescriptors": {
           "type": "array",
+          "scope": "window",
           "default": [],
           "description": "Enter absolute paths to your .ext.json files containing declaratively defined projections.",
           "items": {
@@ -28,18 +29,19 @@
         },
         "puredit.scanForDeclarativeProjectionDescriptors": {
           "type": "boolean",
+          "scope": "window",
           "default": true,
           "description": "Scan for .ext.json files in the current project and load them."
         },
         "puredit.enabledPackages.py-polars": {
           "type": "boolean",
-          "scope": "application",
+          "scope": "window",
           "default": true,
           "description": "Enable projections for Polars."
         },
         "puredit.enabledPackages.py-pytorch": {
           "type": "boolean",
-          "scope": "application",
+          "scope": "window",
           "default": true,
           "description": "Enable projections for PyTorch."
         }

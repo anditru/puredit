@@ -3,11 +3,10 @@ import polars as pl
 from tutorial.utils import download_file, get_image_data
 
 download_file("https://corgis-edu.github.io/corgis/datasets/csv/weather/weather.csv", "data/weather.csv")
-
 weather_data = pl.read_csv("data/weather.csv")
 print(weather_data)
 
-aggregated_weather =(weather_data.pivot(
+aggregated_weather = (weather_data.pivot(
     index=[
         "Date.Full"
     ], columns=[
@@ -41,7 +40,7 @@ transformed_weather = (weather_data.select(
     .filter(pl.col("year") > 2015)
     .group_by("Station.City")
     .agg(
-        pl.col("max_temperature").max()
+        pl.max("max_temperature")
     )
     .rename({"Station.City": "city"})
     .sort("max_temperature", descending=True)

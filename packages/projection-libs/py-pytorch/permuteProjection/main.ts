@@ -9,7 +9,7 @@ import { integerPart } from "../common/integerPart/config";
 const tensor = arg("tensor", ["identifier"]);
 const dimensions = agg("dimensions", "argument_list", [integerPart.template]);
 
-const pattern = parser.statementPattern("PyTorch:Tensor:Permute")`${tensor}.permute${dimensions}`;
+const pattern = parser.expressionPattern("PyTorch:Tensor:Permute")`${tensor}.permute${dimensions}`;
 
 const beginWidget = svelteProjection(BeginWidget);
 const endWidget = svelteProjection(EndWidget);

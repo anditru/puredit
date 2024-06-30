@@ -26,13 +26,4 @@
   });
 </script>
 
-<div style="display: flex; flex-direction: column;">
-  {#if context.reorderedDimensions}
-    <span>Dimensions after permutation:</span>
-    <div style="display: flex; flex-direction: column;">
-      {#each context.reorderedDimensions as dimension, index}
-        <span style="margin-left: 10px;">{index}: {dimension}</span>
-      {/each}
-    </div>
-  {/if}
-</div>
+<span style="display: inline-flex;"> end transpose </span>

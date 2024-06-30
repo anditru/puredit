@@ -30,14 +30,28 @@
 </script>
 
 <span class="inline-flex">
-  <span>Permute dimensions of tensor</span>
-  <TextInput
-    className={highlightingFor(state, [tags.atom])}
-    node={match.argsToAstNodeMap.tensor}
-    {state}
-    {view}
-    {focusGroup}
-    placeholder="tensor"
-  />
-  <span>to order</span>
+  <div style="display: flex; flex-direction: column;">
+    <span class="inline-flex">
+      <span>Permute dimensions of tensor</span>
+      <TextInput
+        className={highlightingFor(state, [tags.atom])}
+        node={match.argsToAstNodeMap.tensor}
+        {state}
+        {view}
+        {focusGroup}
+        placeholder="tensor"
+      />
+      <span>to order</span>
+    </span>
+    <div style="display: flex; flex-direction: column;">
+      {#if context.reorderedDimensions}
+        <span>Dimensions after permutation:</span>
+        <div style="display: flex; flex-direction: column;">
+          {#each context.reorderedDimensions as dimension, index}
+            <span style="margin-left: 10px;">{index}: {dimension}</span>
+          {/each}
+        </div>
+      {/if}
+    </div>
+  </div>
 </span>

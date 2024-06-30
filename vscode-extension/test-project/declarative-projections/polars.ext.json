@@ -388,6 +388,10 @@
               {
                 "type": "aggregationPartReference",
                 "referencedProjection": "Polars:Column:Chain"
+              },
+              {
+                "type": "aggregationPartReference",
+                "referencedProjection": "Polars:Column"
               }
             ]
           }

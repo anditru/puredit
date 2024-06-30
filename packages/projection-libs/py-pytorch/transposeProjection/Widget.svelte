@@ -61,13 +61,15 @@
         placeholder="tensor"
       />
     </span>
-    {#if context.dimensions}
-      <span>Dimensions after transpose:</span>
-      <div style="display: flex; flex-direction: column;">
-        {#each context.dimensions as dimension, index}
-          <span style="margin-left: 10px;">{index}: {dimension}</span>
-        {/each}
-      </div>
-    {/if}
+    <div style="display: flex; flex-direction: column;">
+      {#if context.dimensions}
+        <span>Dimensions after transpose:</span>
+        <div style="display: flex; flex-direction: column;">
+          {#each context.dimensions as dimension, index}
+            <span style="margin-left: 10px;">{index}: {dimension}</span>
+          {/each}
+        </div>
+      {/if}
+    </div>
   </div>
 </span>
