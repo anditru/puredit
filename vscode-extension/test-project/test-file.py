@@ -37,7 +37,7 @@ transformed_weather = (weather_data.select(
         year="Date.Year"
     )
     .drop_nulls()
-    .filter(pl.col("year") > 2015)
+    .filter(year=2015)
     .group_by("Station.City")
     .agg(
         pl.max("max_temperature")

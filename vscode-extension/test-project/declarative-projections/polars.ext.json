@@ -358,7 +358,7 @@
         "type": "chainLink",
         "name": "Polars:Dataframe:FilterEqual",
         "description": "Filter the rows of a dataframe where a column has a specific value.",
-        "template": "filter(<%column%> == <%value%>)",
+        "template": "filter(<%column%>=<%value%>)",
         "segmentWidgets": ["filtering columns where <%column%> is <%value%>"],
         "parameters": [
           {
