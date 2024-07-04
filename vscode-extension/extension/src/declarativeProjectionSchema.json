@@ -188,13 +188,16 @@
     "TemplateParameterDefinition": {
       "anyOf": [
         {
+          "$ref": "#/definitions/TemplateChainDefinition"
+        },
+        {
+          "$ref": "#/definitions/TemplateAggregationDefinition"
+        },
+        {
           "$ref": "#/definitions/TemplateArgumentDefinition"
         },
         {
           "$ref": "#/definitions/TemplateContextVariableDefinition"
-        },
-        {
-          "$ref": "#/definitions/TemplateAggregationDefinition"
         }
       ]
     },
@@ -263,7 +266,8 @@
       "type": "object",
       "properties": {
         "type": {
-          "type": "string"
+          "type": "string",
+          "const": "chain"
         },
         "name": {
           "type": "string"

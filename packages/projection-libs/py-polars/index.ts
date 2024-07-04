@@ -1,5 +1,5 @@
-import { columnChainProjection } from "./columnChainProjection/main";
-import { selectChainProjection as processingChainProjection } from "./processingChainProjection/main";
+import { columnChainProjection } from "./columnChain/main";
+import { dataFrameChainProjection } from "./dataFrameChain/main";
 
-export const projections = [columnChainProjection, processingChainProjection];
-export { columnChainProjection, processingChainProjection };
+export const projections = [dataFrameChainProjection, columnChainProjection];
+export { dataFrameChainProjection, columnChainProjection };
