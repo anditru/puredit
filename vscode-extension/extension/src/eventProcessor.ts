@@ -1,17 +1,16 @@
 import * as vscode from "vscode";
 import { Action, ChangeDocumentPayload, Message, MessageType } from "@puredit/webview-interface";
-import { Diagnostic, LanguageService, TextDocument } from "vscode-json-languageservice";
 import * as fs from "fs";
 import { v4 as uuid } from "uuid";
 import { mapToChangeSpec, mapToWorkspaceEdit } from "./changeMapping";
 import { getHtmlForWebview } from "./bootstrap";
 import { EditorContext } from "./editorRegistry";
 import DocumentRegistry from "./documentRegistry";
+import { load } from "js-yaml";
+import { validateSchema } from "./descriptorValidation";
 
 export class EventProcessor {
   private pendingDuplicateUpdates = 0;
-
-  constructor(private readonly extensionLanguageService: LanguageService) {}
 
   processDocumentChange(event: vscode.TextDocumentChangeEvent, context: EditorContext) {
     const oldDocumentState = DocumentRegistry.instance.get(event.document);
@@ -137,34 +136,31 @@ export class EventProcessor {
   private async readDeclarativeProjections(descriptorPaths: string[]) {
     let extensions: any[] = [];
     for (const descriptorPath of descriptorPaths) {
-      let descriptor: string;
+      let descriptorString: string;
       try {
-        descriptor = fs.readFileSync(descriptorPath, "utf-8");
+        descriptorString = fs.readFileSync(descriptorPath, "utf-8");
       } catch (error) {
         vscode.window.showErrorMessage(
           `Failed to read extension descriptor path ${descriptorPath}.`
         );
         continue;
       }
-
-      const textDocument = TextDocument.create("config.json", "json", 1, descriptor);
-      const jsonDocument = this.extensionLanguageService.parseJSONDocument(textDocument);
-      const diagnostics = await this.extensionLanguageService.doValidation(
-        textDocument,
-        jsonDocument
-      );
-      const errors = diagnostics.filter(
-        (diagnostic) => diagnostic.severity && diagnostic.severity <= 2
-      );
-      if (errors.length > 0) {
-        const message = errors.reduce((prev, error: Diagnostic) => {
-          const newMessage =
-            (prev += `\nLine ${error.range.start.line}:${error.range.start.character} ${error.message}`);
-          return newMessage;
-        }, "Invalid configuration for Puredit extensions:");
-        vscode.window.showErrorMessage(message);
+      let descriptor;
+      if (descriptorPath.endsWith(".json")) {
+        descriptor = JSON.parse(descriptorString);
+      } else if (descriptorPath.endsWith(".yaml") || descriptorPath.endsWith(".json")) {
+        descriptor = load(descriptorString);
       } else {
-        extensions = extensions.concat(JSON.parse(descriptor));
+        vscode.window.showErrorMessage(
+          `Unsupported descriptor format in file ${descriptorPath}. Only JSON and YAML are supported.`
+        );
+      }
+      if (validateSchema(descriptor)) {
+        extensions = extensions.concat(descriptor);
+      } else {
+        vscode.window.showErrorMessage(
+          `Invalid descriptor syntax in file ${descriptorPath}. Open the file for details.`
+        );
       }
     }
     return extensions;

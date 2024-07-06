@@ -11,7 +11,14 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "extensionDependencies": [
+    "redhat.vscode-yaml"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/*.puredit.json",
+    "workspaceContains:**/*.puredit.yaml",
+    "workspaceContains:**/*.puredit.yml"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "configuration": {
@@ -22,7 +29,7 @@
           "type": "array",
           "scope": "window",
           "default": [],
-          "description": "Enter absolute paths to your .ext.json files containing declaratively defined projections.",
+          "description": "Enter absolute paths to your files containing declaratively defined projections.",
           "items": {
             "type": "string"
           }
@@ -31,7 +38,7 @@
           "type": "boolean",
           "scope": "window",
           "default": true,
-          "description": "Scan for .ext.json files in the current project and load them."
+          "description": "Scan for declarative projection descriptor files in the current project and load them."
         },
         "puredit.enabledPackages.py-polars": {
           "type": "boolean",
@@ -49,7 +56,7 @@
     },
     "jsonValidation": [
       {
-        "fileMatch": "*.ext.json",
+        "fileMatch": "*.puredit.json",
         "url": "./dist/declarativeProjectionSchema.json"
       }
     ],
@@ -90,6 +97,7 @@
     "lint": "eslint \"src/**/*.ts\""
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/mocha": "^10.0.2",
     "@types/node": "18.x",
     "@types/uuid": "^9.0.8",
@@ -107,8 +115,11 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "vscode-json-languageservice": "^5.3.11",
+    "ajv": "^8.16.0",
+    "js-yaml": "^4.1.0",
     "webpack": "^5.92.1",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "yaml": "^2.4.5",
+    "yaml-validator": "^5.1.0"
   }
 }

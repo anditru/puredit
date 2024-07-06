@@ -1,11 +1,20 @@
 import * as vscode from "vscode";
-import { extensionLanguageService } from "./extensionLanguageService";
 import { ProjectionalEditorProvider } from "./projectionalEditorProvider";
 import { SvelteResources } from "./editorRegistry";
 import DocumentRegistry from "./documentRegistry";
 
 export async function activate(extensionContext: vscode.ExtensionContext) {
   DocumentRegistry.init(extensionContext);
+
+  // Enbale validation yaml extnesion files
+  const yamlConfig = vscode.workspace.getConfiguration("yaml");
+  const pathToSchema = vscode.Uri.joinPath(
+    extensionContext.extensionUri,
+    "dist/declarativeProjectionSchema.json"
+  ).toString();
+  const currentSettings = yamlConfig.get<object>("schemas");
+  const newSettings = { ...currentSettings, [pathToSchema]: "*.puredit.yaml" };
+  yamlConfig.update("schemas", newSettings, vscode.ConfigurationTarget.Global);
 
   // Scan for declarative projection descriptors if required
   const config = vscode.workspace.getConfiguration("puredit");
@@ -22,8 +31,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
   };
   const projectionalPythonEditorProvider = new ProjectionalEditorProvider(
     extensionContext,
-    svelteResources,
-    extensionLanguageService()
+    svelteResources
   );
   const providerRegistration = vscode.window.registerCustomEditorProvider(
     "puredit.PythonEditor",
@@ -42,7 +50,9 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
 async function scanForDeclarativeProjectionDescriptors(
   extensionConfig: vscode.WorkspaceConfiguration
 ) {
-  const descriptorFiles = await vscode.workspace.findFiles("**/*.ext.json");
+  const jsonDescriptorFiles = await vscode.workspace.findFiles("**/*.puredit.json");
+  const yamlDescriptorFiles = await vscode.workspace.findFiles("**/*.puredit.yaml");
+  const descriptorFiles = jsonDescriptorFiles.concat(yamlDescriptorFiles);
   const existingDescriptorPaths =
     extensionConfig.get<string[]>("declarativeProjectionDescriptors") || [];
   const pathSet = new Set(existingDescriptorPaths);

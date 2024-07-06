@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { LanguageService } from "vscode-json-languageservice";
 import { EventProcessor } from "./eventProcessor";
 import { getHtmlForWebview } from "./bootstrap";
 import { EditorContext, EditorRegistry, SvelteResources } from "./editorRegistry";
@@ -12,11 +11,10 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
 
   constructor(
     private readonly extensionContext: vscode.ExtensionContext,
-    private readonly svelteResources: SvelteResources,
-    extensionLanguageService: LanguageService
+    private readonly svelteResources: SvelteResources
   ) {
     this.editorRegistry = new EditorRegistry();
-    this.eventProcessor = new EventProcessor(extensionLanguageService);
+    this.eventProcessor = new EventProcessor();
   }
 
   resolveCustomTextEditor(document: vscode.TextDocument, webviewPanel: vscode.WebviewPanel) {
