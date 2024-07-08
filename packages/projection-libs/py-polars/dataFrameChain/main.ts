@@ -1,7 +1,7 @@
 import { chain } from "@puredit/parser";
 import type { RootProjection } from "@puredit/projections";
 import { parser } from "../parser";
-import { selectStartSubProjection } from "./chainStart";
+import { baseDataframeSubProjection } from "./baseDataframe";
 import { selectSubProjection } from "./select";
 import { columnSubProjection } from "./column";
 import { columnWithAliasSubProjection } from "./columnWithAlias";
@@ -20,7 +20,7 @@ import { pivotSubProjection } from "./pivot/config";
 
 const dataframeChain = chain(
   "dataframeChain",
-  selectStartSubProjection.template,
+  baseDataframeSubProjection.template,
   [
     selectSubProjection.template,
     dropAllNullsSubProjection.template,
@@ -45,7 +45,7 @@ export const dataFrameChainProjection: RootProjection = {
   requiredContextVariables: [],
   segmentWidgets: [],
   subProjections: [
-    selectStartSubProjection,
+    baseDataframeSubProjection,
     selectSubProjection,
     columnSubProjection,
     columnWithAliasSubProjection,

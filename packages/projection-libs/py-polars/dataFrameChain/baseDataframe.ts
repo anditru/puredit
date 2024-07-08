@@ -6,7 +6,7 @@ const sourceDataFrame = arg("sourceDataFrame", ["identifier"]);
 export const template = parser.subPattern("Polars:Dataframe:ChainStart")`${sourceDataFrame}`;
 const widget = simpleProjection(["Dataframe", sourceDataFrame, "transformed by"]);
 
-export const selectStartSubProjection: SubProjection = {
+export const baseDataframeSubProjection: SubProjection = {
   template,
   description: "Dataframe to transform.",
   requiredContextVariables: [],

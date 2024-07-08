@@ -349,7 +349,7 @@ export default class MatchVerification {
 
     const followedPaths = [];
     let chainDepth = -1;
-    let oneLinkMatched = false;
+    let numLinkMatches = 0;
     let chainableNodeTypeConfig;
     this.chainToLinkMatchesMap[chainNode.name] = [];
     do {
@@ -360,28 +360,30 @@ export default class MatchVerification {
         currentAstNode.type
       );
       if (chainableNodeTypeConfig) {
-        logger.debug(`Found ${chainDepth + 1}. chain link`);
         const linkMatched = this.findLinkMatchFor(chainNode, chainableNodeTypeConfig);
-        oneLinkMatched = oneLinkMatched || linkMatched;
-      } else {
-        if (!oneLinkMatched) {
-          throw new DoesNotMatch();
+        if (linkMatched) {
+          logger.debug(`Found ${chainDepth + 1}. chain link`);
+          numLinkMatches++;
+          continue;
         }
-        this.findChainStartMatchFor(chainNode);
+      }
+      const startMatched = this.findChainStartMatchFor(chainNode);
+      if (startMatched) {
         logger.debug(`Reached chain start at depth ${chainDepth}`);
         break;
+      }
+      if (!chainableNodeTypeConfig && !startMatched) {
+        throw new DoesNotMatch();
       }
     } while (
       this.astCursor.follow(chainableNodeTypeConfig.pathToNextLink) &&
       followedPaths.push(chainableNodeTypeConfig.pathToNextLink)
     );
 
-    if (chainDepth < chainNode.minumumLength) {
+    if (numLinkMatches < chainNode.minumumLength) {
       // We only match if at least two functions are called in a row
       logger.debug(
-        `ChainNode does not match since only ${
-          chainDepth + 1
-        } consecutive function calls were found`
+        `ChainNode does not match since only ${chainDepth + 1}` + `matching chainLinks were found`
       );
       throw new DoesNotMatch();
     }
@@ -472,11 +474,12 @@ export default class MatchVerification {
     );
     const result = chainStartPatternMatching.executeOnlySpanningEntireRange();
     if (!result.matches.length) {
-      throw new DoesNotMatch();
+      return false;
     }
     this.matchesBelow = this.matchesBelow.concat(result.matches.slice(1));
     this.chainToStartMatchMap[chainName] = result.matches[0];
     this.contextVariableRanges = this.contextVariableRanges.concat(result.contextVariableRanges);
+    return true;
   }
 
   private extractChainStartRangeFor(chainNode: ChainNode) {
