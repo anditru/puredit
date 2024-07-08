@@ -247,37 +247,47 @@ function analyzeChanges(oldText: string, newText: string, parser: Parser) {
       changedStatementNodes.push(newStatementNode, newStatementNodes[i + 1]);
       i++;
     }
-    if (nodesEqual(oldStatementNode, newStatementNode)) {
-      continue;
-    }
-    if (containsError(newStatementNode)) {
-      errorNodes.push(newStatementNode);
-    } else {
-      changedStatementNodes.push(newStatementNode);
+    try {
+      if (!nodesEqual(oldStatementNode, newStatementNode)) {
+        changedStatementNodes.push(newStatementNode);
+      }
+    } catch (error) {
+      if (error instanceof ErrorFound) {
+        errorNodes.push(newStatementNode);
+      } else {
+        throw error;
+      }
     }
   }
   return { changedStatementNodes, errorNodes };
 }
 
-function nodesEqual(oldNode: AstNode, newNode: AstNode): boolean {
+function nodesEqual(oldNode: AstNode, newNode: AstNode, differenceFound = false): boolean {
+  if (newNode.type == "ERROR") {
+    throw new ErrorFound();
+  }
   if (oldNode.type !== newNode.type) {
-    return false;
+    differenceFound = true;
   }
   if (oldNode.startIndex !== newNode.startIndex || oldNode.endIndex !== newNode.endIndex) {
-    return false;
+    differenceFound = true;
   }
   if (oldNode.children?.length !== newNode.children?.length) {
-    return false;
+    differenceFound = true;
   }
   if (oldNode.children.length === 0) {
-    return oldNode.text === newNode.text;
+    differenceFound = oldNode.text !== newNode.text || differenceFound;
   }
   for (const [oldChildNode, newChildNode] of zip(oldNode.children, newNode.children)) {
-    if (!nodesEqual(oldChildNode, newChildNode)) {
-      return false;
-    }
+    differenceFound = !nodesEqual(oldChildNode, newChildNode, differenceFound) || differenceFound;
   }
-  return true;
+  return !differenceFound;
+}
+
+class ErrorFound extends Error {
+  constructor(message?: string) {
+    super(message);
+  }
 }
 
 function containsError(rootNode: AstNode): boolean {
