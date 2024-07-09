@@ -111,22 +111,14 @@ function correctCopyLine(tr: Transaction) {
       lastCopiedLine = startDoc.lineAt(to + insert.length - 1);
       change.from = lastCopiedLine.to;
     }
-    let copyFrom = Infinity;
-    let copyTo = 0;
+    let copyFrom = firstCopiedLine.from;
+    let copyTo = lastCopiedLine.to;
     decorations.between(firstCopiedLine.from, lastCopiedLine.to, (_, __, dec) => {
       modifyCopy = true;
       const match = dec.spec.widget.match;
-      if (match.from <= firstCopiedLine.from || match.to >= lastCopiedLine.to) {
-        copyFrom = startDoc.lineAt(match.from).from;
-        copyTo = startDoc.lineAt(match.to).to;
-        change.from = startDoc.lineAt(match.to).to;
-        return false;
-      }
-      if (match.from >= firstCopiedLine.from && match.to <= lastCopiedLine.to) {
-        copyFrom = firstCopiedLine.from;
-        copyTo = lastCopiedLine.to;
-        return false;
-      }
+      copyFrom = Math.min(copyFrom, startDoc.lineAt(match.from).from);
+      copyTo = Math.max(copyTo, startDoc.lineAt(match.to).to);
+      change.from = copyTo;
     });
     change.insert = "\n" + startDoc.slice(copyFrom, copyTo);
     modifiedChanges.push(change);
