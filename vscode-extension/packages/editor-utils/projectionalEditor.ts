@@ -1,5 +1,12 @@
 import { EditorView } from "codemirror";
-import { Annotation, ChangeSpec, EditorState, Extension, Transaction } from "@codemirror/state";
+import {
+  Annotation,
+  ChangeSpec,
+  EditorSelection,
+  EditorState,
+  Extension,
+  Transaction,
+} from "@codemirror/state";
 import { Action } from "@puredit/webview-interface";
 import { mapTransactionToChanges } from "./changeMapping";
 import VsCodeMessenger from "./vsCodeMessenger";
@@ -21,7 +28,7 @@ export default class ProjectionalEditor {
   ) {
     this.vsCodeMessenger.registerHandler(Action.UPDATE_EDITOR, (message) => {
       const payload = message.payload as { from: number; to: number; insert: string | Text };
-      const lengthDelta = payload.to - payload.from - payload.insert.length;
+      const lengthDelta = payload.insert.length - (payload.to - payload.from);
       let cursorPosition;
       if (payload.insert.length) {
         const newLength = this.editorView.state.doc.length + lengthDelta;
@@ -32,10 +39,7 @@ export default class ProjectionalEditor {
       const changes = message.payload as ChangeSpec;
       this.editorView.dispatch({
         changes,
-        selection: {
-          anchor: cursorPosition,
-          head: cursorPosition,
-        },
+        selection: EditorSelection.single(cursorPosition),
         annotations: this.doNotSyncAnnotation.of(true),
         filter: false,
       });

@@ -179,8 +179,11 @@ function correctDeleteLine(tr: Transaction) {
     if (extendBackwards) {
       change!.to = change!.to + 1;
     }
+    change!.to = Math.min(change!.to, startDoc.length);
+    const newDocLength = startDoc.length - (change!.to - change!.from);
+    const cursorPos = Math.min(change!.from + 1, newDocLength);
     Object.assign(tr, {
-      selection: EditorSelection.single(change!.from + 1),
+      selection: EditorSelection.single(cursorPos),
       changes: ChangeSet.of([change!], startDoc.length, tr.startState.lineBreak),
     });
   }
