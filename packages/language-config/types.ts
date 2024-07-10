@@ -6,6 +6,7 @@ export enum Language {
 }
 
 export type LanguageConfig = {
+  lookAheadPaths: LookAheadPathsConfig;
   nodeTypesToSplit: NodeTypesToSplitConfig;
   arguments: ArgumentsConfig;
   aggregations: AggregationsConfig;
@@ -13,6 +14,8 @@ export type LanguageConfig = {
   blocks: BlocksConfig;
   comments: CommentsConfig;
 };
+
+export type LookAheadPathsConfig = Record<string, TreePath>;
 
 export type NodeTypesToSplitConfig = Record<string, string>;
 

@@ -70,3 +70,7 @@ export function loadCommentsConfigFor(language: Language): CommentsConfig {
 export function loadNodeTypesToSplitFor(language: Language): NodeTypesToSplitConfig {
   return languageConfigs[language].nodeTypesToSplit;
 }
+
+export function loadLookAheadPathFor(language: Language, nodeType: string) {
+  return languageConfigs[language].lookAheadPaths[nodeType];
+}

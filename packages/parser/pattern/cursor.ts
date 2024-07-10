@@ -58,9 +58,10 @@ export default class PatternCursor extends Cursor {
     this.runningTransaction = false;
   }
 
-  follow(path: TreePath): boolean {
+  follow(path: TreePath | number[]): boolean {
     this.beginTransaction();
-    for (const step of path.steps) {
+    const steps: number[] = path instanceof TreePath ? path.steps : path;
+    for (const step of steps) {
       if (this.goToFirstChild()) {
         if (!this.goToSiblingWithIndex(step)) {
           this.rollbackTransaction();
@@ -75,9 +76,10 @@ export default class PatternCursor extends Cursor {
     return true;
   }
 
-  reverseFollow(path: TreePath): boolean {
+  reverseFollow(path: TreePath | number[]): boolean {
     this.beginTransaction();
-    for (const _ of path.steps) {
+    const steps: number[] = path instanceof TreePath ? path.steps : path;
+    for (const _ of steps) {
       if (this.goToParent()) {
         continue;
       } else {

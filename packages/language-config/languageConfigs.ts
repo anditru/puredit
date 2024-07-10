@@ -8,6 +8,10 @@ import {
 
 const languageConfigs: Record<Language, LanguageConfig> = {
   [Language.Python]: {
+    lookAheadPaths: {
+      attribute: new TreePath([2]),
+      call: new TreePath([0, 2]),
+    },
     nodeTypesToSplit: {
       function_definition: "body",
       class_definition: "body",
@@ -95,6 +99,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
     },
   },
   [Language.TypeScript]: {
+    lookAheadPaths: {},
     nodeTypesToSplit: {},
     arguments: {
       draftTypeMapping: {

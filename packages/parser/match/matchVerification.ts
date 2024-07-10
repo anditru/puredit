@@ -11,7 +11,7 @@ import type {
   MatchMap,
   VerificationResult,
 } from "./types";
-import { agg, PatternMatching } from "..";
+import { PatternMatching } from "..";
 import { ContextVariableMap } from "@puredit/projections";
 import Pattern from "../pattern/pattern";
 import ArgumentNode from "../pattern/nodes/argumentNode";
@@ -29,6 +29,7 @@ import {
   loadAggregatableNodeTypeConfigFor,
 } from "@puredit/language-config";
 import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
+import { loadLookAheadPathFor } from "@puredit/language-config/load";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.MatchVerification");
@@ -547,6 +548,25 @@ export default class MatchVerification {
       logger.debug("AST does not match RegularNode.");
       throw new DoesNotMatch();
     }
+
+    const lookAheadPath = loadLookAheadPathFor(this.pattern.language, regularNode.type);
+    if (
+      lookAheadPath &&
+      this.astCursor.follow(lookAheadPath) &&
+      this.patternCursor.follow(lookAheadPath)
+    ) {
+      if (
+        !(this.patternCursor.currentNode instanceof ArgumentNode) &&
+        this.astCursor.currentNode.type === "identifier" &&
+        this.astCursor.currentNode.text !== this.patternCursor.currentNode.text
+      ) {
+        throw new DoesNotMatch();
+      } else {
+        this.astCursor.reverseFollow(lookAheadPath);
+        this.patternCursor.reverseFollow(lookAheadPath);
+      }
+    }
+
     if (regularNode.hasChildren()) {
       this.visitRegularNodeChildren();
     }
