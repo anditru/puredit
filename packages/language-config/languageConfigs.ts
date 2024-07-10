@@ -8,6 +8,12 @@ import {
 
 const languageConfigs: Record<Language, LanguageConfig> = {
   [Language.Python]: {
+    nodeTypesToSplit: {
+      function_definition: "body",
+      class_definition: "body",
+      module: "*",
+      block: "*",
+    },
     arguments: {
       draftTypeMapping: {
         string: `""`,
@@ -89,6 +95,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
     },
   },
   [Language.TypeScript]: {
+    nodeTypesToSplit: {},
     arguments: {
       draftTypeMapping: {
         string: `""`,

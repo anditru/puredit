@@ -99,7 +99,7 @@ function correctCopyLine(tr: Transaction) {
     const change: ChangeSpec = { from, to: undefined, insert };
     let firstCopiedLine: Line;
     let lastCopiedLine: Line;
-    if (insert.text[0] === "") {
+    if (insert.toString().startsWith("\n")) {
       // Copy up
       isCopyUp = true;
       firstCopiedLine = startDoc.lineAt(to - insert.length + 1);

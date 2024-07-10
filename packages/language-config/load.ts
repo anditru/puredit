@@ -8,6 +8,7 @@ import {
   ChainsConfig,
   CommentsConfig,
   Language,
+  NodeTypesToSplitConfig,
 } from "./types";
 
 export function loadArgumentsConfigFor(language: Language): ArgumentsConfig {
@@ -64,4 +65,8 @@ export function loadBlocksConfigFor(language: Language): BlocksConfig {
 
 export function loadCommentsConfigFor(language: Language): CommentsConfig {
   return languageConfigs[language].comments;
+}
+
+export function loadNodeTypesToSplitFor(language: Language): NodeTypesToSplitConfig {
+  return languageConfigs[language].nodeTypesToSplit;
 }

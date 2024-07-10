@@ -77,6 +77,23 @@ export default class AstCursor extends Cursor {
     }
   }
 
+  goToChildWithFieldName(fieldName: string) {
+    this.beginTransaction();
+    if (this.goToFirstChild()) {
+      while (this.currentFieldName !== fieldName) {
+        if (!this.goToNextSibling()) {
+          this.rollbackTransaction();
+          return false;
+        }
+      }
+      this.commitTransaction();
+      return true;
+    } else {
+      this.rollbackTransaction();
+      return false;
+    }
+  }
+
   goToFirstChildForIndex(index: number): boolean {
     return this.treeCursor.gotoFirstChildForIndex(index);
   }

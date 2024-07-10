@@ -1,10 +1,4 @@
-import {
-  EditorState,
-  RangeSetBuilder,
-  StateEffect,
-  StateField,
-  Transaction,
-} from "@codemirror/state";
+import { EditorState, RangeSetBuilder, StateEffect, StateField } from "@codemirror/state";
 import { Decoration, EditorView } from "@codemirror/view";
 import type { DecorationSet, ViewUpdate } from "@codemirror/view";
 import { PatternMatching } from "@puredit/parser";
@@ -17,6 +11,8 @@ import AstCursor from "@puredit/parser/ast/cursor";
 import { zip } from "@puredit/utils-shared";
 import { Extension } from "@puredit/declarative-projections";
 import ProjectionRegistry from "../projectionRegistry";
+import { loadNodeTypesToSplitFor } from "@puredit/language-config/load";
+import { NodeTypesToSplitConfig } from "@puredit/language-config";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("projections.state.state");
@@ -70,10 +66,6 @@ export const projectionState = StateField.define<ProjectionState>({
 
   update({ config, decorations, contextVariableRanges }, transaction) {
     const isCompletion = Boolean(transaction.annotation(pickedCompletion));
-    decorations = decorations.map(transaction.changes);
-    const oldState = transaction.startState;
-    const newState = transaction.state;
-
     let forceRematch = false;
     let forceRecreation = false;
     for (const effect of transaction.effects) {
@@ -96,54 +88,65 @@ export const projectionState = StateField.define<ProjectionState>({
       logger.debug("Rematching nothing");
       return { config, decorations, contextVariableRanges };
     }
-    const mainSelect = transaction.selection?.main;
-    let nodesToRematch: AstNode[] = [];
-    let nodesToInvalidate: AstNode[] = [];
+
+    decorations = decorations.map(transaction.changes);
+    const oldState = transaction.startState;
+    const oldText = oldState.sliceDoc(0);
+    const oldUnits = getMatchingUnits(oldText, config.parser);
+
+    const newState = transaction.state;
+    const newText = newState.sliceDoc(0);
+    const newUnits = getMatchingUnits(newText, config.parser);
+
+    const mainSelect = newState.selection.main;
+    let unitsToRematch: AstNode[] = [];
+    let unitsToInvalidate: AstNode[] = [];
     if (forceRematch) {
-      nodesToRematch = getAllStatementNodes(newState.sliceDoc(0), config.parser);
-      nodesToInvalidate = nodesToRematch;
-      logger.debug("Projections changed. Rematching everything");
+      // Force rematch -> rematch everything
+      unitsToRematch = newUnits;
+      unitsToInvalidate = newUnits;
+      logger.debug("Force rematch. Rematching everything");
     } else if (transaction.docChanged) {
-      const { changedStatementNodes, errorNodes } = analyzeChanges(
-        oldState.sliceDoc(0),
-        newState.sliceDoc(0),
-        config.parser
-      );
-      nodesToRematch = changedStatementNodes;
-      nodesToInvalidate = errorNodes.concat(changedStatementNodes);
+      // Document has changed -> find changed units and rematch them
+      logger.debug("Document changed. Analyzing changes");
+      const { changedUnits, errorUnits } = analyzeChanges(oldText, oldUnits, newText, newUnits);
+      unitsToRematch = changedUnits;
+      unitsToInvalidate = errorUnits.concat(changedUnits);
       logger.debug(
-        `Rematching ${nodesToRematch.length} changed nodes, invalidating ${nodesToInvalidate.length} nodes`
+        `Rematching ${unitsToRematch.length} changed nodes, invalidating ${unitsToInvalidate.length} nodes`
       );
     } else if (mainSelect && mainSelect.anchor === mainSelect.head) {
-      // TODO: Implement partial rematching for selection of size > 0
+      // Cursor is placed somewhere
       logger.debug("Searching node with cursor");
-      const nodeWithCursor = findNodeContainingCursor(
-        newState.sliceDoc(0),
-        transaction.selection?.main.anchor,
-        config.parser
-      );
-      if (nodeWithCursor) {
-        const cursorNodeHasError = containsError(nodeWithCursor);
+      const unitWithCursor = findUnitForPosition(newUnits, mainSelect.anchor);
+      if (unitWithCursor) {
+        // Cursor is in some node
+        const cursorNodeHasError = containsError(unitWithCursor);
         if (cursorNodeHasError) {
-          nodesToInvalidate = [nodeWithCursor];
+          // If node has an error, just invalide but do not rematch
+          unitsToInvalidate = [unitWithCursor];
           logger.debug("Invalidating node with cursor");
         } else {
-          nodesToRematch = [nodeWithCursor];
+          // If node has no error, rematch
+          unitsToRematch = [unitWithCursor];
+          unitsToInvalidate = [unitWithCursor];
           logger.debug("Rematching node with cursor");
         }
       } else {
-        nodesToRematch = getAllStatementNodes(newState.sliceDoc(0), config.parser);
-        logger.debug("Rematching everything");
+        // Cursor is outside a node, e.g. in an empty line
+        logger.debug("Rematching nothing");
       }
     } else {
-      nodesToRematch = getAllStatementNodes(newState.sliceDoc(0), config.parser);
-      logger.debug("Rematching all nodes");
+      // Fallback: Rematch everything
+      unitsToRematch = newUnits;
+      unitsToInvalidate = newUnits;
+      logger.debug("Rematching everything");
     }
 
     let allMatches: Match[] = [];
     let allContextVariableRanges: ContextVariableRange[] = [];
-    for (const changedNode of nodesToRematch) {
-      const cursor = changedNode.walk();
+    for (const changedUnit of unitsToRematch) {
+      const cursor = changedUnit.walk();
       const patternMatching = new PatternMatching(
         config.projectionRegistry.rootProjectionPatternsByRootNodeType,
         cursor,
@@ -162,7 +165,7 @@ export const projectionState = StateField.define<ProjectionState>({
       .setIsCompletion(isCompletion)
       .setState(newState)
       .setMatches(allMatches)
-      .setNodesToInvalidate(nodesToInvalidate);
+      .setNodesToInvalidate(unitsToInvalidate);
     let newDecorations = decorationSetBuilder.build();
     logger.debug("Done rebuilding projections");
 
@@ -178,19 +181,41 @@ export const projectionState = StateField.define<ProjectionState>({
   },
 });
 
-function getAllStatementNodes(text: string, parser: Parser): AstNode[] {
+function getMatchingUnits(text: string, parser: Parser): AstNode[] {
   const astCursor = new AstCursor(parser.parse(text).walk());
-  return astCursor.currentNode.children;
+  const nodeTypesToSplit = loadNodeTypesToSplitFor(parser.language);
+  return splitIntoMatchingUnits(astCursor, nodeTypesToSplit);
 }
 
-function findNodeContainingCursor(text: string, cursorPos: number, parser: Parser): AstNode | null {
-  const astCursor = new AstCursor(parser.parse(text).walk());
-  const statementNodes = astCursor.currentNode.children;
+function splitIntoMatchingUnits(
+  astCursor: AstCursor,
+  nodeTypesToSplit: NodeTypesToSplitConfig
+): AstNode[] {
+  let matchingUnits: AstNode[] = [];
+  const fieldNameToSplit = nodeTypesToSplit[astCursor.currentNode.type];
+  if (!fieldNameToSplit) {
+    matchingUnits.push(astCursor.currentNode);
+    return matchingUnits;
+  } else if (fieldNameToSplit === "*") {
+    astCursor.goToFirstChild();
+    do {
+      matchingUnits = matchingUnits.concat(splitIntoMatchingUnits(astCursor, nodeTypesToSplit));
+    } while (astCursor.goToNextSibling());
+    astCursor.goToParent();
+  } else {
+    astCursor.goToChildWithFieldName(fieldNameToSplit);
+    matchingUnits = matchingUnits.concat(splitIntoMatchingUnits(astCursor, nodeTypesToSplit));
+    astCursor.goToParent();
+  }
+  return matchingUnits;
+}
+
+function findUnitForPosition(units: AstNode[], cursorPos: number): AstNode | null {
   let low = 0;
-  let high = statementNodes.length - 1;
+  let high = units.length - 1;
   while (high >= low) {
     const mid = Math.floor(low + (high - low) / 2);
-    const currentNode = statementNodes[mid];
+    const currentNode = units[mid];
     if (cursorPos >= currentNode.startIndex && cursorPos <= currentNode.endIndex) {
       return currentNode;
     } else if (cursorPos < currentNode.endIndex) {
@@ -202,19 +227,18 @@ function findNodeContainingCursor(text: string, cursorPos: number, parser: Parse
   return null;
 }
 
-function analyzeChanges(oldText: string, newText: string, parser: Parser) {
-  const oldAstCursor = new AstCursor(parser.parse(oldText).walk());
-  const oldStatementNodes = oldAstCursor.currentNode.children;
-
-  const newAstCursor = new AstCursor(parser.parse(newText).walk());
-  const newStatementNodes = newAstCursor.currentNode.children;
-
-  if (!newStatementNodes.length) {
-    return { changedStatementNodes: [], errorNodes: [] };
+function analyzeChanges(
+  oldText: string,
+  oldUnits: AstNode[],
+  newText: string,
+  newUnits: AstNode[]
+) {
+  if (!newUnits.length) {
+    return { changedUnits: [], errorUnits: [] };
   }
 
-  const changedStatementNodes: AstNode[] = [];
-  const errorNodes: AstNode[] = [];
+  const changedUnits: AstNode[] = [];
+  const errorUnits: AstNode[] = [];
 
   const oldLeadingWhiteSpace = oldText.match(/^\s*/);
   const newLeadingWhiteSpace = newText.match(/^\s*/);
@@ -226,40 +250,40 @@ function analyzeChanges(oldText: string, newText: string, parser: Parser) {
     (oldLeadingWhiteSpace && !newLeadingWhiteSpace) ||
     (!oldLeadingWhiteSpace && newLeadingWhiteSpace)
   ) {
-    changedStatementNodes.push(newStatementNodes[0]);
+    changedUnits.push(newUnits[0]);
     i = 1;
   }
-  for (; i < newStatementNodes.length; i++) {
-    const oldStatementNode = oldStatementNodes[i];
-    const newStatementNode = newStatementNodes[i];
-    if (!oldStatementNode) {
-      changedStatementNodes.push(newStatementNode);
+  for (; i < newUnits.length; i++) {
+    const oldUnit = oldUnits[i];
+    const newUnit = newUnits[i];
+    if (!oldUnit) {
+      changedUnits.push(newUnit);
       continue;
     }
-    if (oldStatementNode.text === newStatementNode.text) {
+    if (oldUnit.text === newUnit.text) {
       continue;
     }
-    if (newStatementNode.type === "ERROR") {
-      errorNodes.push(newStatementNode);
+    if (newUnit.type === "ERROR") {
+      errorUnits.push(newUnit);
       continue;
     }
-    if (newStatementNode.type === "comment") {
-      changedStatementNodes.push(newStatementNode, newStatementNodes[i + 1]);
+    if (newUnit.type === "comment") {
+      changedUnits.push(newUnit, newUnits[i + 1]);
       i++;
     }
     try {
-      if (!nodesEqual(oldStatementNode, newStatementNode)) {
-        changedStatementNodes.push(newStatementNode);
+      if (!nodesEqual(oldUnit, newUnit)) {
+        changedUnits.push(newUnit);
       }
     } catch (error) {
       if (error instanceof ErrorFound) {
-        errorNodes.push(newStatementNode);
+        errorUnits.push(newUnit);
       } else {
         throw error;
       }
     }
   }
-  return { changedStatementNodes, errorNodes };
+  return { changedUnits, errorUnits };
 }
 
 function nodesEqual(oldNode: AstNode, newNode: AstNode, differenceFound = false): boolean {

@@ -6,12 +6,15 @@ export enum Language {
 }
 
 export type LanguageConfig = {
+  nodeTypesToSplit: NodeTypesToSplitConfig;
   arguments: ArgumentsConfig;
   aggregations: AggregationsConfig;
   chains: ChainsConfig;
   blocks: BlocksConfig;
   comments: CommentsConfig;
 };
+
+export type NodeTypesToSplitConfig = Record<string, string>;
 
 export type ArgumentsConfig = {
   draftTypeMapping: DraftTypeMapping;
