@@ -98,6 +98,8 @@
     font-size: 1.2em;
     border-color: transparent;
     background-color: transparent;
-    color: inherit;
+    color: white;
+    --caret-color: white;
+    --selection-color: white;
   }
 </style>

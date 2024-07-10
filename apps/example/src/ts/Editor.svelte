@@ -1,6 +1,4 @@
 <script lang="ts">
-  import DarkMode from "svelte-dark-mode";
-  import type { Theme } from "svelte-dark-mode/types/DarkMode.svelte";
   import { basicSetup } from "codemirror";
   import { EditorState, Annotation, Compartment } from "@codemirror/state";
   import type { Extension } from "@codemirror/state";
@@ -10,7 +8,6 @@
   import { onDestroy, onMount } from "svelte";
   import { example, typeDeclarationsMap } from "./code";
   import { projectionPlugin, completions } from "@puredit/projections";
-  import { oneDark } from "@codemirror/theme-one-dark";
   import {
     injectTypes,
     typescript,
@@ -18,8 +15,8 @@
   } from "@puredit/codemirror-typescript";
   import { indentationMarkers } from "@replit/codemirror-indentation-markers";
   import { projectionPluginConfig } from "./projections";
+  import { vscodeDarkInit } from "@uiw/codemirror-theme-vscode";
 
-  let theme: Theme | undefined;
   let container: HTMLDivElement;
   let projectionalEditor: EditorView | undefined;
   let codeEditor: EditorView | undefined;
@@ -31,7 +28,7 @@
     const extensions: Extension[] = [
       basicSetup,
       keymap.of([indentWithTab]),
-      darkThemeCompartment.of(theme === "dark" ? oneDark : []),
+      vscodeDarkInit(),
       indentationMarkers(),
       EditorView.theme({
         ".cm-scroller": {
@@ -96,22 +93,7 @@
     projectionalEditor?.destroy();
     codeEditor?.destroy();
   });
-
-  function onThemeChange(theme?: Theme) {
-    const transaction = {
-      effects: [
-        darkThemeCompartment.reconfigure(theme === "dark" ? oneDark : []),
-      ],
-    };
-    projectionalEditor?.dispatch(transaction);
-    codeEditor?.dispatch(transaction);
-  }
-
-  // Dynamically update color scheme on theme change
-  $: onThemeChange(theme);
 </script>
-
-<DarkMode bind:theme />
 
 <div class="container" bind:this={container} />
 

@@ -37,6 +37,6 @@ export { completions, insertDeclarativeProjectionsEffect, removeProjectionPackag
 
 export { default as ProjectionRegistry } from "./projectionRegistry";
 export { default as Projection } from "./projection";
-export { FocusGroup } from "./widget/focus";
+export { FocusGroup, type CursorPositionHandler } from "./widget/focus";
 export { svelteProjection } from "./widget/svelte";
 export { simpleProjection } from "./widget/simpleWidget";
