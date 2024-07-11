@@ -23,6 +23,7 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
       document,
       extensionContext: this.extensionContext,
       svelteResources: this.svelteResources,
+      pendingDuplicateUpdates: 0,
     };
     this.editorRegistry.register(editorContext);
 

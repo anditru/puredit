@@ -34,6 +34,7 @@ transformed_weather = (weather_data.select(
         pl.col("Date.Full").alias("date"),
         pl.col("Data.Temperature.Max Temp").alias("max_temperature"),
         "Station.City",
+        CN.pla,
         year="Date.Year"
     )
     .drop_nulls()

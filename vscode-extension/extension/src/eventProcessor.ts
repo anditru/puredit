@@ -10,8 +10,6 @@ import { load } from "js-yaml";
 import { validateSchema } from "./descriptorValidation";
 
 export class EventProcessor {
-  private pendingDuplicateUpdates = 0;
-
   processDocumentChange(event: vscode.TextDocumentChangeEvent, context: EditorContext) {
     const oldDocumentState = DocumentRegistry.instance.get(event.document);
     if (!oldDocumentState) {
@@ -25,7 +23,7 @@ export class EventProcessor {
           action: Action.UPDATE_EOL,
           payload: event.document.eol,
         });
-      } else if (this.pendingDuplicateUpdates === 0 && event.contentChanges.length) {
+      } else if (context.pendingDuplicateUpdates === 0 && event.contentChanges.length) {
         event.contentChanges.forEach((contentChange) => {
           context.webviewPanel.webview.postMessage({
             id: uuid(),
@@ -34,8 +32,8 @@ export class EventProcessor {
             payload: mapToChangeSpec(contentChange, oldDocumentState),
           });
         });
-      } else if (this.pendingDuplicateUpdates > 0 && event.contentChanges.length) {
-        this.pendingDuplicateUpdates -= 1;
+      } else if (context.pendingDuplicateUpdates > 0 && event.contentChanges.length) {
+        context.pendingDuplicateUpdates -= 1;
       }
       DocumentRegistry.instance.update(event.document);
     }
@@ -87,7 +85,7 @@ export class EventProcessor {
       message.payload! as ChangeDocumentPayload,
       context.document
     );
-    this.pendingDuplicateUpdates += 1;
+    context.pendingDuplicateUpdates += 1;
     await vscode.workspace.applyEdit(workspaceEdit);
     context.webviewPanel.webview.postMessage({
       id: message.id,

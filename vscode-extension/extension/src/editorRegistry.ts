@@ -1,29 +1,23 @@
 import * as vscode from "vscode";
 
 export class EditorRegistry {
-  private readonly registry: Record<string, EditorContext> = {};
+  private readonly registry: Map<vscode.WebviewPanel, EditorContext> = new Map();
 
   register(editorContext: EditorContext) {
-    const editorKey = getEditorKey(editorContext);
-    this.registry[editorKey] = editorContext;
+    this.registry.set(editorContext.webviewPanel, editorContext);
   }
 
   unregister(editorContext: EditorContext) {
-    const editorKey = getEditorKey(editorContext);
-    delete this.registry[editorKey];
+    this.registry.delete(editorContext.webviewPanel);
   }
 
   getAllEditorContexts(): EditorContext[] {
-    return Object.values(this.registry);
+    return Array.from(this.registry.values());
   }
 
   get numberOfEditors(): number {
-    return Object.keys(this.registry).length;
+    return this.getAllEditorContexts().length;
   }
-}
-
-function getEditorKey(editorContext: EditorContext) {
-  return editorContext.document.uri.toString();
 }
 
 export interface EditorContext {
@@ -31,6 +25,7 @@ export interface EditorContext {
   document: vscode.TextDocument;
   extensionContext: vscode.ExtensionContext;
   svelteResources: SvelteResources;
+  pendingDuplicateUpdates: number;
 }
 
 export interface SvelteResources {

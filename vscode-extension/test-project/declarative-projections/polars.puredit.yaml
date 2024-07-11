@@ -1,3 +1,50 @@
+- type: projectionExtension
+  package: py-polars
+  parentProjection: Polars:Dataframe:SelectColumns
+  parentParameter: columns
+  subProjections:
+  - type: aggregationPart
+    name: Polars:CnColumn
+    description: CN column
+    template: CN.<%columnName%>
+    segmentWidgets:
+    - column <%columnName%>
+    parameters:
+    - type: argument
+      name: columnName
+      nodeTypes:
+      - identifier
+
+- type: projectionExtension
+  package: py-polars
+  parentProjection: Polars:Dataframe:GroupBy
+  parentParameter: columns
+  subProjections:
+  - type: aggregationPartReference
+    referencedProjection: Polars:CnColumn
+
+- type: projectionExtension
+  package: py-polars
+  parentProjection: Polars:Dataframe:Chain
+  parentParameter: dataframeChain
+  subProjections:
+  - type: chainLink
+    name: Polars:Dataframe:SelectList
+    description: Select CN columns
+    template: select(<%columns%>)
+    segmentWidgets:
+      - "select columns"
+      - "end columns"
+    parameters:
+      - type: aggregation
+        name: columns
+        nodeType: list
+        partSubProjections:
+          - type: aggregationPartReference
+            referencedProjection: Polars:CnColumn
+          - type: aggregationPartReference
+            referencedProjection: Polars:Column
+
 - package: py-polars
   type: packageExtension
   rootProjections:
