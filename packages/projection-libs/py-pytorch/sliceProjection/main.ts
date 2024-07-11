@@ -10,8 +10,8 @@ import { fromStartIndexSubProjection } from "./fromStartIndexSubProjection/confi
 import { betweenIndicesSubProjection } from "./betweenIndicesSubProjection/config";
 import { singleItemSubProjection } from "./singleItemSubProjection/config";
 
-const baseTensor = arg("baseTensor", ["identifier"]);
-const startPattern = parser.subPattern("baseTensor")`${baseTensor}`;
+const data = arg("data", ["identifier"]);
+const startPattern = parser.subPattern("data")`${data}`;
 const slices = agg(
   "slices",
   "subscript",

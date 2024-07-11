@@ -8,9 +8,11 @@ const logger = logProvider.getLogger("vscode.editor-utils.changeMapping");
 
 export function mapTransactionToChanges(transaction: Transaction, eol: EndOfLine): Change[] {
   const changes: Change[] = [];
+  let cummulatedDelta = 0;
   transaction.changes.iterChanges(
     (fromBefore: number, toBefore: number, fromAfter: number, toAfter: number, inserted: Text) => {
       const previousDelta = changes[changes.length - 1]?.delta || 0;
+      cummulatedDelta += previousDelta;
       const lineShift = {
         fromBefore: 0,
         toBefore: 0,
@@ -30,14 +32,14 @@ export function mapTransactionToChanges(transaction: Transaction, eol: EndOfLine
           { fromBefore, toBefore, fromAfter, toAfter, inserted },
           null,
           2
-        )} with delta ${previousDelta} and lineShift ${JSON.stringify(lineShift)}...`
+        )} with delta ${cummulatedDelta} and lineShift ${JSON.stringify(lineShift)}...`
       );
 
       const change = new Change(
-        fromBefore + previousDelta + lineShift.fromBefore,
-        toBefore + previousDelta + lineShift.toBefore,
-        fromAfter + previousDelta + lineShift.fromAfter,
-        toAfter + previousDelta + lineShift.toAfter,
+        fromBefore + cummulatedDelta + lineShift.fromBefore,
+        toBefore + cummulatedDelta + lineShift.toBefore,
+        fromAfter + cummulatedDelta + lineShift.fromAfter,
+        toAfter + cummulatedDelta + lineShift.toAfter,
         inserted
       );
       logger.debug(`to ${JSON.stringify(change, null, 2)}`);

@@ -5,6 +5,9 @@ import { projectionState } from "./state/state";
 
 export const transactionFilter = EditorState.transactionFilter.of((tr) => {
   const userEvent = tr.annotation(Transaction.userEvent);
+  if (userEvent === "input.indent") {
+    return tr;
+  }
   if (userEvent === "move.drop") {
     rejectMoveDrop(tr);
   } else if (userEvent === "move.line") {
@@ -205,6 +208,7 @@ function correctSelectionRanges(tr: Transaction) {
     direction = 1;
   }
   let newRange = selection!.main;
+  console.log(`before: ${JSON.stringify(newRange, null, 2)}`);
 
   decorations.between(left + 1, right - 1, (from, to, dec) => {
     const widget: ProjectionWidget = dec.spec.widget;
@@ -216,6 +220,7 @@ function correctSelectionRanges(tr: Transaction) {
       newRange = EditorSelection.range(left, right);
     }
   });
+  console.log(`after: ${JSON.stringify(newRange, null, 2)}`);
 
   Object.assign(tr, { selection: EditorSelection.create([newRange]) });
 }
@@ -316,9 +321,9 @@ function correctOtherChanges(tr: Transaction) {
     }
   }, true);
 
-  if (modifyChanges) {
-    Object.assign(tr, {
-      changes: ChangeSet.of(changes, tr.changes.length, tr.startState.lineBreak),
-    });
-  }
+  // if (modifyChanges) {
+  //   Object.assign(tr, {
+  //     changes: ChangeSet.of(changes, tr.changes.length, tr.startState.lineBreak),
+  //   });
+  // }
 }

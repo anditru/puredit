@@ -31,13 +31,13 @@
 </script>
 
 <span class="inline-flex">
-  <span>Slice tensor</span>
+  <span>Slice</span>
   <TextInput
     className={highlightingFor(state, [tags.atom])}
     node={match.aggregationToStartMatchMap.slices.node}
     {state}
     {view}
     {focusGroup}
-    placeholder="base tensor"
+    placeholder="data"
   />
 </span>
