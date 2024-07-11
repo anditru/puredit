@@ -98,7 +98,8 @@ export const projectionState = StateField.define<ProjectionState>({
     const newText = newState.sliceDoc(0);
     const newUnits = getMatchingUnits(newText, config.parser);
 
-    const mainSelect = newState.selection.main;
+    const newSelect = newState.selection.main;
+    const oldSelect = oldState.selection.main;
     let unitsToRematch: AstNode[] = [];
     let unitsToInvalidate: AstNode[] = [];
     if (forceRematch) {
@@ -115,10 +116,10 @@ export const projectionState = StateField.define<ProjectionState>({
       logger.debug(
         `Rematching ${unitsToRematch.length} changed nodes, invalidating ${unitsToInvalidate.length} nodes`
       );
-    } else if (mainSelect && mainSelect.anchor === mainSelect.head) {
+    } else if (newSelect.anchor === newSelect.head) {
       // Cursor is placed somewhere
       logger.debug("Searching node with cursor");
-      const unitWithCursor = findUnitForPosition(newUnits, mainSelect.anchor);
+      const unitWithCursor = findUnitForPosition(newUnits, newSelect.anchor);
       if (unitWithCursor) {
         // Cursor is in some node
         const cursorNodeHasError = containsError(unitWithCursor);
@@ -135,6 +136,26 @@ export const projectionState = StateField.define<ProjectionState>({
       } else {
         // Cursor is outside a node, e.g. in an empty line
         logger.debug("Rematching nothing");
+      }
+    } else if (newSelect.anchor !== newSelect.head) {
+      let from: number | undefined | null;
+      let to: number | undefined | null;
+      if (oldSelect.head < newSelect.head) {
+        from = oldSelect.head;
+        to = newSelect.head;
+      } else if (oldSelect.head > newSelect.head) {
+        from = newSelect.head;
+        to = oldSelect.head;
+      }
+      if (from == null || to == null) {
+        unitsToRematch = newUnits;
+        unitsToInvalidate = newUnits;
+      } else {
+        const unitsFrom = findNextLowerIndex(newUnits, from) || 0;
+        const unitsTo = findNextHigherIndex(newUnits, to) || newUnits.length - 1;
+        unitsToRematch = newUnits.slice(unitsFrom, unitsTo + 1);
+        unitsToRematch = unitsToRematch.filter((unit) => !containsError(unit));
+        unitsToRematch = unitsToInvalidate;
       }
     } else {
       // Fallback: Rematch everything
@@ -231,6 +252,50 @@ function findUnitForPosition(units: AstNode[], cursorPos: number): AstNode | nul
     }
   }
   return null;
+}
+
+function findNextLowerIndex(units: AstNode[], cursorPos: number): number | null {
+  let low = 0;
+  let high = units.length - 1;
+  let lastBeforeCursor: number | null = null;
+
+  while (high >= low) {
+    const mid = Math.floor(low + (high - low) / 2);
+    const currentNode = units[mid];
+
+    if (cursorPos >= currentNode.startIndex && cursorPos <= currentNode.endIndex) {
+      return mid;
+    } else if (cursorPos < currentNode.startIndex) {
+      high = mid - 1;
+    } else {
+      lastBeforeCursor = mid;
+      low = mid + 1;
+    }
+  }
+
+  return lastBeforeCursor;
+}
+
+function findNextHigherIndex(units: AstNode[], cursorPos: number): number | null {
+  let low = 0;
+  let high = units.length - 1;
+  let nextAfterCursor: number | null = null;
+
+  while (high >= low) {
+    const mid = Math.floor(low + (high - low) / 2);
+    const currentNode = units[mid];
+
+    if (cursorPos >= currentNode.startIndex && cursorPos <= currentNode.endIndex) {
+      return mid;
+    } else if (cursorPos < currentNode.startIndex) {
+      nextAfterCursor = mid;
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return nextAfterCursor;
 }
 
 function analyzeChanges(

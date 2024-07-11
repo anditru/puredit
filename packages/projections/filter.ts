@@ -208,8 +208,6 @@ function correctSelectionRanges(tr: Transaction) {
     direction = 1;
   }
   let newRange = selection!.main;
-  console.log(`before: ${JSON.stringify(newRange, null, 2)}`);
-
   decorations.between(left + 1, right - 1, (from, to, dec) => {
     const widget: ProjectionWidget = dec.spec.widget;
     left = Math.min(widget.match.from, from, left);
@@ -220,7 +218,6 @@ function correctSelectionRanges(tr: Transaction) {
       newRange = EditorSelection.range(left, right);
     }
   });
-  console.log(`after: ${JSON.stringify(newRange, null, 2)}`);
 
   Object.assign(tr, { selection: EditorSelection.create([newRange]) });
 }
@@ -321,9 +318,9 @@ function correctOtherChanges(tr: Transaction) {
     }
   }, true);
 
-  // if (modifyChanges) {
-  //   Object.assign(tr, {
-  //     changes: ChangeSet.of(changes, tr.changes.length, tr.startState.lineBreak),
-  //   });
-  // }
+  if (modifyChanges) {
+    Object.assign(tr, {
+      changes: ChangeSet.of(changes, tr.changes.length, tr.startState.lineBreak),
+    });
+  }
 }
