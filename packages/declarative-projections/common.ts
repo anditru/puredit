@@ -1,19 +1,16 @@
-import {
-  RootProjectionDefinition,
-  SubProjectionDefinition,
-  TemplateAggregationDefinition,
-  TemplateArgumentDefinition,
-  TemplateContextVariableDefinition,
-  TemplateParameterDefinition,
-} from "./types";
-import { arg, contextVariable, Template, TemplateArgument } from "@puredit/parser";
+import { RootProjectionDefinition, NewSubProjectionDefinition } from "./types";
+import { TemplateArgument } from "@puredit/parser";
 import { simpleProjection } from "@puredit/projections";
 import TemplateParameter from "@puredit/parser/template/parameters/templateParameter";
 import TemplatePartArray from "./templatePartArray";
 
 export const PLACEHOLDER_PATTERN = /<%[^%>]+%>/g;
-export const ALLOWED_EXTENSION_TYPES = ["packageExtension", "rootProjectionExtension"].join(", ");
-export const ALLOWED_SUBPROJECTION_TYPES = ["chainLink", "aggregationPart"].join(", ");
+export const ALLOWED_EXTENSION_TYPES = ["packageExtension", "projectionExtension"].join(", ");
+export const ALLOWED_SUBPROJECTION_TYPES = [
+  "chainLink",
+  "aggregationPart",
+  "aggregationPartReference",
+].join(", ");
 export const ALLOWED_PARAMETER_TYPES = [
   "reference",
   "argument",
@@ -25,7 +22,7 @@ export const ALLOWED_PARAMETER_TYPES = [
 export type ParamsMap = Record<string, TemplateParameter>;
 
 export function buildParserInput(
-  definition: RootProjectionDefinition | SubProjectionDefinition,
+  definition: RootProjectionDefinition | NewSubProjectionDefinition,
   paramsMap: ParamsMap
 ) {
   const patternStaticParts = definition.template.split(PLACEHOLDER_PATTERN);

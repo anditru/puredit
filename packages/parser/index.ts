@@ -7,6 +7,7 @@ export type { SyntaxNode } from "web-tree-sitter";
 export { Parser } from "./parse/internal";
 export { arg, agg, chain, block, contextVariable, reference } from "./template/definitionFunctions";
 export { default as TemplateArgument } from "./template/parameters/templateArgument";
+export type { Template, TransformableTemplate } from "./template/template";
 export { PatternMatching } from "./match/patternMatching";
 export { createPatternMap } from "./common";
 export type {

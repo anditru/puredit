@@ -1,6 +1,10 @@
 import { ProjectionRegistry, SubProjection } from "@puredit/projections";
-import { RootProjectionExtension, SubProjectionDefinition, SubProjectionExtension } from "./types";
-import { Parser, Pattern } from "@puredit/parser";
+import {
+  ProjectionExtension,
+  NewSubProjectionDefinition,
+  AggregationPartReferenceDefinition,
+} from "./types";
+import { Parser, Pattern, reference } from "@puredit/parser";
 import ChainDecorator from "@puredit/parser/pattern/decorators/chainDecorator";
 import ChainLinkTemplateTransformer from "@puredit/parser/parse/chainLinkTemplateTransformer";
 import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
@@ -9,24 +13,25 @@ import { loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
 import CodeString from "@puredit/parser/template/codeString";
 import { ALLOWED_SUBPROJECTION_TYPES } from "./common";
 import ExtensionCompiler from "./extensionCompiler";
+import ReferencePattern from "@puredit/parser/pattern/referencePattern";
 
 export default class ProjectionExtensionCompiler extends ExtensionCompiler {
   constructor(parser: Parser, private readonly projectionRegistry: ProjectionRegistry) {
     super(parser);
   }
 
-  compile(extension: RootProjectionExtension | SubProjectionExtension) {
+  compile(extension: ProjectionExtension) {
     let subProjection: SubProjection, pattern: Pattern, subProjectionsBelow: SubProjection[];
     for (const definition of extension.subProjections) {
       switch (definition.type) {
         case "chainLink":
           ({ subProjection, pattern, subProjectionsBelow } = this.processChainLink(
             extension,
-            definition
+            definition as NewSubProjectionDefinition
           ));
           this.projectionRegistry.insertChainLink(
             extension.package,
-            extension.rootProjection,
+            extension.parentProjection,
             extension.parentParameter,
             subProjection,
             pattern,
@@ -36,15 +41,26 @@ export default class ProjectionExtensionCompiler extends ExtensionCompiler {
         case "aggregationPart":
           ({ subProjection, pattern, subProjectionsBelow } = this.processAggregationPart(
             extension,
-            definition
+            definition as NewSubProjectionDefinition
           ));
           this.projectionRegistry.insertAggregationPart(
             extension.package,
-            extension.rootProjection,
+            extension.parentProjection,
             extension.parentParameter,
             subProjection,
             pattern,
             subProjectionsBelow
+          );
+          break;
+        case "aggregationPartReference":
+          const aggPartReferenceDefinition = definition as AggregationPartReferenceDefinition;
+          const referenceTemplate = reference(aggPartReferenceDefinition.referencedProjection);
+          const referencePattern = referenceTemplate.toPattern() as ReferencePattern;
+          this.projectionRegistry.insertAggregationPartReference(
+            extension.package,
+            extension.parentProjection,
+            extension.parentParameter,
+            referencePattern
           );
           break;
         default:
@@ -56,51 +72,36 @@ export default class ProjectionExtensionCompiler extends ExtensionCompiler {
   }
 
   private processAggregationPart(
-    extension: RootProjectionExtension | SubProjectionExtension,
-    definition: SubProjectionDefinition
+    extension: ProjectionExtension,
+    definition: NewSubProjectionDefinition
   ) {
     const { newSubProjection, subProjectionsBelow } = this.buildSubProjection(definition);
-    let pattern: Pattern;
-    if (extension.type === "rootProjectionExtension") {
-      const rootProjectionExtension = extension as RootProjectionExtension;
-      pattern = this.buildAggregationPartPattern(
-        newSubProjection,
-        rootProjectionExtension.package,
-        rootProjectionExtension.rootProjection,
-        rootProjectionExtension.parentParameter
-      );
-    } else {
-      const subProjectionExtension = extension as SubProjectionExtension;
-      pattern = this.buildAggregationPartPattern(
-        newSubProjection,
-        subProjectionExtension.package,
-        subProjectionExtension.subProjection,
-        subProjectionExtension.parentParameter
-      );
-    }
+    const pattern = this.buildAggregationPartPattern(
+      newSubProjection,
+      extension.package,
+      extension.parentProjection,
+      extension.parentParameter
+    );
     return { subProjection: newSubProjection, pattern, subProjectionsBelow };
   }
 
-  private processChainLink(
-    extension: RootProjectionExtension | SubProjectionExtension,
-    definition: SubProjectionDefinition
-  ) {
+  private processChainLink(extension: ProjectionExtension, definition: NewSubProjectionDefinition) {
     const { newSubProjection, subProjectionsBelow } = this.buildSubProjection(definition);
     let pattern: Pattern;
     if (extension.type === "rootProjectionExtension") {
-      const rootProjectionExtension = extension as RootProjectionExtension;
+      const rootProjectionExtension = extension as ProjectionExtension;
       pattern = this.buildChainLinkPattern(
         newSubProjection,
         rootProjectionExtension.package,
-        rootProjectionExtension.rootProjection,
+        rootProjectionExtension.parentProjection,
         rootProjectionExtension.parentParameter
       );
     } else {
-      const subProjectionExtension = extension as SubProjectionExtension;
+      const subProjectionExtension = extension as ProjectionExtension;
       pattern = this.buildChainLinkPattern(
         newSubProjection,
         subProjectionExtension.package,
-        subProjectionExtension.subProjection,
+        subProjectionExtension.parentProjection,
         subProjectionExtension.parentParameter
       );
     }

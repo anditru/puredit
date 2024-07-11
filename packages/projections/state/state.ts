@@ -197,13 +197,19 @@ function splitIntoMatchingUnits(
     matchingUnits.push(astCursor.currentNode);
     return matchingUnits;
   } else if (fieldNameToSplit === "*") {
-    astCursor.goToFirstChild();
+    if (!astCursor.goToFirstChild()) {
+      matchingUnits.push(astCursor.currentNode);
+      return matchingUnits;
+    }
     do {
       matchingUnits = matchingUnits.concat(splitIntoMatchingUnits(astCursor, nodeTypesToSplit));
     } while (astCursor.goToNextSibling());
     astCursor.goToParent();
   } else {
-    astCursor.goToChildWithFieldName(fieldNameToSplit);
+    if (!astCursor.goToChildWithFieldName(fieldNameToSplit)) {
+      matchingUnits.push(astCursor.currentNode);
+      return matchingUnits;
+    }
     matchingUnits = matchingUnits.concat(splitIntoMatchingUnits(astCursor, nodeTypesToSplit));
     astCursor.goToParent();
   }

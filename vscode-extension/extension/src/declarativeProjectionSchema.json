@@ -21,18 +21,18 @@
       },
       "required": ["type", "package", "rootProjections"]
     },
-    "RootProjectionExtension": {
+    "ProjectionExtension": {
       "additionalProperties": false,
       "type": "object",
       "properties": {
         "type": {
           "type": "string",
-          "const": "rootProjectionExtension"
+          "const": "projectionExtension"
         },
         "package": {
           "type": "string"
         },
-        "rootProjection": {
+        "parentProjection": {
           "type": "string"
         },
         "parentParameter": {
@@ -45,43 +45,7 @@
           }
         }
       },
-      "required": ["type", "package", "rootProjection", "parentParameter", "subProjections"]
-    },
-    "SubProjectionExtension": {
-      "additionalProperties": false,
-      "type": "object",
-      "properties": {
-        "type": {
-          "type": "string",
-          "const": "subProjectionExtension"
-        },
-        "package": {
-          "type": "string"
-        },
-        "rootProjection": {
-          "type": "string"
-        },
-        "subProjection": {
-          "type": "string"
-        },
-        "parentParameter": {
-          "type": "string"
-        },
-        "subProjections": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/SubProjectionDefinition"
-          }
-        }
-      },
-      "required": [
-        "type",
-        "package",
-        "rootProjection",
-        "subProjection",
-        "parentParameter",
-        "subProjections"
-      ]
+      "required": ["type", "package", "parentProjection", "parentParameter", "subProjections"]
     },
     "RootProjectionDefinition": {
       "additionalProperties": false,
@@ -295,10 +259,7 @@
         "$ref": "#/definitions/PackageExtension"
       },
       {
-        "$ref": "#/definitions/RootProjectionExtension"
-      },
-      {
-        "$ref": "#/definitions/SubProjectionExtension"
+        "$ref": "#/definitions/ProjectionExtension"
       }
     ]
   }

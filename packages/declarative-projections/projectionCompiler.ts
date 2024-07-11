@@ -1,10 +1,5 @@
 import { ProjectionRegistry } from "@puredit/projections";
-import {
-  Extension,
-  PackageExtension,
-  RootProjectionExtension,
-  SubProjectionExtension,
-} from "./types";
+import { Extension, PackageExtension, ProjectionExtension } from "./types";
 import { Parser } from "@puredit/parser";
 import RootProjectionExtensionCompiler from "./projectionExtensionCompiler";
 import PackageExtensionCompiler from "./packageExtensionCompiler";
@@ -41,11 +36,8 @@ export class ProjectionCompiler {
         case "packageExtension":
           this.packageExtensionCompiler.compile(extension as PackageExtension);
           break;
-        case "rootProjectionExtension":
-          this.projectionExtensionCompiler.compile(extension as RootProjectionExtension);
-          break;
-        case "subProjectionExtension":
-          this.projectionExtensionCompiler.compile(extension as SubProjectionExtension);
+        case "projectionExtension":
+          this.projectionExtensionCompiler.compile(extension as ProjectionExtension);
           break;
         default:
           throw new Error(

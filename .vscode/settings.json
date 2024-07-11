@@ -2,8 +2,11 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "json.schemas": [
     {
-      "fileMatch": ["**/*.ext.json"],
+      "fileMatch": ["**/*.puredit.json"],
       "url": "./vscode-extension/extension/src/declarativeProjectionSchema.json"
     }
-  ]
+  ],
+  "yaml.schemas": {
+    "file:///Users/I518253/SAPDevelop/public/master/puredit/vscode-extension/extension/src/declarativeProjectionSchema.json": "*.puredit.yaml"
+  }
 }

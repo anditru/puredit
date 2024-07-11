@@ -1,5 +1,5 @@
 // Extensions
-export type Extension = PackageExtension | RootProjectionExtension | SubProjectionExtension;
+export type Extension = PackageExtension | ProjectionExtension;
 
 /**
  * @additionalProperties false
@@ -13,22 +13,10 @@ export interface PackageExtension {
 /**
  * @additionalProperties false
  */
-export interface RootProjectionExtension {
+export interface ProjectionExtension {
   type: string;
   package: string;
-  rootProjection: string;
-  parentParameter: string;
-  subProjections: SubProjectionDefinition[];
-}
-
-/**
- * @additionalProperties false
- */
-export interface SubProjectionExtension {
-  type: string;
-  package: string;
-  rootProjection: string;
-  subProjection: string;
+  parentProjection: string;
   parentParameter: string;
   subProjections: SubProjectionDefinition[];
 }

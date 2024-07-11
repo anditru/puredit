@@ -109,6 +109,26 @@ export default class ProjectionRegistry {
     this.commitInsertion();
   }
 
+  insertAggregationPartReference(
+    packageName: string,
+    parentProjectionName: string,
+    aggregationName: string,
+    pattern: ReferencePattern
+  ) {
+    this.beginInsertion(packageName);
+    const parentPattern = this.getPatternBy(
+      packageName,
+      parentProjectionName
+    ) as AggregationDecorator;
+    try {
+      parentPattern.addPartPattern(aggregationName, pattern);
+      this.referencePatterns.push(pattern);
+    } catch (error) {
+      this.rollbackInsertion();
+    }
+    this.commitInsertion();
+  }
+
   insertChainLink(
     packageName: string,
     parentProjectionName: string,

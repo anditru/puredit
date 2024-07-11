@@ -65,9 +65,9 @@
     ]
   },
   {
-    "type": "rootProjectionExtension",
+    "type": "projectionExtension",
     "package": "py-pytorch",
-    "rootProjection": "PyTorch:Tensor:Slice",
+    "parentProjection": "PyTorch:Tensor:Slice",
     "parentParameter": "slices",
     "subProjections": [
       {

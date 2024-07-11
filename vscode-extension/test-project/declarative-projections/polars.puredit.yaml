@@ -199,8 +199,8 @@
       - identifier
 
 - package: py-polars
-  type: rootProjectionExtension
-  rootProjection: Polars:Column:Chain
+  type: projectionExtension
+  parentProjection: Polars:Column:Chain
   parentParameter: columnChain
   subProjections:
   - name: Polars:Column:Median
@@ -287,8 +287,8 @@
       - integer
 
 - package: py-polars
-  type: rootProjectionExtension
-  rootProjection: Polars:Dataframe:Chain
+  type: projectionExtension
+  parentProjection: Polars:Dataframe:Chain
   parentParameter: dataframeChain
   subProjections:
   - name: Polars:Dataframe:FilterEqual

@@ -8,14 +8,23 @@ import {
   TemplateChainDefinition,
   TemplateContextVariableDefinition,
 } from "./types";
-import { agg, arg, chain, contextVariable, Parser, reference, Template } from "@puredit/parser";
+import {
+  agg,
+  arg,
+  chain,
+  contextVariable,
+  Parser,
+  reference,
+  Template,
+  TransformableTemplate,
+} from "@puredit/parser";
 import TemplateParameter from "@puredit/parser/template/parameters/templateParameter";
 import { ALLOWED_PARAMETER_TYPES, buildParserInput, buildWidget } from "./common";
 
 export default abstract class ExtensionCompiler {
   constructor(protected readonly parser: Parser) {}
 
-  private buildSubProjection(definition: NewSubProjectionDefinition) {
+  protected buildSubProjection(definition: NewSubProjectionDefinition) {
     const technicalName = definition.name;
     const { paramsMap, subProjections } = this.buildParams(definition);
     const { templateStrings, params } = buildParserInput(definition, paramsMap);
@@ -71,7 +80,7 @@ export default abstract class ExtensionCompiler {
               subProjections.push(newSubProjection, ...subProjectionsBelow);
             }
           }
-          let aggregationStartTemplate: Template | undefined;
+          let aggregationStartTemplate: TransformableTemplate | undefined;
           if (aggDefinition.startSubProjection) {
             const { newSubProjection, subProjectionsBelow } = this.buildSubProjection(
               aggDefinition.startSubProjection
@@ -88,7 +97,7 @@ export default abstract class ExtensionCompiler {
           break;
         case "chain":
           const chainDefinition = paramDefinition as TemplateChainDefinition;
-          const linkTemplates: Template[] = [];
+          const linkTemplates: TransformableTemplate[] = [];
           for (const linkDefinition of chainDefinition.linkSubProjections) {
             const { newSubProjection, subProjectionsBelow } =
               this.buildSubProjection(linkDefinition);
