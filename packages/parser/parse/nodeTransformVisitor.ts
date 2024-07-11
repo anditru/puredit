@@ -72,6 +72,7 @@ export default class NodeTransformVisitor {
   private transformNonAtomicNode(changedFieldName?: string): PatternNode {
     const patternNodeBuilder = new RegularNodeBuilder();
     patternNodeBuilder
+      .setLanguage(this.language)
       .setType(this.astCursor.currentNode.type)
       .setText(this.astCursor.currentNode.text)
       .setFieldName(changedFieldName || this.astCursor.currentFieldName);

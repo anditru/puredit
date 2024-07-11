@@ -549,24 +549,6 @@ export default class MatchVerification {
       throw new DoesNotMatch();
     }
 
-    const lookAheadPath = loadLookAheadPathFor(this.pattern.language, regularNode.type);
-    if (
-      lookAheadPath &&
-      this.astCursor.follow(lookAheadPath) &&
-      this.patternCursor.follow(lookAheadPath)
-    ) {
-      if (
-        !(this.patternCursor.currentNode instanceof ArgumentNode) &&
-        this.astCursor.currentNode.type === "identifier" &&
-        this.astCursor.currentNode.text !== this.patternCursor.currentNode.text
-      ) {
-        throw new DoesNotMatch();
-      } else {
-        this.astCursor.reverseFollow(lookAheadPath);
-        this.patternCursor.reverseFollow(lookAheadPath);
-      }
-    }
-
     if (regularNode.hasChildren()) {
       this.visitRegularNodeChildren();
     }

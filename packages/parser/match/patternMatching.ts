@@ -13,6 +13,9 @@ import { TreeCursor } from "web-tree-sitter";
 import { ContextVariableMap } from "@puredit/projections";
 import CommentContextExtraction from "./commentContextExtraction";
 import { v4 as uuid } from "uuid";
+import { loadLookAheadPathFor } from "@puredit/language-config/load";
+import PatternCursor from "../pattern/cursor";
+import ArgumentNode from "../pattern/nodes/argumentNode";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.PatternMatching");
@@ -61,7 +64,33 @@ export class PatternMatching {
   }
 
   private getCandidateMatches(): CandidateMatch[] {
-    const fittingPatterns = this.patternMap[this.astCursor.currentNode.cleanNodeType] || [];
+    let fittingPatterns = this.patternMap[this.astCursor.currentNode.cleanNodeType] || [];
+    const nodeType = this.astCursor.currentNode.type;
+    fittingPatterns = fittingPatterns.filter((pattern) => {
+      const patternCursor = new PatternCursor(pattern);
+      if (patternCursor.currentNode.constructor.name !== "RegularNode") {
+        return true;
+      }
+      const lookAheadPath = loadLookAheadPathFor(patternCursor.currentNode.language, nodeType);
+      if (
+        lookAheadPath &&
+        this.astCursor.follow(lookAheadPath) &&
+        patternCursor.follow(lookAheadPath)
+      ) {
+        if (
+          !(patternCursor.currentNode instanceof ArgumentNode) &&
+          this.astCursor.currentNode.type === "identifier" &&
+          this.astCursor.currentNode.text !== patternCursor.currentNode.text
+        ) {
+          this.astCursor.reverseFollow(lookAheadPath);
+          return false;
+        } else {
+          this.astCursor.reverseFollow(lookAheadPath);
+          return true;
+        }
+      }
+      return true;
+    });
     const sortedCandidatePatterns = this.sortByPriority(fittingPatterns);
     const candidateMatches: CandidateMatch[] = sortedCandidatePatterns.map((candidatePattern) => ({
       pattern: candidatePattern,
