@@ -20,5 +20,9 @@ export const logProvider = Log4TSProvider.createProvider("Puredit", {
       identifier: "vscode.editor-utils",
       expression: new RegExp("vscode.editor-utils.+"),
     },
+    {
+      identifier: "projections.state.lazyMatching",
+      expression: new RegExp("projections.state.lazyMatching.+"),
+    },
   ],
 });

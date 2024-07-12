@@ -1,25 +1,3 @@
-- type: projectionExtension
-  package: py-polars
-  parentProjection: Polars:Dataframe:Chain
-  parentParameter: dataframeChain
-  subProjections:
-  - type: chainLink
-    name: Polars:Dataframe:SelectList
-    description: Select CN columns
-    template: select(<%columns%>)
-    segmentWidgets:
-      - "select columns"
-      - "end columns"
-    parameters:
-      - type: aggregation
-        name: columns
-        nodeType: list
-        partSubProjections:
-          - type: aggregationPartReference
-            referencedProjection: Polars:CnColumn
-          - type: aggregationPartReference
-            referencedProjection: Polars:Column
-
 - package: py-polars
   type: packageExtension
   rootProjections:
