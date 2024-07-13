@@ -1,7 +1,7 @@
 import { ChangeSet, EditorSelection, EditorState, Line, Transaction } from "@codemirror/state";
 import { ChangeSpec } from "@codemirror/state";
 import { ProjectionWidget } from "./widget/widget";
-import { projectionState } from "./state/state";
+import { projectionState } from "./state/stateField";
 
 export const transactionFilter = EditorState.transactionFilter.of((tr) => {
   const userEvent = tr.annotation(Transaction.userEvent);

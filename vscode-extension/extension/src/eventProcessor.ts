@@ -46,6 +46,21 @@ export class EventProcessor {
     ) {
       context.webviewPanel.webview.html = getHtmlForWebview(context);
     }
+    if (event.affectsConfiguration("puredit.rematchingDelay")) {
+      let delay = getConfig<number>("rematchingDelay");
+      if (!delay || delay < 0) {
+        vscode.window.showErrorMessage(
+          `Invalid rematching delay. Value must be greater than 0. Defaulting to 200.`
+        );
+        delay = 200;
+      }
+      context.webviewPanel.webview.postMessage({
+        id: uuid(),
+        type: MessageType.REQUEST,
+        action: Action.UPDATE_REMATCHING_DELAY,
+        payload: delay,
+      });
+    }
   }
 
   async processMessage(message: Message, context: EditorContext) {
@@ -64,6 +79,9 @@ export class EventProcessor {
         break;
       case Action.GET_EOL:
         this.processGetEol(message, context);
+        break;
+      case Action.GET_REMATCHING_DELAY:
+        this.processGetRematchingDelay(message, context);
         break;
       case Action.REPORT_ERROR:
         vscode.window.showErrorMessage(message.payload);
@@ -95,8 +113,7 @@ export class EventProcessor {
   }
 
   private async processGetDeclarativeProjections(message: Message, context: EditorContext) {
-    const config = vscode.workspace.getConfiguration("puredit");
-    const descriptorPaths = config.get<string[]>("declarativeProjectionDescriptors") || [];
+    const descriptorPaths = getConfig<string[]>("declarativeProjectionDescriptors") || [];
     const extensions = await this.readDeclarativeProjections(descriptorPaths);
     context.webviewPanel.webview.postMessage({
       id: message.id,
@@ -128,6 +145,20 @@ export class EventProcessor {
       type: MessageType.RESPONSE,
       action: Action.GET_EOL,
       payload: documentState.eol,
+    });
+  }
+
+  private processGetRematchingDelay(message: Message, context: EditorContext) {
+    const config = vscode.workspace.getConfiguration("puredit");
+    let rematchingDelay = config.get<number>("rematchingDelay");
+    if (rematchingDelay == null) {
+      rematchingDelay = 200;
+    }
+    context.webviewPanel.webview.postMessage({
+      id: message.id,
+      type: MessageType.RESPONSE,
+      action: Action.GET_REMATCHING_DELAY,
+      payload: rematchingDelay,
     });
   }
 
@@ -163,4 +194,9 @@ export class EventProcessor {
     }
     return extensions;
   }
+}
+
+function getConfig<T>(name: string) {
+  const config = vscode.workspace.getConfiguration("puredit");
+  return config.get<T>(name);
 }

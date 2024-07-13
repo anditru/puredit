@@ -19,6 +19,8 @@ export const enum Action {
   REPORT_ERROR = "REPORT_ERROR",
   GET_EOL = "GET_EOL",
   UPDATE_EOL = "UPDATE_EOL",
+  GET_REMATCHING_DELAY = "GET_REMATCHING_DELAY",
+  UPDATE_REMATCHING_DELAY = "UPDATE_REMATCHING_DELAY",
 }
 
 export type MessagePayload = ChangeDocumentPayload | ChangeEditorPayload | string | any;

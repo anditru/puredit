@@ -6,6 +6,7 @@
   import type { FocusGroup } from "../widget/focus";
   import { stringLiteralValue, stringLiteralValueChange } from "../shared";
   import AstNode from "@puredit/parser/ast/node";
+  import { Debouncer } from "../state/debouncing";
 
   export let view: EditorView | null;
   export let node: AstNode;
@@ -58,12 +59,18 @@
   }
 
   function updateValue(value: string) {
-    const code = handleEmptyValueToCode(valueToCode(value));
-    view?.dispatch({
-      filter: false,
-      changes:
-        targetNodes?.map((targetNode) => stringLiteralValueChange(targetNode, code)) ??
-        stringLiteralValueChange(node, code),
+    const debouncer = Debouncer.getInstance();
+    debouncer.executeDebounced(() => {
+      const code = handleEmptyValueToCode(valueToCode(value));
+      view?.dispatch({
+        filter: false,
+        changes:
+          targetNodes?.map((targetNode) => stringLiteralValueChange(targetNode, code)) ??
+          stringLiteralValueChange(node, code),
+      });
+      if (view) {
+        debouncer.rematch(view);
+      }
     });
   }
 

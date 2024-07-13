@@ -3,8 +3,8 @@ import {
   projectionState,
   insertDeclarativeProjectionsEffect,
   removeProjectionPackagesEffect,
-  updateListener,
-} from "./state/state";
+  scrollListener,
+} from "./state/stateField";
 import { transactionFilter } from "./filter";
 import { completions } from "./completions/completions";
 import type {
@@ -16,6 +16,7 @@ import type {
 } from "./types";
 import { style } from "./widget/style";
 import { cursorRescuer } from "./cursorMovements";
+import { debouncedTypeListener } from "./state/debouncing";
 
 export type {
   ProjectionPluginConfig,
@@ -29,7 +30,8 @@ export const projectionPlugin = (config: ProjectionPluginConfig) => [
   style,
   projectionState.init((state) => createProjectionState(state, config)),
   transactionFilter,
-  updateListener,
+  scrollListener,
+  debouncedTypeListener,
   cursorRescuer,
 ];
 

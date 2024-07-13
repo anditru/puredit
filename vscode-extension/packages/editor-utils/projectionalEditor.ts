@@ -15,6 +15,7 @@ import {
   insertDeclarativeProjectionsEffect,
   removeProjectionPackagesEffect,
 } from "@puredit/projections";
+import { updateDelayEffect } from "@puredit/projections/state/stateField";
 
 export default class ProjectionalEditor {
   private readonly doNotSyncAnnotation = Annotation.define<boolean>();
@@ -47,6 +48,13 @@ export default class ProjectionalEditor {
 
     this.vsCodeMessenger.registerHandler(Action.UPDATE_EOL, (message) => {
       this.eol = message.payload as EndOfLine;
+    });
+
+    this.vsCodeMessenger.registerHandler(Action.UPDATE_REMATCHING_DELAY, (message) => {
+      this.editorView.dispatch({
+        effects: updateDelayEffect.of(message.payload),
+        annotations: this.doNotSyncAnnotation.of(true),
+      });
     });
 
     this.editorView = new EditorView({
@@ -83,6 +91,12 @@ export default class ProjectionalEditor {
     const extensions = JSON.parse(projectionsResponse.payload) as ProjectionPackageExtension[];
     this.editorView.dispatch({
       effects: insertDeclarativeProjectionsEffect.of(extensions),
+      annotations: this.doNotSyncAnnotation.of(true),
+    });
+
+    const delayResponse = await this.vsCodeMessenger.sendRequest(Action.GET_REMATCHING_DELAY);
+    this.editorView.dispatch({
+      effects: updateDelayEffect.of(delayResponse.payload),
       annotations: this.doNotSyncAnnotation.of(true),
     });
   }

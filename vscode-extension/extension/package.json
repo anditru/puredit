@@ -51,6 +51,12 @@
           "scope": "window",
           "default": true,
           "description": "Enable projections for PyTorch."
+        },
+        "puredit.rematchingDelay": {
+          "type": "number",
+          "scope": "window",
+          "default": 200,
+          "description": "Minimum delay in miliseconds between two keystrokes to trigger pattern matching."
         }
       }
     },

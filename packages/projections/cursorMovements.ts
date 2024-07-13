@@ -1,6 +1,6 @@
 import { EditorSelection, EditorState } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
-import { projectionState } from "./state/state";
+import { projectionState } from "./state/stateField";
 
 export const cursorRescuer = ViewPlugin.fromClass(
   class {

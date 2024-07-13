@@ -10,15 +10,17 @@ import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("projections.state.lazyMatching");
 
 export function analyzeTransaction(
-  transaction: Transaction,
+  fristTransaction: Transaction,
+  lastTransaction: Transaction,
+  docChanged: boolean,
   parser: Parser,
   forceRematch: boolean
 ): TransactionResult {
-  const oldState = transaction.startState;
+  const oldState = fristTransaction.startState;
   const oldText = oldState.sliceDoc(0);
   const { nonErrorUnits: oldNonErrorUnits } = getMatchingUnits(oldText, parser);
 
-  const newState = transaction.state;
+  const newState = lastTransaction.state;
   const newText = newState.sliceDoc(0);
   const { nonErrorUnits: newNonErrorUnits, errorUnits: newErrorUnits } = getMatchingUnits(
     newText,
@@ -35,7 +37,7 @@ export function analyzeTransaction(
     unitsToRematch = validUnits;
     unitsToInvalidate.push(...invalidUnits);
     logger.debug("Force rematch. Rematching everything");
-  } else if (transaction.docChanged) {
+  } else if (docChanged) {
     // Document has changed -> find changed units and rematch them
     logger.debug("Document changed. Analyzing changes");
     const { changedUnits, errorUnits } = analyzeChanges(

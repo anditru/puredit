@@ -1,6 +1,6 @@
 import type { Completion, CompletionContext } from "@codemirror/autocomplete";
 import type { CompletionResult } from "@codemirror/autocomplete";
-import { projectionState } from "../state/state";
+import { projectionState } from "../state/stateField";
 import CompletionsBuilder from "./completionResultBuilder";
 import { ContextVariableMap, Projection } from "..";
 import { Decoration } from "@codemirror/view";
