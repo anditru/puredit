@@ -1,7 +1,6 @@
 import type { Parser } from "@puredit/parser";
 import AstNode from "@puredit/parser/ast/node";
 import AstCursor from "@puredit/parser/ast/cursor";
-import { zip } from "@puredit/utils-shared";
 import { loadNodeTypesToSplitFor } from "@puredit/language-config/load";
 import { NodeTypesToSplitConfig } from "@puredit/language-config";
 import { Transaction } from "@codemirror/state";
@@ -294,24 +293,28 @@ function analyzeChanges(
 }
 
 function nodesEqual(oldNode: AstNode, newNode: AstNode, differenceFound = false): boolean {
-  if (newNode.type == "ERROR") {
+  if (newNode?.type == "ERROR") {
     throw new ErrorFound();
-  }
-  if (oldNode.type !== newNode.type) {
+  } else if (!newNode || !oldNode) {
     differenceFound = true;
-  }
-  if (oldNode.startIndex !== newNode.startIndex || oldNode.endIndex !== newNode.endIndex) {
+  } else if (oldNode.children.length !== newNode.children.length) {
     differenceFound = true;
+  } else if (newNode.children.length === 0) {
+    differenceFound = oldNode?.text !== newNode?.text;
+  } else {
+    differenceFound =
+      oldNode?.type !== newNode?.type ||
+      oldNode?.startIndex !== newNode?.startIndex ||
+      oldNode?.endIndex !== newNode?.endIndex;
   }
-  if (oldNode.children?.length !== newNode.children?.length) {
-    differenceFound = true;
-  }
-  if (oldNode.children.length === 0) {
-    differenceFound = oldNode.text !== newNode.text || differenceFound;
-  }
-  for (const [oldChildNode, newChildNode] of zip(oldNode.children, newNode.children)) {
+
+  const maxIndex = Math.max(oldNode?.children.length || 0, newNode?.children.length || 0);
+  for (let i = 0; i < maxIndex; i++) {
+    const oldChildNode = oldNode?.children[i];
+    const newChildNode = newNode?.children[i];
     differenceFound = !nodesEqual(oldChildNode, newChildNode, differenceFound) || differenceFound;
   }
+
   return !differenceFound;
 }
 
