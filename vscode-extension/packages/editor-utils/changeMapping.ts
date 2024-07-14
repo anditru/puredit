@@ -79,7 +79,7 @@ export class Change {
   }
 
   insertsNoText(): boolean {
-    return this.inserted.text.length === 1 && this.inserted.text[0] === "";
+    return this.inserted.toString().length === 0;
   }
 
   toChangeDocumentPayload(): ChangeDocumentPayload {
@@ -104,6 +104,6 @@ export class Change {
   }
 
   getInsertedText(): string {
-    return this.inserted.text.join("\n");
+    return this.inserted.toString();
   }
 }
