@@ -16,7 +16,7 @@ import DecorationSetBuilder from "./decorationSetBuilder";
 import { Extension } from "@puredit/declarative-projections";
 import ProjectionRegistry from "../projectionRegistry";
 import { analyzeTransaction } from "./lazyMatching";
-import { Debouncer, rematchEffect } from "./debouncing";
+import { Debouncer } from "./debouncing";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("projections.state.stateField");
@@ -56,8 +56,9 @@ export function createProjectionState(
 
 export const insertDeclarativeProjectionsEffect = StateEffect.define<Extension[]>();
 export const removeProjectionPackagesEffect = StateEffect.define<string[]>();
-export const forceRecreateDecorationsEffect = StateEffect.define<boolean>();
 export const updateDelayEffect = StateEffect.define<number>();
+export const forceRecreateDecorationsEffect = StateEffect.define<boolean>();
+export const rematchEffect = StateEffect.define();
 
 export const projectionState = StateField.define<ProjectionState>({
   create(): ProjectionState {
@@ -65,13 +66,45 @@ export const projectionState = StateField.define<ProjectionState>({
   },
 
   update(projectionState: ProjectionState, transaction: Transaction) {
-    if (transaction.effects.some((effect) => effect.is(updateDelayEffect))) {
-      const delay = transaction.effects.find((effect) => effect.is(updateDelayEffect))!.value;
-      projectionState.rematchingController.setDelay(delay);
+    const config = projectionState.config;
+    let forceRematch = false;
+    let forceRecreation = false;
+    for (const effect of transaction.effects) {
+      if (effect.is(updateDelayEffect)) {
+        const delay = transaction.effects.find((effect) => effect.is(updateDelayEffect))!.value;
+        projectionState.rematchingController.setDelay(delay);
+      }
+      if (effect.is(removeProjectionPackagesEffect)) {
+        logger.debug("removeProjectionPackagesEffect found. Updating projections");
+        effect.value.forEach((packageName) => config.projectionRegistry.removePackage(packageName));
+        forceRematch = true;
+      }
+      if (effect.is(insertDeclarativeProjectionsEffect) && config.projectionCompiler) {
+        logger.debug("insertDeclarativeProjectionsEffect found. Updating projections");
+        config.projectionCompiler.compile(effect.value);
+        forceRematch = true;
+      }
+      if (effect.is(forceRecreateDecorationsEffect)) {
+        logger.debug("forceRecreateDecorationsEffect found.");
+        forceRematch = true;
+        forceRecreation = true;
+      }
     }
-    if (transaction.effects.some((effect) => effect.is(rematchEffect))) {
+
+    if (forceRematch) {
+      logger.debug("Calculating forced update");
+      projectionState = calculateUpdate(
+        projectionState,
+        [transaction],
+        forceRematch,
+        forceRecreation
+      );
+    } else if (transaction.effects.some((effect) => effect.is(rematchEffect))) {
       logger.debug("Calculating lazy update");
-      projectionState = calculateUpdate(projectionState);
+      const rematchingController = projectionState.rematchingController;
+      const transactions = rematchingController.getBufferedTransactions();
+      rematchingController.flushTransactionBuffer();
+      projectionState = calculateUpdate(projectionState, transactions);
     } else if (transaction.docChanged) {
       logger.debug("Shifting decorations");
       projectionState.decorations = projectionState.decorations.map(transaction.changes);
@@ -85,36 +118,22 @@ export const projectionState = StateField.define<ProjectionState>({
   },
 });
 
-function calculateUpdate(projectionState: ProjectionState) {
+function calculateUpdate(
+  projectionState: ProjectionState,
+  transactions: Transaction[],
+  forceRematch = false,
+  forceRecreation = false
+) {
   const { config, decorations, rematchingController } = projectionState;
-  const transactions = rematchingController.getBufferedTransactions();
-  if (!transactions.length) {
+  if (!transactions.length && !forceRematch) {
     return projectionState;
   }
-  rematchingController.flushTransactionBuffer();
 
   let docChanged = false;
   let isCompletion = false;
-  let forceRematch = false;
-  let forceRecreation = false;
   for (const transaction of transactions) {
     docChanged = docChanged || transaction.docChanged;
     isCompletion = isCompletion || Boolean(transaction.annotation(pickedCompletion));
-    for (const effect of transaction.effects) {
-      if (effect.is(removeProjectionPackagesEffect)) {
-        logger.debug("removeProjectionPackagesEffect found. Updating projections");
-        effect.value.forEach((packageName) => config.projectionRegistry.removePackage(packageName));
-        forceRematch = true;
-      } else if (effect.is(insertDeclarativeProjectionsEffect) && config.projectionCompiler) {
-        logger.debug("insertDeclarativeProjectionsEffect found. Updating projections");
-        config.projectionCompiler.compile(effect.value);
-        forceRematch = true;
-      } else if (effect.is(forceRecreateDecorationsEffect)) {
-        logger.debug("forceRecreateDecorationsEffect found. Recreating decorations");
-        forceRematch = true;
-        forceRecreation = true;
-      }
-    }
   }
 
   const firstTransaction = transactions[0];

@@ -1,9 +1,7 @@
-import { StateEffect, Transaction } from "@codemirror/state";
+import { Transaction } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import type { ViewUpdate } from "@codemirror/view";
-import { forceRecreateDecorationsEffect } from "./stateField";
-
-export const rematchEffect = StateEffect.define();
+import { forceRecreateDecorationsEffect, rematchEffect } from "./stateField";
 
 export const debouncedTypeListener = EditorView.updateListener.of((update: ViewUpdate) => {
   const tr = update.transactions[0];

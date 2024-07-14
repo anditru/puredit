@@ -69,6 +69,8 @@
             <span style="margin-left: 10px;">{index}: {dimension}</span>
           {/each}
         </div>
+      {:else}
+        <span>Add tensors's dimensions as context comment to<br />see the preview</span>
       {/if}
     </div>
   </div>
