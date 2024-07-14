@@ -116,7 +116,7 @@
 <!-- <DarkMode bind:theme /> -->
 
 <div class="container" bind:this={container} />
-<button class="floating-button" on:click={executeCode}>Execute</button>
+<!-- <button class="floating-button" on:click={executeCode}>Execute</button> -->
 {#if output}
   <pre class="output">{output}</pre>
   <button class="floating-button" on:click={clearOutput}>Close</button>
