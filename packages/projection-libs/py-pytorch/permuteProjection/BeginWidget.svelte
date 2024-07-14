@@ -43,7 +43,7 @@
       />
       <span>to order</span>
     </span>
-    <div style="display: flex; flex-direction: column;">
+    <div class="preview-container">
       {#if context.reorderedDimensions}
         <span>Dimensions after permutation:</span>
         <div style="display: flex; flex-direction: column;">
@@ -51,7 +51,23 @@
             <span style="margin-left: 10px;">{index}: {dimension}</span>
           {/each}
         </div>
+      {:else}
+        <span>Add tensors's dimensions as context comment to<br />see the preview</span>
       {/if}
     </div>
   </div>
 </span>
+
+<style>
+  .preview-container {
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    margin-bottom: 10px;
+    color: white;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 10px;
+    border-color: white;
+  }
+</style>

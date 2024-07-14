@@ -61,7 +61,7 @@
         placeholder="tensor"
       />
     </span>
-    <div style="display: flex; flex-direction: column;">
+    <div class="preview-container">
       {#if context.dimensions}
         <span>Dimensions after transpose:</span>
         <div style="display: flex; flex-direction: column;">
@@ -73,3 +73,17 @@
     </div>
   </div>
 </span>
+
+<style>
+  .preview-container {
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    margin-bottom: 10px;
+    color: white;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 10px;
+    border-color: white;
+  }
+</style>
