@@ -1,8 +1,6 @@
-// This is the live demo to the paper Virtual Domain Specific Languages via
-// Embedded Projectional Editing by Niklas Korz and Artur Andrzejak, published
-// at 22nd International Conference on Generative Programming:
-// Concepts & Experiences (GPCE 2023), in conjunction with ACM SPLASH 2023,
-// 22-27 October 2023, Cascais, Portugal.
+// This is the live demo to projectional editor Puredit
+// Originally developed by Niklas Korz and Artur Andrzejak (https://github.com/niklaskorz/puredit)
+// Extended by Andre Trump (https://github.com/andretrump/puredit)
 
 // On the left, you see the projectional editor and on the right, the
 // underlying textual source code. Both edit the same model and any changes
