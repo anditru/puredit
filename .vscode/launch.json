@@ -21,7 +21,7 @@
         "UNDECLARED_VAR_USAGES": "[\"c\"]"
       },
       "args": [
-        "projection",
+        "rootProjection",
         "-n",
         "My Test Projection",
         "-t",

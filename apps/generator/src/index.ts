@@ -18,40 +18,40 @@ subParsers.add_parser("package", {
   help: "Generate a projection package",
 });
 
-const projectionParser = subParsers.add_parser("projection", {
-  help: "Generate a projection",
+const rootProjectionParser = subParsers.add_parser("rootProjection", {
+  help: "Generate a root projection",
 });
-projectionParser.add_argument("--language", "-l", {
+rootProjectionParser.add_argument("--language", "-l", {
   required: false,
   help: "Language for the projection",
   dest: "language",
   type: "str",
 });
-projectionParser.add_argument("--display-name", "-n", {
+rootProjectionParser.add_argument("--display-name", "-n", {
   required: false,
   help: "Display name for the projection",
   dest: "displayName",
   type: "str",
 });
-projectionParser.add_argument("--technical-name", "-t", {
+rootProjectionParser.add_argument("--technical-name", "-t", {
   required: false,
   help: "Technical name for the projection",
   dest: "technicalName",
   type: "str",
 });
-projectionParser.add_argument("--description", "-d", {
+rootProjectionParser.add_argument("--description", "-d", {
   required: false,
   help: "Description for the projection",
   dest: "description",
   type: "str",
 });
-projectionParser.add_argument("--samples-file", "-s", {
+rootProjectionParser.add_argument("--samples-file", "-s", {
   required: false,
   help: "Path to the samples file",
   dest: "samplesFile",
   type: "str",
 });
-projectionParser.add_argument("--ignore-blocks", "-ib", {
+rootProjectionParser.add_argument("--ignore-blocks", "-ib", {
   required: false,
   default: false,
   help: "Ignore blocks in pattern generation",
@@ -67,7 +67,7 @@ const args = parser.parse_args();
 if (args.entity === "package") {
   const packageGenerator = new PackageGenerator();
   packageGenerator.execute();
-} else if (args.entity === "projection" && !args.samplesFile) {
+} else if (args.entity === "rootProjection" && !args.samplesFile) {
   const projectionGenerator = new RootProjectionGenerator();
   projectionGenerator
     .setLanguage(args.language)
@@ -75,7 +75,7 @@ if (args.entity === "package") {
     .setTechnicalName(args.technicalName)
     .setDescription(args.description)
     .execute();
-} else if (args.entity === "projection" && args.samplesFile) {
+} else if (args.entity === "rootProjection" && args.samplesFile) {
   const projectionGenerator = new RootProjectionGenerator();
   const contentGenerator = new RootProjectionContentGenerator(projectionGenerator);
   contentGenerator.execute(
