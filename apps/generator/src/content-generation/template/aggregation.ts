@@ -24,12 +24,12 @@ export class TemplateAggregation extends ComplexTemplateParameter {
   toDeclarationString(): string {
     const variableName = this.toVariableName();
     const subProjectionsString = this.partSubProjectionNames
-      .map((name) => `  ${name}.pattern,`)
+      .map((name) => `  ${name}.template,`)
       .join("\n");
     if (this.start) {
       return `const ${variableName} = agg("${variableName}", "${this.type}", [
 ${subProjectionsString}
-], ${this.startSubProjectionName}.pattern);\n`;
+], ${this.startSubProjectionName}.template);\n`;
     } else {
       return `const ${variableName} = agg("${variableName}", "${this.type}", [
 ${subProjectionsString}

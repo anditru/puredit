@@ -63,7 +63,8 @@ export default abstract class ContentGenerator {
       this.templateString,
       this.paramToSubProjectionsMap,
       this.segmentWidgetContents,
-      this.allSubProjections
+      this.allSubProjections,
+      this.templateParameters.getRequiredParameterTypes()
     );
   }
 

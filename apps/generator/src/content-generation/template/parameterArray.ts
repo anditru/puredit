@@ -3,6 +3,14 @@ import TemplateParameter from "./parameter";
 import ComplexTemplateParameter from "./complexParameter";
 import { isPrefixOf } from "../common";
 
+const paramterTypeMap = {
+  TemplateArgument: "arg",
+  TemplateBlock: "block",
+  TemplateContextVariable: "contextVariable",
+  TemplateAggregation: "agg",
+  TemplateChain: "chain",
+};
+
 export default class TemplateParameterArray extends Array<TemplateParameter> {
   sortByAppearance() {
     this.sort((parameterA: TemplateParameter, parameterB: TemplateParameter) => {
@@ -76,5 +84,13 @@ export default class TemplateParameterArray extends Array<TemplateParameter> {
         (parameter) => isPrefixOf(path, parameter.path) && parameter.path.length > path.length
       )
     );
+  }
+
+  getRequiredParameterTypes(): string[] {
+    const parameterTypes: Set<string> = new Set();
+    this.forEach((parameterType) => {
+      parameterTypes.add(paramterTypeMap[parameterType.constructor.name]);
+    });
+    return Array.from<string>(parameterTypes);
   }
 }

@@ -15,7 +15,7 @@
     "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js",
     "lint": "eslint --ignore-path .gitignore .",
     "format": "prettier --write --ignore-path .gitignore --plugin-search-dir=. \"**/*.{ts,tsx,mts,js,jsx,cjs,mjs,json,svelte,html,css,md}\"",
-    "prepare": "husky install",
+    "prepare": "husky install && npm run build --prefix packages/projection-parser",
     "build:example": "docker build --platform linux/amd64 -t andretrump/puredit-example -f apps/example/Dockerfile ."
   },
   "devDependencies": {

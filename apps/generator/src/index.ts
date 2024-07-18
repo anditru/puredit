@@ -7,7 +7,7 @@ import RootProjectionContentGenerator from "./content-generation/rootProjectionC
 
 const parser = new ArgumentParser({
   description:
-    "Generate projection packages, projection and subprojection from scratch or based on samples.",
+    "Generate projection packages, projections and subprojections from scratch or based on samples.",
 });
 const subParsers = parser.add_subparsers({
   help: "What to generate",

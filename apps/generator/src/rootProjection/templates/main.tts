@@ -1,19 +1,19 @@
 import { parser } from "../parser";
 import { svelteProjection } from "@puredit/projections";
 import type { RootProjection } from "@puredit/projections/types";
+<%- parserImports %>
 <%- importedWidgets %>
 <%- importedSubProjections %>
 <%- parameterDeclarations %>
 const pattern = parser.statementPattern(
-  "<%= technicalName %>Pattern"
+  "<%= displayName %>"
 )`<%- templateString %>`;
 
 <%- widgetTransformations %>
 
 export const <%= technicalName %>: RootProjection = {
-  name: "<%= displayName %>",
-  description: "<%= description %>",
   pattern,
+  description: "<%= description %>",
   requiredContextVariables: [],
   segmentWidgets: <%- segmentWidgetArray %>,
   subProjections: <%- subProjectionArray %>,

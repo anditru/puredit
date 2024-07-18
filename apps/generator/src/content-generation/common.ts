@@ -18,11 +18,16 @@ export class ProjectionContent {
     public templateString: string,
     public paramToSubProjectionsMap: Record<string, string[]>,
     public segmentWidgetContents: string[],
-    public allSubProjections: string[]
+    public allSubProjections: string[],
+    public requiredParamterTypes: string[]
   ) {}
 
   get widgetContents() {
     return this.segmentWidgetContents;
+  }
+
+  get parameterImports() {
+    return `import { ${this.requiredParamterTypes.join(", ")} } from "@puredit/parser"`;
   }
 
   get widgetImports() {
@@ -72,4 +77,14 @@ export function isPrefixOf(prefix: number[], target: number[]): boolean {
     }
   }
   return true;
+}
+
+export function toTechnicalName(displayName: string) {
+  const parts = displayName.split(":");
+  const lastPart = parts[parts.length - 1];
+  return lastPart
+    .replace(/[^a-zA-Z0-9\s]/g, " ")
+    .replace(/\s(.)/g, (part) => part.toUpperCase().trim())
+    .replace(/\s/g, "")
+    .replace(/^(.)/, (part) => part.toLowerCase());
 }

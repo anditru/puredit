@@ -15,8 +15,7 @@ import chalk from "chalk";
 import { Question } from "inquirer";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { Language, ProjectionContent } from "../content-generation/common";
-import { toLowerCamelCase } from "@puredit/utils-shared";
+import { Language, ProjectionContent, toTechnicalName } from "../content-generation/common";
 
 interface ProjectionAnswers {
   language?: Language;
@@ -45,7 +44,7 @@ const projectionQuestions: Record<string, Question> = {
     type: "input",
     name: "displayName",
     message: "What shall be the display name for your projection?",
-    default: "My Projection",
+    default: "MyPackage:MyRootProjection",
   },
   description: {
     type: "input",
@@ -63,6 +62,7 @@ export default class RootProjectionGenerator extends BaseGenerator {
   private projectionConfig: ProjectionConfig = {};
   private projectionContent = {
     widgetContents: [],
+    parserImports: "",
     widgetImports: "",
     importedWidgets: `import Widget from "./Widget.svelte";`,
     importedSubProjections: "",
@@ -110,7 +110,7 @@ export default class RootProjectionGenerator extends BaseGenerator {
       .map((field) => projectionQuestions[field]);
     const projectionAnswers = await this.prompt<ProjectionAnswers>(questionsToAsk);
     Object.assign(this.projectionConfig, projectionAnswers);
-    this.projectionConfig.technicalName = toLowerCamelCase(this.projectionConfig.displayName);
+    this.projectionConfig.technicalName = toTechnicalName(this.projectionConfig.displayName);
     this.language = this.projectionConfig.language;
     return this.projectionConfig.technicalName;
   }
@@ -119,6 +119,7 @@ export default class RootProjectionGenerator extends BaseGenerator {
     if (projectionContent) {
       this.projectionContent = {
         widgetContents: projectionContent.widgetContents,
+        parserImports: projectionContent.parameterImports,
         widgetImports: projectionContent.widgetImports,
         importedWidgets: projectionContent.importedWidgets,
         importedSubProjections: projectionContent.importedSubProjections,
