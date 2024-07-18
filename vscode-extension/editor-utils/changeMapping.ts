@@ -3,7 +3,7 @@ import type { Text } from "@codemirror/state";
 import { ChangeDocumentPayload, ChangeType } from "@puredit/webview-interface";
 import { EndOfLine } from "./projectionalEditor";
 
-import { logProvider } from "../../../logconfig";
+import { logProvider } from "../../logconfig";
 const logger = logProvider.getLogger("vscode.editor-utils.changeMapping");
 
 export function mapTransactionToChanges(transaction: Transaction, eol: EndOfLine): Change[] {

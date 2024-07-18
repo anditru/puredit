@@ -1,7 +1,7 @@
 import { Action, Message, MessagePayload, MessageType } from "@puredit/webview-interface";
 import { v4 as uuid } from "uuid";
 
-import { logProvider } from "../../../logconfig";
+import { logProvider } from "../../logconfig";
 const logger = logProvider.getLogger("vscode.editor-utils.VsCodeMessenger");
 const RESPONSE_TIMEOUT = 120;
 
