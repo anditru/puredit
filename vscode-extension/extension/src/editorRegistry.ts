@@ -1,5 +1,11 @@
 import * as vscode from "vscode";
 
+/**
+ * @class
+ * Stores the essential information about all opened projectional editors
+ * in a map. The stored infomration is required during event processing.
+ * @see EventProcessor
+ */
 export class EditorRegistry {
   private readonly registry: Map<vscode.WebviewPanel, EditorContext> = new Map();
 

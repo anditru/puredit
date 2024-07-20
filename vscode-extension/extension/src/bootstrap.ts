@@ -1,3 +1,9 @@
+/**
+ * @module
+ * Provides utility functions to construct the initial HTML for a webview
+ * containing a projectional editor.
+ */
+
 import * as vscode from "vscode";
 import { EditorContext } from "./editorRegistry";
 

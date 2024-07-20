@@ -1,12 +1,22 @@
+/**
+ * @module
+ * Main entry point of the extension.
+ */
+
 import * as vscode from "vscode";
 import { ProjectionalEditorProvider } from "./projectionalEditorProvider";
 import { SvelteResources } from "./editorRegistry";
 import DocumentRegistry from "./documentRegistry";
 
+/**
+ * Initialized the extension and registers commands and the projectional editor
+ * provider with VS Code.
+ * @param extensionContext
+ */
 export async function activate(extensionContext: vscode.ExtensionContext) {
   DocumentRegistry.init(extensionContext);
 
-  // Enbale validation yaml extnesion files
+  // Enable validation of yaml extension files
   const yamlConfig = vscode.workspace.getConfiguration("yaml");
   const pathToSchema = vscode.Uri.joinPath(
     extensionContext.extensionUri,

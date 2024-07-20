@@ -5,6 +5,10 @@ import { EditorContext, EditorRegistry, SvelteResources } from "./editorRegistry
 
 const PROJECTIONAL_EDITOR_RUNNING_KEY = "projectionalEditorRunning";
 
+/**
+ * @class
+ * Provides instances of the projectional editor as webviews.
+ */
 export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvider {
   private readonly editorRegistry: EditorRegistry;
   private readonly eventProcessor: EventProcessor;
@@ -17,6 +21,12 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
     this.eventProcessor = new EventProcessor();
   }
 
+  /**
+   * Creates the HTML for the webview and registers handlers to process messages sent from the
+   * webview to keep the document and the weview in sync.
+   * @param document
+   * @param webviewPanel
+   */
   resolveCustomTextEditor(document: vscode.TextDocument, webviewPanel: vscode.WebviewPanel) {
     const editorContext: EditorContext = {
       webviewPanel,
@@ -54,6 +64,11 @@ export class ProjectionalEditorProvider implements vscode.CustomTextEditorProvid
     });
   }
 
+  /**
+   * Recreates the HTML for the vewviews of all editors when the button
+   * "Reload all projectional editors" button is pressed or it is required
+   * by a configuration change.
+   */
   reloadAllEditors() {
     this.editorRegistry.getAllEditorContexts().forEach((editorContext) => {
       editorContext.webviewPanel.webview.html = getHtmlForWebview(editorContext);

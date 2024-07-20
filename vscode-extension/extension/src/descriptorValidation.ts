@@ -1,3 +1,8 @@
+/**
+ * @module
+ * Provides the compiled JSON schema to validate declarative projection descriptors.
+ */
+
 import Ajv from "ajv";
 import * as fs from "fs";
 

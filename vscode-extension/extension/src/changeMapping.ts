@@ -1,3 +1,9 @@
+/**
+ * @module
+ * Provides utility functions to map changes communicated by the projectional editors
+ * to vscode.WorkspaceEdits and vice versa.
+ */
+
 import * as vscode from "vscode";
 import { ChangeDocumentPayload, ChangeEditorPayload, ChangeType } from "@puredit/webview-interface";
 import { DocumentState } from "./documentRegistry";

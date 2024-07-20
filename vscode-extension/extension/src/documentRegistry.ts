@@ -1,5 +1,12 @@
 import * as vscode from "vscode";
 
+/**
+ * @class
+ * Stores all documents opened in at least one projectional editor with
+ * their current text end end-of-line character. This information is required
+ * to correctly map the changes communicated form the projectional editors
+ * to vscode.WorkspaceEdits.
+ */
 export default class DocumentRegistry {
   private static _instance: DocumentRegistry | undefined;
 

@@ -9,6 +9,15 @@ import DocumentRegistry from "./documentRegistry";
 import { load } from "js-yaml";
 import { validateSchema } from "./descriptorValidation";
 
+/**
+ * @class
+ * Stateless service class that provides handler methods for events
+ * issued by the webviews containing the projectional editors.
+ * Messages can be caused by:
+ * - Document changes
+ * - Configuration changes
+ * - Messages @see processMessage
+ */
 export class EventProcessor {
   processDocumentChange(event: vscode.TextDocumentChangeEvent, context: EditorContext) {
     const oldDocumentState = DocumentRegistry.instance.get(event.document);
@@ -124,8 +133,7 @@ export class EventProcessor {
   }
 
   private processGetDisabledPackages(message: Message, context: EditorContext) {
-    const config = vscode.workspace.getConfiguration("puredit");
-    const enabledPackages = config.get<Record<string, boolean>>("enabledPackages") || {};
+    const enabledPackages = getConfig<Record<string, boolean>>("enabledPackages") || {};
     const disabledPackages = Object.keys(enabledPackages).filter((key) => !enabledPackages[key]);
     context.webviewPanel.webview.postMessage({
       id: message.id,
@@ -149,8 +157,7 @@ export class EventProcessor {
   }
 
   private processGetRematchingDelay(message: Message, context: EditorContext) {
-    const config = vscode.workspace.getConfiguration("puredit");
-    let rematchingDelay = config.get<number>("rematchingDelay");
+    let rematchingDelay = getConfig<number>("rematchingDelay");
     if (rematchingDelay == null) {
       rematchingDelay = 200;
     }
