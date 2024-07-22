@@ -59,8 +59,9 @@ export const svelteProjection = (Component: ComponentClass<Props>) =>
         isFocused = true;
         view.dispatch({
           selection: {
-            anchor: this.match.from,
+            anchor: this.range.from,
           },
+          filter: false,
         });
       });
       dom.addEventListener("focusout", () => {
@@ -70,9 +71,10 @@ export const svelteProjection = (Component: ComponentClass<Props>) =>
         if (!isFocused) {
           view.dispatch({
             selection: {
-              anchor: this.match.from,
-              head: this.match.to,
+              anchor: this.range.from,
+              head: this.range.to,
             },
+            filter: false,
           });
         }
       });

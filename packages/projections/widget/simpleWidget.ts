@@ -77,8 +77,9 @@ export const simpleProjection = (template: Array<string | TemplateArgument | Tem
         isFocused = true;
         view.dispatch({
           selection: {
-            anchor: this.match.from,
+            anchor: this.range.from,
           },
+          filter: false,
         });
       });
       dom.addEventListener("focusout", () => {
@@ -88,9 +89,10 @@ export const simpleProjection = (template: Array<string | TemplateArgument | Tem
         if (!isFocused) {
           view.dispatch({
             selection: {
-              anchor: this.match.from,
-              head: this.match.to,
+              anchor: this.range.from,
+              head: this.range.to,
             },
+            filter: false,
           });
         }
       });

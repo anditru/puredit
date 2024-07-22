@@ -63,6 +63,10 @@ export function analyzeTransactions(
       newNonErrorUnits
     );
     unitsToRematch = changedUnits;
+    const unitWithCursor = findUnitForPosition(newNonErrorUnits, newSelect.head);
+    if (unitWithCursor && !unitsToRematch.find((unit) => unit === unitWithCursor)) {
+      unitsToRematch.push(unitWithCursor);
+    }
     unitsToInvalidate.push(...errorUnits);
     logger.debug(
       `Rematching ${unitsToRematch.length} changed nodes, invalidating ${unitsToInvalidate.length} nodes`

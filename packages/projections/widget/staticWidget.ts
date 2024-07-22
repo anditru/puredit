@@ -29,9 +29,10 @@ export const staticWidget = (initialize: (state: EditorState) => HTMLElement) =>
       dom.addEventListener("click", () => {
         view.dispatch({
           selection: {
-            anchor: this.match.node.startIndex,
-            head: this.match.node.endIndex,
+            anchor: this.range.from,
+            head: this.range.to,
           },
+          filter: false,
         });
       });
       return dom;

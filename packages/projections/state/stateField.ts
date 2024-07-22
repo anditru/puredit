@@ -13,7 +13,7 @@ import {
   Transaction,
 } from "@codemirror/state";
 import { Decoration, EditorView } from "@codemirror/view";
-import type { DecorationSet, ViewUpdate } from "@codemirror/view";
+import { DecorationSet, ViewUpdate } from "@codemirror/view";
 import { PatternMatching } from "@puredit/parser";
 import { pickedCompletion } from "@codemirror/autocomplete";
 import type { ContextVariableRange, Match } from "@puredit/parser";
@@ -142,7 +142,7 @@ export const projectionState = StateField.define<ProjectionState>({
       projectionState = calculateUpdate(projectionState, transactions);
     } else if (transaction.docChanged) {
       logger.debug("Shifting decorations");
-      projectionState.decorations = projectionState.decorations.map(transaction.changes);
+      projectionState.decorations = shiftDecorations(projectionState.decorations, transaction);
       projectionState = Object.assign({}, projectionState);
     }
     return projectionState;
@@ -152,6 +152,20 @@ export const projectionState = StateField.define<ProjectionState>({
     return EditorView.decorations.from(field, (state) => state.decorations);
   },
 });
+
+function shiftDecorations(decorations: DecorationSet, transaction: Transaction) {
+  const delta = transaction.changes.newLength - transaction.changes.length;
+  let last = 0;
+  transaction.changes.iterChangedRanges((_, toA, __, ___) => {
+    last = Math.max(last, toA);
+  });
+  decorations.between(last + 1, transaction.changes.length, (from, _, dec) => {
+    if (from > last) {
+      dec.spec.widget.shift(delta);
+    }
+  });
+  return decorations.map(transaction.changes);
+}
 
 function calculateUpdate(
   projectionState: ProjectionState,

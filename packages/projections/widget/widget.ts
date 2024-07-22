@@ -11,9 +11,10 @@ import { Range } from "../types";
 export abstract class ProjectionWidget extends WidgetType {
   private dom: HTMLElement;
   protected view: EditorView | null = null;
+  public dirty = false;
 
   constructor(
-    protected range: Range,
+    public range: Range,
     protected isNew: boolean,
     public match: Match,
     public context: ContextInformation,
@@ -25,6 +26,7 @@ export abstract class ProjectionWidget extends WidgetType {
   }
 
   set(range: Range, match: Match, context: ContextInformation, state: EditorState) {
+    this.dirty = false;
     this.range = range;
     this.isNew = false;
     this.match = match;
@@ -42,6 +44,12 @@ export abstract class ProjectionWidget extends WidgetType {
 
   get position(): number | undefined {
     return this.view?.posAtDOM(this.dom);
+  }
+
+  shift(delta: number) {
+    this.dirty = true;
+    this.range.from += delta;
+    this.range.to += delta;
   }
 
   eq(other: ProjectionWidget): boolean {
