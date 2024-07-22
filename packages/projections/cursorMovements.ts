@@ -2,6 +2,12 @@ import { EditorSelection, EditorState } from "@codemirror/state";
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 import { projectionState } from "./state/stateField";
 
+/**
+ * @const
+ * Sometimes the cursor gets stuck under a widget. When this situation is
+ * detected the cursor is placed before or after the widget depending on
+ * the direction it moved before.
+ */
 export const cursorRescuer = ViewPlugin.fromClass(
   class {
     view: EditorView;

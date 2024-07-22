@@ -37,8 +37,9 @@ export const projectionPlugin = (config: ProjectionPluginConfig) => [
 
 export { completions, insertDeclarativeProjectionsEffect, removeProjectionPackagesEffect };
 
-export { default as ProjectionRegistry } from "./projectionRegistry";
-export { default as Projection } from "./projection";
+export { default as ProjectionRegistry } from "./state/projectionRegistry";
+export { default as Projection } from "./state/projection";
 export { FocusGroup, type CursorPositionHandler } from "./widget/focus";
 export { svelteProjection } from "./widget/svelte";
+export { staticWidget } from "./widget/staticWidget";
 export { simpleProjection } from "./widget/simpleWidget";

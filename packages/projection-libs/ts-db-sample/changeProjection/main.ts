@@ -1,8 +1,8 @@
 import type { Text } from "@codemirror/state";
 import { arg, block, contextVariable } from "@puredit/parser";
 import type { Match } from "@puredit/parser";
-import { span, staticWidget, stringLiteralValue } from "@puredit/projections/shared";
-import { svelteProjection } from "@puredit/projections";
+import { span, stringLiteralValue } from "@puredit/projections/shared";
+import { svelteProjection, staticWidget } from "@puredit/projections";
 import type { ContextInformation, RootProjection } from "@puredit/projections/types";
 import Widget from "./Widget.svelte";
 import type { ContextColumns } from "../context";

@@ -13,9 +13,16 @@ import {
 } from "@puredit/language-config";
 import type { AggregatableNodeTypeConfig } from "@puredit/language-config";
 import AstNode from "@puredit/parser/ast/node";
-import Projection from "../projection";
-import { Range } from "../shared";
+import Projection from "../state/projection";
+import { Range } from "../types";
 
+/**
+ * @class
+ * Builds the new set of decorations for the widgets to be rendered in the editor
+ * based on the matches provided by pattern matching, the existing decorations
+ * and the areas that should be invalidated (i.e. the areas where all decorations
+ * should be removed due to syntactic errors).
+ */
 export default class DecorationSetBuilder {
   // Input
   private decorations!: DecorationSet;

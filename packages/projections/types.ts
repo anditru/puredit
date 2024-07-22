@@ -2,8 +2,8 @@ import type { Text } from "@codemirror/state";
 import type { Match, Parser } from "@puredit/parser";
 import type { ProjectionWidgetClass } from "./widget/widget";
 import type { Pattern } from "@puredit/parser";
-import type Template from "@puredit/parser/template/template";
-import ProjectionRegistry from "./projectionRegistry";
+import type { Template } from "@puredit/parser";
+import ProjectionRegistry from "./state/projectionRegistry";
 import { ProjectionCompiler } from "@puredit/declarative-projections";
 
 export interface ProjectionPluginConfig {
@@ -43,3 +43,8 @@ export type FnContextProvider = (
 
 export type ContextVariableMap = Record<string, any | undefined>;
 export type ContextInformation = Record<string, any>;
+
+export interface Range {
+  from: number;
+  to: number;
+}

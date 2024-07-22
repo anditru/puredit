@@ -17,6 +17,11 @@ interface Props {
   focusGroup: FocusGroup;
 }
 
+/**
+ * Creates a widget from a Svelte component.
+ * @param Component
+ * @returns
+ */
 export const svelteProjection = (Component: ComponentClass<Props>) =>
   class extends ProjectionWidget implements FocusGroupHandler {
     component!: SvelteComponent<Props>;

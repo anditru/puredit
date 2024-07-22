@@ -1,3 +1,9 @@
+/**
+ * @module
+ * Provides the StateField holding the projections' state and the logic
+ * to update and redraw the projections.
+ */
+
 import {
   EditorState,
   RangeSet,
@@ -14,8 +20,8 @@ import type { ContextVariableRange, Match } from "@puredit/parser";
 import type { ProjectionPluginConfig } from "../types";
 import DecorationSetBuilder from "./decorationSetBuilder";
 import { Extension } from "@puredit/declarative-projections";
-import ProjectionRegistry from "../projectionRegistry";
-import { analyzeTransaction } from "./lazyMatching";
+import ProjectionRegistry from "./projectionRegistry";
+import { analyzeTransactions } from "./lazyMatching";
 import { Debouncer } from "./debouncing";
 
 import { logProvider } from "../../../logconfig";
@@ -28,6 +34,11 @@ export interface ProjectionState {
   rematchingController: Debouncer;
 }
 
+/**
+ * Creates the initial projection state after the editor is opened.
+ * @param state
+ * @param config
+ */
 export function createProjectionState(
   state: EditorState,
   config: ProjectionPluginConfig
@@ -54,10 +65,34 @@ export function createProjectionState(
   return { config, decorations, contextVariableRanges, rematchingController };
 }
 
+/**
+ * @const
+ * StateEffect to indicate that new declarative projections should be inserted into the ProjectionRegistry.
+ * */
 export const insertDeclarativeProjectionsEffect = StateEffect.define<Extension[]>();
+/**
+ * @const
+ * StateEffect to indicate that some declarative projections should be removed from the ProjectionRegistry.
+ */
 export const removeProjectionPackagesEffect = StateEffect.define<string[]>();
+/**
+ * @const
+ * StateEffect to indicate that the delay after which a reamtching should be triggered should be updated.
+ */
 export const updateDelayEffect = StateEffect.define<number>();
+/**
+ * @const
+ * StateEffect to force redrawing all decorations. Should be avoided whenever possible since it also causes
+ * a rematching of the entire document which might cause lags if the document is large enough.
+ * Currently required when the user scrolls wide enough to change editor's viewport since codemirror detroys
+ * decorations that are outside the viewport.
+ */
 export const forceRecreateDecorationsEffect = StateEffect.define<boolean>();
+/**
+ * @const
+ * StateEffect to indicate that the rematching deply has ellapsed and therefore a lazy rematching should be
+ * executed.
+ */
 export const rematchEffect = StateEffect.define();
 
 export const projectionState = StateField.define<ProjectionState>({
@@ -136,9 +171,10 @@ function calculateUpdate(
     isCompletion = isCompletion || Boolean(transaction.annotation(pickedCompletion));
   }
 
+  // Find units to reamatch and to invalidate
   const firstTransaction = transactions[0];
   const lastTransaction = transactions[transactions.length - 1];
-  const { unitsToRematch, unitsToInvalidate } = analyzeTransaction(
+  const { unitsToRematch, unitsToInvalidate } = analyzeTransactions(
     firstTransaction,
     lastTransaction,
     docChanged,
@@ -146,6 +182,7 @@ function calculateUpdate(
     forceRematch
   );
 
+  // Rematch units and collect matches
   const newState = lastTransaction.state;
   let allMatches: Match[] = [];
   let allContextVariableRanges: ContextVariableRange[] = [];
@@ -162,6 +199,7 @@ function calculateUpdate(
   }
   logger.debug("Done rematching. Rebuilding projections");
 
+  // Build new decorations
   const decorationSetBuilder = new DecorationSetBuilder();
   decorationSetBuilder
     .setProjectionPluginConfig(config)
@@ -173,6 +211,8 @@ function calculateUpdate(
   let newDecorations = decorationSetBuilder.build();
   logger.debug("Done rebuilding projections");
 
+  // When a decoration is scolled outside the visible area, cordmirror destroy the HTML
+  // Therefore we redraw them
   if (forceRecreation) {
     newDecorations = redrawDecorations(
       0,
@@ -191,6 +231,14 @@ function calculateUpdate(
   };
 }
 
+/**
+ * Redraws the decorations between the positions recreateFrom and recreateTo
+ * @param recreateFrom
+ * @param recreateTo
+ * @param decorations
+ * @param projectionRegistry
+ * @param state
+ */
 function redrawDecorations(
   recreateFrom: number,
   recreateTo: number,
@@ -229,6 +277,11 @@ function redrawDecorations(
   return RangeSet.join([newDecorationSet, decorations]);
 }
 
+/**
+ * @const
+ * UpdateListener detecting changes in the viewport cuased by scrolling and then
+ * causes all decorations to be redrawn.
+ */
 export const scrollListener = EditorView.updateListener.of((update: ViewUpdate) => {
   if (update.viewportChanged && !update.transactions.length) {
     update.view.dispatch({

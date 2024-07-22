@@ -12,6 +12,12 @@ import { isString } from "@puredit/utils-shared";
 import type { SvelteComponent } from "./svelte";
 import type { TemplateArgument } from "@puredit/parser";
 
+/**
+ * Creates a simple widget consisting of a sequence static texts and text fields
+ * to avoid having to create such simple widgets in separate .svelte files.
+ * @param template
+ * @returns
+ */
 export const simpleProjection = (template: Array<string | TemplateArgument | TemplateArgument[]>) =>
   class extends ProjectionWidget implements FocusGroupHandler {
     focusGroup!: FocusGroup;

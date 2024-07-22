@@ -1,12 +1,8 @@
 import { tags } from "@lezer/highlight";
-import type { EditorView } from "@codemirror/view";
 import { highlightingFor } from "@codemirror/language";
 import type { EditorState, ChangeSpec } from "@codemirror/state";
 import type { Text } from "@codemirror/state";
-import type { Match } from "@puredit/parser";
-import { ProjectionWidget } from "./widget/widget";
 import type AstNode from "@puredit/parser/ast/node";
-import { ContextInformation, RootProjection } from "./types";
 
 const stringTypes = ["string", "template_string"];
 
@@ -75,51 +71,8 @@ export function span(text: string): HTMLElement {
   return el;
 }
 
-export const staticWidget = (initialize: (state: EditorState) => HTMLElement) =>
-  class extends ProjectionWidget {
-    protected initialize(
-      _match: Match,
-      _context: ContextInformation,
-      state: EditorState
-    ): HTMLElement {
-      return initialize(state);
-    }
-
-    protected update(): void {
-      return;
-    }
-
-    toDOM(view: EditorView): HTMLElement {
-      const dom = super.toDOM(view);
-      dom.addEventListener("click", () => {
-        view.dispatch({
-          selection: {
-            anchor: this.match.node.startIndex,
-            head: this.match.node.endIndex,
-          },
-        });
-      });
-      return dom;
-    }
-  };
-
 export const validateFromList = (allowedValues: string[]) => (value: string) => {
   if (!allowedValues.includes(value)) {
     return `invalid value ${value}`;
   }
 };
-
-export function toRootProjectionMap(projections: RootProjection[]) {
-  return new Map(projections.map((p: RootProjection) => [p.pattern, p]));
-}
-
-export function toSubProjectionMap(projections: RootProjection[]) {
-  return new Map(
-    projections.flatMap((p: RootProjection) => p.subProjections.map((s) => [s.template, s]))
-  );
-}
-
-export interface Range {
-  from: number;
-  to: number;
-}

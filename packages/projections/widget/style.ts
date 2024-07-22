@@ -1,5 +1,10 @@
 import { EditorView } from "@codemirror/view";
 
+/**
+ * @const
+ * Codemirror extension apply custom CSS classes
+ * that ensure correct rendering of the projections
+ */
 export const style = EditorView.theme({
   ".cm-line.flex-center": {
     display: "flex",

@@ -2,8 +2,12 @@ import type { EditorState } from "@codemirror/state";
 import { EditorView, WidgetType } from "@codemirror/view";
 import type { Match } from "@puredit/parser";
 import { ContextInformation } from "../types";
-import { Range } from "../shared";
+import { Range } from "../types";
 
+/**
+ * @class
+ * Abstract class all kinds of widgets must inherit from.
+ */
 export abstract class ProjectionWidget extends WidgetType {
   private dom: HTMLElement;
   protected view: EditorView | null = null;

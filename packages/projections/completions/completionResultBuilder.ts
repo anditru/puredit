@@ -1,8 +1,14 @@
 import type { ContextVariableMap } from "../types";
 import type { Completion, CompletionSection } from "@codemirror/autocomplete";
 import { pickedCompletion } from "@codemirror/autocomplete";
-import Projection from "../projection";
+import Projection from "../state/projection";
 
+/**
+ * @class
+ * Builds the completion options in the format required by codemirror from the projections
+ * in the ProjectionRegistry. If a search string is provided by the user, it performs a fuzzy
+ * search on the names and descriptions of the projections.
+ */
 export default class CompletionsBuilder {
   private indentation!: string;
   private contextVariables!: ContextVariableMap;

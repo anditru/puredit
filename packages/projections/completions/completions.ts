@@ -1,3 +1,11 @@
+/**
+ * @module
+ * Integrates the completions for projections into codemirror by providing
+ * a single functions that can be included in the codemirror editor as an
+ * extension.
+ * @see completions
+ */
+
 import type { Completion, CompletionContext } from "@codemirror/autocomplete";
 import type { CompletionResult } from "@codemirror/autocomplete";
 import { projectionState } from "../state/stateField";

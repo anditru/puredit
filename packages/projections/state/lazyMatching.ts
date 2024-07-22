@@ -1,3 +1,10 @@
+/**
+ * @module
+ * Implements lazy matching to ensure we only rematch the areas of code
+ * required to be remachted by the changes ade to the document and the
+ * cursor movements.
+ */
+
 import type { Parser } from "@puredit/parser";
 import AstNode from "@puredit/parser/ast/node";
 import AstCursor from "@puredit/parser/ast/cursor";
@@ -8,7 +15,17 @@ import { Transaction } from "@codemirror/state";
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("projections.state.lazyMatching");
 
-export function analyzeTransaction(
+/**
+ * Analyzes the transactions in the buffer to determine the areas
+ * to rematch and to invlaidate.
+ * @param fristTransaction First transaction in the buffer
+ * @param lastTransaction Last transaction in the buffer
+ * @param docChanged
+ * @param parser
+ * @param forceRematch
+ * @returns The units to rematch and invalidate
+ */
+export function analyzeTransactions(
   fristTransaction: Transaction,
   lastTransaction: Transaction,
   docChanged: boolean,
@@ -119,6 +136,12 @@ function filterInvalidUnits(units: AstNode[]) {
   return { validUnits, invalidUnits };
 }
 
+/**
+ * Splits the syntax tree up into matching units based on the configuation
+ * for the respective language in @puredit/language-config
+ * @param text
+ * @param parser
+ */
 function getMatchingUnits(text: string, parser: Parser): SplitResult {
   const astCursor = new AstCursor(parser.parse(text).walk());
   const nodeTypesToSplit = loadNodeTypesToSplitFor(parser.language);
@@ -172,6 +195,13 @@ interface SplitResult {
   errorUnits: AstNode[];
 }
 
+/**
+ * Searches the unit, a certain position in the document belongs into.
+ * @param units
+ * @param cursorPos
+ * @returns The unit if the position belongs to one or null if the position
+ * does not belong to any unit.
+ */
 function findUnitForPosition(units: AstNode[], cursorPos: number): AstNode | null {
   let low = 0;
   let high = units.length - 1;
@@ -189,6 +219,12 @@ function findUnitForPosition(units: AstNode[], cursorPos: number): AstNode | nul
   return null;
 }
 
+/**
+ * Finds the index of the unit, a certain cursor position benlongs to
+ * or the next unit before the position.
+ * @param units
+ * @param cursorPos
+ */
 function findNextLowerIndex(units: AstNode[], cursorPos: number): number | null {
   let low = 0;
   let high = units.length - 1;
@@ -211,6 +247,12 @@ function findNextLowerIndex(units: AstNode[], cursorPos: number): number | null 
   return lastBeforeCursor;
 }
 
+/**
+ * Finds the index of the unit, a certain cursor position benlongs to
+ * or the next unit after the position.
+ * @param units
+ * @param cursorPos
+ */
 function findNextHigherIndex(units: AstNode[], cursorPos: number): number | null {
   let low = 0;
   let high = units.length - 1;
@@ -233,6 +275,15 @@ function findNextHigherIndex(units: AstNode[], cursorPos: number): number | null
   return nextAfterCursor;
 }
 
+/**
+ * Compares the units (i.e. nodes) before the changes by the buffered transactions
+ * and after the buffered transactions to determine which units must be rematched and
+ * which must be rematched.
+ * @param oldText
+ * @param oldUnits
+ * @param newText
+ * @param newUnits
+ */
 function analyzeChanges(
   oldText: string,
   oldUnits: AstNode[],
@@ -292,6 +343,15 @@ function analyzeChanges(
   return { changedUnits, errorUnits };
 }
 
+/**
+ * Performs a deep comparison of two nodes to determine if the two nodes are equal.
+ * Performs a full traversal of the subtree below the newNode to make sure
+ * no error nodes are hidden below it.
+ * @param oldNode
+ * @param newNode
+ * @param differenceFound
+ * @throws {ErrorFound}: If an error node is found below the new node.
+ */
 function nodesEqual(oldNode: AstNode, newNode: AstNode, differenceFound = false): boolean {
   if (newNode?.type == "ERROR") {
     throw new ErrorFound();
@@ -324,6 +384,10 @@ class ErrorFound extends Error {
   }
 }
 
+/**
+ * Performs a BFS to check if a node contains an error.
+ * @param rootNode
+ */
 function containsError(rootNode: AstNode): boolean {
   const queue: AstNode[] = [rootNode];
 

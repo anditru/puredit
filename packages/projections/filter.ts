@@ -3,6 +3,11 @@ import { ChangeSpec } from "@codemirror/state";
 import { ProjectionWidget } from "./widget/widget";
 import { projectionState } from "./state/stateField";
 
+/**
+ * @const
+ * {@link https://codemirror.net/docs/ref/#state.EditorState^transactionFilter | TransactionFilter} to correct
+ * cursor movements and complex operations like copying lines and deleting lines in the vincity of projections.
+ */
 export const transactionFilter = EditorState.transactionFilter.of((tr) => {
   const userEvent = tr.annotation(Transaction.userEvent);
   if (userEvent === "input.indent") {

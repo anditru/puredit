@@ -1,3 +1,9 @@
+/**
+ * @module
+ * Implements focus handling for projections, e.g. automatic placement of the cursor
+ * when a new projection appears in the editor.
+ */
+
 export interface FocusGroupHandler {
   onLeaveStart(): void;
   onLeaveEnd(): void;

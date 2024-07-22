@@ -1,12 +1,17 @@
 import { Pattern } from "@puredit/parser";
-import { RootProjection, SubProjection } from "./types";
-import Projection from "./projection";
+import { RootProjection, SubProjection } from "../types";
+import Projection from "../state/projection";
 import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
 import ChainDecorator from "@puredit/parser/pattern/decorators/chainDecorator";
 import ReferencePattern from "@puredit/parser/pattern/referencePattern";
 import { removeFromArray } from "@puredit/utils-shared";
 import FlexSearch from "flexsearch";
 
+/**
+ * The central storage for all projections loaded in a projectional editor.
+ * The projections and patterns are stored in different layouts such that
+ * they can be accessed efficiently in all places where they are required.
+ */
 export default class ProjectionRegistry {
   private _projectionsByPackage: Record<string, Record<string, Projection>> = {};
   private _projectionsAsArray: Projection[] = [];
