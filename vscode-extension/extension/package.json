@@ -4,7 +4,7 @@
   "description": "A projectional editor that uses textual code as its source of truth.",
   "icon": "logo.png",
   "repository": "https://github.com/andretrump/puredit",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "engines": {
     "vscode": "^1.83.0"
   },
