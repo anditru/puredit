@@ -6,6 +6,11 @@ import { Language } from "@puredit/language-config";
 import { CompleteTemplateTransformer } from "./internal";
 import WasmPathProvider from "../tree-sitter/wasmPathProvider";
 
+/**
+ * @class
+ * Facade class that provides a simple interface for DSL developers to
+ * create patterns and subpatterns.
+ */
 export default class Parser {
   static async load(language: Language, wasmPathProvider: WasmPathProvider): Promise<Parser> {
     const treeSitterParser = await createTreeSitterParser(language, wasmPathProvider);
@@ -21,6 +26,13 @@ export default class Parser {
     this.templateTransformer = new CompleteTemplateTransformer(this);
   }
 
+  /**
+   * Parses an input string with the plain Tree-sitter parser.
+   * @param input
+   * @param previousTree
+   * @param options
+   * @returns
+   */
   parse(
     input: string | TreeSitterParser.Input,
     previousTree?: TreeSitterParser.Tree,

@@ -3,6 +3,10 @@ import AstCursor from "../../ast/cursor";
 import PatternNode from "./patternNode";
 import { ContextVariableMap } from "@puredit/projections";
 
+/**
+ * @class
+ * Represents a syntax node that appears in a pattern "as it is".
+ */
 export default class RegularNode extends PatternNode {
   constructor(
     language: Language,

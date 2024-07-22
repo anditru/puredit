@@ -6,6 +6,11 @@ import TreePath from "../cursor/treePath";
 import Cursor from "../cursor/cursor";
 import ReferencePattern from "./referencePattern";
 
+/**
+ * @class
+ * Extension of the base cursor to operate on syntax tree patterns.
+ * API is analogous to the AstCursor.
+ */
 export default class PatternCursor extends Cursor {
   private _currentNode: PatternNode;
 

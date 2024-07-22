@@ -3,6 +3,10 @@ import Pattern from "../pattern";
 import TreePath from "../../cursor/treePath";
 import { Language } from "@puredit/language-config";
 
+/**
+ * @class Abstract decorator all decorators for extending the BasePattern
+ * must inherit from.
+ */
 export default abstract class PatternDecorator implements Pattern {
   constructor(private pattern: Pattern) {}
 

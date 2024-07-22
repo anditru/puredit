@@ -3,6 +3,10 @@ import PatternDecorator from "./patternDecorator";
 import { createPatternMap } from "../../common";
 import { PatternMap, PatternsMap } from "../../match/types";
 
+/**
+ * @class Decorator the extend a BasePattern with the functionality required
+ * if it contains at least one chain.
+ */
 export default class ChainDecorator extends PatternDecorator {
   constructor(
     pattern: Pattern,

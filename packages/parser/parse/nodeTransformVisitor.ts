@@ -4,6 +4,11 @@ import PatternNode from "../pattern/nodes/patternNode";
 import RegularNode, { RegularNodeBuilder } from "../pattern/nodes/regularNode";
 import ParameterTable from "../template/codeString";
 
+/**
+ * @class
+ * Recursively transforms a node and the subtree below it into
+ * a pattern. It is used by the transformer classes in this package.
+ */
 export default class NodeTransformVisitor {
   private astCursor!: AstCursor;
   private codeString!: ParameterTable;

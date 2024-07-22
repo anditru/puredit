@@ -3,6 +3,14 @@ import Pattern from "./pattern";
 import TreePath from "../cursor/treePath";
 import { Language } from "@puredit/language-config";
 
+/**
+ * @class
+ * Represents pattern without chains or aggregations. If the pattern
+ * includes one of these the pattern must be decrated with the corresponding
+ * decorator class
+ * @see ChainDecorator
+ * @see AggregationDecorator
+ */
 export default class BasePattern implements Pattern {
   private readonly numberOfLeafNodes: number;
 

@@ -6,6 +6,15 @@ import { ProjectionRegistry } from "@puredit/projections";
 import AggregationDecorator from "./decorators/aggregationDecorator";
 import ChainDecorator from "./decorators/chainDecorator";
 
+/**
+ * @class
+ * Represents a pointer to an existing pattern. It is required to reuse patterns.
+ * A reference pattern has two states:
+ * - Unresolved: The ReferencePattern does not have a reference to pattern it points to,
+ *               therefore, no method of the pattern it points to an be called.
+ * - Resolved:   The ReferencePattern has a reference to the pattern it points to,
+ *               therefore, the methods of the of the pattern it points to an be called.
+ */
 export default class ReferencePattern implements Pattern {
   private readonly _name: string;
   private referencedPattern: Pattern | undefined;
@@ -14,6 +23,12 @@ export default class ReferencePattern implements Pattern {
     this._name = name;
   }
 
+  /**
+   * Attempt to resolve the pattern. The pattern the ReferencePattern points to, must be
+   * present in the projection registry.
+   * @param projectionRegistry
+   * @param packageName
+   */
   resolve(projectionRegistry: ProjectionRegistry, packageName: string) {
     const referencedPattern = projectionRegistry.getPatternBy(packageName, this._name);
     if (!referencedPattern) {

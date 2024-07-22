@@ -6,6 +6,12 @@ import { AggregatableNodeTypeConfig, aggregationStartPlaceHolder } from "@puredi
 import { TemplateTransformer, Parser } from "./internal";
 import CodeString from "../template/codeString";
 
+/**
+ * @class
+ * Contains the logic to transform an aggregation start template into a pattern
+ * by wrapping it into the correct surrounding code, parsing it with Tree-sitter
+ * and transforming the resulting sytax tree into a pattern.
+ */
 export default class AggStartTemplateTransformer extends TemplateTransformer {
   private nodeTypeConfig!: AggregatableNodeTypeConfig;
 

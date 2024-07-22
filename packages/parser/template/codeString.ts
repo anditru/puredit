@@ -3,6 +3,13 @@ import ParameterTable from "./parameterTable";
 import TemplateParameter from "./parameters/templateParameter";
 import { TransformableTemplate } from "./template";
 
+/**
+ * @class
+ * Represents a code string with an additional parameter table that contains
+ * all parameters in the code string. This allows to check if a certain part
+ * of the code is covered by a parameter. This is required during the transformation
+ * of a template into a pattern.
+ */
 export default class CodeString {
   static fromTemplate(template: TransformableTemplate, language: Language) {
     const templateStrings = template.templateStrings;
@@ -52,6 +59,12 @@ export default class CodeString {
     return this;
   }
 
+  /**
+   * Get the template parameter that covers the code between from and to.
+   * @param from Start position
+   * @param to End position
+   * @returns A template parameter if from and to a the boundries of a template parameter, otherwise null.
+   */
   resolveParameter(from: number, to: number): TemplateParameter | undefined {
     return this.parameterTable.get(from, to);
   }

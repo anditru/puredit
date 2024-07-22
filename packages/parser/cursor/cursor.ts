@@ -1,5 +1,12 @@
 import TreePath from "./treePath";
 
+/**
+ * @class
+ * Abstract implementation of a transaction-aware cursor. It allows to implement complex
+ * operations as transactions, i.e. if the cursor cannot complete the operation, e.g. because
+ * a leaf node has been reached, it is rolled back.
+ * Both the AstCursor and the PatternCursor inherit from it.
+ */
 export default abstract class Cursor {
   follow(path: TreePath | number[]): boolean {
     this.beginTransaction();

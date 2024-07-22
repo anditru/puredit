@@ -2,6 +2,13 @@ import { CommentTypeConfig, loadCommentsConfigFor } from "@puredit/language-conf
 import { VerificationResult } from "./types";
 import AstNode from "../ast/node";
 
+/**
+ * @class
+ * Implements the extraction of context information from comments by
+ * 1. searching for comments before a statement
+ * 2. checking if the comment begins with `CONTEXT:`
+ * 3. extracting the largest valid piece of JSON code from the comment
+ */
 export default class CommentContextExtraction {
   constructor(private readonly verificationResult: VerificationResult) {}
 

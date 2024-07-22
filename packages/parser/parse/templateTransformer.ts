@@ -19,6 +19,11 @@ import {
 import AggregationNode from "../pattern/nodes/aggregationNode";
 import CodeString from "../template/codeString";
 
+/**
+ * @class
+ * Contains common logic required by all algorithms implemented in the subclasses,
+ * specifically the control flow between the algorithms of its subclasses.
+ */
 export default abstract class TemplateTransformer {
   protected template!: TransformableTemplate;
   protected isExpression!: boolean;

@@ -1,3 +1,9 @@
+/**
+ * @module
+ * This module is only required to import the transformer classes from
+ * to resolve circular imports.
+ */
+
 import TemplateTransformer from "./templateTransformer";
 import AggStartTemplateTransformer from "./aggStartTemplateTransformer";
 import AggPartTemplateTransformer from "./aggPartTemplateTransformer";

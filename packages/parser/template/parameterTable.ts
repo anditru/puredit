@@ -2,6 +2,11 @@ import { isString } from "@puredit/utils-shared";
 import TemplateParameter from "./parameters/templateParameter";
 import { Language } from "@puredit/language-config";
 
+/**
+ * @class
+ * Holds the paramteres in acode string with their positions in the code string.
+ * It is used by the CodeString to store the positions of its parameters.
+ */
 export default class ParameterTable {
   private table: Record<string, TemplateParameter> = {};
 

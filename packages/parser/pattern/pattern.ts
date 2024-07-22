@@ -2,6 +2,10 @@ import PatternNode from "./nodes/patternNode";
 import TreePath from "../cursor/treePath";
 import { Language } from "@puredit/language-config";
 
+/**
+ * @interface
+ * Common interface for all patterns.
+ */
 export default interface Pattern {
   getTypesMatchedByRootNode(): string[];
   getPathToNodeWithText(text: string): TreePath;

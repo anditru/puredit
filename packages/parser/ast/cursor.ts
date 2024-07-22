@@ -2,6 +2,11 @@ import type { TreeCursor } from "web-tree-sitter";
 import AstNode from "./node";
 import Cursor from "../cursor/cursor";
 
+/**
+ * @class
+ * Wrapper class around the Tree-sitter parser. It extends the Tree-sitter parsers
+ * with more complex operations such as goToChildWithFieldName.
+ */
 export default class AstCursor extends Cursor {
   private runningTransaction = false;
   private runningRollback = false;

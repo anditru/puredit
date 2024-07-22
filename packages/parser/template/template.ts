@@ -8,6 +8,11 @@ import ReferencePattern from "../pattern/referencePattern";
 
 export type Template = TransformableTemplate | ReferenceTemplate;
 
+/**
+ * @class
+ * Represents a tempalte created from a tagged tempalte string that is to be
+ * transformed into a pattern using the parser.
+ */
 export class TransformableTemplate {
   constructor(
     public readonly name: string,
@@ -38,6 +43,10 @@ export class TransformableTemplate {
   }
 }
 
+/**
+ * @class
+ * Represents a reference to an existing template.
+ */
 export class ReferenceTemplate {
   constructor(public readonly name: string) {}
 

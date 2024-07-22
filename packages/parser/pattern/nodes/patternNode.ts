@@ -3,6 +3,11 @@ import AstCursor from "../../ast/cursor";
 import { Pattern } from "../..";
 import { Language } from "@puredit/language-config";
 
+/**
+ * @class
+ * Abstract base class all pattern nodes must inherit from. All further
+ * classes in this folder represent a specific type of pattern node.
+ */
 export default abstract class PatternNode {
   private _parent: PatternNode | null | undefined;
 
@@ -92,7 +97,21 @@ export default abstract class PatternNode {
     this._parent = parent;
   }
 
+  /**
+   * Checks if the pattern node matches the syntac node the astCursor points to.
+   * @param astCursor
+   * @param contextVariables
+   */
   abstract matches(astCursor: AstCursor, contextVariables?: ContextVariableMap): boolean;
+
+  /**
+   * Returns the list of syntax node types the pattern node matches.
+   */
   abstract getMatchedTypes(): string[];
+
+  /**
+   * Recursively transforms the pattern node into a code string. This is required
+   * when the user selects a projection from the code completion.
+   */
   abstract toDraftString(): string;
 }

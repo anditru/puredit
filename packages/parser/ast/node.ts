@@ -1,6 +1,10 @@
 import type { SyntaxNode } from "web-tree-sitter";
 import AstCursor from "./cursor";
 
+/**
+ * @class
+ * Wrapper around the SyntaxNode class of Tree-sitter.
+ */
 export default class AstNode {
   private _parent: AstNode | null = null;
 
@@ -59,7 +63,7 @@ export default class AstNode {
     return this.syntaxNode.type;
   }
 
-  public get text() {
+  get text() {
     return this.syntaxNode.text;
   }
 

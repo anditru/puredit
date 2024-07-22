@@ -1,5 +1,5 @@
 /**
- * @module definitionFunctions
+ * @module
  * Implements functions to define template parameters.
  */
 
@@ -74,6 +74,11 @@ export function contextVariable(name: string): TemplateContextVariable {
   return new TemplateContextVariable(name);
 }
 
+/**
+ * Defines a reference to another template
+ * @param templateName Name of the template to reference
+ * @returns ReferenceTemplate
+ */
 export function reference(templateName: string): ReferenceTemplate {
   return new ReferenceTemplate(templateName);
 }

@@ -3,6 +3,12 @@ import Pattern from "../pattern/pattern";
 import CodeString from "../template/codeString";
 import { Parser, TemplateTransformer } from "./internal";
 
+/**
+ * @class
+ * Contains the algorithm to transform a template that can be transformed without
+ * the context of the surrounding code, i.e., chain start templates and
+ * the templates of root projections.
+ */
 export default class CompleteTemplateTransformer extends TemplateTransformer {
   constructor(parser: Parser) {
     super(parser);

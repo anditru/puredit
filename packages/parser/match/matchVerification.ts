@@ -29,11 +29,17 @@ import {
   loadAggregatableNodeTypeConfigFor,
 } from "@puredit/language-config";
 import AggregationDecorator from "../pattern/decorators/aggregationDecorator";
-import { loadLookAheadPathFor } from "@puredit/language-config/load";
 
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.MatchVerification");
 
+/**
+ * @class
+ * Implements the MatchVerification algorithm to determine if a candidate
+ * match actually matches. It is essentially a visitor that recursively
+ * checks for each for each PatternNode if it matches the corresponding
+ * syntax tree node.
+ */
 export default class MatchVerification {
   // Input
   private pattern: Pattern;

@@ -20,6 +20,13 @@ import ArgumentNode from "../pattern/nodes/argumentNode";
 import { logProvider } from "../../../logconfig";
 const logger = logProvider.getLogger("parser.match.PatternMatching");
 
+/**
+ * @class
+ * Implements the pattern matching algorithm. Essentially, it moves
+ * the pattern over the syntax tree and runs the MatchVerification
+ * algorithm on each syntax node for each candidate pattern until
+ * a match is found.
+ */
 export class PatternMatching {
   // Input
   private patternMap: PatternsMap;
