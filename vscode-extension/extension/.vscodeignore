@@ -11,6 +11,7 @@ vsc-extension-quickstart.md
 **/*.ts
 node_modules
 ../../**
-../packages
 ../editors
+../editor-utils
+../webview-interface
 ../test-project
