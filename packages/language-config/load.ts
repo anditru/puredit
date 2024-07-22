@@ -1,3 +1,9 @@
+/**
+ * @module
+ * Provides functions to access specific properties of the configuration
+ * for a certain language.
+ */
+
 import languageConfigs from "./languageConfigs";
 import {
   AggregatableNodeTypeConfig,

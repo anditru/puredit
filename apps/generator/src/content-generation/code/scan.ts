@@ -277,7 +277,7 @@ class NodeComparison {
     aggregationParts = aggregationParts.filter(
       (_, i) => !limitingTokens.includes(this.a.currentNode.children[i].type)
     );
-    if (nodeTypeConfig.specialStartPattern) {
+    if (nodeTypeConfig.hasStartPattern) {
       aggregationStart = aggregationParts[0];
       aggregationParts = aggregationParts.slice(1);
     }

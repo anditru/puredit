@@ -28,7 +28,7 @@ export default class TemplateAggregation extends TemplateParameter {
     const aggregatableNodeTypeConfig = loadAggregatableNodeTypeConfigFor(language, this.type);
     const innerCodeString = TemplateAggregation.CODE_STRING_PREFIX + this.id.toString();
     let codeString;
-    if (aggregatableNodeTypeConfig.specialStartPattern) {
+    if (aggregatableNodeTypeConfig.hasStartPattern) {
       if (!this.startTemplate) {
         throw new Error(`Aggregation of node type ${this.type} requires special start pattern`);
       }

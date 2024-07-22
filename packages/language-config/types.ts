@@ -1,3 +1,8 @@
+/**
+ * @module
+ * Contains the types that define the structure of the language configuration.
+ */
+
 import type { TreePath } from "@puredit/parser";
 
 export enum Language {
@@ -34,7 +39,7 @@ export type AggregatableNodeTypeConfig = {
   delimiterToken: string;
   endToken: string;
   contextTemplate: string;
-  specialStartPattern: boolean;
+  hasStartPattern: boolean;
 };
 
 export const aggregationStartPlaceHolder = "__start__";

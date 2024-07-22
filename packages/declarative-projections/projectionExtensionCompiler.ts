@@ -148,7 +148,7 @@ export default class ProjectionExtensionCompiler extends ExtensionCompiler {
     );
     const transformation = new AggPartTemplateTransformer(this.parser);
     transformation;
-    if (nodeTypeConfig.specialStartPattern) {
+    if (nodeTypeConfig.hasStartPattern) {
       transformation.setStartTemplateCodeString(new CodeString("a"));
     }
     return transformation

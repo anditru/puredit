@@ -1,3 +1,9 @@
+/**
+ * @module
+ * Stores the configuration object with the configuration properties for each
+ * language currently supported by puredit.
+ */
+
 import { TreePath } from "@puredit/parser";
 import {
   Language,
@@ -33,42 +39,42 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           delimiterToken: ",",
           endToken: ")",
           contextTemplate: `someFunction(${aggregationPlaceHolder})`,
-          specialStartPattern: false,
+          hasStartPattern: false,
         },
         dictionary: {
           startToken: "{",
           delimiterToken: ",",
           endToken: "}",
           contextTemplate: `{${aggregationPlaceHolder}}`,
-          specialStartPattern: false,
+          hasStartPattern: false,
         },
         set: {
           startToken: "{",
           delimiterToken: ",",
           endToken: "}",
           contextTemplate: `{${aggregationPlaceHolder}}`,
-          specialStartPattern: false,
+          hasStartPattern: false,
         },
         list: {
           startToken: "[",
           delimiterToken: ",",
           endToken: "]",
           contextTemplate: `[${aggregationPlaceHolder}]`,
-          specialStartPattern: false,
+          hasStartPattern: false,
         },
         tuple: {
           startToken: "(",
           delimiterToken: ",",
           endToken: ")",
           contextTemplate: `(${aggregationPlaceHolder}, 1)`,
-          specialStartPattern: false,
+          hasStartPattern: false,
         },
         subscript: {
           startToken: "[",
           delimiterToken: ",",
           endToken: "]",
           contextTemplate: `${aggregationStartPlaceHolder}[${aggregationPlaceHolder}]`,
-          specialStartPattern: true,
+          hasStartPattern: true,
         },
       },
     },
@@ -116,7 +122,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           delimiterToken: ",",
           endToken: ")",
           contextTemplate: `someFunction(${aggregationPlaceHolder})`,
-          specialStartPattern: false,
+          hasStartPattern: false,
         },
       },
     },
