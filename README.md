@@ -11,6 +11,7 @@ The preferred way to use the projectional editor is through our VS Code extensio
 - Go to the [latest release](https://github.com/andretrump/puredit/releases/latest) and download the asset `test-project.zip`.
 - Unpack the zip archive and open the unpacked folder in VS Code.
 - In the file explorer, right-click the `.vsix` file and select "Install Extension VSIX" from the context menu.
+- If you already had installed an older version of the extension, reload the VS Code window.
 - Right-click one of the `.py` files in the folder and select "Open with"
 - Select the "Projectional Python Editor" from the list.
 
