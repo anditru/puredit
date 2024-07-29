@@ -7,11 +7,13 @@ The **Pur**ist **edit**or is a projectional editor that uses textual code as its
 This extension contributes the following settings:
 
 - `puredit.declarativeProjectionDescriptors`: Enter absolute paths to your .ext.json files containing declaratively defined projections.
+- `puredit.scanForDeclarativeProjectionDescriptors`: Scan for declarative projection descriptor files in the current project and load them.
 - `puredit.enabledPackages`: Enable or disable built-in projection packages.
+- `puredit.rematchingDelay`: Minimum delay in miliseconds between two keystrokes to trigger pattern matching.
 
 ## Known Issues
 
-- Stability problems.
+- Stability issues.
 
 ## Release Notes
 

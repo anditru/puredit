@@ -7,8 +7,9 @@
     }
   ],
   "yaml.schemas": {
-    "file:///Users/I518253/SAPDevelop/public/master/puredit/vscode-extension/extension/src/declarativeProjectionSchema.json": [
-      "*.puredit.yaml"
+    "./vscode-extension/extension/src/declarativeProjectionSchema.json": [
+      "*.puredit.yaml",
+      "*.puredit.yml"
     ]
   }
 }

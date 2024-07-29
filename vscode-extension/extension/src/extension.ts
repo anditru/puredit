@@ -24,7 +24,7 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
   ).toString();
   const currentSettings = yamlConfig.get<object>("schemas");
   const newSettings = { ...currentSettings, [pathToSchema]: "*.puredit.yaml" };
-  yamlConfig.update("schemas", newSettings, vscode.ConfigurationTarget.Global);
+  yamlConfig.update("schemas", newSettings, vscode.ConfigurationTarget.Workspace);
 
   // Scan for declarative projection descriptors if required
   const config = vscode.workspace.getConfiguration("puredit");
