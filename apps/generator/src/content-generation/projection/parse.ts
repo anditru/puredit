@@ -2,7 +2,25 @@ import { parser } from "@puredit/projection-parser";
 import { Tree, TreeCursor, SyntaxNode } from "@lezer/common";
 
 export function parseProjections(projections: string[]): Tree[] {
-  return projections.map((projection) => parser.parse(projection));
+  return projections.map((projection) => {
+    const tree = parser.parse(projection);
+    if (containsErrors(tree.topNode)) {
+      throw new Error(`SyntaxError: Invalid projection sample: ${projection}`);
+    }
+    return tree;
+  });
+}
+
+function containsErrors(node: SyntaxNode) {
+  if (node.type.isError) {
+    return true;
+  }
+  for (let child = node.firstChild; child; child = child.nextSibling) {
+    if (containsErrors(child)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export function getWidgetTokens(cursor: TreeCursor, sample: string): string[] {

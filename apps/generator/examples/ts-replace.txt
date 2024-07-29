@@ -1,8 +1,8 @@
-table["name"] = table["name"].replace("Mister", "Mr.");
+table["name"] = table["name"].replace("Mister", "Mr\.");
 
-table["title"] = table["title"].replace("Doctor", "Dr.");
+table["title"] = table["title"].replace("Doctor", "Dr\.");
 
-table["address"] = table["address"].replace("Road", "Rd.");
+table["address"] = table["address"].replace("Road", "Rd\.");
 
 ---
 

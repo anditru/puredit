@@ -2,6 +2,7 @@ import TemplateArgument from "./argument";
 import TemplateParameter from "./parameter";
 import ComplexTemplateParameter from "./complexParameter";
 import { isPrefixOf } from "../common";
+import TemplateBlock from "./block";
 
 const paramterTypeMap = {
   TemplateArgument: "arg",
@@ -41,7 +42,10 @@ export default class TemplateParameterArray extends Array<TemplateParameter> {
         !(templateParam instanceof ComplexTemplateParameter) ||
         usedParamsWithSubProjections.includes(templateParam)
     );
-    usedParamsWithSubProjections.forEach((templateParam) => {
+    const blocks = this.filter((param) => param instanceof TemplateBlock);
+    const boundryParams = usedParamsWithSubProjections as TemplateParameter[];
+    boundryParams.push(...blocks);
+    boundryParams.forEach((templateParam) => {
       this.filterInPlace(
         (parameter) =>
           !(

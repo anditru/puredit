@@ -1,11 +1,11 @@
-with open("my_file.txt", "w") as file:
+with open("my_file\.txt", "w") as file:
     file.write(my_text)
 
-with open("data.txt", "a") as file:
+with open("data\.txt", "a") as file:
     file.write(my_text)
 
 ---
 
-read file my_file.txt in mode w :.
+read file my_file\.txt in mode w :.
 
-read file data.txt in mode a :.
+read file data\.txt in mode a :.

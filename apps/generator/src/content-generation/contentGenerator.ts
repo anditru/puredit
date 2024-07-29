@@ -88,7 +88,7 @@ export default abstract class ContentGenerator {
       this.templateParameters.getComplexParams()
     );
     this.subProjectionSolution = await subProjectionResolver.execute();
-    this.templateParameters.concat(this.globalTemplateParameters);
+    this.templateParameters.push(...this.globalTemplateParameters);
     this.templateParameters.removeUnusedParameters(Array.from(this.subProjectionSolution.keys()));
   }
 

@@ -19,7 +19,7 @@ export async function handleUndeclaredVariables(samples: AstNode[], language: La
     }
     usages = JSON.parse(process.env.UNDECLARED_VAR_USAGES);
   } else if (!process.env.DEBUG && undeclaredVariables.length) {
-    const questions = undeclaredVariables.map((variable) => ({
+    const questions = undeclaredVariables.map((variable, index) => ({
       type: "list",
       name: "usage",
       message: `Found potential context variable ${variable.name} how to you want to use it?`,
@@ -29,10 +29,15 @@ export async function handleUndeclaredVariables(samples: AstNode[], language: La
         { name: "Ignore", value: "i" },
       ],
     }));
-    const answers = await inquirer.prompt(questions);
-    usages = Array.isArray(answers)
-      ? answers.map((answer: { usage: any }) => answer.usage)
-      : [answers.usage];
+    const prompt = inquirer.createPromptModule();
+    const answers: { usage: string }[] = [];
+    /* It should not be necessary to prompt all questions individually but for some reason
+    inquirier refuses to ask more than one question */
+    for (const question of questions) {
+      const answer = await prompt(question);
+      answers.push(answer);
+    }
+    usages = answers.map((answer: { usage: any }) => answer.usage);
   }
 
   let templateParameters: TemplateParameter[] = [];
