@@ -22,8 +22,14 @@ export async function activate(extensionContext: vscode.ExtensionContext) {
     extensionContext.extensionUri,
     "dist/declarativeProjectionSchema.json"
   ).toString();
-  const currentSettings = yamlConfig.get<object>("schemas");
-  const newSettings = { ...currentSettings, [pathToSchema]: "*.puredit.yaml" };
+  const currentSettings = yamlConfig.get<object>("schemas") || {};
+  const newSettings: Record<string, any> = {};
+  for (const [path, pattern] of Object.entries(currentSettings)) {
+    if (pattern !== "*.puredit.yaml") {
+      newSettings[path] = pattern;
+    }
+  }
+  newSettings[pathToSchema] = "*.puredit.yaml";
   yamlConfig.update("schemas", newSettings, vscode.ConfigurationTarget.Workspace);
 
   // Scan for declarative projection descriptors if required

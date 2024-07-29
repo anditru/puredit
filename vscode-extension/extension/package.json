@@ -16,8 +16,7 @@
   ],
   "activationEvents": [
     "workspaceContains:**/*.puredit.json",
-    "workspaceContains:**/*.puredit.yaml",
-    "workspaceContains:**/*.puredit.yml"
+    "workspaceContains:**/*.puredit.yaml"
   ],
   "main": "./dist/extension.js",
   "contributes": {
