@@ -9,5 +9,5 @@ lectures.select("lecturer", "id", "credits").filter(credits==8)
     then filtering rows where age is 24.
 
     Transform dataframe lectures by.
-    select columns lecturer, id, credits.
+    selecting columns lecturer, id, credits.
     then filtering rows where credits is 8.
