@@ -240,13 +240,17 @@ export default class ProjectionRegistry {
     }
     const projectionsToRemove = Object.values(pkg);
     this.removeProjections(projectionsToRemove);
+    delete this._projectionsByPackage[packageName];
   }
 
-  private removeProjections(projections: Projection[]) {
-    const patternsToRemove = projections.map((projection) => projection.pattern);
-    this._projectionsAsArray.filter((projection) => !projections.includes(projection));
-    Object.values(this._rootProjectionPatternsByRootNodeType).forEach((patterns) => {
-      patterns.filter((pattern) => !patternsToRemove.includes(pattern));
+  private removeProjections(projectionsToRemove: Projection[]) {
+    const patternsToRemove = projectionsToRemove.map((projection) => projection.pattern);
+    this._projectionsAsArray = this._projectionsAsArray.filter(
+      (projection) => !projectionsToRemove.includes(projection)
+    );
+    Object.entries(this._rootProjectionPatternsByRootNodeType).forEach(([type, patterns]) => {
+      const filteredPatterns = patterns.filter((pattern) => !patternsToRemove.includes(pattern));
+      this._rootProjectionPatternsByRootNodeType[type] = filteredPatterns;
     });
     patternsToRemove.forEach((pattern) => delete this._projectionsByName[pattern.name]);
   }
