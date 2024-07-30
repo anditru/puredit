@@ -11,6 +11,9 @@ export default class TemplateContextVariable extends TemplateParameter {
   constructor(path: Path, private readonly name: string) {
     super(TemplateContextVariable.issueId(), path);
   }
+  copyWithPath(newPath: Path): TemplateContextVariable {
+    return new TemplateContextVariable(newPath, this.name);
+  }
 
   toDeclarationString(): string {
     return `const ${this.name} = contextVariable("${this.name}");\n`;

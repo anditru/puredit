@@ -40,6 +40,8 @@ export type AggregatableNodeTypeConfig = {
   endToken: string;
   contextTemplate: string;
   hasStartPattern: boolean;
+  startPath?: TreePath;
+  partPath: TreePath;
 };
 
 export const aggregationStartPlaceHolder = "__start__";

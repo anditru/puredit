@@ -39,6 +39,7 @@ export default class RootProjectionContentGenerator extends ContentGenerator {
     );
     this.assertLanguageAvailable();
     this.codeAsts = await parseCodeSamples(this.codeSamples, this.generator.language);
+    this.overheadPath = [];
     this.projectionTrees = parseProjections(projectionSamples);
     await this.extractGlobalTemplateParams();
 

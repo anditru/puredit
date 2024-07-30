@@ -40,6 +40,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           endToken: ")",
           contextTemplate: `someFunction(${aggregationPlaceHolder})`,
           hasStartPattern: false,
+          partPath: new TreePath([0, 0, 1, 1]),
         },
         dictionary: {
           startToken: "{",
@@ -47,6 +48,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           endToken: "}",
           contextTemplate: `{${aggregationPlaceHolder}}`,
           hasStartPattern: false,
+          partPath: new TreePath([0, 0, 1]),
         },
         set: {
           startToken: "{",
@@ -54,6 +56,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           endToken: "}",
           contextTemplate: `{${aggregationPlaceHolder}}`,
           hasStartPattern: false,
+          partPath: new TreePath([0, 0, 1]),
         },
         list: {
           startToken: "[",
@@ -61,6 +64,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           endToken: "]",
           contextTemplate: `[${aggregationPlaceHolder}]`,
           hasStartPattern: false,
+          partPath: new TreePath([0, 0, 1]),
         },
         tuple: {
           startToken: "(",
@@ -68,6 +72,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           endToken: ")",
           contextTemplate: `(${aggregationPlaceHolder}, 1)`,
           hasStartPattern: false,
+          partPath: new TreePath([0, 0, 1]),
         },
         subscript: {
           startToken: "[",
@@ -75,6 +80,8 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           endToken: "]",
           contextTemplate: `${aggregationStartPlaceHolder}[${aggregationPlaceHolder}]`,
           hasStartPattern: true,
+          startPath: new TreePath([0, 0, 0]),
+          partPath: new TreePath([0, 0, 2]),
         },
       },
     },
@@ -123,6 +130,7 @@ const languageConfigs: Record<Language, LanguageConfig> = {
           endToken: ")",
           contextTemplate: `someFunction(${aggregationPlaceHolder})`,
           hasStartPattern: false,
+          partPath: new TreePath([0, 0, 1, 1]),
         },
       },
     },

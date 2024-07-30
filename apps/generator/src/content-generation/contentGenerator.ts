@@ -12,11 +12,13 @@ import { SubProjectionResolver, SubProjectionSolution } from "./subProjectionRes
 import { PatternNode } from "./pattern";
 import TemplateParameterArray from "./template/parameterArray";
 import AstNode from "@puredit/parser/ast/node";
-import { BlockVariableMap } from "./context-var-detection/blockVariableMap";
+import { BlockVariableMap, Path } from "./context-var-detection/blockVariableMap";
 import { Tree } from "@lezer/common";
 import { zip } from "@puredit/utils-shared";
 import { getWidgetTokens } from "./projection/parse";
 import BaseGenerator from "../common/baseGenerator";
+import { aggregationPlaceHolder, aggregationStartPlaceHolder, loadAggregatableNodeTypeConfigFor } from "@puredit/language-config";
+import { parseCodeSamples } from "./code/parse";
 
 export default abstract class ContentGenerator {
   // Input
@@ -24,6 +26,7 @@ export default abstract class ContentGenerator {
   protected ignoreBlocks = true;
   protected codeSamples: string[];
   protected codeAsts: AstNode[];
+  protected overheadPath: Path;
   protected projectionSamples: string[];
   protected projectionTrees: Tree[];
 
@@ -94,6 +97,7 @@ export default abstract class ContentGenerator {
 
   private serializePattern() {
     const [parameterDeclarations, templateString] = serializePattern(
+      this.codeSamples[0],
       this.codeAsts[0],
       this.pattern,
       this.templateParameters
@@ -163,9 +167,9 @@ export default abstract class ContentGenerator {
   }
 
   private serializeWidgets() {
-    this.segmentWidgetContents = this.segmentsPerWidget.map(
-      (widgetSegments) => serializeWidget(widgetSegments)
-    );
+    this.segmentWidgetContents = this.segmentsPerWidget
+      .filter(widgetSegments => widgetSegments.length)
+      .map(widgetSegments => serializeWidget(widgetSegments));
   }
 
   private async generateSubProjectionsForChain(
@@ -176,33 +180,43 @@ export default abstract class ContentGenerator {
     let allSubProjections = [];
     const newSubProjections = [];
     for (let subProjIndex = 0; subProjIndex < numSubProj; subProjIndex++) {
-      const subProjectionNodes = samplesForParam.map((group) => group.getChildren("ProjectionContent")[subProjIndex]);
-      const subProjectionSamples = Array.from(zip(subProjectionNodes, this.projectionSamples)).map(([node, sample]) => sample.slice(node.from, node.to+1));
+      const subProjectionNodes = samplesForParam.map(
+        (group) => group.getChildren("ProjectionContent")[subProjIndex]
+      );
+      const subProjectionSamples = Array.from(
+        zip(subProjectionNodes, this.projectionSamples)).map(([node, sample]) => sample.slice(node.from, node.to+1)
+      );
       const subProjectionTrees = subProjectionNodes.map(node => node.toTree());
-      let codeSampleParts: string[];
+      let codeSamples: string[];
+      let codeAsts: AstNode[];
+      let overheadPath: Path;
       let relevantGlobalTemplateParams: TemplateParameterArray;
       if (subProjIndex === 0) {
         // Chain start
-        codeSampleParts = this.codeSamples.map(
+        codeSamples = this.codeSamples.map(
           (sample, index) => templateParam.start.extractText(this.codeAsts[index].walk(), sample)
         );
+        overheadPath = [];
+        codeAsts = await parseCodeSamples(codeSamples, this.generator.language, overheadPath);
         relevantGlobalTemplateParams = this.globalTemplateParameters.getParamsBelow(templateParam.start.nodePath);
         console.log(
           `\nGenerating subprojection for chain start ` +
-            `with code samples\n${codeSampleParts.join("\n")}`
+            `with code samples\n${codeSamples.join("\n")}`
         );
       } else {
         // Chain links
-        codeSampleParts = this.codeSamples.map((sample, index) =>
+        codeSamples = this.codeSamples.map((sample, index) =>
           templateParam.links[numSubProj - subProjIndex - 1].extractText(
             this.codeAsts[index].walk(),
             sample
           )
         );
+        overheadPath = [];
+        codeAsts = await parseCodeSamples(codeSamples, this.generator.language, overheadPath);
         relevantGlobalTemplateParams = this.globalTemplateParameters.getParamsBelow(templateParam.links[numSubProj - subProjIndex - 1].startNodePath);
         console.log(
           `\nGenerating subprojection for chain link ` +
-            `with code samples\n${codeSampleParts.join("\n")}`
+            `with code samples\n${codeSamples.join("\n")}`
         );
       }
       const subProjectionGenerator = new SubProjectionGenerator(this.generator.fs);
@@ -211,7 +225,9 @@ export default abstract class ContentGenerator {
       const contentGenerator = new SubProjectionContentGenerator(subProjectionGenerator);
       const subProjectionsBelow = await contentGenerator.execute(
         this.projectionPath,
-        codeSampleParts,
+        codeSamples,
+        codeAsts,
+        overheadPath,
         subProjectionSamples,
         subProjectionTrees,
         this.undeclaredVariableMap,
@@ -237,13 +253,20 @@ export default abstract class ContentGenerator {
       const subProjectionNodes = samplesForParam.map((group) => group.getChildren("ProjectionContent")[subProjIndex]);
       const subProjectionSamples = Array.from(zip(subProjectionNodes, this.projectionSamples)).map(([node, sample]) => sample.slice(node.from, node.to+1));
       const subProjectionTrees = subProjectionNodes.map(node => node.toTree());
-      let codeSampleParts: string[];
+      let codeSamples: string[];
+      let codeAsts: AstNode[];
+      let overheadPath: Path;
       let relevantGlobalTemplateParams: TemplateParameterArray;
       if (subProjIndex === 0 && templateParam.start) {
-        // Special start pattern
-        codeSampleParts = this.codeSamples.map(
+        // Aggregation start
+        const codeSampleParts = this.codeSamples.map(
           (sample, index) => templateParam.start.extractText(this.codeAsts[index].walk(), sample)
         );
+        const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(this.generator.language, templateParam.type);
+        overheadPath = nodeTypeConfig.startPath.steps;
+        codeSamples = codeSampleParts.map(part => nodeTypeConfig.contextTemplate.replace(aggregationStartPlaceHolder, part));
+        codeAsts = await parseCodeSamples(codeSamples, this.generator.language, overheadPath);
+
         relevantGlobalTemplateParams = this.globalTemplateParameters.getParamsBelow(templateParam.start.path);
         console.log(
           `\nGenerating subprojection for special start pattern ` +
@@ -252,12 +275,17 @@ export default abstract class ContentGenerator {
       } else {
         // Aggregation parts
         const partIndex = templateParam.start ? subProjIndex - 1 : subProjIndex;
-        codeSampleParts = this.codeSamples.map((sample, index) =>
+        const codeSampleParts = this.codeSamples.map((sample, index) =>
           templateParam.parts[partIndex].extractText(
             this.codeAsts[index].walk(),
             sample
           )
         );
+        const nodeTypeConfig = loadAggregatableNodeTypeConfigFor(this.generator.language, templateParam.type);
+        overheadPath = nodeTypeConfig.partPath.steps;
+        codeSamples = codeSampleParts.map(part => nodeTypeConfig.contextTemplate.replace(aggregationPlaceHolder, part));
+        codeAsts = await parseCodeSamples(codeSamples, this.generator.language, overheadPath);
+
         relevantGlobalTemplateParams = this.globalTemplateParameters.getParamsBelow(templateParam.parts[partIndex].path);
         console.log(
           `\nGenerating subprojection for aggregation part ` +
@@ -270,7 +298,9 @@ export default abstract class ContentGenerator {
       const contentGenerator = new SubProjectionContentGenerator(subProjectionGenerator);
       const subProjectionsBelow = await contentGenerator.execute(
         this.projectionPath,
-        codeSampleParts,
+        codeSamples,
+        codeAsts,
+        overheadPath,
         subProjectionSamples,
         subProjectionTrees,
         this.undeclaredVariableMap,
@@ -280,8 +310,7 @@ export default abstract class ContentGenerator {
       newSubProjections.push(subProjectionsBelow[subProjectionsBelow.length - 1]);
       allSubProjections = allSubProjections.concat(subProjectionsBelow);
     }
-    templateParam.startSubProjectionName = newSubProjections[0];
-    templateParam.partSubProjectionNames = newSubProjections;
+    templateParam.setSubProjectionNames(newSubProjections);
     return [allSubProjections, newSubProjections];
   }
 }

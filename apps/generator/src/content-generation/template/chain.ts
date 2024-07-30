@@ -16,6 +16,13 @@ export class TemplateChain extends ComplexTemplateParameter {
     super(TemplateChain.issueId(), path);
   }
 
+  copyWithPath(newPath: Path): TemplateChain {
+    const copy = new TemplateChain(newPath, this.start, this.links);
+    copy.startSubProjectionName = this.startSubProjectionName;
+    copy.linkSubProjectionNames = this.linkSubProjectionNames;
+    return copy;
+  }
+
   toDeclarationString(): string {
     const variableName = this.toVariableName();
     const subProjectionsString = this.linkSubProjectionNames

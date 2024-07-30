@@ -122,7 +122,7 @@ export default class RootProjectionGenerator extends BaseGenerator {
         parserImports: projectionContent.parameterImports,
         widgetImports: projectionContent.widgetImports,
         importedWidgets: projectionContent.importedWidgets,
-        importedSubProjections: projectionContent.importedSubProjections,
+        importedSubProjections: projectionContent.importedSubProjectionsForRootProjection,
         parameterDeclarations: projectionContent.parameterDeclarations,
         templateString: projectionContent.templateString,
         widgetTransformations: projectionContent.widgetTransformations,
@@ -149,7 +149,7 @@ export default class RootProjectionGenerator extends BaseGenerator {
           }
         )
       );
-    } else {
+    } else if (!projectionContent) {
       this.fs.copyTpl(this.templatePath("Widget.tsvelte"), this.destinationPath("Widget.svelte"), {
         ...this.projectionConfig,
         componentContent: this.projectionConfig.displayName,

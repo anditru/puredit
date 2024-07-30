@@ -42,7 +42,13 @@ export class ProjectionContent {
       .join("\n");
   }
 
-  get importedSubProjections() {
+  get importedSubProjectionsForSubProjection() {
+    return this.allSubProjections
+      .map((name) => `import { ${name} } from "../${name}/config";`)
+      .join("\n");
+  }
+
+  get importedSubProjectionsForRootProjection() {
     return this.allSubProjections
       .map((name) => `import { ${name} } from "./${name}/config";`)
       .join("\n");

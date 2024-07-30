@@ -3,6 +3,7 @@ import TemplateParameter from "./parameter";
 import ComplexTemplateParameter from "./complexParameter";
 import { isPrefixOf } from "../common";
 import TemplateBlock from "./block";
+import { Path } from "../context-var-detection/blockVariableMap";
 
 const paramterTypeMap = {
   TemplateArgument: "arg",
@@ -82,11 +83,16 @@ export default class TemplateParameterArray extends Array<TemplateParameter> {
     return this.filter((parameter) => parameter instanceof TemplateArgument);
   }
 
-  getParamsBelow(path: number[]): TemplateParameterArray {
+  getParamsBelow(pathToRemove: Path): TemplateParameterArray {
     return new TemplateParameterArray(
       ...this.filter(
-        (parameter) => isPrefixOf(path, parameter.path) && parameter.path.length > path.length
-      )
+        (parameter) =>
+          isPrefixOf(pathToRemove, parameter.path) && parameter.path.length >= pathToRemove.length
+      ).map((parameter) => {
+        const currentPath = parameter.path;
+        const newPath = currentPath.slice(pathToRemove.length);
+        return parameter.copyWithPath(newPath);
+      })
     );
   }
 

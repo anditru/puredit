@@ -21,6 +21,22 @@ export class TemplateAggregation extends ComplexTemplateParameter {
     super(TemplateAggregation.issueId(), path);
   }
 
+  setSubProjectionNames(names: string[]) {
+    if (this.start) {
+      this.startSubProjectionName = names[0];
+      this.partSubProjectionNames = names.slice(1);
+    } else {
+      this.partSubProjectionNames = names;
+    }
+  }
+
+  copyWithPath(newPath: Path): TemplateAggregation {
+    const copy = new TemplateAggregation(newPath, this.type, this.parts, this.start);
+    copy.startSubProjectionName = this.startSubProjectionName;
+    copy.partSubProjectionNames = this.partSubProjectionNames;
+    return copy;
+  }
+
   toDeclarationString(): string {
     const variableName = this.toVariableName();
     const subProjectionsString = this.partSubProjectionNames

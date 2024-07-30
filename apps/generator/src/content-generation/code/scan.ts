@@ -34,13 +34,8 @@ export async function scanCode(
   let cursor: AstCursor | PatternCursor = samples[0].walk();
 
   for (let i = 1; i < samples.length; i++) {
-    const nodeComparison = new NodeComparison(
-      cursor,
-      samples[i].walk(),
-      language,
-      undeclaredVariableMap,
-      true
-    );
+    const next = samples[i].walk();
+    const nodeComparison = new NodeComparison(cursor, next, language, undeclaredVariableMap, true);
     [nodes, templateParameters] = nodeComparison.execute(ignoreBlocks);
     cursor = new PatternCursor(nodes[0]);
   }
@@ -257,7 +252,8 @@ class NodeComparison {
       this.a.reverseFollow(path);
       this.b.reverseFollow(path);
     }
-    return isChain ? new TemplateChain(this.path.concat(index), chainStart, chainLinks) : null;
+    const path = this.path.length || !this.initial ? this.path.concat(index) : this.path;
+    return isChain ? new TemplateChain(path, chainStart, chainLinks) : null;
   }
 
   extractTemplateAggregation(index: number) {
@@ -309,7 +305,12 @@ class NodeComparison {
 
   private recordTemplate(index: number) {
     const nodeType = this.a.currentNode.type;
-    this.templateParameters.push(new TemplateArgument(this.path.concat(index), [nodeType]));
+    this.templateParameters.push(
+      new TemplateArgument(
+        this.path.length || !this.initial ? this.path.concat(index) : this.path,
+        [nodeType]
+      )
+    );
     this.nodes.push({
       variable: true,
       fieldName: this.a.currentFieldName || undefined,

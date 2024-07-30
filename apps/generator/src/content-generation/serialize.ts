@@ -3,16 +3,18 @@ import { PatternCursor, PatternNode } from "./pattern";
 import { ProjectionSegment } from "./projection/scan";
 import TemplateParameterArray from "./template/parameterArray";
 import AstNode from "@puredit/parser/ast/node";
+import { Path } from "./context-var-detection/blockVariableMap";
 
 export function serializePattern(
+  source: string,
   sampleRootNode: AstNode,
   pattern: PatternNode,
   templateParameters: TemplateParameterArray
 ): [string, string] {
-  const source = sampleRootNode.text;
   let declarationsResult = "";
   let patternResult = "";
-  let from = 0;
+  let from = sampleRootNode.startIndex;
+  const to = sampleRootNode.endIndex;
   templateParameters.sortByAppearance();
 
   for (let i = 0; i < templateParameters.length; i++) {
@@ -31,7 +33,7 @@ export function serializePattern(
     patternResult += templateParameters[i].toTemplatePart();
     from = sampleCursor.endIndex;
   }
-  patternResult += escapeTemplateCode(source.slice(from));
+  patternResult += escapeTemplateCode(source.slice(from, to));
   return [declarationsResult, patternResult];
 }
 

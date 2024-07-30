@@ -1,9 +1,9 @@
-import { parseCodeSamples } from "./code/parse";
 import { Tree } from "@lezer/common";
 import SubProjectionGenerator from "../subProjection/subProjectionGenerator";
 import { ContentGenerator } from "./internal";
-import { BlockVariableMap } from "./context-var-detection/blockVariableMap";
+import { BlockVariableMap, Path } from "./context-var-detection/blockVariableMap";
 import TemplateParameterArray from "./template/parameterArray";
+import AstNode from "@puredit/parser/ast/node";
 
 export default class SubProjectionContentGenerator extends ContentGenerator {
   constructor(generator: SubProjectionGenerator) {
@@ -13,6 +13,8 @@ export default class SubProjectionContentGenerator extends ContentGenerator {
   async execute(
     projectionPath: string,
     codeSamples: string[],
+    codeAsts: AstNode[],
+    overheadPath: Path,
     projectionSamples: string[],
     projectionTrees: Tree[],
     undeclaredVariableMap: BlockVariableMap,
@@ -22,6 +24,8 @@ export default class SubProjectionContentGenerator extends ContentGenerator {
     this.projectionPath = projectionPath;
     this.ignoreBlocks = ignoreBlocks;
     this.codeSamples = codeSamples;
+    this.codeAsts = codeAsts;
+    this.overheadPath = overheadPath;
     this.projectionSamples = projectionSamples;
     this.projectionTrees = projectionTrees;
     this.undeclaredVariableMap = undeclaredVariableMap;
@@ -29,7 +33,6 @@ export default class SubProjectionContentGenerator extends ContentGenerator {
 
     const projectionName = await this.generator.showPrompts();
     this.assertLanguageAvailable();
-    this.codeAsts = await parseCodeSamples(this.codeSamples, this.generator.language);
 
     const projectionContent = await this.generateContent();
     await this.generator.writeFiles(projectionContent);

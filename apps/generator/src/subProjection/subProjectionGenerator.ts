@@ -143,7 +143,7 @@ export default class SubProjectionGenerator extends BaseGenerator {
         parserImports: projectionContent.parameterImports,
         widgetImports: projectionContent.widgetImports,
         importedWidgets: projectionContent.importedWidgets,
-        importedSubProjections: projectionContent.importedSubProjections,
+        importedSubProjections: projectionContent.importedSubProjectionsForSubProjection,
         parameterDeclarations: projectionContent.parameterDeclarations,
         templateString: projectionContent.templateString,
         widgetTransformations: projectionContent.widgetTransformations,
@@ -173,14 +173,7 @@ export default class SubProjectionGenerator extends BaseGenerator {
           }
         )
       );
-    } else if (projectionContent && !this.projectionContent.widgetContents.length) {
-      this.fs.copyTpl(this.templatePath("Widget.tsvelte"), this.destinationPath("Widget.svelte"), {
-        ...this.subProjectionConfig,
-        componentContent: this.subProjectionConfig.displayName,
-        widgetImports: this.projectionContent.widgetImports,
-        widgetContent: "",
-      });
-    } else {
+    } else if (!projectionContent) {
       this.fs.copyTpl(this.templatePath("Widget.tsvelte"), this.destinationPath("Widget.svelte"), {
         ...this.subProjectionConfig,
         componentContent: this.subProjectionConfig.displayName,

@@ -9,4 +9,5 @@ export default abstract class TemplateParameter {
 
   abstract toDeclarationString(): string;
   abstract toVariableName(): string;
+  abstract copyWithPath(newPath: Path): TemplateParameter;
 }

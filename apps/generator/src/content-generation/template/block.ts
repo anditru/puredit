@@ -12,6 +12,10 @@ export default class TemplateBlock extends TemplateParameter {
     super(TemplateBlock.issueId(), path);
   }
 
+  copyWithPath(newPath: Path): TemplateBlock {
+    return new TemplateBlock(newPath, this.contextVariables);
+  }
+
   toDeclarationString(): string {
     const variableName = this.toVariableName();
     const contextVariableString = this.serializeContextVariables();

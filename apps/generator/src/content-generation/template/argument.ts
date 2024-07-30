@@ -12,6 +12,10 @@ export default class TemplateArgument extends TemplateParameter {
     super(TemplateArgument.issueId(), path);
   }
 
+  copyWithPath(newPath: Path): TemplateArgument {
+    return new TemplateArgument(newPath, this.types);
+  }
+
   toDeclarationString(): string {
     const variableName = this.toVariableName();
     return `const ${variableName} = arg("${variableName}", ${JSON.stringify(this.types)});\n`;
