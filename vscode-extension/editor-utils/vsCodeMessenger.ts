@@ -3,7 +3,6 @@ import { v4 as uuid } from "uuid";
 
 import { logProvider } from "../../logconfig";
 const logger = logProvider.getLogger("vscode.editor-utils.VsCodeMessenger");
-const RESPONSE_TIMEOUT = 120;
 
 declare const vscode: {
   postMessage(message: Message): void;
@@ -66,34 +65,17 @@ export default class VSCodeMessenger {
       const { message } = this.queue[0];
       logger.debug(`Sending message ${JSON.stringify(message, null, 2)}`);
       vscode.postMessage(message);
-
-      setTimeout(() => {
-        if (this.processing) {
-          const { reject } = this.queue.shift()!;
-          reject(
-            new Error(
-              `Timed out waiting for response to message ${JSON.stringify(
-                message,
-                null,
-                RESPONSE_TIMEOUT
-              )} after ${RESPONSE_TIMEOUT} seconds`
-            )
-          );
-          this.processing = false;
-          this.sendNextMessage();
-        }
-      }, RESPONSE_TIMEOUT * 1000);
     }
   }
 
   private handleIncomingMessage(event: MessageEvent) {
     const message = event.data as Message;
-    logger.debug(`Processing message ${JSON.stringify(message, null, 2)}`);
     if (
       message.type === MessageType.RESPONSE &&
       this.queue.length > 0 &&
       message.id === this.queue[0].message.id
     ) {
+      logger.debug(`Resolving promise with message ${JSON.stringify(message, null, 2)}`);
       const { resolve } = this.queue.shift()!;
       resolve(message);
       this.processing = false;
@@ -102,10 +84,13 @@ export default class VSCodeMessenger {
       message.type === MessageType.REQUEST &&
       Object.keys(this.handlers).includes(message.action)
     ) {
+      logger.debug(`Invoking handler for message ${JSON.stringify(message, null, 2)}`);
       const handlersForEvent = this.handlers[message.action];
       for (const handler of handlersForEvent) {
         handler(message);
       }
+    } else {
+      logger.debug(`Ignoring message ${JSON.stringify(message, null, 2)}`);
     }
   }
 }

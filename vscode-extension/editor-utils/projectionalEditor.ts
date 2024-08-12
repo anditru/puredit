@@ -76,21 +76,21 @@ export default class ProjectionalEditor {
     const eolResponse = await this.vsCodeMessenger.sendRequest(Action.GET_EOL);
     this.eol = eolResponse.payload as EndOfLine;
 
-    const disabledPackagesResponse = await this.vsCodeMessenger.sendRequest(
-      Action.GET_DISABLED_PACKAGES
-    );
-    const disabledPackages = JSON.parse(disabledPackagesResponse.payload);
-    this.editorView.dispatch({
-      effects: removeProjectionPackagesEffect.of(disabledPackages),
-      annotations: this.doNotSyncAnnotation.of(true),
-    });
-
     const projectionsResponse = await this.vsCodeMessenger.sendRequest(
       Action.GET_DECLARATIVE_PROJECTIONS
     );
     const extensions = JSON.parse(projectionsResponse.payload) as ProjectionPackageExtension[];
     this.editorView.dispatch({
       effects: insertDeclarativeProjectionsEffect.of(extensions),
+      annotations: this.doNotSyncAnnotation.of(true),
+    });
+
+    const disabledPackagesResponse = await this.vsCodeMessenger.sendRequest(
+      Action.GET_DISABLED_PACKAGES
+    );
+    const disabledPackages = JSON.parse(disabledPackagesResponse.payload);
+    this.editorView.dispatch({
+      effects: removeProjectionPackagesEffect.of(disabledPackages),
       annotations: this.doNotSyncAnnotation.of(true),
     });
 

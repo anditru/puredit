@@ -51,7 +51,7 @@ export function analyzeTransactions(
     // Force rematch -> rematch everything
     const { validUnits, invalidUnits } = filterInvalidUnits(newNonErrorUnits);
     unitsToRematch = validUnits;
-    unitsToInvalidate.push(...invalidUnits);
+    unitsToInvalidate.push(...validUnits, ...invalidUnits);
     logger.debug("Force rematch. Rematching everything");
   } else if (docChanged) {
     // Document has changed -> find changed units and rematch them
@@ -63,11 +63,15 @@ export function analyzeTransactions(
       newNonErrorUnits
     );
     unitsToRematch = changedUnits;
+    unitsToInvalidate.push(...errorUnits);
     const unitWithCursor = findUnitForPosition(newNonErrorUnits, newSelect.head);
-    if (unitWithCursor && !unitsToRematch.find((unit) => unit === unitWithCursor)) {
+    if (
+      unitWithCursor &&
+      !unitsToRematch.find((unit) => unit === unitWithCursor) &&
+      !unitsToInvalidate.find((unit) => unit === unitWithCursor)
+    ) {
       unitsToRematch.push(unitWithCursor);
     }
-    unitsToInvalidate.push(...errorUnits);
     logger.debug(
       `Rematching ${unitsToRematch.length} changed nodes, invalidating ${unitsToInvalidate.length} nodes`
     );

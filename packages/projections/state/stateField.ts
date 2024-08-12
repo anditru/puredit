@@ -116,7 +116,11 @@ export const projectionState = StateField.define<ProjectionState>({
       }
       if (effect.is(insertDeclarativeProjectionsEffect) && config.projectionCompiler) {
         logger.debug("insertDeclarativeProjectionsEffect found. Updating projections");
-        config.projectionCompiler.compile(effect.value);
+        try {
+          config.projectionCompiler.compile(effect.value);
+        } catch (error: any) {
+          logger.warn(error.message);
+        }
         forceRematch = true;
       }
       if (effect.is(forceRecreateDecorationsEffect)) {
@@ -185,7 +189,7 @@ function calculateUpdate(
     isCompletion = isCompletion || Boolean(transaction.annotation(pickedCompletion));
   }
 
-  // Find units to reamatch and to invalidate
+  // Find units to rematch and to invalidate
   const firstTransaction = transactions[0];
   const lastTransaction = transactions[transactions.length - 1];
   const { unitsToRematch, unitsToInvalidate } = analyzeTransactions(

@@ -93,7 +93,7 @@ export class EventProcessor {
         this.processGetRematchingDelay(message, context);
         break;
       case Action.REPORT_ERROR:
-        vscode.window.showErrorMessage(message.payload);
+        this.processReportError(message, context);
         break;
     }
   }
@@ -166,6 +166,15 @@ export class EventProcessor {
       type: MessageType.RESPONSE,
       action: Action.GET_REMATCHING_DELAY,
       payload: rematchingDelay,
+    });
+  }
+
+  private processReportError(message: Message, context: EditorContext) {
+    vscode.window.showErrorMessage(message.payload);
+    context.webviewPanel.webview.postMessage({
+      id: message.id,
+      type: MessageType.RESPONSE,
+      action: Action.REPORT_ERROR,
     });
   }
 
