@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 
 import { logProvider } from "../../logconfig";
 const logger = logProvider.getLogger("vscode.editor-utils.VsCodeMessenger");
-const RESPONSE_TIMEOUT = 120;
+const RESPONSE_TIMEOUT = 700;
 
 declare const vscode: {
   postMessage(message: Message): void;
@@ -76,13 +76,13 @@ export default class VSCodeMessenger {
                 message,
                 null,
                 RESPONSE_TIMEOUT
-              )} after ${RESPONSE_TIMEOUT} seconds`
+              )} after ${RESPONSE_TIMEOUT} ms`
             )
           );
           this.processing = false;
           this.sendNextMessage();
         }
-      }, RESPONSE_TIMEOUT * 1000);
+      }, RESPONSE_TIMEOUT);
     }
   }
 

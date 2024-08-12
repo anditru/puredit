@@ -116,7 +116,11 @@ export const projectionState = StateField.define<ProjectionState>({
       }
       if (effect.is(insertDeclarativeProjectionsEffect) && config.projectionCompiler) {
         logger.debug("insertDeclarativeProjectionsEffect found. Updating projections");
-        config.projectionCompiler.compile(effect.value);
+        try {
+          config.projectionCompiler.compile(effect.value);
+        } catch (error: any) {
+          logger.warn(error.message);
+        }
         forceRematch = true;
       }
       if (effect.is(forceRecreateDecorationsEffect)) {
