@@ -26,13 +26,15 @@ const logger = logProvider.getLogger("projections.state.lazyMatching");
  * @returns The units to rematch and invalidate
  */
 export function analyzeTransactions(
-  fristTransaction: Transaction,
-  lastTransaction: Transaction,
+  transactions: Transaction[],
   docChanged: boolean,
   parser: Parser,
   forceRematch: boolean
 ): TransactionResult {
-  const oldState = fristTransaction.startState;
+  const firstTransaction = transactions[0];
+  const lastTransaction = transactions[transactions.length - 1];
+
+  const oldState = firstTransaction.startState;
   const oldText = oldState.sliceDoc(0);
   const { nonErrorUnits: oldNonErrorUnits } = getMatchingUnits(oldText, parser);
 
@@ -45,13 +47,14 @@ export function analyzeTransactions(
 
   const newSelect = newState.selection.main;
   const oldSelect = oldState.selection.main;
-  let unitsToRematch: AstNode[] = [];
-  const unitsToInvalidate: AstNode[] = newErrorUnits;
+  let unitsToRematch: Set<AstNode> = new Set();
+  const unitsToInvalidate: Set<AstNode> = new Set(newErrorUnits);
   if (forceRematch) {
     // Force rematch -> rematch everything
     const { validUnits, invalidUnits } = filterInvalidUnits(newNonErrorUnits);
-    unitsToRematch = validUnits;
-    unitsToInvalidate.push(...validUnits, ...invalidUnits);
+    unitsToRematch = new Set(validUnits);
+    insert(validUnits, unitsToInvalidate);
+    insert(invalidUnits, unitsToInvalidate);
     logger.debug("Force rematch. Rematching everything");
   } else if (docChanged) {
     // Document has changed -> find changed units and rematch them
@@ -63,17 +66,19 @@ export function analyzeTransactions(
       newNonErrorUnits
     );
     unitsToRematch = changedUnits;
-    unitsToInvalidate.push(...errorUnits);
+    insert([...errorUnits], unitsToInvalidate);
+
+    const insertedUnits = getInsertedUnits(newNonErrorUnits, transactions);
+    let insertedNonErrorUnits = difference(insertedUnits, errorUnits);
+    insertedNonErrorUnits = difference(insertedNonErrorUnits, new Set(newErrorUnits));
+    insert([...insertedNonErrorUnits], unitsToRematch);
+
     const unitWithCursor = findUnitForPosition(newNonErrorUnits, newSelect.head);
-    if (
-      unitWithCursor &&
-      !unitsToRematch.find((unit) => unit === unitWithCursor) &&
-      !unitsToInvalidate.find((unit) => unit === unitWithCursor)
-    ) {
-      unitsToRematch.push(unitWithCursor);
+    if (unitWithCursor && !unitsToInvalidate.has(unitWithCursor)) {
+      unitsToRematch.add(unitWithCursor);
     }
     logger.debug(
-      `Rematching ${unitsToRematch.length} changed nodes, invalidating ${unitsToInvalidate.length} nodes`
+      `Rematching ${unitsToRematch.size} changed nodes, invalidating ${unitsToInvalidate.size} nodes`
     );
   } else if (newSelect.anchor === newSelect.head) {
     // Cursor is placed somewhere
@@ -84,11 +89,11 @@ export function analyzeTransactions(
       const cursorNodeHasError = containsError(unitWithCursor);
       if (cursorNodeHasError) {
         // If unit has an error, just invalide but do not rematch
-        unitsToInvalidate.push(unitWithCursor);
+        unitsToInvalidate.add(unitWithCursor);
         logger.debug("Invalidating node with cursor");
       } else {
         // If unit has no error, rematch
-        unitsToRematch = [unitWithCursor];
+        unitsToRematch = new Set([unitWithCursor]);
         logger.debug("Rematching node with cursor");
       }
     } else {
@@ -107,23 +112,26 @@ export function analyzeTransactions(
       to = oldSelect.head;
     }
     if (from == null || to == null) {
-      unitsToRematch = newNonErrorUnits;
+      unitsToRematch = new Set(newNonErrorUnits);
     } else {
       const unitsFrom = findNextLowerIndex(newNonErrorUnits, from) || 0;
       const unitsTo = findNextHigherIndex(newNonErrorUnits, to) || newNonErrorUnits.length - 1;
       const unitsInRange = newNonErrorUnits.slice(unitsFrom, unitsTo + 1);
       const { validUnits, invalidUnits } = filterInvalidUnits(unitsInRange);
-      unitsToRematch = validUnits;
-      unitsToInvalidate.push(...invalidUnits);
+      unitsToRematch = new Set(validUnits);
+      insert(invalidUnits, unitsToInvalidate);
     }
   } else {
     // Fallback: Rematch everything
     const { validUnits, invalidUnits } = filterInvalidUnits(newNonErrorUnits);
-    unitsToRematch = validUnits;
-    unitsToInvalidate.push(...invalidUnits);
+    unitsToRematch = new Set(validUnits);
+    insert(invalidUnits, unitsToInvalidate);
     logger.debug("Rematching everything");
   }
-  return { unitsToRematch, unitsToInvalidate };
+  return {
+    unitsToRematch: [...unitsToRematch].sort(nodeSorter),
+    unitsToInvalidate: [...unitsToInvalidate].sort(nodeSorter),
+  };
 }
 
 export interface TransactionResult {
@@ -204,21 +212,52 @@ interface SplitResult {
 }
 
 /**
- * Searches the unit, a certain position in the document belongs into.
+ * Finds all units that have been affected by the insertions caused by the given transactions
  * @param units
- * @param cursorPos
+ * @param transactions
+ */
+function getInsertedUnits(units: AstNode[], transactions: Transaction[]) {
+  const { from, to } = getAffectedTextRange(transactions);
+  const firstUnitIndex = findNextHigherIndex(units, from) || 0;
+  const lastUnitIndex = findNextLowerIndex(units, to) || units.length - 1;
+  return new Set(units.slice(firstUnitIndex, lastUnitIndex + 1));
+}
+
+/**
+ * Finds the first and last text position affected by the insertions caused by the given transactions
+ * @param transactions
+ */
+function getAffectedTextRange(transactions: Transaction[]) {
+  let startIndex = Infinity;
+  let endIndex = 0;
+  transactions.forEach((transaction) => {
+    transaction.changes.iterChangedRanges((_, __, fromB, toB) => {
+      startIndex = Math.min(startIndex, fromB);
+      endIndex = Math.max(endIndex, toB);
+    });
+  });
+  return {
+    from: startIndex,
+    to: endIndex,
+  };
+}
+
+/**
+ * Searches the unit, a position in the document belongs into.
+ * @param units
+ * @param pos
  * @returns The unit if the position belongs to one or null if the position
  * does not belong to any unit.
  */
-function findUnitForPosition(units: AstNode[], cursorPos: number): AstNode | null {
+function findUnitForPosition(units: AstNode[], pos: number): AstNode | null {
   let low = 0;
   let high = units.length - 1;
   while (high >= low) {
     const mid = Math.floor(low + (high - low) / 2);
     const currentNode = units[mid];
-    if (cursorPos >= currentNode.startIndex && cursorPos <= currentNode.endIndex) {
+    if (pos >= currentNode.startIndex && pos <= currentNode.endIndex) {
       return currentNode;
-    } else if (cursorPos < currentNode.endIndex) {
+    } else if (pos < currentNode.endIndex) {
       high = mid - 1;
     } else {
       low = mid + 1;
@@ -228,12 +267,12 @@ function findUnitForPosition(units: AstNode[], cursorPos: number): AstNode | nul
 }
 
 /**
- * Finds the index of the unit, a certain cursor position benlongs to
+ * Finds the index of the unit, a certain position benlongs to
  * or the next unit before the position.
  * @param units
- * @param cursorPos
+ * @param pos
  */
-function findNextLowerIndex(units: AstNode[], cursorPos: number): number | null {
+function findNextLowerIndex(units: AstNode[], pos: number): number | null {
   let low = 0;
   let high = units.length - 1;
   let lastBeforeCursor: number | null = null;
@@ -242,9 +281,9 @@ function findNextLowerIndex(units: AstNode[], cursorPos: number): number | null 
     const mid = Math.floor(low + (high - low) / 2);
     const currentNode = units[mid];
 
-    if (cursorPos >= currentNode.startIndex && cursorPos <= currentNode.endIndex) {
+    if (pos >= currentNode.startIndex && pos <= currentNode.endIndex) {
       return mid;
-    } else if (cursorPos < currentNode.startIndex) {
+    } else if (pos < currentNode.startIndex) {
       high = mid - 1;
     } else {
       lastBeforeCursor = mid;
@@ -256,12 +295,12 @@ function findNextLowerIndex(units: AstNode[], cursorPos: number): number | null 
 }
 
 /**
- * Finds the index of the unit, a certain cursor position benlongs to
+ * Finds the index of the unit, a certain position benlongs to
  * or the next unit after the position.
  * @param units
- * @param cursorPos
+ * @param pos
  */
-function findNextHigherIndex(units: AstNode[], cursorPos: number): number | null {
+function findNextHigherIndex(units: AstNode[], pos: number): number | null {
   let low = 0;
   let high = units.length - 1;
   let nextAfterCursor: number | null = null;
@@ -270,9 +309,9 @@ function findNextHigherIndex(units: AstNode[], cursorPos: number): number | null
     const mid = Math.floor(low + (high - low) / 2);
     const currentNode = units[mid];
 
-    if (cursorPos >= currentNode.startIndex && cursorPos <= currentNode.endIndex) {
+    if (pos >= currentNode.startIndex && pos <= currentNode.endIndex) {
       return mid;
-    } else if (cursorPos < currentNode.startIndex) {
+    } else if (pos < currentNode.startIndex) {
       nextAfterCursor = mid;
       high = mid - 1;
     } else {
@@ -299,11 +338,11 @@ function analyzeChanges(
   newUnits: AstNode[]
 ) {
   if (!newUnits.length) {
-    return { changedUnits: [], errorUnits: [] };
+    return { changedUnits: new Set<AstNode>(), errorUnits: new Set<AstNode>() };
   }
 
-  const changedUnits: AstNode[] = [];
-  const errorUnits: AstNode[] = [];
+  const changedUnits: Set<AstNode> = new Set();
+  const errorUnits: Set<AstNode> = new Set();
 
   const oldLeadingWhiteSpace = oldText.match(/^\s*/);
   const newLeadingWhiteSpace = newText.match(/^\s*/);
@@ -315,34 +354,35 @@ function analyzeChanges(
     (oldLeadingWhiteSpace && !newLeadingWhiteSpace) ||
     (!oldLeadingWhiteSpace && newLeadingWhiteSpace)
   ) {
-    changedUnits.push(newUnits[0]);
+    changedUnits.add(newUnits[0]);
     i = 1;
   }
   for (; i < newUnits.length; i++) {
     const oldUnit = oldUnits[i];
     const newUnit = newUnits[i];
     if (!oldUnit) {
-      changedUnits.push(newUnit);
+      changedUnits.add(newUnit);
       continue;
     }
     if (oldUnit.text === newUnit.text) {
       continue;
     }
     if (newUnit.type === "ERROR") {
-      errorUnits.push(newUnit);
+      errorUnits.add(newUnit);
       continue;
     }
     if (newUnit.type === "comment") {
-      changedUnits.push(newUnit, newUnits[i + 1]);
+      changedUnits.add(newUnit);
+      changedUnits.add(newUnits[i + 1]);
       i++;
     }
     try {
       if (!nodesEqual(oldUnit, newUnit)) {
-        changedUnits.push(newUnit);
+        changedUnits.add(newUnit);
       }
     } catch (error) {
       if (error instanceof ErrorFound) {
-        errorUnits.push(newUnit);
+        errorUnits.add(newUnit);
       } else {
         throw error;
       }
@@ -370,10 +410,7 @@ function nodesEqual(oldNode: AstNode, newNode: AstNode, differenceFound = false)
   } else if (newNode.children.length === 0) {
     differenceFound = oldNode?.text !== newNode?.text;
   } else {
-    differenceFound =
-      oldNode?.type !== newNode?.type ||
-      oldNode?.startIndex !== newNode?.startIndex ||
-      oldNode?.endIndex !== newNode?.endIndex;
+    differenceFound = oldNode?.type !== newNode?.type;
   }
 
   const maxIndex = Math.max(oldNode?.children.length || 0, newNode?.children.length || 0);
@@ -398,20 +435,62 @@ class ErrorFound extends Error {
  */
 function containsError(rootNode: AstNode): boolean {
   const queue: AstNode[] = [rootNode];
-
   while (queue.length > 0) {
     const currentNode = queue.shift();
-
     if (currentNode) {
       if (currentNode.type === "ERROR") {
         return true;
       }
-
       for (const childNode of currentNode.children) {
         queue.push(childNode);
       }
     }
   }
-
   return false;
+}
+
+/**
+ * Comparison function to be used with the arrays' sort function when sorting AstNodes
+ * @param a
+ * @param b
+ */
+function nodeSorter(a: AstNode, b: AstNode) {
+  if (a.startIndex < b.startIndex) {
+    return -1;
+  } else if (a.startIndex > b.startIndex) {
+    return 1;
+  } else {
+    if (a.endIndex < b.endIndex) {
+      return -1;
+    } else if (a.endIndex > b.endIndex) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+}
+
+/**
+ * Computes the difference (a - b) of two sets.
+ * @param a
+ * @param b
+ * @returns
+ */
+function difference(a: Set<any>, b: Set<any>) {
+  const result = new Set();
+  for (const elem of a) {
+    if (!b.has(elem)) {
+      result.add(elem);
+    }
+  }
+  return result;
+}
+
+/**
+ * Inserts an array of items into a tagret set.
+ * @param items Items to insert
+ * @param set Target set
+ */
+function insert(items: any[], set: Set<any>) {
+  items.forEach((item) => set.add(item));
 }

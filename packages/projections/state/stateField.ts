@@ -190,18 +190,15 @@ function calculateUpdate(
   }
 
   // Find units to rematch and to invalidate
-  const firstTransaction = transactions[0];
-  const lastTransaction = transactions[transactions.length - 1];
   const { unitsToRematch, unitsToInvalidate } = analyzeTransactions(
-    firstTransaction,
-    lastTransaction,
+    transactions,
     docChanged,
     config.parser,
     forceRematch
   );
 
   // Rematch units and collect matches
-  const newState = lastTransaction.state;
+  const newState = transactions[transactions.length - 1].state;
   let allMatches: Match[] = [];
   let allContextVariableRanges: ContextVariableRange[] = [];
   for (const unitToRematch of unitsToRematch) {
@@ -229,7 +226,7 @@ function calculateUpdate(
   let newDecorations = decorationSetBuilder.build();
   logger.debug("Done rebuilding projections");
 
-  // When a decoration is scolled outside the visible area, cordmirror destroy the HTML
+  // When a decoration is scolled outside the visible area, codemirror destroys the HTML
   // Therefore we redraw them
   if (forceRecreation) {
     newDecorations = redrawDecorations(
