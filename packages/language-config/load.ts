@@ -80,3 +80,7 @@ export function loadNodeTypesToSplitFor(language: Language): NodeTypesToSplitCon
 export function loadLookAheadPathFor(language: Language, nodeType: string) {
   return languageConfigs[language].lookAheadPaths[nodeType];
 }
+
+export function loadAggregationDelimiterTokenFor(language: Language, nodeType: string) {
+  return languageConfigs[language].aggregations.aggregatableNodeTypes[nodeType].delimiterToken;
+}

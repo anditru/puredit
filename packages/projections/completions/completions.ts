@@ -14,6 +14,7 @@ import { ContextVariableMap, Projection } from "..";
 import { Decoration } from "@codemirror/view";
 import { Match } from "@puredit/parser";
 import AggregationDecorator from "@puredit/parser/pattern/decorators/aggregationDecorator";
+import { loadAggregationDelimiterTokenFor } from "@puredit/language-config/load";
 
 /**
  * Transforms the registered projections into suggestions for the code completion
@@ -39,14 +40,15 @@ export function completions(completionContext: CompletionContext): CompletionRes
     }
   }
 
-  let recommendedProjections: Projection[] = [];
+  let recommendedAggProjections: Projection[] = [];
+  let delimiterTokens: string[] = [];
   const cursorPos = completionContext.pos;
 
   let siblingPartPatterns: Projection[] | undefined;
+  let delimiterToken: string | undefined;
   const decorationCursor = decorations.iter();
   while (decorationCursor.value) {
     const match: Match = decorationCursor.value.spec.widget.match;
-
     for (const [aggregationName, range] of Object.entries(match.aggregationToRangeMap)) {
       if (cursorPos >= range.from && cursorPos <= range.to) {
         const pattern = match.pattern as AggregationDecorator;
@@ -54,6 +56,8 @@ export function completions(completionContext: CompletionContext): CompletionRes
         siblingPartPatterns = partPatterns.map(
           (partPattern) => config.projectionRegistry.projectionsByName[partPattern.name]
         );
+        const aggregatableNodeType = pattern.getNodeTypeFor(aggregationName);
+        delimiterToken = loadAggregationDelimiterTokenFor(pattern.language, aggregatableNodeType);
         break;
       }
     }
@@ -64,9 +68,11 @@ export function completions(completionContext: CompletionContext): CompletionRes
     }
   }
   if (siblingPartPatterns) {
-    recommendedProjections = recommendedProjections.concat(siblingPartPatterns);
+    recommendedAggProjections = recommendedAggProjections.concat(siblingPartPatterns);
+    delimiterTokens = Array(siblingPartPatterns.length).fill(delimiterToken);
   }
 
+  let recommendedChainProjections: Projection[] = [];
   let closestPos = -1;
   let closestDec: Decoration | undefined;
   decorations.between(0, cursorPos, (from, to, dec) => {
@@ -79,7 +85,7 @@ export function completions(completionContext: CompletionContext): CompletionRes
     const closestPattern = closestDec.spec.widget.match.pattern;
     const siblingLinkProjections =
       config.projectionRegistry.getSiblingLinkProjections(closestPattern);
-    recommendedProjections = recommendedProjections.concat(siblingLinkProjections);
+    recommendedChainProjections = recommendedChainProjections.concat(siblingLinkProjections);
   }
 
   const selection = completionContext.state.selection?.main;
@@ -107,17 +113,33 @@ export function completions(completionContext: CompletionContext): CompletionRes
   }
 
   let recommnededOptions: Completion[] = [];
-  if (recommendedProjections.length) {
+  if (recommendedAggProjections.length) {
     const recommendedOptionsBuilder = new CompletionsBuilder();
-    recommnededOptions = recommendedOptionsBuilder
+    const recommnededAggOptions = recommendedOptionsBuilder
       .setIndendation(indentation)
       .setContext(contextVariables)
-      .setProjections(recommendedProjections)
+      .setProjections(recommendedAggProjections)
+      .setAggegationDelimiterTokens(delimiterTokens)
       .setCompletionSection({
         name: "Recommended",
         rank: 1,
       })
       .build();
+    recommnededOptions = recommnededOptions.concat(recommnededAggOptions);
+  }
+
+  if (recommendedChainProjections.length) {
+    const recommendedOptionsBuilder = new CompletionsBuilder();
+    const recommnededChainOptions = recommendedOptionsBuilder
+      .setIndendation(indentation)
+      .setContext(contextVariables)
+      .setProjections(recommendedChainProjections)
+      .setCompletionSection({
+        name: "Recommended",
+        rank: 1,
+      })
+      .build();
+    recommnededOptions = recommnededOptions.concat(recommnededChainOptions);
   }
 
   const allCompletionsBuilder = new CompletionsBuilder();

@@ -13,9 +13,9 @@ export default class CompletionsBuilder {
   private indentation!: string;
   private contextVariables!: ContextVariableMap;
   private completionSection!: CompletionSection;
-  private delimiterToken = "";
   private projections!: Projection[];
   private searchString = "";
+  private aggregationDelimiterTokens: string[] = [];
 
   private completions: Completion[] = [];
   private boost = 100;
@@ -35,11 +35,6 @@ export default class CompletionsBuilder {
     return this;
   }
 
-  setDelimiterToken(delimiterToken: string): CompletionsBuilder {
-    this.delimiterToken = delimiterToken;
-    return this;
-  }
-
   setProjections(projections: Projection[]): CompletionsBuilder {
     this.projections = projections;
     return this;
@@ -50,18 +45,26 @@ export default class CompletionsBuilder {
     return this;
   }
 
+  setAggegationDelimiterTokens(delimiterTokens: string[]) {
+    this.aggregationDelimiterTokens = delimiterTokens;
+    return this;
+  }
+
   build(): Completion[] {
-    for (const projection of this.projections) {
-      this.processProjection(projection);
-    }
+    this.projections.forEach((projection, index) => {
+      const aggregationDelimiterToken = this.aggregationDelimiterTokens[index]
+        ? this.aggregationDelimiterTokens[index]
+        : "";
+      this.processProjection(projection, aggregationDelimiterToken);
+    });
 
     return this.completions;
   }
 
-  private processProjection(projection: Projection) {
+  private processProjection(projection: Projection, aggregationDelimiterToken: string) {
     const showOption = this.requiredContextExistsFor(projection);
     if (showOption) {
-      this.completions.push(this.transformToCompletion(projection));
+      this.completions.push(this.transformToCompletion(projection, aggregationDelimiterToken));
     }
   }
 
@@ -76,7 +79,10 @@ export default class CompletionsBuilder {
     return requiredContextExists;
   }
 
-  private transformToCompletion(projection: Projection): Completion {
+  private transformToCompletion(
+    projection: Projection,
+    aggregationDelimiterToken: string
+  ): Completion {
     this.boost = Math.max(--this.boost, 1);
     return {
       label: projection.name,
@@ -85,10 +91,10 @@ export default class CompletionsBuilder {
       boost: this.searchString ? this.boost : 1,
       info: projection.description,
       apply: (view, completion, from, to) => {
-        const insert = projection.pattern
+        let insert = projection.pattern
           .toDraftString()
           .split("\n")
-          .join("\n" + this.indentation + this.delimiterToken);
+          .join("\n" + this.indentation);
         const selection = view.state.selection?.main;
         let replaceFrom = from;
         let replaceTo = to;
@@ -102,6 +108,9 @@ export default class CompletionsBuilder {
           if (characterLeft === "." && firstCharacter === ".") {
             replaceFrom--;
           }
+        }
+        if (aggregationDelimiterToken) {
+          insert += aggregationDelimiterToken;
         }
         view.dispatch({
           changes: {
