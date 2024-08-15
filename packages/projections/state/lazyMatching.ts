@@ -77,6 +77,7 @@ export function analyzeTransactions(
     if (unitWithCursor && !unitsToInvalidate.has(unitWithCursor)) {
       unitsToRematch.add(unitWithCursor);
     }
+    insert([...unitsToRematch], unitsToInvalidate);
     logger.debug(
       `Rematching ${unitsToRematch.size} changed nodes, invalidating ${unitsToInvalidate.size} nodes`
     );
