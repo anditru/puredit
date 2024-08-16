@@ -1,8 +1,7 @@
 import type { Text } from "@codemirror/state";
-import type { Match, Parser } from "@puredit/parser";
+import type { Match, Parser, TransformableTemplate } from "@puredit/parser";
 import type { ProjectionWidgetClass } from "./widget/widget";
 import type { Pattern } from "@puredit/parser";
-import type { Template } from "@puredit/parser";
 import ProjectionRegistry from "./state/projectionRegistry";
 import { ProjectionCompiler } from "@puredit/declarative-projections";
 
@@ -24,7 +23,7 @@ export interface RootProjection {
 }
 
 export interface SubProjection {
-  template: Template;
+  template: TransformableTemplate;
   description: string;
   requiredContextVariables: string[];
   segmentWidgets: Array<ProjectionWidgetClass>;

@@ -103,7 +103,8 @@ export default class MatchVerification {
     let ignoredNode = false;
     if (
       currentAstNode.type === "parenthesized_expression" &&
-      currentAstNode.children[1]?.type === "call"
+      currentAstNode.children[1]?.type === "call" &&
+      currentPatternNode.type !== "parenthesized_expression"
     ) {
       const fieldName = this.astCursor.currentFieldName;
       this.astCursor.goToFirstChild();
