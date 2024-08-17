@@ -27,9 +27,6 @@ export function completions(completionContext: CompletionContext): CompletionRes
   if (!word) {
     return null;
   }
-  if (word.from === word.to && (!selection || selection.from !== selection.to)) {
-    return null;
-  }
 
   let searchString = "";
   if (selection.from !== selection.to) {
