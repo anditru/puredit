@@ -88,8 +88,8 @@ export default class CompletionsBuilder {
       label: projection.name,
       type: "projection",
       section: this.completionSection,
-      boost: this.searchString ? this.boost : 1,
       info: projection.description,
+      boost: this.searchString ? this.boost : 1,
       apply: (view, completion, from, to) => {
         let insert = projection.pattern
           .toDraftString()

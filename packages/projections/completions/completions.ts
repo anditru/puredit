@@ -23,8 +23,19 @@ import { loadAggregationDelimiterTokenFor } from "@puredit/language-config/load"
  */
 export function completions(completionContext: CompletionContext): CompletionResult | null {
   const word = completionContext.matchBefore(/\w*/);
-  if (!word || (word.from === word.to && !completionContext.explicit)) {
+  const selection = completionContext.state.selection?.main;
+  if (!word) {
     return null;
+  }
+  if (word.from === word.to && (!selection || selection.from !== selection.to)) {
+    return null;
+  }
+
+  let searchString = "";
+  if (selection.from !== selection.to) {
+    searchString = completionContext.state.doc.slice(selection.from, selection.to).toString();
+  } else {
+    searchString = completionContext.state.doc.slice(word.from, word.to).toString();
   }
 
   const line = completionContext.state.doc.lineAt(word.from);
@@ -73,25 +84,24 @@ export function completions(completionContext: CompletionContext): CompletionRes
   }
 
   let recommendedChainProjections: Projection[] = [];
-  let closestPos = -1;
+  let closestFrom = -1;
+  let closestTo = -1;
   let closestDec: Decoration | undefined;
   decorations.between(0, cursorPos, (from, to, dec) => {
-    if (from < cursorPos && from > closestPos) {
-      closestPos = from;
+    if (from < cursorPos && from > closestFrom) {
+      closestFrom = from;
+      closestTo = to;
       closestDec = dec;
     }
   });
   if (closestDec) {
-    const closestPattern = closestDec.spec.widget.match.pattern;
-    const siblingLinkProjections =
-      config.projectionRegistry.getSiblingLinkProjections(closestPattern);
-    recommendedChainProjections = recommendedChainProjections.concat(siblingLinkProjections);
-  }
-
-  const selection = completionContext.state.selection?.main;
-  let searchString = "";
-  if (selection.from !== selection.to) {
-    searchString = completionContext.state.doc.slice(selection.from, selection.to).toString();
+    const textBetween = completionContext.state.doc.slice(closestTo, cursorPos).toString();
+    if (!containsLettersOrDigits(textBetween)) {
+      const closestPattern = closestDec.spec.widget.match.pattern;
+      const siblingLinkProjections =
+        config.projectionRegistry.getSiblingLinkProjections(closestPattern);
+      recommendedChainProjections = recommendedChainProjections.concat(siblingLinkProjections);
+    }
   }
 
   let searchOptions: Completion[] = [];
@@ -142,6 +152,10 @@ export function completions(completionContext: CompletionContext): CompletionRes
     recommnededOptions = recommnededOptions.concat(recommnededChainOptions);
   }
 
+  if (!completionContext.explicit && !recommnededOptions.length) {
+    return null;
+  }
+
   const allCompletionsBuilder = new CompletionsBuilder();
   const allOptions = allCompletionsBuilder
     .setIndendation(indentation)
@@ -158,4 +172,8 @@ export function completions(completionContext: CompletionContext): CompletionRes
     options: [...searchOptions, ...recommnededOptions, ...allOptions],
     filter: false,
   };
+}
+
+function containsLettersOrDigits(str: string): boolean {
+  return /[a-zA-Z\d]/.test(str);
 }
