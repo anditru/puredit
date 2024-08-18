@@ -159,7 +159,7 @@ function filterInvalidUnits(units: AstNode[]) {
  * @param text
  * @param parser
  */
-function getMatchingUnits(text: string, parser: Parser): SplitResult {
+export function getMatchingUnits(text: string, parser: Parser): SplitResult {
   const astCursor = new AstCursor(parser.parse(text).walk());
   const nodeTypesToSplit = loadNodeTypesToSplitFor(parser.language);
   return splitIntoMatchingUnits(astCursor, nodeTypesToSplit);
@@ -169,7 +169,7 @@ function splitIntoMatchingUnits(
   astCursor: AstCursor,
   nodeTypesToSplit: NodeTypesToSplitConfig
 ): SplitResult {
-  if (astCursor.currentNode.type === "ERROR") {
+  if (isErrorNode(astCursor.currentNode)) {
     return {
       nonErrorUnits: [],
       errorUnits: [astCursor.currentNode],
@@ -368,7 +368,7 @@ function analyzeChanges(
     if (oldUnit.text === newUnit.text) {
       continue;
     }
-    if (newUnit.type === "ERROR") {
+    if (isErrorNode(newUnit)) {
       errorUnits.add(newUnit);
       continue;
     }
@@ -402,7 +402,7 @@ function analyzeChanges(
  * @throws {ErrorFound}: If an error node is found below the new node.
  */
 function nodesEqual(oldNode: AstNode, newNode: AstNode, differenceFound = false): boolean {
-  if (newNode?.type == "ERROR") {
+  if (isErrorNode(newNode)) {
     throw new ErrorFound();
   } else if (!newNode || !oldNode) {
     differenceFound = true;
@@ -434,12 +434,12 @@ class ErrorFound extends Error {
  * Performs a BFS to check if a node contains an error.
  * @param rootNode
  */
-function containsError(rootNode: AstNode): boolean {
+export function containsError(rootNode: AstNode): boolean {
   const queue: AstNode[] = [rootNode];
   while (queue.length > 0) {
     const currentNode = queue.shift();
     if (currentNode) {
-      if (currentNode.type === "ERROR") {
+      if (isErrorNode(currentNode)) {
         return true;
       }
       for (const childNode of currentNode.children) {
@@ -494,4 +494,20 @@ function difference(a: Set<any>, b: Set<any>) {
  */
 function insert(items: any[], set: Set<any>) {
   items.forEach((item) => set.add(item));
+}
+
+/**
+ * Checks if the node represents an error. It not enough to simply check
+ * if the node is of type ERROR since Tree-sitter does not consider a string
+ * that is never closed an error in Python so this must be checked separately
+ * @param node
+ */
+function isErrorNode(node?: AstNode) {
+  if (node) {
+    return (
+      node.type === "ERROR" || (node.type === "string_end" && node.startIndex === node.endIndex)
+    );
+  } else {
+    return undefined;
+  }
 }

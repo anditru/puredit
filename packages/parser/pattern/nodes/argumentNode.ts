@@ -33,14 +33,10 @@ export default class ArgumentNode extends PatternNode {
   }
 
   toDraftString(): string {
-    if (this.astNodeTypes.length === 1) {
-      return this.getDraftStringForSingeType(this.astNodeTypes[0]);
-    } else {
-      return this.getDraftStringForMultipleTypes();
+    let type = this.astNodeTypes.find((type) => type !== "string");
+    if (!type) {
+      type = this.astNodeTypes[0];
     }
-  }
-
-  private getDraftStringForSingeType(type: string): string {
     const argumentsConfig = loadArgumentsConfigFor(this.language);
     const maybeDraft = argumentsConfig.draftTypeMapping[type];
     if (maybeDraft) {
@@ -48,14 +44,5 @@ export default class ArgumentNode extends PatternNode {
     } else {
       return argumentsConfig.draftTypeMapping["default"].replace(typePlaceHolder, type);
     }
-  }
-
-  private getDraftStringForMultipleTypes(): string {
-    return this.astNodeTypes
-      .map((type) => {
-        const argumentsConfig = loadArgumentsConfigFor(this.language);
-        return argumentsConfig.draftTypeMapping["default"].replace(typePlaceHolder, type);
-      })
-      .join("_or");
   }
 }

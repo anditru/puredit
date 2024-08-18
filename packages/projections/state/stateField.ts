@@ -21,7 +21,7 @@ import type { ProjectionPluginConfig } from "../types";
 import DecorationSetBuilder from "./decorationSetBuilder";
 import { Extension } from "@puredit/declarative-projections";
 import ProjectionRegistry from "./projectionRegistry";
-import { analyzeTransactions } from "./lazyMatching";
+import { analyzeTransactions, containsError, getMatchingUnits } from "./lazyMatching";
 import { Debouncer } from "./debouncing";
 
 import { logProvider } from "../../../logconfig";
@@ -43,13 +43,21 @@ export function createProjectionState(
   state: EditorState,
   config: ProjectionPluginConfig
 ): ProjectionState {
-  const cursor = config.parser.parse(state.sliceDoc(0)).walk();
-  const patternMatching = new PatternMatching(
-    config.projectionRegistry.rootProjectionPatternsByRootNodeType,
-    cursor,
-    config.globalContextVariables
-  );
-  const { matches, contextVariableRanges } = patternMatching.execute();
+  const { nonErrorUnits } = getMatchingUnits(state.sliceDoc(0), config.parser);
+  const unitsToMatch = nonErrorUnits.filter((unit) => !containsError(unit));
+  let allMatches: Match[] = [];
+  let allContextVariableRanges: ContextVariableRange[] = [];
+  for (const unitToMatch of unitsToMatch) {
+    const cursor = unitToMatch.walk();
+    const patternMatching = new PatternMatching(
+      config.projectionRegistry.rootProjectionPatternsByRootNodeType,
+      cursor,
+      config.globalContextVariables
+    );
+    const { matches, contextVariableRanges } = patternMatching.execute();
+    allMatches = allMatches.concat(matches);
+    allContextVariableRanges = allContextVariableRanges.concat(contextVariableRanges);
+  }
 
   const decorationSetBuilder = new DecorationSetBuilder();
   decorationSetBuilder
@@ -57,12 +65,17 @@ export function createProjectionState(
     .setDecorations(Decoration.none)
     .setIsCompletion(false)
     .setState(state)
-    .setMatches(matches);
+    .setMatches(allMatches);
   const decorations = decorationSetBuilder.build();
 
   const rematchingController = Debouncer.getInstance();
 
-  return { config, decorations, contextVariableRanges, rematchingController };
+  return {
+    config,
+    decorations,
+    contextVariableRanges: allContextVariableRanges,
+    rematchingController,
+  };
 }
 
 /**

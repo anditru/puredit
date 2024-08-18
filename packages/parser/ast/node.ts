@@ -19,7 +19,11 @@ export default class AstNode {
   }
 
   isErrorToken(): boolean {
-    return this.syntaxNode.type === "ERROR";
+    const lastChild = this.children[this.children.length - 1];
+    return (
+      this.syntaxNode.type === "ERROR" ||
+      (this.syntaxNode.type === "string" && lastChild?.startIndex === lastChild?.endIndex)
+    );
   }
 
   hasChildren(): boolean {
