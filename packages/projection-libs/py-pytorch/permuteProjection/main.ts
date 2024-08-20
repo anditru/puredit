@@ -34,7 +34,7 @@ export const permuteProjection: RootProjection = {
     const reorderedDimensions: string[] = new Array(permutation.length);
     for (let i = 0; i < permutation.length; i++) {
       const nextDimension = contextInformation.commentContext[permutation[i]];
-      if (Number.isNaN(nextDimension)) {
+      if (Number.isNaN(nextDimension) || !nextDimension) {
         return { reorderedDimensions: null };
       }
       reorderedDimensions[i] = nextDimension;

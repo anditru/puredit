@@ -26,4 +26,6 @@
   });
 </script>
 
-<span style="display: inline-flex;"> end transpose </span>
+<span class="inline-flex">
+  <span>end transpose</span>
+</span>
