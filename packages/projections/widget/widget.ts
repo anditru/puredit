@@ -1,4 +1,4 @@
-import type { EditorState } from "@codemirror/state";
+import type { EditorState, Line } from "@codemirror/state";
 import { EditorView, WidgetType } from "@codemirror/view";
 import type { Match } from "@puredit/parser";
 import { ContextInformation } from "../types";
@@ -31,6 +31,11 @@ export abstract class ProjectionWidget extends WidgetType {
     this.isNew = false;
     this.match = match;
     this.context = context;
+    if (this.view && this.nextToLineStartOrSpace(this.view.state)) {
+      this.dom.classList.remove("space-left");
+    } else {
+      this.dom.classList.add("space-left");
+    }
     this.update(match, context, state);
   }
 
@@ -67,7 +72,12 @@ export abstract class ProjectionWidget extends WidgetType {
   }
 
   private nextToLineStartOrSpace(state: EditorState): boolean {
-    const line = state.doc.lineAt(this.match.from);
+    let line: Line;
+    try {
+      line = state.doc.lineAt(this.match.from);
+    } catch (error) {
+      return false;
+    }
     if (this.range.from === line.from) {
       return true;
     }

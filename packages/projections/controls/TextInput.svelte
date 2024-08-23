@@ -4,9 +4,14 @@
   import { onDestroy } from "svelte";
   import { compareTwoStrings } from "string-similarity";
   import type { FocusGroup } from "../widget/focus";
-  import { stringLiteralValue, stringLiteralValueChange } from "../shared";
+  import {
+    escapeString,
+    isStringNode,
+    nodeValue,
+    stringLiteralValue,
+    stringLiteralValueChange,
+  } from "../shared";
   import AstNode from "@puredit/parser/ast/node";
-  import { Debouncer } from "../state/debouncing";
 
   export let view: EditorView | null;
   export let node: AstNode;
@@ -18,9 +23,6 @@
   export let className: string | null = null;
   export let placeholder = "text";
   export let focusGroup: FocusGroup | null = null;
-
-  export let codeToValue = (code: string) => code;
-  export let valueToCode = (value: string) => value;
 
   let input: HTMLInputElement | undefined;
   $: if (input && focusGroup) {
@@ -53,29 +55,37 @@
   export let validate: ValidationFunction | null = null;
   let error: string | undefined;
   let value = "";
-  $: value = codeToValue(handleEmptyCodeToValue(stringLiteralValue(node, state.doc)));
+  let previousCode: string | undefined;
+  $: value = handleEmptyCodeToValue(stringLiteralValue(node, state.doc));
+  $: if (isStringNode(node)) {
+    previousCode = nodeValue(node, state.doc, 1);
+  } else {
+    previousCode = nodeValue(node, state.doc);
+  }
   $: if (validate) {
     error = validate(value);
   }
 
-  function updateValue(value: string) {
-    const debouncer = Debouncer.getInstance();
-    debouncer.executeDebounced(() => {
-      const code = handleEmptyValueToCode(valueToCode(value));
-      view?.dispatch({
-        filter: false,
-        changes:
-          targetNodes?.map((targetNode) => stringLiteralValueChange(targetNode, code)) ??
-          stringLiteralValueChange(node, code),
-      });
-      if (view) {
-        debouncer.rematch(view);
-      }
-    });
-  }
-
   function onInput(e: { currentTarget: HTMLInputElement }) {
     updateValue(e.currentTarget.value);
+  }
+
+  function updateValue(newValue: string) {
+    let newCode;
+    if (isStringNode(node)) {
+      newCode = handleEmptyValueToCode(escapeString(newValue));
+    } else {
+      newCode = handleEmptyValueToCode(newValue);
+    }
+    const changes =
+      targetNodes?.map((targetNode) =>
+        stringLiteralValueChange(targetNode, previousCode, newCode)
+      ) ?? stringLiteralValueChange(node, previousCode, newCode);
+    view?.dispatch({
+      filter: false,
+      changes,
+    });
+    previousCode = newCode;
   }
 
   function onKeydown(e: KeyboardEvent & { currentTarget: HTMLInputElement }) {

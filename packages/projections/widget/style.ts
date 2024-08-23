@@ -33,6 +33,6 @@ export const style = EditorView.theme({
     content: '"✨"',
   },
   ".space-left": {
-    marginLeft: "8px",
+    paddingLeft: "8px",
   },
 });

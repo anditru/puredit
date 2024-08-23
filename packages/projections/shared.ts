@@ -6,6 +6,13 @@ import type AstNode from "@puredit/parser/ast/node";
 
 const stringTypes = ["string", "template_string"];
 
+export function stringLiteralValue(node: AstNode, text: Text) {
+  if (!isStringNode(node)) {
+    return nodeValue(node, text);
+  }
+  return unEscapeString(nodeValue(node, text, 1));
+}
+
 export function isStringNode(node: AstNode): boolean {
   return stringTypes.includes(node.type);
 }
@@ -14,42 +21,44 @@ export function nodeValue(node: AstNode, text: Text, offsetLeftRight = 0): strin
   return text.sliceString(node.startIndex + offsetLeftRight, node.endIndex - offsetLeftRight);
 }
 
-export function stringLiteralValue(node: AstNode, text: Text) {
+export function stringLiteralValueChange(
+  node: AstNode,
+  oldCode: string,
+  newCode: string
+): ChangeSpec {
   if (!isStringNode(node)) {
-    return nodeValue(node, text);
+    return nodeValueChange(node, oldCode, newCode);
   }
-  return (
-    nodeValue(node, text, 1)
-      .replaceAll("\\\\", "\\")
-      .replaceAll('\\"', '"')
-      .replaceAll("\\'", "'")
-      //.replaceAll(" ", "·")
-      .replaceAll("\n", "↵")
-  );
+  return nodeValueChange(node, oldCode, newCode, 1);
 }
 
-export function nodeValueChange(node: AstNode, newValue: string, offsetLeftRight = 0): ChangeSpec {
+export function nodeValueChange(
+  node: AstNode,
+  oldCode: string,
+  newCode: string,
+  offsetLeftRight = 0
+): ChangeSpec {
   return {
     from: node.startIndex + offsetLeftRight,
-    to: node.endIndex - offsetLeftRight,
-    insert: newValue,
+    to: node.startIndex + offsetLeftRight + oldCode.length,
+    insert: newCode,
   };
 }
 
-export function stringLiteralValueChange(node: AstNode, newValue: string): ChangeSpec {
-  if (!isStringNode(node)) {
-    return nodeValueChange(node, newValue);
-  }
-  return nodeValueChange(
-    node,
-    newValue
-      .replaceAll("\\", "\\\\")
-      .replaceAll('"', '\\"')
-      .replaceAll("'", "\\'")
-      //.replaceAll("·", " ")
-      .replaceAll("↵", "\n"),
-    1
-  );
+export function escapeString(value: string) {
+  return value
+    .replaceAll("\\", "\\\\")
+    .replaceAll('"', '\\"')
+    .replaceAll("'", "\\'")
+    .replaceAll("↵", "\n");
+}
+
+export function unEscapeString(value: string) {
+  return value
+    .replaceAll("\\\\", "\\")
+    .replaceAll('\\"', '"')
+    .replaceAll("\\'", "'")
+    .replaceAll("\n", "↵");
 }
 
 export function bold(text: string): HTMLElement {
