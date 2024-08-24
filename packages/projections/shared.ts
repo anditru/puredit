@@ -6,6 +6,14 @@ import type AstNode from "@puredit/parser/ast/node";
 
 const stringTypes = ["string", "template_string"];
 
+export function getCode(node: AstNode, text: Text) {
+  if (isStringNode(node)) {
+    return nodeValue(node, text, 1);
+  } else {
+    return nodeValue(node, text);
+  }
+}
+
 export function stringLiteralValue(node: AstNode, text: Text) {
   if (!isStringNode(node)) {
     return nodeValue(node, text);
@@ -24,23 +32,25 @@ export function nodeValue(node: AstNode, text: Text, offsetLeftRight = 0): strin
 export function stringLiteralValueChange(
   node: AstNode,
   oldCode: string,
-  newCode: string
+  newCode: string,
+  offSetLeft = 0
 ): ChangeSpec {
   if (!isStringNode(node)) {
-    return nodeValueChange(node, oldCode, newCode);
+    return nodeValueChange(node, oldCode, newCode, offSetLeft);
   }
-  return nodeValueChange(node, oldCode, newCode, 1);
+  return nodeValueChange(node, oldCode, newCode, offSetLeft, 1);
 }
 
 export function nodeValueChange(
   node: AstNode,
   oldCode: string,
   newCode: string,
+  offsetLeft = 0,
   offsetLeftRight = 0
 ): ChangeSpec {
   return {
-    from: node.startIndex + offsetLeftRight,
-    to: node.startIndex + offsetLeftRight + oldCode.length,
+    from: node.startIndex + offsetLeft + offsetLeftRight,
+    to: node.startIndex + offsetLeft + offsetLeftRight + oldCode.length,
     insert: newCode,
   };
 }

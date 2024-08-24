@@ -3,7 +3,12 @@
   import type { EditorView } from "@codemirror/view";
   import type AstNode from "@puredit/parser/ast/node";
   import type { CursorPositionHandler, FocusGroup } from "@puredit/projections";
-  import { stringLiteralValue, stringLiteralValueChange } from "@puredit/projections/shared";
+  import {
+    escapeString,
+    getCode,
+    stringLiteralValue,
+    stringLiteralValueChange,
+  } from "@puredit/projections/shared";
   import { MathfieldElement } from "mathlive";
   import { onDestroy, onMount } from "svelte";
   export let view: EditorView | null;
@@ -31,11 +36,18 @@
     }
   }
   $: updateMathfield(stringLiteralValue(node, state.doc));
+
+  // The code before the text change being currently processed
+  let previousCode: string | undefined;
+  $: previousCode = getCode(node, state.doc);
+
   mfe.addEventListener("input", () => {
+    const newCode = escapeString(mfe.value);
     view?.dispatch({
       filter: false,
-      changes: stringLiteralValueChange(node, mfe.value),
+      changes: stringLiteralValueChange(node, previousCode, newCode),
     });
+    previousCode = newCode;
   });
   mfe.addEventListener("move-out", (e) => {
     switch (e.detail.direction) {

@@ -6,8 +6,8 @@
   import type { FocusGroup } from "../widget/focus";
   import {
     escapeString,
+    getCode,
     isStringNode,
-    nodeValue,
     stringLiteralValue,
     stringLiteralValueChange,
   } from "../shared";
@@ -54,32 +54,43 @@
   type ValidationFunction = (value: string) => string | undefined;
   export let validate: ValidationFunction | null = null;
   let error: string | undefined;
-  let value = "";
-  let previousCode: string | undefined;
-  $: value = handleEmptyCodeToValue(stringLiteralValue(node, state.doc));
-  $: if (isStringNode(node)) {
-    previousCode = nodeValue(node, state.doc, 1);
-  } else {
-    previousCode = nodeValue(node, state.doc);
-  }
   $: if (validate) {
     error = validate(value);
   }
+
+  // The displayed code right after the last rematching
+  let originalCode = getCode(node, state.doc);
+  let fromBefore = node.startIndex;
+  let toBefore = node.endIndex;
+  $: if (fromBefore !== node.startIndex || toBefore !== node.endIndex) {
+    originalCode = getCode(node, state.doc);
+    fromBefore = node.startIndex;
+    toBefore = node.endIndex;
+  }
+
+  // The code before the text change being currently processed
+  let previousCode: string | undefined;
+  $: previousCode = getCode(node, state.doc);
+
+  // The text displayed in the text field
+  let value = "";
+  $: value = handleEmptyCodeToValue(stringLiteralValue(node, state.doc));
 
   function onInput(e: { currentTarget: HTMLInputElement }) {
     updateValue(e.currentTarget.value);
   }
 
   function updateValue(newValue: string) {
-    let newCode;
+    let newCode: string;
     if (isStringNode(node)) {
       newCode = handleEmptyValueToCode(escapeString(newValue));
     } else {
       newCode = handleEmptyValueToCode(newValue);
     }
+    const delta = previousCode.length - originalCode.length;
     const changes =
-      targetNodes?.map((targetNode) =>
-        stringLiteralValueChange(targetNode, previousCode, newCode)
+      targetNodes?.map((targetNode, index) =>
+        stringLiteralValueChange(targetNode, previousCode, newCode, delta * index)
       ) ?? stringLiteralValueChange(node, previousCode, newCode);
     view?.dispatch({
       filter: false,
