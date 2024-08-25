@@ -21,6 +21,7 @@ export const enum Action {
   UPDATE_EOL = "UPDATE_EOL",
   GET_REMATCHING_DELAY = "GET_REMATCHING_DELAY",
   UPDATE_REMATCHING_DELAY = "UPDATE_REMATCHING_DELAY",
+  REMATCH_IMMEDIATELY = "REMATCH_IMMEDIATELY",
 }
 
 export type MessagePayload = ChangeDocumentPayload | ChangeEditorPayload | string | any;

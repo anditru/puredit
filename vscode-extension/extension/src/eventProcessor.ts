@@ -41,6 +41,13 @@ export class EventProcessor {
             payload: mapToChangeSpec(contentChange, oldDocumentState),
           });
         });
+        if (event.reason != null) {
+          context.webviewPanel.webview.postMessage({
+            id: uuid(),
+            type: MessageType.REQUEST,
+            action: Action.REMATCH_IMMEDIATELY,
+          });
+        }
       } else if (context.pendingDuplicateUpdates > 0 && event.contentChanges.length) {
         context.pendingDuplicateUpdates -= 1;
       }

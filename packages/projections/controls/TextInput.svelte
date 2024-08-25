@@ -74,7 +74,14 @@
 
   // The text displayed in the text field
   let value = "";
-  $: value = handleEmptyCodeToValue(stringLiteralValue(node, state.doc));
+  $: {
+    value = handleEmptyCodeToValue(stringLiteralValue(node, state.doc));
+    // Sometimes the value displayed in the field des not update
+    // so we update it manually
+    if (input) {
+      input.value = value;
+    }
+  }
 
   function onInput(e: { currentTarget: HTMLInputElement }) {
     updateValue(e.currentTarget.value);

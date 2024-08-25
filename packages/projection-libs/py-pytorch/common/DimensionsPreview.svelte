@@ -38,7 +38,7 @@
         </div>
       {:else}
         <span
-          >You need to provide tensors's dimensions in a context comment<br />fitting to the code to
+          >You need to provide tensors's dimensions in a context<br />comment fitting to the code to
           see the preview.</span
         >
       {/if}

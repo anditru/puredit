@@ -37,6 +37,9 @@ export class FocusGroup {
   constructor(private handler: FocusGroupHandler) {}
 
   registerElement(el: HTMLElement): void {
+    if (this.elements.includes(el)) {
+      return;
+    }
     try {
       for (let i = 0; i < this.elements.length; i++) {
         // check if the new element comes before the current

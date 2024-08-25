@@ -31,6 +31,11 @@ export const debouncedTypeListener = EditorView.updateListener.of((update: ViewU
     rematchController.bufferTransaction(tr);
     rematchController.triggerRematching(update.view);
   }
+  if (tr && tr.annotation(Transaction.userEvent) === "delete.line") {
+    update.view.dispatch({
+      effects: rematchEffect.of(null),
+    });
+  }
 });
 
 /**
