@@ -5,8 +5,8 @@ import { columnSubProjection } from "./column";
 
 const idVars = agg("idVars", "list", [columnSubProjection.template]);
 const valueVars = agg("valueVars", "list", [columnSubProjection.template]);
-const variableColumnName = arg("variableColumnName", ["string", "attribute", "identifier"]);
-const valueColumnName = arg("valueColumnName", ["string", "attribute", "identifier"]);
+const variableColumnName = arg("variableColumnName", ["string"]);
+const valueColumnName = arg("valueColumnName", ["string"]);
 
 const template = parser.subPattern(
   "Polars:Dataframe:Melt"
