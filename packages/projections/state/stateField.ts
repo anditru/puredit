@@ -17,7 +17,7 @@ import { DecorationSet, ViewUpdate } from "@codemirror/view";
 import { PatternMatching } from "@puredit/parser";
 import { pickedCompletion } from "@codemirror/autocomplete";
 import type { ContextVariableRange, Match } from "@puredit/parser";
-import type { ProjectionPluginConfig } from "../types";
+import type { ProjectionPluginConfig, Range } from "../types";
 import DecorationSetBuilder from "./decorationSetBuilder";
 import { Extension } from "@puredit/declarative-projections";
 import ProjectionRegistry from "./projectionRegistry";
@@ -274,12 +274,12 @@ function redrawDecorations(
   projectionRegistry: ProjectionRegistry,
   state: EditorState
 ): DecorationSet {
-  const newDecorations = new RangeSetBuilder<Decoration>();
+  let newDecorations = Decoration.none;
   decorations.between(recreateFrom, recreateTo, (from, to, dec) => {
     const oldWidget = dec.spec.widget;
 
     // Save old state
-    const range = { from, to };
+    const range: Range = { from, to };
     const match: Match = Object.assign({}, oldWidget.match);
     const contextInformation = Object.assign({}, oldWidget.context);
     const isCompletion = oldWidget.isCompletion;
@@ -290,19 +290,20 @@ function redrawDecorations(
     // Create new
     const segmentWidgets = projectionRegistry.projectionsByName[match.pattern.name].segmentWidgets;
     const Widget = segmentWidgets.find((WidgetClass) => dec.spec.widget instanceof WidgetClass)!;
-    newDecorations.add(
-      range.from,
-      range.to,
-      Decoration.replace({
-        widget: new Widget(range, isCompletion, match, contextInformation, state),
-      })
-    );
+    newDecorations = newDecorations.update({
+      add: [
+        Decoration.replace({
+          widget: new Widget(range, isCompletion, match, contextInformation, state),
+        }).range(range.from, range.to),
+      ],
+      sort: true,
+    });
+
     decorations = decorations.update({
       filter: (_, __, currentDecoration) => currentDecoration !== dec,
     });
   });
-  const newDecorationSet = newDecorations.finish();
-  return RangeSet.join([newDecorationSet, decorations]);
+  return RangeSet.join([newDecorations, decorations]);
 }
 
 /**

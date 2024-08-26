@@ -3,15 +3,14 @@ import { svelteProjection } from "@puredit/projections";
 import type { ContextInformation, RootProjection } from "@puredit/projections/types";
 import BeginWidget from "./BeginWidget.svelte";
 import EndWidget from "./EndWidget.svelte";
-import { Match, agg, arg } from "@puredit/parser";
+import { Match, agg } from "@puredit/parser";
 
 import { toEndIndexSubProjection } from "./toEndIndexSubProjection/config";
 import { fromStartIndexSubProjection } from "./fromStartIndexSubProjection/config";
 import { betweenIndicesSubProjection } from "./betweenIndicesSubProjection/config";
 import { singleItemSubProjection } from "./singleItemSubProjection/config";
+import { startSubProjection } from "./startSubProjection/config";
 
-const data = arg("data", ["identifier"]);
-const startPattern = parser.subPattern("data")`${data}`;
 const slices = agg(
   "slices",
   "subscript",
@@ -21,9 +20,9 @@ const slices = agg(
     betweenIndicesSubProjection.template,
     singleItemSubProjection.template,
   ],
-  startPattern
+  startSubProjection.template
 );
-const pattern = parser.statementPattern("PyTorch:Tensor:Slice")`${slices}`;
+const pattern = parser.expressionPattern("PyTorch:Tensor:Slice")`${slices}`;
 
 const beginWidget = svelteProjection(BeginWidget);
 const endWidget = svelteProjection(EndWidget);
@@ -34,6 +33,7 @@ export const sliceProjection: RootProjection = {
   requiredContextVariables: [],
   segmentWidgets: [beginWidget, endWidget],
   subProjections: [
+    startSubProjection,
     toEndIndexSubProjection,
     fromStartIndexSubProjection,
     betweenIndicesSubProjection,
