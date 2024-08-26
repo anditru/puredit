@@ -12,6 +12,7 @@
     stringLiteralValueChange,
   } from "../shared";
   import AstNode from "@puredit/parser/ast/node";
+  import { rematchEffect } from "../state/stateField";
 
   export let view: EditorView | null;
   export let node: AstNode;
@@ -49,6 +50,12 @@
       return `__empty_${nodeType}`;
     }
     return value;
+  }
+
+  function triggerRematching() {
+    view?.dispatch({
+      effects: rematchEffect.of(null),
+    });
   }
 
   type ValidationFunction = (value: string) => string | undefined;
@@ -140,15 +147,19 @@
     }
     if (e.key === "ArrowLeft" && pos === 0) {
       e.preventDefault();
+      triggerRematching();
       focusGroup.previous(e.currentTarget);
     } else if (e.key === "ArrowRight" && pos === e.currentTarget.value.length) {
       e.preventDefault();
+      triggerRematching();
       focusGroup.next(e.currentTarget);
     } else if (e.key === "Tab") {
       e.preventDefault();
       if (e.shiftKey) {
+        triggerRematching();
         focusGroup.previous(e.currentTarget);
       } else {
+        triggerRematching();
         focusGroup.next(e.currentTarget);
       }
     }

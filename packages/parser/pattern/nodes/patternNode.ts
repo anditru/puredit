@@ -18,12 +18,16 @@ export default abstract class PatternNode {
   public fieldName: string | undefined;
   public readonly text: string;
   public readonly children: PatternNode[];
+  public readonly startIndex: number;
+  public readonly endIndex: number;
 
   constructor(
     language: Language,
     type: string,
     fieldName: string | undefined,
     text: string,
+    startIndex: number,
+    endIndex: number,
     children: PatternNode[] = []
   ) {
     this.language = language;
@@ -34,6 +38,8 @@ export default abstract class PatternNode {
       this.fieldName = fieldName;
     }
     this.text = text;
+    this.startIndex = startIndex;
+    this.endIndex = endIndex;
     this.children = children;
   }
 

@@ -1,10 +1,6 @@
 import PatternNode from "./patternNode";
 import AstCursor from "../../ast/cursor";
-import {
-  Language,
-  loadChainableNodeTypeConfigFor,
-  loadChainableNodeTypesFor,
-} from "@puredit/language-config";
+import { Language, loadChainableNodeTypesFor } from "@puredit/language-config";
 import ChainDecorator from "../decorators/chainDecorator";
 import { ContextVariableMap } from "@puredit/projections";
 
@@ -21,10 +17,12 @@ export default class ChainNode extends PatternNode {
     language: Language,
     fieldName: string | undefined,
     text: string,
+    startIndex: number,
+    endIndex: number,
     minumumLength: number,
     contextVariables: ContextVariableMap
   ) {
-    super(language, ChainNode.TYPE, fieldName, text);
+    super(language, ChainNode.TYPE, fieldName, text, startIndex, endIndex);
     this.name = name;
     this.minumumLength = minumumLength;
     this.contextVariables = contextVariables;

@@ -11,9 +11,11 @@ export default class ContextVariableNode extends RegularNode {
     language: Language,
     type: string,
     fieldName: string | undefined,
-    text: string
+    text: string,
+    startIndex: number,
+    endIndex: number
   ) {
-    super(language, type, fieldName, text);
+    super(language, type, fieldName, text, startIndex, endIndex);
     this.name = name;
   }
 

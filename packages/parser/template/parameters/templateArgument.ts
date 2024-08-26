@@ -20,7 +20,9 @@ export default class TemplateArgument extends TemplateParameter {
       language,
       this.types,
       cursor.currentFieldName,
-      cursor.currentNode.text
+      cursor.currentNode.text,
+      cursor.currentNode.startIndex,
+      cursor.currentNode.endIndex
     );
   }
 }

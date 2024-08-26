@@ -69,6 +69,10 @@ export function loadBlocksConfigFor(language: Language): BlocksConfig {
   return languageConfigs[language].blocks;
 }
 
+export function loadBlockNodeTypeFor(language: Language): string {
+  return languageConfigs[language].blocks.blockNodeType;
+}
+
 export function loadCommentsConfigFor(language: Language): CommentsConfig {
   return languageConfigs[language].comments;
 }

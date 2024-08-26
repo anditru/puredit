@@ -4,14 +4,14 @@ other_data[11::12,:13:14]
 
 ---
 
-Slice tensor
-    data.
+with
+    Slice tensor data.
     from index 1 until end with stepsize 2.
-    images from start to index 3 with stepsize 4.
+    from start to index 3 with stepsize 4.
 end slice.
 
-Slice tensor
-    other_data.
+with
+    Slice tensor other_data.
     from index 11 until end with stepsize 12.
-    images from start to index 13 with stepsize 14.
+    from start to index 13 with stepsize 14.
 end slice.

@@ -26,9 +26,9 @@ export class TemplateChain extends ComplexTemplateParameter {
   toDeclarationString(): string {
     const variableName = this.toVariableName();
     const subProjectionsString = this.linkSubProjectionNames
-      .map((name) => `  ${name}.pattern,`)
+      .map((name) => `  ${name}.template,`)
       .join("\n");
-    return `const ${variableName} = chain("${variableName}", ${this.startSubProjectionName}.pattern, [
+    return `const ${variableName} = chain("${variableName}", ${this.startSubProjectionName}.template, [
 ${subProjectionsString}
 ]);\n`;
   }

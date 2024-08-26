@@ -13,9 +13,11 @@ export default class ArgumentNode extends PatternNode {
     language: Language,
     astNodeTypes: string[],
     fieldName: string | undefined,
-    text: string
+    text: string,
+    startIndex: number,
+    endIndex: number
   ) {
-    super(language, ArgumentNode.TYPE, fieldName, text);
+    super(language, ArgumentNode.TYPE, fieldName, text, startIndex, endIndex);
     this.name = name;
     this.astNodeTypes = astNodeTypes;
   }

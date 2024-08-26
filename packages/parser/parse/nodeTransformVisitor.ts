@@ -80,6 +80,8 @@ export default class NodeTransformVisitor {
       .setLanguage(this.language)
       .setType(this.astCursor.currentNode.type)
       .setText(this.astCursor.currentNode.text)
+      .setStartIndex(this.astCursor.currentNode.startIndex)
+      .setEndIndex(this.astCursor.currentNode.endIndex)
       .setFieldName(changedFieldName || this.astCursor.currentFieldName);
 
     this.astCursor!.goToFirstChild();
@@ -114,7 +116,9 @@ export default class NodeTransformVisitor {
       this.language,
       this.astCursor.currentNode.type,
       changedFieldName || this.astCursor.currentFieldName,
-      this.astCursor.currentNode.text
+      this.astCursor.currentNode.text,
+      this.astCursor.currentNode.startIndex,
+      this.astCursor.currentNode.endIndex
     );
   }
 }

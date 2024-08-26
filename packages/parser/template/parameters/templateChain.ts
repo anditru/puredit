@@ -29,6 +29,8 @@ export default class TemplateChain extends TemplateParameter {
       language,
       cursor.currentFieldName,
       cursor.currentNode.text,
+      cursor.currentNode.startIndex,
+      cursor.currentNode.endIndex,
       this.minimumLength,
       this.contextVariables
     );

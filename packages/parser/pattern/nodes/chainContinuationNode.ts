@@ -8,8 +8,20 @@ export default class ChainContinuationNode extends PatternNode {
   static readonly TEXT = "__chain_continuation_";
 
   private readonly astNodeTypes: string[];
-  constructor(language: Language, startPatternRootNode: PatternNode) {
-    super(language, ChainContinuationNode.TYPE, undefined, ChainContinuationNode.TEXT);
+  constructor(
+    language: Language,
+    startPatternRootNode: PatternNode,
+    startIndex: number,
+    endIndex: number
+  ) {
+    super(
+      language,
+      ChainContinuationNode.TYPE,
+      undefined,
+      ChainContinuationNode.TEXT,
+      startIndex,
+      endIndex
+    );
     const chainableNodeTypes = loadChainableNodeTypesFor(this.language);
     this.astNodeTypes = [...chainableNodeTypes, ...startPatternRootNode.getMatchedTypes()];
   }

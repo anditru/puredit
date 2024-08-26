@@ -52,6 +52,8 @@ export default class TemplateAggregation extends TemplateParameter {
       this.type,
       cursor.currentFieldName,
       cursor.currentNode.text,
+      cursor.currentNode.startIndex,
+      cursor.currentNode.endIndex,
       !!this.startTemplate,
       this.contextVariables
     );

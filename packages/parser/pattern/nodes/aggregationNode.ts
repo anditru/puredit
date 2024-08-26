@@ -18,10 +18,12 @@ export default class AggregationNode extends PatternNode {
     astNodeType: string,
     fieldName: string | undefined,
     text: string,
+    startIndex: number,
+    endIndex: number,
     hasStartPattern: boolean,
     contextVariables: ContextVariableMap
   ) {
-    super(language, AggregationNode.TYPE, fieldName, text);
+    super(language, AggregationNode.TYPE, fieldName, text, startIndex, endIndex);
     this.name = name;
     this.astNodeType = astNodeType;
     this.contextVariables = contextVariables;

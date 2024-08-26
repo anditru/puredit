@@ -21,6 +21,8 @@ export default class TemplateBlock extends TemplateParameter {
       language,
       cursor.currentFieldName,
       cursor.currentNode.text,
+      cursor.currentNode.startIndex,
+      cursor.currentNode.endIndex,
       this.contextVariables
     );
   }

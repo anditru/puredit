@@ -21,7 +21,9 @@ export default class TemplateContextVariable extends TemplateParameter {
       language,
       cursor.currentNode.type,
       cursor.currentFieldName,
-      cursor.currentNode.text
+      cursor.currentNode.text,
+      cursor.currentNode.startIndex,
+      cursor.currentNode.endIndex
     );
   }
 }

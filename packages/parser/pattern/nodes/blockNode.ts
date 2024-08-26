@@ -13,9 +13,11 @@ export default class BlockNode extends PatternNode {
     language: Language,
     fieldName: string | undefined,
     text: string,
+    startIndex: number,
+    endIndex: number,
     contextVariables: ContextVariableMap
   ) {
-    super(language, BlockNode.TYPE, fieldName, text);
+    super(language, BlockNode.TYPE, fieldName, text, startIndex, endIndex);
     this.contextVariables = contextVariables;
     this.astNodeType = loadBlocksConfigFor(this.language).blockNodeType;
   }
