@@ -37,10 +37,8 @@
           {/each}
         </div>
       {:else}
-        <span
-          >You need to provide tensors's dimensions in a context<br />comment fitting to the code to
-          see the preview.</span
-        >
+        <!-- prettier-ignore -->
+        <span>You need to provide tensors's dimensions in a context<br />comment fitting to the code to see the preview.</span>
       {/if}
     </div>
   {/if}
