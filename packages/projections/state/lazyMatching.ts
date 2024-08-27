@@ -195,6 +195,14 @@ function splitIntoMatchingUnits(
     } while (astCursor.goToNextSibling());
     astCursor.goToParent();
   } else {
+    for (const child of astCursor.currentNode.children) {
+      if (isErrorNode(child)) {
+        return {
+          nonErrorUnits: [],
+          errorUnits: [astCursor.currentNode],
+        };
+      }
+    }
     if (!astCursor.goToChildWithFieldName(fieldNameToSplit)) {
       result.nonErrorUnits.push(astCursor.currentNode);
       return result;

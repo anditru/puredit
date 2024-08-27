@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EditorState } from "@codemirror/state";
+  import type { ChangeSpec, EditorState } from "@codemirror/state";
   import type { EditorView } from "@codemirror/view";
   import { onDestroy } from "svelte";
   import { compareTwoStrings } from "string-similarity";
@@ -8,6 +8,7 @@
     escapeString,
     getCode,
     isStringNode,
+    simpleStringLiteralValueChange,
     stringLiteralValue,
     stringLiteralValueChange,
   } from "../shared";
@@ -94,6 +95,12 @@
     updateValue(e.currentTarget.value);
   }
 
+  function allSameLength(nodes: AstNode[]) {
+    if (nodes.length === 0) return true;
+    const length = nodes[0].text.length;
+    return nodes.every((node) => node.text.length === length);
+  }
+
   function updateValue(newValue: string) {
     let newCode: string;
     if (isStringNode(node)) {
@@ -101,15 +108,28 @@
     } else {
       newCode = handleEmptyValueToCode(newValue);
     }
-    const delta = previousCode.length - originalCode.length;
-    const changes =
-      targetNodes?.map((targetNode, index) =>
-        stringLiteralValueChange(targetNode, previousCode, newCode, delta * index)
-      ) ?? stringLiteralValueChange(node, previousCode, newCode);
-    view?.dispatch({
-      filter: false,
-      changes,
-    });
+
+    let changes: ChangeSpec;
+    if (targetNodes && !allSameLength(targetNodes)) {
+      changes =
+        targetNodes?.map((targetNode) => simpleStringLiteralValueChange(targetNode, newCode)) ??
+        simpleStringLiteralValueChange(node, newCode);
+      view?.dispatch({
+        filter: false,
+        changes,
+      });
+      triggerRematching();
+    } else {
+      const delta = previousCode.length - originalCode.length;
+      changes =
+        targetNodes?.map((targetNode, index) =>
+          stringLiteralValueChange(targetNode, previousCode, newCode, delta * index)
+        ) ?? stringLiteralValueChange(node, previousCode, newCode);
+      view?.dispatch({
+        filter: false,
+        changes,
+      });
+    }
     previousCode = newCode;
   }
 

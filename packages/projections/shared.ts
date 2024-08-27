@@ -55,6 +55,25 @@ export function nodeValueChange(
   };
 }
 
+export function simpleStringLiteralValueChange(node: AstNode, newCode: string): ChangeSpec {
+  if (!isStringNode(node)) {
+    return simpleNodeValueChange(node, newCode);
+  }
+  return simpleNodeValueChange(node, newCode, 1);
+}
+
+export function simpleNodeValueChange(
+  node: AstNode,
+  newCode: string,
+  offsetLeftRight = 0
+): ChangeSpec {
+  return {
+    from: node.startIndex + offsetLeftRight,
+    to: node.endIndex - offsetLeftRight,
+    insert: newCode,
+  };
+}
+
 export function escapeString(value: string) {
   return value
     .replaceAll("\\", "\\\\")

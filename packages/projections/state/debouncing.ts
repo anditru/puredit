@@ -29,7 +29,11 @@ export const debouncedTypeListener = EditorView.updateListener.of((update: ViewU
   ) {
     const rematchController = Debouncer.getInstance();
     rematchController.bufferTransaction(tr);
-    rematchController.triggerRematching(update.view);
+    if (tr.selection && tr.changes.empty) {
+      rematchController.triggerRematching(update.view, 200);
+    } else {
+      rematchController.triggerRematching(update.view);
+    }
   }
   if (tr && tr.annotation(Transaction.userEvent) === "delete.line") {
     update.view.dispatch({
@@ -77,13 +81,13 @@ export class Debouncer {
     this.delay = delay;
   }
 
-  triggerRematching(view: EditorView) {
+  triggerRematching(view: EditorView, delay = this.delay) {
     if (this.timeout) {
       clearTimeout(this.timeout);
     }
     this.timeout = setTimeout(() => {
       this.rematch(view);
-    }, this.delay);
+    }, delay);
   }
 
   rematch(view: EditorView) {
