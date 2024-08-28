@@ -99,6 +99,8 @@ function correctMoveLine(tr: Transaction) {
 function correctCopyLine(tr: Transaction) {
   const { decorations } = tr.startState.field(projectionState);
   const startDoc = tr.startState.doc;
+  const newSelection = tr.newSelection.main;
+  const startSelection = tr.startState.selection.main;
 
   let modifyCopy = false;
   const modifiedChanges: ChangeSpec[] = [];
@@ -107,17 +109,22 @@ function correctCopyLine(tr: Transaction) {
     const change: ChangeSpec = { from, to: undefined, insert };
     let firstCopiedLine: Line;
     let lastCopiedLine: Line;
-    if (insert.toString().startsWith("\n")) {
+    if (
+      newSelection.from >= from &&
+      newSelection.to >= from &&
+      startSelection.from >= from &&
+      startSelection.to >= from
+    ) {
+      // Copy down
+      firstCopiedLine = startDoc.lineAt(to + 1);
+      lastCopiedLine = startDoc.lineAt(to + insert.length - 1);
+      change.from = lastCopiedLine.to;
+    } else {
       // Copy up
       isCopyUp = true;
       firstCopiedLine = startDoc.lineAt(to - insert.length + 1);
       lastCopiedLine = startDoc.lineAt(from - 1);
       change.from = firstCopiedLine.from - 1;
-    } else {
-      // Copy down
-      firstCopiedLine = startDoc.lineAt(to + 1);
-      lastCopiedLine = startDoc.lineAt(to + insert.length - 1);
-      change.from = lastCopiedLine.to;
     }
     let copyFrom = firstCopiedLine.from;
     let copyTo = lastCopiedLine.to;
